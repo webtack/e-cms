@@ -1,0 +1,46 @@
+{
+    "name": "webtack/e-cms",
+    "type": "library",
+    "description": "A multilingual content management system with an Inertia admin panel and a theme system for Laravel.",
+    "keywords": [
+        "laravel",
+        "cms",
+        "inertia",
+        "admin"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "inertiajs/inertia-laravel": "^3.5",
+        "intervention/image": "^4.4",
+        "laravel/framework": "^13.17",
+        "symfony/html-sanitizer": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webtack\\Ecms\\": "src/",
+            "Webtack\\Ecms\\Database\\Factories\\": "database/factories/",
+            "Webtack\\Ecms\\Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webtack\\Ecms\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webtack\\Ecms\\EcmsServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
