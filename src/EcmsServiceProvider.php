@@ -8,6 +8,7 @@ use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Foundation\Http\Kernel as FoundationKernel;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\FileLoader;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Webtack\Ecms\Access\AccessResolver;
 use Webtack\Ecms\Console\Commands\EcmsInstallCommand;
@@ -49,6 +51,7 @@ use Webtack\Ecms\Policies\UserPolicy;
 use Webtack\Ecms\Settings\SiteSettings;
 use Webtack\Ecms\Support\AdminAssets;
 use Webtack\Ecms\Support\AppSettings;
+use Webtack\Ecms\Support\HostFirstFileLoader;
 use Webtack\Ecms\Support\UserModel;
 use Webtack\Ecms\Theme\BlockRenderer;
 use Webtack\Ecms\Theme\DisplayFields;
@@ -104,6 +107,11 @@ class EcmsServiceProvider extends ServiceProvider
         foreach (self::CONFIG as $name) {
             $this->mergeConfigFrom("{$this->root}/config/{$name}.php", $name);
         }
+
+        // The host's JSON translations win over the package's (see HostFirstFileLoader).
+        $this->app->extend('translation.loader', fn (Loader $loader, $app) => $loader instanceof FileLoader
+            ? new HostFirstFileLoader($app['files'], $loader->paths(), $app->langPath())
+            : $loader);
 
         $this->app->singleton(AccessResolver::class);
         $this->app->singleton(AppSettings::class);
@@ -217,7 +225,9 @@ class EcmsServiceProvider extends ServiceProvider
      * `validation` are registered without a namespace, so `__('auth.failed')` and the validator work unchanged.
      * A namespace-less path is searched after the framework's and the host's `lang/`, and a later path wins on the
      * keys both define: the package's `auth.php`/`validation.php` override the same keys of the host, while the host's
-     * JSON keys win over the package's (see Support\InterfaceTranslations).
+     * JSON keys win over the package's: on the server through {@see HostFirstFileLoader} (Laravel reads the JSON
+     * dictionary from the same directories, so the package would otherwise win), on the client through
+     * {@see InterfaceTranslations}.
      */
     private function bootTranslations(): void
     {

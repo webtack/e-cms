@@ -49,6 +49,9 @@ class EcmsInstallCommand extends Command
 
     public function handle(): int
     {
+        // The command object is reused when the command is called again in the same process (a test, a queued job).
+        $this->failed = false;
+
         $this->components->info('Installing the CMS');
 
         if (! $this->checkUserModel()) {
