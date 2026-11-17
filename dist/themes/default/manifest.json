@@ -1,0 +1,11 @@
+{
+  "themes/default/assets/app.css": {
+    "file": "assets/app-DNb71IRT.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "themes/default/assets/app.css",
+    "isEntry": true
+  }
+}
