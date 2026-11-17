@@ -1,0 +1,44 @@
+# Documentation
+
+- [Package structure](package-structure.md) — the layout of `webtack/e-cms`, the `Webtack\Ecms\` namespace, what stays in the host, the user model contract.
+- [Package bootstrap](package-bootstrap.md) — auto-discovery, the `ecms.*` switches (`public_site`, `auth_routes`, `locales`), middleware, redirects, route order, the language prefix, theme and translation lookup, conflicts with the host.
+- [Package installer](package-installer.md) — migrations of the package, the `users` extension, `ecms:install`, the first administrator, the rule for existing users.
+- [Package frontend](package-frontend.md) — the committed `dist/`, the publish tags `ecms-assets`/`ecms-theme`/`ecms-theme-tooling`, the root view `ecms::app`, asset versioning, the freshness check, the dev server.
+- [Admin shell](admin-shell.md) — the Inertia/React/TypeScript stack, the build, the frontend structure.
+- [Admin multilingual interface](admin-i18n.md) — interface languages, detecting and storing the choice, translations for React and the server.
+- [Admin authentication](admin-auth.md) — login/logout, verified, rate limiting, the initial user (seeder).
+- [Access control by roles](access-control.md) — roles, rights (system and `none/own/any` levels), `AccessResolver`, policies, the `admin` role.
+- [Users in the admin panel](admin-users.md) — the `/admin/users` section: list, creation with a role, deactivation, deletion, protection of the last administrator.
+- [Profile of the signed-in user](admin-profile.md) — the `/admin/profile` page: personal data, password change, language and theme.
+- [Roles in the admin panel](admin-roles.md) — the `/admin/roles` section: list, form with the rights matrix, protection of the system role and of roles with users.
+- [Content model](content-model.md) — types, fields, nodes, `kind`, type hierarchy, `slug`, `uuid`, `title`, cascades.
+- [Application settings](app-settings.md) — the `app_settings` store, key format, the `AppSettings` API.
+- [Site settings](admin-site-settings.md) — `site.*` keys, the format with the `default` language, the `SiteSettings` reader and writer, logo tracking, the `/admin/settings` page.
+- [Content languages](content-languages.md) — `app_languages`, code normalization, the multilingual switch, the base language code, language usages, language validity rules.
+- [Content languages page](admin-content-languages.md) — the `/admin/settings/languages` page: switch, base code, additional languages, routes and validation.
+- [Content values](content-values.md) — the field type registry (including the `type_ref` and `node_ref` references), the value table schema, slug, translations, writing, reading.
+- [Node querying](content-querying.md) — parameters, language, operators by type, search, sorting, `settings.list`.
+- [Admin visual style](admin-visual-style.md) — the colour tokens (light and dark), links, sidebar and surfaces.
+- [Admin data table](admin-data-table.md) — the address contract, operators by type, the server helper `TableRequest`/`TablePage`.
+- [Content types in the admin panel](admin-content-types.md) — the `/admin/content-types` table: columns, server-side search/filters/sorting, the row action shell, the edit form with the "Node list" section (`settings.list`).
+- [Page types in the admin panel](admin-page-types.md) — the `/admin/page-types` section: routes, differences from `content`, how the kind is selected from the route.
+- [Block types in the admin panel](admin-block-types.md) — the `/admin/block-types` section: routes, differences from `content`, the shared kind mechanism.
+- [Content fields in the admin panel](admin-content-fields.md) — routes, the response of `index`, validation rules, maximum number of items, field description, file settings.
+- [Nodes in the admin panel (content, pages, blocks)](admin-content-nodes.md) — the routes of three sections by `uuid`, the block slug prefix, the node list, columns from `settings.list`, search and sorting.
+- [Translation mode](admin-translation-mode.md) — editing the translations of an entity one language at a time (`?lang=`): the switcher, prefilling, saving, clearing, routes and props, how a new entity adopts it.
+- [Taxonomy in the admin panel](admin-taxonomy.md) — the `/admin/taxonomy` section: routes and responses of vocabulary pages, forms, deletion rules.
+- [File storage](file-storage.md) — the `media` table, upload profiles (including the image size limits and the `.env` variables), `UploadRules`, image downscaling (`ImageResizer`), `FileStorage`, the endpoint and validation rule, the widget.
+- [Media library](media-library.md) — the `media_relations` file relations, the `FileRelations` service, the owner registry, rules for the consumer.
+- [Image styles](image-styles.md) — presets and arbitrary sizes (`thumb`, `300x250`), composition with a blurred background, the WebP format, the `image_style()` helper, lazy generation by the route, the `itok` signature.
+- [Taxonomy](taxonomy.md) — vocabularies and terms, a tree with a depth limit, translations, images, deletion, the `TermWriter`/`TermTree`/`TermUsage` services.
+- [Menus in the admin panel](admin-menus.md) — the `/admin/menus` section: routes and responses of menu and item pages, forms, statuses, deletion rules, drag-and-drop ordering.
+- [Menus](menus.md) — menus and items, a tree with a depth limit, item address, translations, images, visibility by schedule, deletion.
+- [Favorites in the admin panel](admin-favorites.md) — the personal "Favorites" menu: the `user_favorite_types` table, the star on the list, the sidebar block, filtering by access.
+- [Dashboard in the admin panel](admin-dashboard.md) — the `/admin/dashboard` start page: the `DashboardData` service, access scoping, definitions of published/drafts/scheduled/expired, the props of the widgets.
+- [Admin menu](admin-navigation-menu.md) — the menu for everyone in the sidebar: the `admin_menu_entries` table, groups and type links, the `/admin/settings/navigation` page, filtering by access.
+- [Public site themes](site-themes.md) — the theme catalog, `APP_THEME`, the "candidate → theme" cascade, `ThemeException`, the `preprocess`/`suggest` hooks, a separate theme asset build (`theme:build`, `theme:dev`, `vendor`/`app`, SCSS), the `theme:check` command, languages in a theme.
+- [Public site](public-site.md) — the routes `/`, `/{slug}`, `/{type.slug}`, `/{type.slug}/{node.slug}`, the priority of service paths, the language prefix (`/en/...`, reading language, fallback), visibility, 404, the shell and template data.
+- [Type sitemap](type-sitemap.md) — the per-type sitemap settings (`settings.sitemap`), the XML sitemap `/sitemap.xml`, the web sitemap `/sitemap`, the 50 000 URL limit, the reserved path and the `sitemap/page` template.
+- [Theme templates](theme-templates.md) — language variables (`$lang`, `$languages`, `$alternates`, `$canonical`), field rendering (`present`, eight candidates, `$items`), the directives `@field`/`@fields`/`@preview`/`@block`/`@menu`, pages, list cards, blocks, menus, hooks, `default` templates for 15 types.
+- [Theme `dcculture`](theme-dcculture.md) — the public design theme: the frame on every page, home sections as partials, CSS layout, static files, data seams for later wiring.
+- [Legacy site import](legacy-import.md) — the `legacy:import` command: requirements, steps, type/field/value mapping, legacy slugs, files, users, idempotency, dry run, fresh start, the report.
