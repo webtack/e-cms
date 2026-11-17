@@ -1,0 +1,115 @@
+/*
+ * Stylesheet of the `default` theme: Tailwind 4 build.
+ *
+ * Element styles are Tailwind utilities written in the Blade templates; the classes the templates
+ * already print (site-header, menu__item, field__label, ...) stay as hooks for other themes.
+ * Rich text (HTML from the editor, without classes) is styled by the plain `.richtext` selectors below.
+ */
+@import 'tailwindcss' source(none);
+
+/* Utilities are generated only for classes found in these templates: the default theme and the views of every theme.
+ * `source(none)` turns off Tailwind's automatic scan of the project, so the admin's classes do not end up here. */
+@source '../views';
+@source '../../*/views';
+@source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@theme {
+    --font-sans: system-ui, ui-sans-serif, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-ink: #1f2937;
+    --color-muted: #6b7280;
+    --color-line: #e5e7eb;
+    --color-accent: #2563eb;
+}
+
+/* Menu states: the active link is accent-coloured and underlined; the items on the way to it are ink-coloured and bold. */
+.menu a.is-active {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.menu .is-trail > a,
+.menu .is-trail > span {
+    color: var(--color-ink);
+    font-weight: 600;
+}
+
+/* Rich text: heading, paragraph, list, link, quote and table rules for the `richtext` class on field__item. */
+.richtext {
+    overflow-wrap: anywhere;
+}
+
+.richtext > * + * {
+    margin-top: 1em;
+}
+
+.richtext h1,
+.richtext h2,
+.richtext h3,
+.richtext h4 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1.5em;
+}
+
+.richtext h1 {
+    font-size: 1.875rem;
+}
+
+.richtext h2 {
+    font-size: 1.5rem;
+}
+
+.richtext h3 {
+    font-size: 1.25rem;
+}
+
+.richtext h4 {
+    font-size: 1.125rem;
+}
+
+.richtext ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+}
+
+.richtext ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+}
+
+.richtext li + li {
+    margin-top: 0.25em;
+}
+
+.richtext a {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.richtext blockquote {
+    border-left: 4px solid var(--color-line);
+    padding-left: 1rem;
+    color: var(--color-muted);
+}
+
+.richtext table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.richtext th,
+.richtext td {
+    border: 1px solid var(--color-line);
+    padding: 0.375rem 0.75rem;
+    text-align: left;
+}
+
+/* Header cells differ from data cells: bold on a light background. */
+.richtext th {
+    background-color: color-mix(in srgb, var(--color-line) 40%, white);
+    font-weight: 600;
+}
