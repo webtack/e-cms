@@ -24,10 +24,10 @@ Composer installs `inertiajs/inertia-laravel`, `intervention/image` and `symfony
    composer require webtack/e-cms
    ```
 
-   Until the package is published on a registry, add its repository first (a VCS repository, or `path` for a local checkout) and require the released version. A path repository takes the version from the git tag of the checkout (`v0.1.0`); a checkout past the tag, or without tags, has only `dev-main`, which needs `webtack/e-cms:@dev` under the default `minimum-stability`:
+   Until the package is published on a registry, add its repository first (a VCS repository, or `path` for a local checkout) and require the released version. A path repository reports the branch of the checkout as `dev-main`, not its git tag, so state the version in the repository options (a VCS repository or Packagist reads the tags itself). Without the option use `webtack/e-cms:@dev`:
 
    ```bash
-   composer config repositories.ecms path ../e-cms-package
+   composer config repositories.ecms '{"type":"path","url":"../e-cms-package","options":{"versions":{"webtack/e-cms":"0.1.0"}}}' --json
    composer require "webtack/e-cms:^0.1"
    ```
 

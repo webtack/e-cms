@@ -35,10 +35,10 @@ php artisan ecms:install --admin-email=owner@example.com --admin-password='a-lon
 
 Start the application (`php artisan serve`), open `/login`, sign in with that account and you land on `/admin/dashboard`.
 
-Before the package is published on a registry, add its repository to the application's `composer.json` first and require the released version (a path repository takes the version from the git tag the checkout is on):
+Before the package is published on a registry, add its repository to the application's `composer.json` first and require the released version (a path repository reports the branch as `dev-main`, so state the version in the repository options):
 
 ```bash
-composer config repositories.ecms path ../e-cms-package
+composer config repositories.ecms '{"type":"path","url":"../e-cms-package","options":{"versions":{"webtack/e-cms":"0.1.0"}}}' --json
 composer require "webtack/e-cms:^0.1"
 php artisan ecms:install
 ```
