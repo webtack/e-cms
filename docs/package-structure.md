@@ -15,7 +15,7 @@ The CMS ships as the Composer package `webtack/e-cms`. This page describes what 
 | `resources/` | Admin frontend sources (`js`, `css`) and the root view |
 | `routes/` | `service.php` (always loaded) and `public.php` (public site, loaded last), see [package-bootstrap.md](package-bootstrap.md) |
 | `themes/default/` | The default theme (`theme.json`, `views/`, `assets/`, `hooks.php`) |
-| `tests/` | The package test suite (introduced in the change `package-tests-on-testbench`) |
+| `tests/` | The package test suite on Orchestra Testbench ([package-testing.md](package-testing.md)) |
 | `docs/` | Topic documentation |
 | `openspec/` | Specifications and change history |
 

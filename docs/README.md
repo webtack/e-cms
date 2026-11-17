@@ -4,6 +4,7 @@
 - [Package bootstrap](package-bootstrap.md) — auto-discovery, the `ecms.*` switches (`public_site`, `auth_routes`, `locales`), middleware, redirects, route order, the language prefix, theme and translation lookup, conflicts with the host.
 - [Package installer](package-installer.md) — migrations of the package, the `users` extension, `ecms:install`, the first administrator, the rule for existing users.
 - [Package frontend](package-frontend.md) — the committed `dist/`, the publish tags `ecms-assets`/`ecms-theme`/`ecms-theme-tooling`, the root view `ecms::app`, asset versioning, the freshness check, the dev server.
+- [Package testing](package-testing.md) — running the suite, the run policy, the Testbench harness (`TestCase`), the fixture user.
 - [Admin shell](admin-shell.md) — the Inertia/React/TypeScript stack, the build, the frontend structure.
 - [Admin multilingual interface](admin-i18n.md) — interface languages, detecting and storing the choice, translations for React and the server.
 - [Admin authentication](admin-auth.md) — login/logout, verified, rate limiting, the initial user (seeder).

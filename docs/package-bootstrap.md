@@ -86,4 +86,4 @@ Themes are looked up in two roots, the application's `themes/` first and the pac
 
 ## Tests
 
-The package test suite is introduced in the change `package-tests-on-testbench`. The behaviour on this page was verified with a throwaway host application (stock configuration, SQLite).
+The behaviour on this page is locked in by `tests/Feature/Package/*` (registration, switches, route order with cached routes, theme roots, translations, locales, language prefix); see [package-testing.md](package-testing.md).
