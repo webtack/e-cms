@@ -20,7 +20,7 @@ The nodes of pages live under the type: `/admin/page-types/{key}/nodes…`, name
 
 ## The route defines the kind
 
-`routes/web.php` registers all sets in one loop `['content-types' => 'content', 'page-types' => 'page', 'block-types' => 'block']`; each route gets a default `kind` value. Further:
+`routes/service.php` registers all sets in one loop `['content-types' => 'content', 'page-types' => 'page', 'block-types' => 'block']`; each route gets a default `kind` value. Further:
 
 - `Route::bind('contentType')` selects `ContentType::ofKind($route->defaults['kind'])`, so a type key of another kind (in particular `content` or `block` in `/admin/page-types/**` and `page` in `/admin/content-types/**`; the block types section works the same way, see [admin-block-types.md](admin-block-types.md)) gives 404 on all routes, including fields.
 - The controllers take the kind through the trait `Concerns\ResolvesTypeSection`: `kind($request)` for querying, creation (`'kind' => $kind`), and `parentOptions`; `routeName($request, 'index')` for redirects into their own section; `section($request)` for the Inertia prop `section` = `{ kind, basePath }`.
@@ -49,9 +49,8 @@ The item "Page Types" (`FileStack`) is placed in `navigation.ts` after "Content 
 
 ## Tests
 
-`tests/Feature/Admin/PageTypeTest.php` (a guest, only `page` in the list without a slug, creation with kind `page`, a parent of another kind, an update without changing `key`/`kind`, a descendant as the parent, 404 between sections, deletion, fields: list, creation, prohibition of deleting `title`, order, a foreign key) and `e2e/admin-page-types.spec.js` (together with nodes: the "Nodes" item in both menus, the counter as a link, creation with a slug from the title, editing, breadcrumbs, 404 between sections). Page nodes: `ContentNodeIndexTest`, `ContentNodeWriteTest`. Run:
+`tests/Feature/Admin/PageTypeTest.php` (a guest, only `page` in the list without a slug, creation with kind `page`, a parent of another kind, an update without changing `key`/`kind`, a descendant as the parent, 404 between sections, deletion, fields: list, creation, prohibition of deleting `title`, order, a foreign key) (together with nodes: the "Nodes" item in both menus, the counter as a link, creation with a slug from the title, editing, breadcrumbs, 404 between sections). Page nodes: `ContentNodeIndexTest`, `ContentNodeWriteTest`. Run:
 
 ```bash
-docker compose exec app php artisan test --filter=PageType
-npm run test:e2e -- admin-page-types
+vendor/bin/phpunit --filter=PageType
 ```

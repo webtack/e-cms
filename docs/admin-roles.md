@@ -39,8 +39,7 @@ Request body: `name` and `permissions` = `{ system: {users: bool, …}, nodes: {
 ## Tests
 
 ```bash
-docker compose exec app php artisan test --compact --filter=Role
-npm run test:e2e -- e2e/admin-roles.spec.js
+vendor/bin/phpunit --filter=Role
 ```
 
-Feature tests — `tests/Feature/Admin/RoleAdminTest.php`; e2e — `e2e/admin-roles.spec.js` (creating a role, changing the matrix, the system role, deleting a role with users and an empty one).
+Feature tests — `tests/Feature/Admin/RoleAdminTest.php`.

@@ -4,7 +4,7 @@ The `/admin/taxonomy` section manages vocabularies and the tree of terms. The do
 
 ## Routes
 
-A vocabulary is addressed by its `key` (`Route::bind('vocabulary')` in `routes/web.php`; a vocabulary has no uuid); an unknown key gives 404. Route names start with `admin.taxonomy.`.
+A vocabulary is addressed by its `key` (`Route::bind('vocabulary')` in `routes/service.php`; a vocabulary has no uuid); an unknown key gives 404. Route names start with `admin.taxonomy.`.
 
 | Method and address | Name | Action |
 | --- | --- | --- |
@@ -105,10 +105,8 @@ A term among the usages of a file is shown with a label — its base name — an
 ## Tests
 
 ```bash
-docker compose exec app php artisan test --compact --filter=VocabularyAdmin
-docker compose exec app php artisan test --compact --filter=TermAdmin
-docker compose exec app php artisan test --compact --filter=TermOwnerTest
-npm run test:e2e -- e2e/admin-taxonomy.spec.js
+vendor/bin/phpunit --filter=VocabularyAdmin
+vendor/bin/phpunit --filter=TermAdmin
+vendor/bin/phpunit --filter=TermOwnerTest
 ```
 
-The e2e scenarios are described in [e2e-testing.md](e2e-testing.md).

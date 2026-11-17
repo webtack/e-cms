@@ -74,7 +74,7 @@ All strings go through `t()` with English keys in `lang/en.json` and `lang/uk.js
 
 ## Tests
 
-PHP: `tests/Feature/Dashboard/DashboardDataTest.php` (rights per level, ordering, numbers with a fixed `$now`, media levels) and `tests/Feature/Admin/DashboardTest.php` (the endpoint and its props). e2e: `e2e/admin-dashboard.spec.js`.
+PHP: `tests/Feature/Dashboard/DashboardDataTest.php` (rights per level, ordering, numbers with a fixed `$now`, media levels) and `tests/Feature/Admin/DashboardTest.php` (the endpoint and its props).
 
 ## Related
 

@@ -132,7 +132,7 @@ The `<head>` of every public page (home, page, list and node details, 404) gets 
 - `youtube` gives the address of the saved screenshot of the video (`screen`); the site does not contact YouTube while showing the page. A video without a screenshot gives no value, and the next source is taken.
 - A field that was deleted or whose type changed is ignored (`PublicDisplaySettings::clean()`), and the next source is taken. When there is no source at all, the tag `meta description` / `og:image` is not output.
 
-Coverage: `tests/Feature/Public/PageMetaTest.php` (including the type meta), `PublicRoutesTest`, e2e `e2e/public-site.spec.js` (the `<head>` of a list with the type's `meta_description`).
+Coverage: `tests/Feature/Public/PageMetaTest.php` (including the type meta), `PublicRoutesTest`.
 
 ## Page and list fields
 
@@ -161,7 +161,7 @@ A `content` type whose public settings have an `archive` (`{field, sort}`, [cont
 - **Boundary.** "Past" is decided against the start of the current day in UTC (`now()->startOfDay()`, computed by `PublicNodeController::list()`), so a record dated today, even at `00:00`, stays in the main list during the whole day. The exact rules per date kind (a multiple field, an empty value, `unpublished_at`) are in [Period selection](content-querying.md#period-selection); the two lists are complements, and visibility ([above](#visibility)) is applied to both.
 - **Paging.** Both lists use the type's `per_page` and the paginator; the `page` parameter works in both, and the paginator links of the archive keep `period=archive`.
 - **Other values.** A `period` value other than `archive` gives the main list without an error. A type without an archive ignores the parameter and shows the same list as without it.
-- **Template variables** (`content/list`): `$period` is `'current'` or `'archive'` (the list shown), `$hasArchive` is `true` when the type has an archive. The core renders no switch itself; a theme builds a link to the archive from these two variables ([theme-dcculture.md](theme-dcculture.md)).
+- **Template variables** (`content/list`): `$period` is `'current'` or `'archive'` (the list shown), `$hasArchive` is `true` when the type has an archive. The core renders no switch itself; a theme builds a link to the archive from these two variables.
 
 Coverage: `tests/Feature/Public/PublicRoutesTest.php` (the archive period).
 
@@ -180,4 +180,4 @@ From specific to general ([site-themes.md](site-themes.md#candidate-cascade)); `
 | Web sitemap | `sitemap/page` | `sitemap` |
 | 404 | `errors/404` | `errors.404` |
 
-Tests: `tests/Feature/Public/PublicRoutesTest.php`; e2e — `e2e/public-site.spec.js` ([e2e-testing.md](e2e-testing.md)).
+Tests: `tests/Feature/Public/PublicRoutesTest.php`.

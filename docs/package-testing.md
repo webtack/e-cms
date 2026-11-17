@@ -13,7 +13,7 @@ composer test                                        # same as the first line
 vendor/bin/pint --test                               # code style (composer lint)
 ```
 
-In the demo application's Docker setup the package is mounted at `/var/www/e-cms-package`, so the commands run as `docker compose exec -w /var/www/e-cms-package app vendor/bin/phpunit ...`.
+The demo application mounts the package into its container, where the same commands run from the package directory; see the contributing notes in the repository root.
 
 ### Run policy
 

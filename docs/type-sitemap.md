@@ -64,8 +64,8 @@ Titles: a type's public title is its `section_title` (reading language, then bas
 
 ## Differences from the legacy module
 
-The legacy module stored its settings in its own table (`entity_type`, `entity_id`, `web`, `xml`), listed only the 50 oldest records per type in the XML and answered `text/xml`. Here the settings live in the type, all visible records are listed, and the type is `application/xml; charset=utf-8`. The legacy settings are not imported ([legacy-import.md](legacy-import.md)); each type is configured by hand on its "Sitemap" tab.
+The legacy module stored its settings in its own table (`entity_type`, `entity_id`, `web`, `xml`), listed only the 50 oldest records per type in the XML and answered `text/xml`. Here the settings live in the type, all visible records are listed, and the type is `application/xml; charset=utf-8`. Each type is configured by hand on its "Sitemap" tab.
 
 ## Tests
 
-`tests/Feature/Content/ContentTypeTest.php` (validation), `tests/Feature/Admin/ContentTypeSitemapTest.php` (the tab), `tests/Feature/Public/SitemapXmlTest.php`, `tests/Feature/Public/SitemapWebTest.php`, `tests/Unit/Content/PublicPathsTest.php` (the reserved path) and the sitemap cases of `e2e/admin-content-types.spec.js` and `e2e/admin-page-types.spec.js`. Theme templates have no tests (project rule).
+`tests/Feature/Content/ContentTypeTest.php` (validation), `tests/Feature/Admin/ContentTypeSitemapTest.php` (the tab), `tests/Feature/Public/SitemapXmlTest.php`, `tests/Feature/Public/SitemapWebTest.php`, `tests/Unit/Content/PublicPathsTest.php` (the reserved path). Theme templates have no tests (project rule).

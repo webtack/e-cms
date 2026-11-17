@@ -49,3 +49,23 @@ jobs:
 
       - name: The committed dist/ matches the sources
         run: npm run check:dist
+
+  docs:
+    name: Documentation is consistent
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Relative links and anchors
+        run: node scripts/check-docs.mjs
+
+      - name: Every config key is documented
+        run: node scripts/check-config-docs.mjs
+
+      - name: docs/HISTORY.md matches the OpenSpec archive
+        run: node scripts/history.mjs --check

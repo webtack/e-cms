@@ -57,10 +57,9 @@ At least one **active** user of the system role `admin` always remains: it canno
 ## Tests
 
 ```bash
-docker compose exec app php artisan test --compact --filter=User
-npm run test:e2e -- e2e/admin-users.spec.js
+vendor/bin/phpunit --filter=User
 ```
 
-Feature tests — `tests/Feature/Admin/UserAdminTest.php` (creation, password, role, self-protection, deletion, last administrator through `LastAdminGuard`, 403 for a non-administrator on every action against an administrator, the `can_manage` flag and the filtered `roles` props) and `tests/Feature/Access/UserPolicyTest.php` (the policy matrix); e2e — `e2e/admin-users.spec.js` (creation with a role and login, deactivation and login of a deactivated user, deleting an author is rejected, the own row, a user with only `users` sees an administrator without actions and no `admin` in the role select, avatar in the list and release on deletion).
+Feature tests — `tests/Feature/Admin/UserAdminTest.php` (creation, password, role, self-protection, deletion, last administrator through `LastAdminGuard`, 403 for a non-administrator on every action against an administrator, the `can_manage` flag and the filtered `roles` props) and `tests/Feature/Access/UserPolicyTest.php` (the policy matrix).
 
 The parallel last-administrator scenario is not reproduced in PHPUnit (a single process): the sequential logic is checked, and the locking is verified by the `lockForUpdate` property in the transaction (SQLite in tests has no locking; MySQL applies it).

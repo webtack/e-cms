@@ -67,7 +67,7 @@ Files are copied as they are: the content is not changed, so comments, class nam
 
 ## Hooks
 
-`hooks.php` returns a function with the registry (`Webtack\Ecms\Theme\ThemeHooks`; before the package it was `App\Theme\ThemeHooks`, see [package-structure.md](package-structure.md#namespace-mapping)):
+`hooks.php` returns a function with the registry (`Webtack\Ecms\Theme\ThemeHooks`; for the former import see [UPGRADING.md](../UPGRADING.md)):
 
 ```php
 <?php
@@ -88,7 +88,7 @@ return function (ThemeHooks $hooks): void {
 ```
 
 - The callback takes an argument by reference (`array &$vars`, `array &$candidates`).
-- A `preprocess` callback may end the request by throwing `Illuminate\Http\Exceptions\HttpResponseException` with a response (for example a redirect); Laravel sends that response and the page is not rendered. The theme `dcculture` does this for a node with a single file or link ([theme-dcculture.md](theme-dcculture.md#redirect-to-a-single-file-or-link)).
+- A `preprocess` callback may end the request by throwing `Illuminate\Http\Exceptions\HttpResponseException` with a response (for example a redirect); Laravel sends that response and the page is not rendered. An application theme can do this, for example, for a node that holds a single file or link.
 - Besides template names, the core runs the `preprocess` hook `breadcrumbs` (the trail of the page, see [theme-templates.md](theme-templates.md#breadcrumbs)) when the shared page variables are built.
 - The hook name is a dot path from general to specific: a call of `field.youtube` runs the hook `field`, then `field.youtube`. Within one name, the callbacks run in the order of registration.
 - The files are loaded: `themes/default/hooks.php` first, then the active theme's; each file is loaded once (on first use).
@@ -157,7 +157,7 @@ Check after a change: `npm run build` and `npm run theme:build` on the host, the
 ## Theme check: `theme:check`
 
 ```
-docker compose exec app php artisan theme:check
+php artisan theme:check
 ```
 
 It checks `theme.json` of the active theme and of `default`, the presence of the required templates (in the active theme or in `default`), that `default` has `fields/field-{type}` for each registered field type ([theme-templates.md](theme-templates.md#default-templates)), and that each `hooks.php` returns a function. Each problem is output on a separate line; the exit code is 0 without problems and 1 otherwise.

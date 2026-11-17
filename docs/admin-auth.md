@@ -16,7 +16,7 @@ All `/admin/*` routes have the `auth` + `verified` middleware:
 - a guest → redirect to `/login` (set by the package provider, see [package-bootstrap.md](package-bootstrap.md#redirects-and-the-404-page); with `ecms.auth_routes` off the host's own redirect applies);
 - a user without a verified email → redirect to `/email/verify` (`verification.notice`, the page `Pages/Auth/VerifyEmail.tsx` has only a logout button; sending verification emails is out of scope).
 
-`User` implements `MustVerifyEmail`.
+The check applies only when the host user model implements `Illuminate\Contracts\Auth\MustVerifyEmail`; the package does not require it ([integration.md](integration.md#the-user-model)). Users created in the admin get a verified email.
 
 ## Deactivated user
 
@@ -61,15 +61,15 @@ Older versions of the seeder created `admin@example.com` / `password`. On an ins
 5. Check that no node or media file references the old user, that no user has the email `admin@example.com`, and that `Hash::check('password', $user->password)` is false.
 
 ```bash
-docker compose exec app php artisan db:seed
+php artisan db:seed
 ```
 
-For a clean database from scratch (⚠️ deletes all tables): `docker compose exec app php artisan migrate:fresh --seed`.
+For a clean database from scratch (⚠️ deletes all tables): `php artisan migrate:fresh --seed`.
 
 ## Tests
 
 ```bash
-docker compose exec app php artisan test
+vendor/bin/phpunit
 ```
 
 Feature tests: `tests/Feature/Auth` (login, logout, throttling, unverified email, seeder) and `tests/Feature/Admin`.

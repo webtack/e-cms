@@ -51,4 +51,4 @@ The section "Create menu" at the bottom of the settings page (`Components/Admin/
 
 ## Tests
 
-`tests/Feature/Navigation/AdminMenuTest.php`, `SidebarNavigationTest.php`, `CreateMenuSettingsTest.php` (the Create menu list); `tests/Feature/Access/RouteCoverageTest.php` covers the 403 without the right; e2e — `e2e/admin-favorites-menu.spec.js`.
+`tests/Feature/Navigation/AdminMenuTest.php`, `SidebarNavigationTest.php`, `CreateMenuSettingsTest.php` (the Create menu list); `tests/Feature/Access/RouteCoverageTest.php` covers the 403 without the right.

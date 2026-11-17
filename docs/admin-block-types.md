@@ -25,9 +25,8 @@ Placing blocks on pages is not covered by this section. Block nodes have slugs w
 
 ## Tests
 
-`tests/Feature/Admin/BlockTypeTest.php` and `e2e/admin-block-types.spec.js` (together with nodes: the menus, generation of `block-…`, the slug prefix in the form); block nodes — also `ContentNodeIndexTest` and `ContentNodeWriteTest`. Run:
+`tests/Feature/Admin/BlockTypeTest.php` (together with nodes: the menus, generation of `block-…`, the slug prefix in the form); block nodes — also `ContentNodeIndexTest` and `ContentNodeWriteTest`. Run:
 
 ```bash
-docker compose exec app php artisan test --filter=BlockType
-npm run test:e2e -- e2e/admin-block-types.spec.js
+vendor/bin/phpunit --filter=BlockType
 ```

@@ -20,9 +20,9 @@ All routes are nested under the type: `/admin/content-types/{contentType}/fields
 
 `PUT …/fields/order` is declared **before** the routes with `{field}`, so that `order` is not bound as a field key.
 
-`{contentType}` is bound by `key` and only in the kind's section ([admin-content-types.md](admin-content-types.md#editing)): the key of a missing type, as well as types of another kind, give 404 on all routes of this page. `{field}` is bound by an explicit `Route::bind('field', …)` in `routes/web.php`: it looks up the field by the **pair** (the type key from the already resolved parameter, `key`), so the key of a missing field or of a field of another type also gives 404. A field is addressed by its key, not by a numeric `id`, like all other entities.
+`{contentType}` is bound by `key` and only in the kind's section ([admin-content-types.md](admin-content-types.md#editing)): the key of a missing type, as well as types of another kind, give 404 on all routes of this page. `{field}` is bound by an explicit `Route::bind('field', …)` in `routes/service.php`: it looks up the field by the **pair** (the type key from the already resolved parameter, `key`), so the key of a missing field or of a field of another type also gives 404. A field is addressed by its key, not by a numeric `id`, like all other entities.
 
-The logic is in `Webtack\Ecms\Http\Controllers\Admin\ContentFieldController`; the requests are `StoreContentFieldRequest`, `UpdateContentFieldRequest`, `ReorderContentFieldsRequest` (`app/Http/Requests/Admin`).
+The logic is in `Webtack\Ecms\Http\Controllers\Admin\ContentFieldController`; the requests are `StoreContentFieldRequest`, `UpdateContentFieldRequest`, `ReorderContentFieldsRequest` (`src/Http/Requests/Admin`).
 
 ## `index` response
 
@@ -174,13 +174,9 @@ The page keeps a **local copy** of `fields`: after a drop the row immediately mo
 
 `tests/Feature/Admin/ContentFieldIndexTest.php`, `ContentFieldCreateTest.php`, `ContentFieldEditTest.php`, `ContentFieldDestroyTest.php` (together with the order): a guest and an unverified user, props, order by weight, `has_values`, 404 for `page`/`block` and a foreign key (the `page` and `block` sections — in `PageTypeTest` and `BlockTypeTest`), validation, the field description (saving, clearing, the 1000-character limit, changing the description of `title` while the other prohibitions remain), prohibitions for `title` and fields with values, the immutability of the type of a field without values, the order, hidden panel fields (the list, 404 on edit/update/destroy, rejection of their keys in the order).
 
-The e2e scenario `e2e/admin-content-fields.spec.js` prepares data via tinker (like `admin-content-types.spec.js`) and checks opening the page from the type menu, the absence of the filter button, client-side search, creation, editing, deletion with a dialog, a blocked field type for a field without values and fields with values (the deletion dialog without confirmation), `title` without deletion, the absence of panel fields in the table and 404 on their pages, rejection of a reserved system key, dragging with saving after reload, and the "Description" field (saving, showing on edit, length error, clearing).
-
-Settings of reference fields and their integrity: `tests/Feature/Content/TypeRefFieldTypeTest.php`, `NodeRefFieldTypeTest.php` (values, settings `kind` / `content_type`, immutability, multiplicity, translation, filters), `RefUsageTest.php` (the prohibition on deleting a target); the settings UI — `e2e/content-reference-fields.spec.js`.
+Settings of reference fields and their integrity: `tests/Feature/Content/TypeRefFieldTypeTest.php`, `NodeRefFieldTypeTest.php` (values, settings `kind` / `content_type`, immutability, multiplicity, translation, filters), `RefUsageTest.php` (the prohibition on deleting a target).
 
 ```bash
-docker compose exec app php artisan test --filter=ContentField
-docker compose exec app php artisan test --filter=RefFieldType
-npm run test:e2e -- admin-content-fields
-npm run test:e2e -- e2e/content-reference-fields.spec.js
+vendor/bin/phpunit --filter=ContentField
+vendor/bin/phpunit --filter=RefFieldType
 ```

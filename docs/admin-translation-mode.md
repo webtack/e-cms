@@ -65,4 +65,4 @@ Entity forms with shared attributes (`TermForm`, `MenuItemForm`, `ContentNodeFor
 1. Add `saveTranslation`/`clearTranslation` to the entity's writer (store only differing, non-empty values; delete the row when nothing remains).
 2. Use `ResolvesTranslationLanguage` in the controller: call `resolveTranslationLang()` in `edit`, return `translationProp($lang, $translatedCodes, $values, $exists)`, and add the `PUT`/`DELETE` translation routes under the entity's existing permission.
 3. In the form, render `LanguageSwitcher` above it. If the entity has shared attributes, keep one form and lock them in the translation mode (never move fields between blocks); a form with nothing but translatable fields is the same one form, so the rule is the same.
-4. Add e2e coverage next to the existing specs and list the consumer in the "Shared code → specs" table of [e2e-testing.md](e2e-testing.md).
+4. Add a Feature test for the new consumer.

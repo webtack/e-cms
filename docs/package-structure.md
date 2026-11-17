@@ -45,8 +45,7 @@ The package takes what belongs to the admin panel and the theme `default`. Every
 | Laravel-default migrations for `users`, `cache`, `jobs` | The host already has them |
 | The legacy import (`Legacy/`, `LegacyImportCommand`, `LegacyImportMap`, its migration, `config/legacy.php`) | One-off code of the owner's old site |
 | `themes/dcculture` and `lang/{en,uk}/{dcculture,months}.php` | Application theme and its translations |
-| `e2e/` | Browser tests of the demo |
-| `docs/{e2e-testing,legacy-import,theme-dcculture,deployment}.md` | Demo-only documentation |
+| Browser tests, legacy import docs and other demo-only documentation | Specific to the demo application |
 
 ## The user model contract
 

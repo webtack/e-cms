@@ -6,7 +6,7 @@ It is a sub-page of [Site settings](admin-site-settings.md) (linked from it; the
 
 ## Routes
 
-All routes are in the `can:settings` group (`routes/web.php`), controller `Webtack\Ecms\Http\Controllers\Admin\ContentLanguageController`. A language in the URL is its normalized `code` (`Route::bind('language', …)`; an unknown code answers 404).
+All routes are in the `can:settings` group (`routes/service.php`), controller `Webtack\Ecms\Http\Controllers\Admin\ContentLanguageController`. A language in the URL is its normalized `code` (`Route::bind('language', …)`; an unknown code answers 404).
 
 | Method and path | Name | Action |
 | --- | --- | --- |
@@ -39,4 +39,4 @@ Success messages go to the `success` flash: "Languages saved.", "Language added.
 
 ## Tests
 
-PHP: `tests/Feature/Admin/ContentLanguageAdminTest.php`. Browser: `e2e/admin-content-languages.spec.js` ([e2e-testing.md](e2e-testing.md)).
+PHP: `tests/Feature/Admin/ContentLanguageAdminTest.php`.

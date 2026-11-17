@@ -1,6 +1,6 @@
 # Image styles
 
-An image style is a derived version of the original of a given size: a thumbnail for lists and cards, a picture of the required size in a template. The theme template requests the address of a style with the helper [`image_style()`](#image_style-helper); the file is created on the first request (see [Lazy generation](#lazy-generation)) and then served by the web server as a static file. The code — `app/Files/ImageStyles.php`, `app/Files/ImageResizer.php` (`fit()`), `app/Http/Controllers/ImageStyleController.php`, `app/helpers.php`.
+An image style is a derived version of the original of a given size: a thumbnail for lists and cards, a picture of the required size in a template. The theme template requests the address of a style with the helper [`image_style()`](#image_style-helper); the file is created on the first request (see [Lazy generation](#lazy-generation)) and then served by the web server as a static file. The code — `src/Files/ImageStyles.php`, `src/Files/ImageResizer.php` (`fit()`), `src/Http/Controllers/ImageStyleController.php`, `src/helpers.php`.
 
 The styles are stored by the [file storage](file-storage.md) on the disk of the `image` profile; the originals do not change.
 
@@ -74,7 +74,7 @@ The address of a style is built from the address of the original by inserting `s
 
 ## `image_style()` helper
 
-A global function (`app/helpers.php`, connected through `autoload.files` in `composer.json`; after adding it `composer dump-autoload` was run). It works without DB or disk access.
+A global function (`src/helpers.php`, connected through `autoload.files` in `composer.json`; after adding it `composer dump-autoload` was run). It works without DB or disk access.
 
 ```blade
 <img src="{{ image_style($node->hero, 'thumb') }}" alt="">
@@ -87,7 +87,7 @@ A global function (`app/helpers.php`, connected through `autoload.files` in `com
 | `image_style('/storage/{uuid}.jpg', 'thumb')` | `/storage/styles/thumb/{uuid}.webp` |
 | `image_style('/storage/{uuid}.jpg', '300x250')` | `/storage/styles/300x250/{uuid}.webp?itok=…` |
 | `image_style('{uuid}.png', 'thumb')` | the address `styles/thumb/{uuid}.webp` on the disk of the `image` profile (a field value, as in `FileStorage::urlForValue()`) |
-| `image_style('http://localhost:8080/storage/{uuid}.jpg', 'thumb')` | `http://localhost:8080/storage/styles/thumb/{uuid}.webp` |
+| `image_style('https://example.com/storage/{uuid}.jpg', 'thumb')` | `https://example.com/storage/styles/thumb/{uuid}.webp` |
 | `image_style('https://cdn.example.com/photo.jpg', 'thumb')` | the same address without changes |
 | `image_style('/storage/{uuid}.pdf', 'thumb')` | the same address without changes (not an image) |
 | `image_style('/storage/{uuid}.jpg', '300х250')` (Cyrillic `х`) | the same address without changes |
@@ -118,7 +118,7 @@ If the style file cannot be written (or the temporary file cannot be moved into 
 
 ### Environment requirement
 
-No web server rules are needed beyond the standard redirection of non-existent files to the Laravel front controller: `public/.htaccess` (Apache) and `try_files $uri $uri/ /index.php?$query_string` (nginx, `docker/nginx/default.conf`). Without this, a request to a not-yet-created file will give a 404 from the web server, and the route will not run. For the `public` disk, `storage:link` is needed.
+No web server rules are needed beyond the standard redirection of non-existent files to the Laravel front controller: `public/.htaccess` (Apache) and `try_files $uri $uri/ /index.php?$query_string` (nginx). Without this, a request to a not-yet-created file will give a 404 from the web server, and the route will not run. For the `public` disk, `storage:link` is needed.
 
 ## Creation on upload
 
@@ -146,12 +146,12 @@ The client shows `preview ?? url`: when `preview` is absent (old data that does 
 ## Flushing
 
 ```bash
-docker compose exec app php artisan image-styles:flush          # all styles
-docker compose exec app php artisan image-styles:flush thumb    # only styles/thumb
-docker compose exec app php artisan image-styles:flush 300x250  # only styles/300x250
+php artisan image-styles:flush          # all styles
+php artisan image-styles:flush thumb    # only styles/thumb
+php artisan image-styles:flush 300x250  # only styles/300x250
 ```
 
-The command (`app/Console/Commands/ImageStylesFlushCommand.php`) deletes the directory `styles/` (or `styles/{style}`) on the disk of the `image` profile. The originals and everything outside `styles/` remain. The name of the style goes through the same check as in the route (`300X250` becomes `300x250`), so `..` cannot leave the directory: an invalid style is an error and an exit code 1. The deleted styles are created again on the next request with the current settings, so the command is run after changing the size of a preset. A preset with `upload => true` for old files is also created lazily.
+The command (`src/Console/Commands/ImageStylesFlushCommand.php`) deletes the directory `styles/` (or `styles/{style}`) on the disk of the `image` profile. The originals and everything outside `styles/` remain. The name of the style goes through the same check as in the route (`300X250` becomes `300x250`), so `..` cannot leave the directory: an invalid style is an error and an exit code 1. The deleted styles are created again on the next request with the current settings, so the command is run after changing the size of a preset. A preset with `upload => true` for old files is also created lazily.
 
 ## Signature and limits
 
@@ -172,4 +172,4 @@ An arbitrary size is served only with the signature `itok` — the first 16 hex 
 | Creation on upload, deletion | `tests/Feature/Files/FileStorageTest.php` (the block "Image styles") |
 | The command `image-styles:flush` | `tests/Feature/Files/ImageStylesFlushCommandTest.php` |
 
-Run: `docker compose exec app php artisan test --compact --filter=ImageStyle`.
+Run: `vendor/bin/phpunit --filter=ImageStyle`.

@@ -37,7 +37,7 @@ The public site is the exception: on routes named `public.*` the middleware skip
 
 ## Server side
 
-- **Middleware `Webtack\Ecms\Http\Middleware\SetLocale`** — in the `web` group (`bootstrap/app.php`), after the session and cookie encryption and **before** `HandleInertiaRequests`, which reads `app()->getLocale()`. It applies the priority from the section above via `app()->setLocale()`.
+- **Middleware `Webtack\Ecms\Http\Middleware\SetLocale`** — pushed to the `web` group by the package provider (the host edits no `bootstrap/app.php`), after the session and cookie encryption and **before** `HandleInertiaRequests`, which reads `app()->getLocale()`. It applies the priority from the section above via `app()->setLocale()`.
 - **`POST /locale`** (`locale.update`, `Webtack\Ecms\Http\Controllers\LocaleController@update`) — available to guests too, `throttle:30,1`. The `locale` field is validated by the rule `Rule::in(array_keys(config('ecms.locales')))`; a validation error changes nothing. For an authenticated user it writes `users.locale`, for everyone it sets the long-lived `locale` cookie, and responds with `back()`.
 - **Shared prop `locale`** (`HandleInertiaRequests::share`):
 
@@ -51,7 +51,7 @@ The public site is the exception: on routes named `public.*` the middleware skip
 
   The type is described in `resources/js/types/index.d.ts` (`LocaleProps`). The `<html lang>` attribute is taken from `app()->getLocale()` (`resources/views/app.blade.php`) on a full page load; after client-side Inertia visits (for example, after `POST /locale`) it is synchronized by `resources/js/app.tsx` on the `success` and `navigate` events.
 
-Route check: `docker compose exec app php artisan route:list --name=locale`.
+Route check: `php artisan route:list --name=locale`.
 
 ## Server translations (`lang/`)
 
@@ -75,7 +75,7 @@ The package ships the translations (`lang/{en,uk}.json`, `lang/{en,uk}/auth.php`
 1. Add an entry to `ecms.locales` (the host's `config/ecms.php`), for example `'pl' => 'Polski'`.
 2. Copy the package's `lang/en.json` to the host's `lang/pl.json` and translate the values (do not change the keys). The `TranslationParityTest` requires the same set of keys in all languages.
 3. If needed, create `lang/pl/auth.php` and `lang/pl/validation.php` (without them the fallback to `en` works).
-4. Check: `docker compose exec app php artisan test --compact tests/Feature/Locale`.
+4. Check: `vendor/bin/phpunit tests/Feature/Locale`.
 
 No code change is needed: the language switcher is built from `ecms.locales`.
 
@@ -111,8 +111,7 @@ export default function Example() {
 ## Tests
 
 - PHPUnit (`tests/Feature/Locale/`): `SetLocaleTest` (priority, `uk-UA` → `uk`, invalid values), `LocaleControllerTest` (`POST /locale` for a guest, an authenticated user, and an invalid value), `SharedLocalePropsTest`, `ServerMessagesTest` (server translations), `TranslationParityTest` (identical keys in `lang/*.json`).
-- Playwright: `e2e/admin-i18n.spec.js` (see [e2e-testing.md](e2e-testing.md)).
 
-Run: `docker compose exec app php artisan test --compact tests/Feature/Locale`.
+Run: `vendor/bin/phpunit tests/Feature/Locale`.
 
 > Test note: the Symfony request in PHPUnit has `Accept-Language: en-us` by default; to simulate a missing header, pass an empty value.

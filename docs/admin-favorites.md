@@ -38,4 +38,4 @@ The level `AccessResolver::nodeLevel` for the type is `none` — the response is
 
 ## Tests
 
-`tests/Feature/Navigation/FavoriteTypeTest.php`, `SidebarNavigationTest.php`; e2e — `e2e/admin-favorites-menu.spec.js`.
+`tests/Feature/Navigation/FavoriteTypeTest.php`, `SidebarNavigationTest.php`.

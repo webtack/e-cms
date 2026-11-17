@@ -4,7 +4,7 @@ The `/admin/menus` section manages the site menus and the tree of their items. T
 
 ## Routes
 
-A menu is addressed by its `key` (`Route::bind('menu')` in `routes/web.php`; a menu has no `uuid`); an unknown key gives 404. An item is addressed by `uuid` within its menu (`Route::bind('item')`): the `uuid` of an item of another menu and an unknown `uuid` give 404. Route names start with `admin.menus.`.
+A menu is addressed by its `key` (`Route::bind('menu')` in `routes/service.php`; a menu has no `uuid`); an unknown key gives 404. An item is addressed by `uuid` within its menu (`Route::bind('item')`): the `uuid` of an item of another menu and an unknown `uuid` give 404. Route names start with `admin.menus.`.
 
 | Method and address | Name | Action |
 | --- | --- | --- |
@@ -97,10 +97,8 @@ An item among the usages of a file is shown with a label — its base title — 
 ## Tests
 
 ```bash
-docker compose exec app php artisan test --compact --filter=MenuAdmin
-docker compose exec app php artisan test --compact --filter=MenuItemAdmin
-docker compose exec app php artisan test --compact --filter=MenuItemOwnerTest
-npm run test:e2e -- e2e/admin-menus.spec.js
+vendor/bin/phpunit --filter=MenuAdmin
+vendor/bin/phpunit --filter=MenuItemAdmin
+vendor/bin/phpunit --filter=MenuItemOwnerTest
 ```
 
-The e2e scenarios are described in [e2e-testing.md](e2e-testing.md).

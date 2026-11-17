@@ -66,7 +66,7 @@ These rules are the same for server-side processing of a collection (`TablePage:
 
 ## Server helper
 
-The directory `app/Support/Table/`. The helper **runs no queries**: it parses the request into a normalized state, and the controller applies it to its own source (Eloquent, `ContentNodeQuery`, a collection).
+The directory `src/Support/Table/`. The helper **runs no queries**: it parses the request into a normalized state, and the controller applies it to its own source (Eloquent, `ContentNodeQuery`, a collection).
 
 | Class | Purpose |
 | --- | --- |
@@ -168,7 +168,7 @@ The mode is set by the prop `mode` (default `server`); the look and behavior are
 
 **What to choose.** `client` — for small sets (a guideline: up to a few hundred rows; content languages, dictionaries, type fields). `server` — for large ones (content nodes). The threshold remains the decision of the page developer; the component does not guess it. Two server tables on one page would conflict over `q`, `page`, and so on, so a page should have no more than one server table (if needed, a table prefix is added in a separate change).
 
-The client engine `runClientEngine(rows, columns, state)` is a pure function with the same rules as `TablePage::fromCollection()` (see [comparison rules](#comparison-rules)); e2e compares the result of both modes on shared data.
+The client engine `runClientEngine(rows, columns, state)` is a pure function with the same rules as `TablePage::fromCollection()` (see [comparison rules](#comparison-rules)).
 
 ## Usage in a page
 
@@ -312,10 +312,9 @@ shadcn/ui primitives: `table`, `select`, `popover`, `checkbox`, `badge` (`Compon
 
 `tests/Unit/Support/Table/TableRequestTest.php` (parsing, all operators by type, `between`, an unknown column, an invalid operator, `per_page` above the maximum, a page out of range) and `TablePageTest.php` (each operator on a collection, search, sorting with empties at the end, stability, pagination, an empty result).
 
-`tests/Feature/Admin/DataTableDemoTest.php` (a guest, authenticated, production → 404, sorting/filter/search/page through parameters, invalid parameters without 500) and the browser scenarios `e2e/admin-data-table.spec.js` (see [e2e-testing.md](e2e-testing.md)).
+`tests/Feature/Admin/DataTableDemoTest.php` (a guest, authenticated, production → 404, sorting/filter/search/page through parameters, invalid parameters without 500).
 
 ```bash
-docker compose exec app php artisan test --filter=Table
-docker compose exec app php artisan test --filter=DataTableDemo
-npm run test:e2e
+vendor/bin/phpunit --filter=Table
+vendor/bin/phpunit --filter=DataTableDemo
 ```

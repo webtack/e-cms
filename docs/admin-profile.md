@@ -11,7 +11,7 @@ The `/admin/profile` page lets every signed-in user maintain their own account: 
 | PUT | `/admin/profile/avatar` | `admin.profile.avatar` | set, replace or remove the avatar |
 | PUT | `/admin/profile/password` | `admin.profile.password` | change the password (`throttle:6,1`) |
 
-The controller is `Webtack\Ecms\Http\Controllers\Admin\ProfileController` (`show`, `update`, `updateAvatar`, `updatePassword`); the requests are `UpdateProfileRequest`, `UpdateProfileAvatarRequest` and `UpdateProfilePasswordRequest` in `app/Http/Requests/Admin`. The page is `Pages/Admin/Profile.tsx`, composed of `Components/Admin/Profile/{ProfileAvatar,ProfileDataForm,ProfilePasswordForm,ProfileSettings}.tsx`. The page props are `profile: {name, email, role, avatar}`; the role is the role name, read-only; `avatar` is the picture URL or `null`.
+The controller is `Webtack\Ecms\Http\Controllers\Admin\ProfileController` (`show`, `update`, `updateAvatar`, `updatePassword`); the requests are `UpdateProfileRequest`, `UpdateProfileAvatarRequest` and `UpdateProfilePasswordRequest` in `src/Http/Requests/Admin`. The page is `Pages/Admin/Profile.tsx`, composed of `Components/Admin/Profile/{ProfileAvatar,ProfileDataForm,ProfilePasswordForm,ProfileSettings}.tsx`. The page props are `profile: {name, email, role, avatar}`; the role is the role name, read-only; `avatar` is the picture URL or `null`.
 
 ## Sections
 
@@ -23,15 +23,14 @@ The controller is `Webtack\Ecms\Http\Controllers\Admin\ProfileController` (`show
 ## Decisions and limits
 
 - **Email verification is not reset** when the email changes: the project sends no verification mail and the administrator vouches for addresses, so a reset would lock the user out under the `verified` middleware.
-- **Other sessions end after a password change.** The `web` group runs `AuthenticateSession` (`$middleware->authenticateSessions()` in `bootstrap/app.php`): every other session and remember-me login of the user is redirected to `/login` on its next request, while the session that changed the password stays signed in. See [sessions after a password change](admin-auth.md#sessions-after-a-password-change).
+- **Other sessions end after a password change.** The `web` group runs `AuthenticateSession` (added by the package provider unless the host already has it, see [package-bootstrap.md](package-bootstrap.md#middleware-of-the-web-group)): every other session and remember-me login of the user is redirected to `/login` on its next request, while the session that changed the password stays signed in. See [sessions after a password change](admin-auth.md#sessions-after-a-password-change).
 - **Throttling** of `PUT /admin/profile/password` is per route (6 attempts per minute), not per account: without it a stolen session could use the current-password check as a guessing oracle.
 - Role and activity are editable only by an administrator with the `users` right.
 
 ## Tests
 
 ```bash
-docker compose exec app php artisan test --compact --filter=ProfileTest
-npm run test:e2e -- e2e/admin-profile.spec.js
+vendor/bin/phpunit --filter=ProfileTest
 ```
 
-Feature tests: `tests/Feature/Admin/ProfileTest.php` (access, save, duplicate email, role and activity ignored, verification kept, password success and failures) and `tests/Feature/Admin/ProfileAvatarTest.php` (set, replace, remove, wrong profile, relation sync, shared prop). e2e: `e2e/admin-profile.spec.js` logs in as a throw-away user created through `tinker` (the avatar tests use `seedAvatar` and `avatarCleanup` from `e2e/support.js`), so the seeded administrator and the saved session stay untouched.
+Feature tests: `tests/Feature/Admin/ProfileTest.php` (access, save, duplicate email, role and activity ignored, verification kept, password success and failures) and `tests/Feature/Admin/ProfileAvatarTest.php` (set, replace, remove, wrong profile, relation sync, shared prop).

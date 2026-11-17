@@ -1,5 +1,19 @@
 # Documentation
 
+Documentation of `webtack/e-cms`, a multilingual content management system with an Inertia admin panel and a theme system for Laravel. One file per topic; this page is the index. Start with the guides, then use the topic pages as a reference. The project history is in [HISTORY.md](HISTORY.md).
+
+## Guides
+
+- [Installation](installation.md) — requirements, `composer require`, `ecms:install`, first login, publish tags, updating, production notes, removal.
+- [Integration](integration.md) — the user model contract, existing users and roles, host routes versus the catch-all, the host's own login, translations, language codes, limits.
+- [Configuration](configuration.md) — every `ecms.*`, `content.*`, `files.*`, `theme.*`, `limits.*` and `social_networks` key and every environment variable with its default.
+- [Theming](theming.md) — writing an application theme: structure, cascade, hooks, directives, assets and building, using and refreshing the published `default`.
+- [Upgrading](../UPGRADING.md) and [changelog](../CHANGELOG.md) — what changes between versions, and the move from an application that ran the CMS as its own code.
+- [Contributing](../CONTRIBUTING.md) — working on the package: tests, `dist/`, documentation checks, the OpenSpec flow.
+- [History](HISTORY.md) — a chronological index of the archived OpenSpec changes and how to read them.
+
+## Reference
+
 - [Package structure](package-structure.md) — the layout of `webtack/e-cms`, the `Webtack\Ecms\` namespace, what stays in the host, the user model contract.
 - [Package bootstrap](package-bootstrap.md) — auto-discovery, the `ecms.*` switches (`public_site`, `auth_routes`, `locales`), middleware, redirects, route order, the language prefix, theme and translation lookup, conflicts with the host.
 - [Package installer](package-installer.md) — migrations of the package, the `users` extension, `ecms:install`, the first administrator, the rule for existing users.
@@ -41,5 +55,3 @@
 - [Public site](public-site.md) — the routes `/`, `/{slug}`, `/{type.slug}`, `/{type.slug}/{node.slug}`, the priority of service paths, the language prefix (`/en/...`, reading language, fallback), visibility, 404, the shell and template data.
 - [Type sitemap](type-sitemap.md) — the per-type sitemap settings (`settings.sitemap`), the XML sitemap `/sitemap.xml`, the web sitemap `/sitemap`, the 50 000 URL limit, the reserved path and the `sitemap/page` template.
 - [Theme templates](theme-templates.md) — language variables (`$lang`, `$languages`, `$alternates`, `$canonical`), field rendering (`present`, eight candidates, `$items`), the directives `@field`/`@fields`/`@preview`/`@block`/`@menu`, pages, list cards, blocks, menus, hooks, `default` templates for 15 types.
-- [Theme `dcculture`](theme-dcculture.md) — the public design theme: the frame on every page, home sections as partials, CSS layout, static files, data seams for later wiring.
-- [Legacy site import](legacy-import.md) — the `legacy:import` command: requirements, steps, type/field/value mapping, legacy slugs, files, users, idempotency, dry run, fresh start, the report.

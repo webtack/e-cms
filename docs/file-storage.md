@@ -48,10 +48,10 @@ The same content uploaded twice gives two separate rows with different `uuid`s a
 
 ## PHP and nginx limits
 
-- PHP: `docker/php/uploads.ini` (`upload_max_filesize=150M`, `post_max_size=200M`) is copied into the `app` image via `docker/php/Dockerfile`. The values have a margin above the largest profile (30 MB). After a change the image is rebuilt: `docker compose up -d --build app`.
-- nginx: `client_max_body_size 64M` (`docker/nginx/default.conf`) does not change.
+- PHP: raise `upload_max_filesize` and `post_max_size` above the largest profile (30 MB); the demo application uses `150M` and `200M`. Restart PHP after the change.
+- nginx: `client_max_body_size` must be above the largest profile as well (the demo application uses `64M`).
 - The real limit of each profile is enforced by the `FileStorage` service; the PHP/nginx limits are only the upper bound of the transport.
-- For public files the `public` disk needs a symbolic link: `docker compose exec app php artisan storage:link`.
+- For public files the `public` disk needs a symbolic link: `php artisan storage:link`.
 
 ## Profiles
 
@@ -84,7 +84,7 @@ The limits, profile sizes, and image processing parameters are read from environ
 | `FILES_IMAGE_WEBP_QUALITY` | `image.quality.webp` | `85` | WebP quality when re-encoding (1–100) |
 | `FILES_IMAGE_MAX_PIXELS` | `image.max_pixels` | `100000000` | The limit of `width × height`, above which an image is rejected before decoding |
 
-The profile sizes must be smaller than the PHP (`docker/php/uploads.ini`) and nginx limits: otherwise the upload is cut off before the profile validation. The `image` block in `config/files.php` (`driver`, `quality`, `max_pixels`) does not belong to a profile: it configures the processing for all profiles with images. The test `FileProfilesTest` checks the presence of the keys and that `null` in `.env` gives `max_width === null`.
+The profile sizes must be smaller than the PHP (`upload_max_filesize`, `post_max_size`) and nginx (`client_max_body_size`) limits: otherwise the upload is cut off before the profile validation. The `image` block in `config/files.php` (`driver`, `quality`, `max_pixels`) does not belong to a profile: it configures the processing for all profiles with images. The test `FileProfilesTest` checks the presence of the keys and that `null` in `.env` gives `max_width === null`.
 
 **Adding a profile** — one block in `config/files.php`, no other code changes:
 
@@ -271,7 +271,7 @@ $request->validate([
 
 ## Lifecycle
 
-A file lives until the administrator deletes it in the [media library](media-library.md) (only an unused one). When a consumer replaces or clears a value, it changes only its own reference and does not delete the file. There is no automatic cleanup. The screenshot of a `youtube` field is the same file with a relation in `media_relations` ([media-library.md](media-library.md#youtube-video-screenshot)); a screenshot obtained by a request but not saved remains a free file, which the administrator deletes.
+A file lives until the administrator deletes it in the [media library](media-library.md) (only an unused one). When a consumer replaces or clears a value, it changes only its own reference and does not delete the file. There is no automatic cleanup. The screenshot of a `youtube` field is the same file with a relation in `media_relations` ([media-library.md](media-library.md)); a screenshot obtained by a request but not saved remains a free file, which the administrator deletes.
 
 ## Widget and demo page
 
@@ -325,4 +325,4 @@ The test identifiers: `{root}-progress`, `{root}-failures`, `{root}-zone` (`root
 
 **Props of the single mode `removable`, `description`, `details`, and `actions`.** `description` — the text of the description of the chosen file, drawn between the name and the size (`line-clamp-2`, `data-testid="{root}-description"`); an empty or missing one draws nothing. `removable` (default `true`) shows the "Delete file" button in the block of the chosen file; `false` hides it — so the block of a row of a multiple field leaves the deletion to the row's cross. `details` — an arbitrary `ReactNode` drawn inside the block of the chosen file under the name and size; the [node form](admin-content-nodes.md#image-and-file-fields) previously put the "Name" and "Description" fields there, now it does not use them; the prop remains for compatibility. `actions` — an arbitrary `ReactNode` in the block's button row (before "Delete file", and with `removable={false}` — in its place); the node form puts there the "Edit file data" button. Without these props the behavior is unchanged, so the demo page and other consumers do not change. In `multiple` mode the props do not apply.
 
-**Demo page** `/admin/ui/file-upload` (`admin.ui.file-upload`, `Ui\FileUploadDemoController`, `Pages/Admin/Ui/FileUploadDemo.tsx`) — two widgets (`image`, `document`) showing the `uuid` a form would receive, and a widget in `multiple` mode (only PNG; `data-testid="file-upload-many"`) that shows the names of the files uploaded through it. Outside the navigation; in production it responds with 404. The files uploaded on it are really stored and, having no usages, remain in the media library until manually deleted. Covered by the spec `e2e/admin-file-upload.spec.js` ([e2e-testing.md](e2e-testing.md#file-upload-scenario-admin-file-uploadspecjs)).
+**Demo page** `/admin/ui/file-upload` (`admin.ui.file-upload`, `Ui\FileUploadDemoController`, `Pages/Admin/Ui/FileUploadDemo.tsx`) — two widgets (`image`, `document`) showing the `uuid` a form would receive, and a widget in `multiple` mode (only PNG; `data-testid="file-upload-many"`) that shows the names of the files uploaded through it. Outside the navigation; in production it responds with 404. The files uploaded on it are really stored and, having no usages, remain in the media library until manually deleted.
