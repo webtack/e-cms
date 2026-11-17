@@ -1,0 +1,35 @@
+schema: spec-driven
+
+context: |
+  Laravel package `webtack/e-cms` (namespace `Webtack\Ecms`, sources in `src/`, admin frontend in `resources/js`, compiled bundle committed in `dist/`).
+  PHP runs either in a clone of the package alone (`composer install`, `vendor/bin/phpunit`, `vendor/bin/pint`) or in the demo application's container, where the package is mounted at `/var/www/e-cms-package` (`docker compose exec -w /var/www/e-cms-package app ...`). There is no PHP on the host.
+  Node/npm run on the host in the package directory; `dist/` is rebuilt and committed with every frontend change (`npm run check:dist`).
+  Tests are PHPUnit on Orchestra Testbench (in-memory SQLite). Browser tests belong to the demo application.
+  Project documentation (`docs/`, OpenSpec artifacts, and main specs) is written in English; chat with the owner stays in Ukrainian.
+
+rules:
+  proposal:
+    - List which docs/ files will be created or updated under Impact.
+  specs:
+    - Specs describe behavior only; code-comment and documentation conventions are not spec requirements.
+  design:
+    - Mention which docs/ files describe the designed components.
+  tasks:
+    - Run PHP commands (phpunit, pint, composer) in a clone of the package or in the demo container with `-w /var/www/e-cms-package`, never on the host.
+    - PHP test verification in a task runs only the tests of the changed area (`vendor/bin/phpunit --filter=<Name>` or a test file/directory path); the full `vendor/bin/phpunit` appears only in a task that changes migrations/DB schema, `tests/TestCase.php` or shared test helpers, `phpunit.xml`, composer dependencies, global middleware, providers, configuration or authentication, and there is no final full-run task per change.
+    - Every task that adds or changes public code includes JSDoc/PHPDoc in English with `@example` where usage is not obvious, and states it in its verification.
+    - Every task group that adds or changes public behavior also updates the matching English docs in docs/ (split by topic, with cross-links), instead of deferring documentation to a final group.
+    - Keep docs/README.md index links valid whenever docs files are added or renamed (`node scripts/check-docs.mjs`), and keep docs/configuration.md complete when a config key is added (`node scripts/check-config-docs.mjs`).
+    - A task that changes the frontend sources rebuilds `dist/` and runs `npm run check:dist`.
+
+operations:
+  apply:
+    guidance:
+      - Write all code comments and JSDoc in English; add `@example` blocks for non-obvious public APIs.
+      - Write and update technical documentation in docs/ in English, one file per topic, with relative cross-links to sections and a current index in docs/README.md.
+      - Before marking a task done, check that its code is commented and its docs are updated.
+  archive:
+    guidance:
+      - When delta specs need syncing, sync them without asking for confirmation (equivalent to choosing "Sync now"); still verify the main specs match the deltas before moving the change. Only ask if a capability is sync-blocked.
+      - After the change is archived, run `node scripts/history.mjs` to refresh docs/HISTORY.md.
+      - Create a git commit with all resulting changes only when the owner asks; use Conventional Commits and no attribution lines.

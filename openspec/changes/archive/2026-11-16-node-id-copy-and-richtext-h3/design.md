@@ -1,0 +1,40 @@
+# Design
+
+## Context
+
+See proposal.md. Observed state: `richTextExtensions.ts` already configures headings `[2, 3, 4]` and `HtmlSanitizer` allows `h2`–`h4`, so headings need only toolbar work (`RichTextToolbar.tsx` has one `toggleHeading({ level: 2 })` button). The edit page props `node` (`ContentNodeController::edit`) carry `uuid`, not `id`; the node is addressed by `uuid` in the admin. The table row (`ContentNodeController` row builder) already has `slug`; `Index.tsx` renders it as `<span title={row.slug}>`. No clipboard code exists in `resources/js` yet.
+
+Docs describing the components: `docs/admin-content-nodes.md` (toolbar, form props, node table) and `docs/content-values.md` (sanitization).
+
+## Goals / Non-Goals
+
+**Goals:**
+- One "Block style" dropdown (Normal, `h2`, `h3`, `h4`) in the toolbar.
+- The node `id` visible and copyable on the edit form; the slug copyable in the table.
+- One reusable copy-to-clipboard piece for both places.
+
+**Non-Goals:**
+- No change to the server allow-list or to stored markup.
+- No `id` column in the node table and no `id` on the create form.
+- No change of addressing: URLs and `node_ref` values keep using `uuid`.
+
+## Decisions
+
+1. **Numeric `id` in `node.id` of the edit page only.** The owner chose the database `id`. It is added next to `uuid` in `edit()`; `create()` sends nothing, so the form shows the row only when `meta.id` is defined. `NodeMeta` gets an optional `id?: number`. Alternative: `uuid` (no server change) — rejected by the owner's answer. It is read-only display data; the form's request validation is untouched.
+2. **A shared `CopyableText` component** (`resources/js/Components/Admin/CopyableText.tsx`): a `button type="button"` styled as text, takes `value` (copied), `children` (displayed), optional `title`. On click it calls `navigator.clipboard.writeText(value)`, falling back to a hidden `textarea` + `document.execCommand('copy')` when the Clipboard API is unavailable (non-secure context, `http://` hosts other than localhost), and confirms with the project's existing toast mechanism if there is one (the implementation checks `resources/js` for it first), otherwise with a short inline "Copied" state (icon swap for ~1.5 s) announced through `aria-live`. A native `button` gives keyboard operation for free. Alternative: copy handler inline in each place — rejected, duplicates the fallback and confirmation.
+3. **Slug cell**: `<CopyableText value={row.slug} title={row.slug}>` with the existing one-line ellipsis styling (`truncate`); the click calls `stopPropagation` so it cannot trigger a row click. The copied value is always the full `row.slug`.
+4. **Block style dropdown**: replace the `Heading` `ToolButton` with a `BlockStyleMenu` built like the existing `AlignMenu` (`DropdownMenu` + `DropdownMenuRadioGroup`, trigger button with `aria-label` "Block style"). The selector of `useEditorState` yields `blockStyle: 'p' | 'h2' | 'h3' | 'h4' | null` (headings by `isActive('heading', { level })`, `p` only when `isActive('paragraph')`, otherwise `null`, e.g. a selected image; no radio item is checked and the trigger shows a neutral `Type` icon for `null`; a paragraph inside a list item is still a paragraph, so it reads `p`). Choosing an item runs `setParagraph()` or `setHeading({ level })` (not `toggleHeading`, so choosing the current level is a no-op and the radio state stays consistent) with `focus()`. The trigger shows the icon of the current style (`Pilcrow`, `Heading2`, `Heading3`, `Heading4` from `lucide-react`) so the toolbar keeps its width; the items show icon and text. New translation keys: `Block style`, `Normal`, `Heading 2`, `Heading 3`, `Heading 4`; the key `Heading` is removed from `lang/*.json` if nothing else uses it (checked by `grep`). Alternative: three toggle buttons — rejected by the owner in favor of a dropdown.
+
+5. **`li > p` is removed on the server, in `HtmlSanitizer::clean()`.** Tiptap's schema keeps the text of a list item in a paragraph, so the editor always serializes `<li><p>…</p></li>`; the sanitizer is the only trusted layer and also covers the "Source" mode and imports, so the rule lives there as a DOM pass over the cleaned fragment (not a regex, so nested lists and attributes are handled): in each `li` that has exactly one `p` child without attributes, the `p` is replaced by its children. `li` with several paragraphs or an attributed paragraph (alignment `style`) is left alone. The editor needs no change: ProseMirror wraps the inline content of `<li>text</li>` into a paragraph when it parses it, which the e2e test (save a list, reopen, edit an item) confirms. `text()` is computed from `clean()` and puts a separator after `</li>`, so the visible text is unchanged. Alternatives: a custom `listItem` `renderHTML` in the editor — rejected, the server stays the source of truth and Source mode would bypass it; a data migration — rejected by the owner ("future materials only").
+
+6. **Word lists are converted on paste, on the client.** No paste handling exists in `RichTextEditor.tsx` today. The clipboard is read only in the browser, so the conversion is a `transformPastedHTML` hook in `editorProps`, implemented as a pure function `convertWordLists(html)` in `richTextUtils.ts` (testable, documented with `@example`). Word marks a list item as `<p class="MsoListParagraph…" style="mso-list:l0 level2 lfo1">` with a marker `<span style="mso-list:Ignore">` holding the typed bullet or number and `&nbsp;` padding. The function detects such paragraphs by `mso-list` in `style` (excluding `mso-list:none`), takes the level from `levelN`, decides `ol` when the marker text looks like a number or a letter followed by `.` or `)` and `ul` otherwise, removes the marker span, and builds nested `ul` / `ol` / `li` for consecutive items (a new list starts when an ordinary node intervenes). The fragment is parsed with `DOMParser`, never inserted into the page. The owner's sample (a news text from Word) reached us as plain text with `•` followed by four spaces, so the clipboard may carry no `mso-list` markup at all (plain text, "paste as text", other platforms). The same function therefore also treats a paragraph whose text starts with a bullet glyph (`•`, `·`, `▪`, `◦`, `●`) plus whitespace (including `&nbsp;`) as a bulleted item, and `transformPastedText` applies the same rule to plain text (lines split into paragraphs). Typed numbers follow a stricter rule because `2026. Рік…` must stay text: only a run of at least two consecutive paragraphs (or lines) that match `^\d{1,3}[.)]\s+` with each number exactly one more than the previous becomes an `ol` (with `start` set to the first number); a single numbered paragraph or numbers that do not follow each other stay text. The owner's second sample (`1.    керівник…`, `2.`, `3.`) is exactly this case. Everything else is returned untouched, so lists from browsers or Google Docs keep the default path. The resulting `li > p` is then cleaned by the server rule of decision 5 on save. Alternative: handle it in the server sanitizer — rejected, by then Word's `mso-list` markup is already stripped by the allow-list and the bullet text is indistinguishable from real text.
+
+## Risks / Trade-offs
+
+- [The Word clipboard markup varies by version and platform (Windows, macOS, Word online)] → the detection relies on the stable `mso-list` style and falls back to the default paste when a paragraph does not match; the e2e test pastes the documented Word shape, and the owner supplies a real `.docx` sample for a manual check.
+
+- [Themes may style `li > p` and rely on it] → `grep` of `themes/*` CSS found nothing for `li > p` in the core; new values simply render as plain `li` text, and earlier values keep the old markup.
+
+- [Clipboard API needs a secure context] → the `execCommand` fallback; both paths are covered by the e2e test on `localhost`.
+- [Replacing the "Heading" button breaks the existing e2e step] → update `e2e/admin-content-nodes.spec.js` in the same task.
+- [Exposing the numeric `id` to the client] → admin-only page behind the same authorization as the form; `id` is not accepted from requests.
