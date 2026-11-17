@@ -13,7 +13,7 @@ The package was developed change by change with [OpenSpec](https://github.com/Fi
 - To learn why something is the way it is, find the capability in `openspec/specs/`, then search the archive for the changes that touched it (`grep -rl "<capability>" openspec/changes/archive`).
 - The topic pages in [docs/](README.md) describe how the code works today; this history explains how it came to be. Some archived changes were made before the code became a package and mention the application's own paths and commands (`App\…`, `docker compose exec app`, browser tests); they are kept as written, and the early ones are written in Ukrainian.
 
-## Archived changes (134)
+## Archived changes (135)
 
 | Date | Change | Why |
 |------|--------|-----|
@@ -138,6 +138,7 @@ The package was developed change by change with [OpenSpec](https://github.com/Fi
 | 2026-11-17 | [home-preloader](../openspec/changes/archive/2026-11-17-home-preloader/proposal.md) | The old site (kultura-poltava.gov.ua) opens its home page with an animated preloader: a diamond grid of photos, a slogan, a growing divider and the site motto. |
 | 2026-11-17 | [legacy-import-type-filter-add-only](../openspec/changes/archive/2026-11-17-legacy-import-type-filter-add-only/proposal.md) | `legacy:import` always walks the whole legacy site and rewrites every node that already exists on the new site, so editors' later changes are lost on a re-run, and there is no way to bring over one content type (for example `news`) on its own. |
 | 2026-11-17 | [media-metadata-and-usages-respect-access](../openspec/changes/archive/2026-11-17-media-metadata-and-usages-respect-access/proposal.md) | An auth audit found two admin-panel leaks around the media library, both confirmed by throwaway probes. |
+| 2026-11-17 | [package-docs-and-history](../openspec/changes/archive/2026-11-17-package-docs-and-history/proposal.md) | A package is only usable if a stranger can install, configure and extend it from its documentation, and the maintainers can see why it is built the way it is. |
 | 2026-11-17 | [package-frontend-dist-and-root-view](../openspec/changes/archive/2026-11-17-package-frontend-dist-and-root-view/proposal.md) | The admin panel is React + Inertia + Tailwind built with Vite. |
 | 2026-11-17 | [package-migrations-and-installer](../openspec/changes/archive/2026-11-17-package-migrations-and-installer/proposal.md) | The package must create its database schema in a host that already has its own `users` table, and a first administrator must be set up without writing a seeder by hand. |
 | 2026-11-17 | [package-scaffold-and-namespace](../openspec/changes/archive/2026-11-17-package-scaffold-and-namespace/proposal.md) | The CMS is a complete Laravel application (`App\`, 400 files reference that namespace), so it cannot be installed into another project. |
