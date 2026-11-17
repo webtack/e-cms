@@ -1,0 +1,1 @@
+import{B as e}from"./BrandLogo-CHHxm0wN.js";import{t}from"./app-C_8FhDFg.js";var n=t();function r({legend:t,className:r,children:i,...a}){return(0,n.jsxs)(`fieldset`,{className:e(`min-w-0 space-y-2 rounded-md border p-4 bg-card`,r),...a,children:[(0,n.jsx)(`legend`,{className:`px-1 text-sm font-medium -mb-1`,children:t}),i]})}export{r as t};
