@@ -9,6 +9,11 @@
         "admin"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Ruslan Bilyshko"
+        }
+    ],
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.5",
