@@ -2,36 +2,36 @@
 
 ## Why
 
-У записах потрібне поле для відео з YouTube: редактор вставляє посилання і отримує з YouTube Data API заголовок, опис і скрін, а потім може їх відредагувати. Усі наявні типи мають одне скалярне значення, тож складене значення (посилання плюс дані з API) потребує першого використання колонки `options`, яку мають усі таблиці значень, але яку досі ніхто не читає й не пише.
+Records need a field for a YouTube video: the editor pastes a link and receives the title, the description and the screenshot from the YouTube Data API, and then can edit them. All existing types have one scalar value, so a composed value (the link plus the data from the API) requires the first use of the column `options`, which all value tables have but which nobody reads or writes yet.
 
 ## What Changes
 
-- Новий тип значення `youtube`: `value` = повне посилання на відео, як його ввели (разом з таймкодом `t` та іншими параметрами), у `content_values_string`; ідентифікатор відео `video_id`, заголовок, опис і скрін лежать в `options` (JSON). Нових таблиць немає.
-- Посилання на Shorts (`youtube.com/shorts/{id}`) перетворюється на звичайне `https://www.youtube.com/watch?v={id}` (YouTube відтворює Shorts за `watch?v=`), і вже з нього читаються дані з API. Інші форми (`youtu.be/`, `embed/`, `live/`, `m.youtube.com`, `youtube-nocookie.com`) зберігаються як введено, ідентифікатор для API з них лише витягується.
-- Скрін зберігається як файл у медіатеці (профіль `image`), в `options` лежить `{uuid}.{ext}` файлу. Файл відстежується в `media_relations`, тому не вважається вільним і не видаляється `files:prune`.
-- Мінімальне розширення спільного механізму: тип може віддавати поряд зі значенням `options` і збирати складене значення назад. `ContentValueWriter` пише `options`, `ContentValueReader` їх читає. Типи без цієї можливості працюють як раніше.
-- Окремий запит адмінки «отримати дані за посиланням»: читає YouTube Data API v3, завантажує найбільший доступний скрін у медіатеку й повертає заголовок, опис і скрін. Запис він не змінює. Сам запис лише зберігає те, що надіслала форма, і в API не ходить.
-- Якщо відео недоступне (невірне посилання, відео немає або приватне, ключ відсутній, API не відповідає чи вичерпано квоту), запит нічого не створює, а біля поля показується відповідне повідомлення.
-- Віджет у формі запису: список карток відео (скрін, заголовок-посилання на відео, що відкривається в новій вкладці, опис) з кнопками додавання, редагування й видалення. Додавання й редагування відбуваються в модальному вікні: поле посилання з кнопкою «Отримати дані», редагований заголовок, редагований опис і блок зі скріном (прев'ю, заміна іншим зображенням, видалення).
-- Ключ API береться з `config('services.youtube.key')` (`YOUTUBE_API_KEY` у `.env`, уже визначений).
-- Підтримуються множинні значення за загальними правилами. Переклади не плануються.
+- A new value type `youtube`: `value` = the full link to the video, as it was entered (together with the timecode `t` and other parameters), in `content_values_string`; the video identifier `video_id`, the title, the description and the screenshot lie in `options` (JSON). There are no new tables.
+- A link to Shorts (`youtube.com/shorts/{id}`) is turned into the ordinary `https://www.youtube.com/watch?v={id}` (YouTube plays Shorts by `watch?v=`), and the data from the API is read from it. Other forms (`youtu.be/`, `embed/`, `live/`, `m.youtube.com`, `youtube-nocookie.com`) are stored as entered; the identifier for the API is only extracted from them.
+- The screenshot is stored as a file in the media library (the profile `image`), in `options` lies the `{uuid}.{ext}` of the file. The file is tracked in `media_relations`, so it is not considered free and is not removed by `files:prune`.
+- A minimal extension of the shared mechanism: a type can give, alongside the value, `options` and collect a composed value back. `ContentValueWriter` writes `options`, `ContentValueReader` reads them. Types without this capability work as before.
+- A separate request of the admin «get data by link»: it reads the YouTube Data API v3, downloads the largest available screenshot to the media library and returns the title, the description and the screenshot. It does not change the record. The record itself only saves what the form sent, and does not go to the API.
+- If the video is unavailable (an invalid link, the video does not exist or is private, the key is missing, the API does not respond or the quota is exhausted), the request creates nothing, and the corresponding message is shown next to the field.
+- The widget in the record form: a list of cards of videos (screenshot, title-link to the video that opens in a new tab, description) with the buttons for adding, editing and deleting. Adding and editing happen in a modal window: the field of the link with the button «Отримати дані», the editable title, the editable description and a block with the screenshot (preview, replacement with another image, deletion).
+- The API key is taken from `config('services.youtube.key')` (`YOUTUBE_API_KEY` in `.env`, already defined).
+- Multiple values are supported by the general rules. Translations are not planned.
 
-Не входить: переклади заголовка й опису, фонове оновлення даних з YouTube, відтворення відео на сайті, відео інших сервісів, кеш відповідей API.
+Not included: translations of the title and the description, background updates of the data from YouTube, playing the video on the site, videos of other services, a cache of the API responses.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `content-values`: новий тип `youtube` (значення + `options`, скрін як файл), запис і читання `options` для типів, що їх використовують, відстеження файлу скріна.
-- `admin-content-nodes`: віджет поля `youtube` у формі запису, запит отримання даних за посиланням із повідомленнями про недоступне відео, показ значення в таблиці записів.
+- `content-values`: the new type `youtube` (value + `options`, the screenshot as a file), writing and reading `options` for the types that use them, tracking of the screenshot file.
+- `admin-content-nodes`: the widget of the field `youtube` in the record form, the request to get the data by link with the messages about an unavailable video, the display of the value in the table of records.
 
 ## Impact
 
-- Код (PHP): новий `App\Content\FieldTypes\YoutubeType`, новий контракт складеного значення (`FieldType` залишається без змін), `ContentValueWriter` і `ContentValueReader` (запис і читання `options`), сервіс клієнта YouTube API і завантаження скріна, контролер запиту «отримати дані» і маршрут в `routes/web.php`, `ContentNodeController` (форма: дані файлу скріна; таблиця: показ значення), `FileController`/`UploadRules`/`StoreFileRequest` (завантаження власного скріна для поля `youtube`), рядки в `config/content.php` (`field_types`) і `config/services.php` (`youtube.key`).
-- Код (фронтенд): `Components/Admin/ContentNodes/NodeFieldInput.tsx` + новий компонент `YoutubeField` (список карток) і `YoutubeFieldDialog` (модальне вікно на `ui/dialog`), переклади `lang/*.json`. Нових npm-залежностей немає.
-- Тести: Feature-тести типу, запису/читання `options`, файлового зв'язку скріна й запиту (з підміною HTTP); e2e `admin-content-nodes` (і `admin-content-fields` для вибору типу).
-- Документація: оновлюються `docs/content-values.md` (реєстр типів, розділ про складені значення й `options`), `docs/admin-content-nodes.md` (віджет і запит), `docs/admin-content-fields.md` (тип у списку), `docs/file-storage.md` (скрін як файл поля), `docs/e2e-testing.md` (сценарії та таблиці). `docs/README.md` лишається чинним, нових файлів немає.
+- Code (PHP): the new `App\Content\FieldTypes\YoutubeType`, a new contract of a composed value (`FieldType` remains unchanged), `ContentValueWriter` and `ContentValueReader` (writing and reading `options`), a service of the YouTube API client and the download of the screenshot, the controller of the request «get data» and the route in `routes/web.php`, `ContentNodeController` (the form: the data of the screenshot file; the table: the display of the value), `FileController`/`UploadRules`/`StoreFileRequest` (upload of an own screenshot for the field `youtube`), the lines in `config/content.php` (`field_types`) and `config/services.php` (`youtube.key`).
+- Code (frontend): `Components/Admin/ContentNodes/NodeFieldInput.tsx` + a new component `YoutubeField` (the list of cards) and `YoutubeFieldDialog` (a modal window on `ui/dialog`), translations `lang/*.json`. There are no new npm dependencies.
+- Tests: Feature tests of the type, writing/reading `options`, the file link of the screenshot and the request (with HTTP substitution); e2e `admin-content-nodes` (and `admin-content-fields` for choosing the type).
+- Documentation: update `docs/content-values.md` (the registry of types, the section on composed values and `options`), `docs/admin-content-nodes.md` (the widget and the request), `docs/admin-content-fields.md` (the type in the list), `docs/file-storage.md` (the screenshot as a file of the field), `docs/e2e-testing.md` (scenarios and tables). `docs/README.md` remains valid, there are no new files.

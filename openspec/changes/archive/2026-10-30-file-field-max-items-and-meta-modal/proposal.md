@@ -2,35 +2,35 @@
 
 ## Why
 
-Множинне поле зараз не має верхньої межі кількості елементів: редактор може додати скільки завгодно значень, а адміністратор не може обмежити, наприклад, галерею п'ятьма зображеннями. Окремо: поля «Назва» й «Опис» під кожним файлом (додані в `edit-file-metadata-in-node-form`) надто роздувають блок одного файлу, особливо у множинному полі з багатьма рядками.
+A multiple field currently has no upper limit on the number of items: the editor can add as many values as they like, and the administrator cannot limit, for example, a gallery to five images. Separately: the "Name" and "Description" fields under each file (added in `edit-file-metadata-in-node-form`) bloat the block of one file too much, especially in a multiple field with many rows.
 
 ## What Changes
 
-- Нове налаштування поля **«Максимальна кількість елементів»** (`max_items`) для множинних полів будь-якого типу: ціле число ≥ 0, за замовчуванням `0` — без обмеження. Задається у формах створення й редагування поля (лише коли увімкнено «Множинне»); для немножинного поля ігнорується й не зберігається (скидається в `0`).
-- Сервер відхиляє запис, у якому множинне поле має більше елементів, ніж `max_items` (помилка біля поля), незалежно від форми.
-- Форма запису дотримується ліміту: коли досягнуто ліміт, «Додати елемент» прихований/вимкнений, а зона множинного завантаження файлів недоступна й показує підказку; файли пакета понад вільні місця не завантажуються, а причина показується. Біля поля видно лічильник «n / max», якщо ліміт заданий.
-- Поля «Назва» й «Опис» файлу переїжджають із блоку файлу в **модальне вікно**: у блоці файлу на місці колишнього внутрішнього хрестика (у рядку множинного поля) з'являється кнопка «Редагувати дані файлу»; в одиночному полі вона стоїть поруч із кнопкою видалення файлу. Вікно має кнопки «Готово» (застосовує зміни до стану форми — зберігаються разом із записом, як і раніше) і «Скасувати» (відкидає). Контракт збереження (`file_meta`) не змінюється.
+- A new field setting **"Maximum number of items"** (`max_items`) for multiple fields of any type: an integer ≥ 0, by default `0` — no limit. It is set in the create and edit field forms (only when "Multiple" is enabled); for a non-multiple field it is ignored and not stored (reset to `0`).
+- The server rejects a record in which a multiple field has more items than `max_items` (an error next to the field), regardless of the form.
+- The record form respects the limit: when the limit is reached, "Add item" is hidden/disabled, and the zone of multiple file upload is unavailable and shows a hint; the files of a batch beyond the free places are not uploaded, and the reason is shown. Next to the field a counter "n / max" is visible if a limit is set.
+- The fields "Name" and "Description" of a file move from the file block to a **modal window**: in the file block, in place of the former inner × (in a row of a multiple field) a button "Edit file data" appears; in a single field it stands next to the button for removing the file. The window has the buttons "Done" (applies the changes to the state of the form — they are saved together with the record, as before) and "Cancel" (discards). The saving contract (`file_meta`) does not change.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `admin-content-fields`: налаштування «Максимальна кількість елементів» у формах поля й відповіді `index`/форми.
-- `content-values`: валідація множинного поля враховує `max_items`.
-- `admin-content-nodes`: ліміт у формі запису (список, множинне завантаження); назва й опис файлу редагуються в модальному вікні.
+- `admin-content-fields`: the setting "Maximum number of items" in the field forms and in the response of `index`/the form.
+- `content-values`: the validation of a multiple field takes `max_items` into account.
+- `admin-content-nodes`: the limit in the record form (the list, multiple upload); the name and the description of a file are edited in the modal window.
 
 ## Impact
 
-- Код: міграція `add_max_items_to_content_fields_table`; `ContentField`, `StoreContentFieldRequest`/`UpdateContentFieldRequest`, `ContentFieldController`, `ContentValueWriter`, `ContentNodeController::formFields()`; фронтенд — `ContentFieldForm.tsx`, `ContentNodeForm.tsx`, `NodeFieldList.tsx`, `NodeFieldInput.tsx`, `types.ts`, новий `ui/dialog.tsx`, переклади `lang/uk.json` / `lang/en.json`.
-- Документація (оновлення): `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/e2e-testing.md`; за потреби `docs/file-storage.md` (якщо `FileUpload` змінюється).
-- Тести: Feature (поля, записи), e2e `admin-content-fields.spec.js`, `admin-content-nodes.spec.js`.
+- Code: the migration `add_max_items_to_content_fields_table`; `ContentField`, `StoreContentFieldRequest`/`UpdateContentFieldRequest`, `ContentFieldController`, `ContentValueWriter`, `ContentNodeController::formFields()`; frontend — `ContentFieldForm.tsx`, `ContentNodeForm.tsx`, `NodeFieldList.tsx`, `NodeFieldInput.tsx`, `types.ts`, the new `ui/dialog.tsx`, translations `lang/uk.json` / `lang/en.json`.
+- Documentation (updates): `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/e2e-testing.md`; if needed `docs/file-storage.md` (if `FileUpload` changes).
+- Tests: Feature (fields, records), e2e `admin-content-fields.spec.js`, `admin-content-nodes.spec.js`.
 
-## Припущення
+## Assumptions
 
-- Ліміт зберігається окремим стовпцем `content_fields.max_items`, а не в `settings`: це загальна властивість множинності (як `is_multiple`), а не специфічне налаштування типу значення. `settings` лишається місцем специфічних налаштувань будь-якого поля; те, що зараз його приймають лише файлові типи, — поточний стан, а не обмеження задуму, і ця зміна його не закріплює.
-- Якщо ліміт зменшили нижче кількості вже збережених елементів, наявні записи не змінюються, але їх неможливо зберегти, доки елементів не стане в межах ліміту.
-- Системні поля не множинні, тож блокування `max_items` для них не потрібне.
+- The limit is stored in a separate column `content_fields.max_items`, not in `settings`: it is a general property of multiplicity (like `is_multiple`), not a specific setting of a value type. `settings` remains the place of specific settings of any field; the fact that currently only the file types accept it is the current state, not a restriction of the design, and this change does not fix it.
+- If the limit is reduced below the number of already stored items, the existing records do not change, but they cannot be saved until the number of items is within the limit.
+- System fields are not multiple, so blocking `max_items` for them is not needed.

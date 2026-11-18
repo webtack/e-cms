@@ -2,26 +2,26 @@
 
 ## Context
 
-Усі чотири сторінки — Inertia-сторінки з `AdminLayout`; кожна вже отримує `type` (ключ і назва). Розмітка заголовків повторюється на сторінках, а посилання «← Типи контенту» є лише в `Pages/Admin/ContentFields/Index.tsx`. Хлібні крихти будуються з URL у `navigation.ts` і не змінюються. Опис компонентів: `docs/admin-content-types.md`, `docs/admin-content-fields.md`.
+All four pages are Inertia pages with `AdminLayout`; each already receives `type` (the key and the name). The markup of the headers is repeated on the pages, and the link "← Content types" exists only in `Pages/Admin/ContentFields/Index.tsx`. Breadcrumbs are built from the URL in `navigation.ts` and do not change. Description of the components: `docs/admin-content-types.md`, `docs/admin-content-fields.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Один компонент меню, що використовується всіма сторінками розділу.
-- Без змін на бекенді.
+- One menu component used by all pages of the section.
+- No changes on the backend.
 
 **Non-Goals:**
-- Меню для видів `page`/`block` і для сторінки створення типу.
-- Нові розділи (вузли тощо) — пункти додаються пізніше в тому ж компоненті.
+- A menu for the kinds `page`/`block` and for the type creation page.
+- New sections (nodes, etc.) — items are added later in the same component.
 
 ## Decisions
 
-- **Компонент `ContentTypeNav`** (`Components/Admin/ContentTypes/ContentTypeNav.tsx`) з пропсами `typeKey` і `active: 'settings' | 'fields'`; пункти — `Link` Inertia з `aria-current="page"` на активному. Пропс `active` явний, а не з `usePage().url`: простіше тестувати й не залежить від форми URL (форми поля мають ті самі пункти, що й список).
-- **Спільна обгортка**: компонент також рендерить посилання «← Типи контенту» над меню, тож сторінки не дублюють його. Alternatives: Inertia nested layout — відкинуто, бо потрібні дані `type` на кожній сторінці й так приходять у пропсах, а вкладений layout ускладнив би персистентність без користі.
-- **Стилі**: горизонтальний рядок із нижньою межею, активний пункт з підкресленням (токени Tailwind теми); нових `ui`-примітивів не додаємо.
-- **Переклади**: ключі «Settings» і «Fields» (останній уже є) додаються в `lang/*.json`, якщо відсутні.
+- **The component `ContentTypeNav`** (`Components/Admin/ContentTypes/ContentTypeNav.tsx`) with the props `typeKey` and `active: 'settings' | 'fields'`; the items — Inertia `Link` with `aria-current="page"` on the active one. The prop `active` is explicit, not from `usePage().url`: it is simpler to test and does not depend on the URL form (the field forms have the same items as the list).
+- **A shared wrapper**: the component also renders the link "← Content types" above the menu, so the pages do not duplicate it. Alternatives: an Inertia nested layout — rejected, because the `type` data is already in the props of each page, and a nested layout would complicate persistence without benefit.
+- **Styles**: a horizontal row with a bottom border, the active item with an underline (Tailwind theme tokens); no new `ui` primitives are added.
+- **Translations**: the keys "Settings" and "Fields" (the latter already exists) are added to `lang/*.json` if missing.
 
 ## Risks / Trade-offs
 
-- [Активний пункт задається вручну на кожній сторінці] → мала кількість сторінок; e2e перевіряє `aria-current` на кожній.
-- [Зайва висота на формах] → меню компактне, один рядок.
+- [The active item is set manually on each page] → a small number of pages; e2e checks `aria-current` on each.
+- [Extra height on the forms] → the menu is compact, one row.

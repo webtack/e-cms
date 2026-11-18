@@ -3,24 +3,24 @@
 ## ADDED Requirements
 
 ### Requirement: Зв'язки зображень форматованого тексту
-Система SHALL вести зв'язки файлів і для зображень у полі `richtext` у тій самій транзакції, що й запис значення: після запису набір зв'язків власника для ролі (ключ поля) і мови SHALL збігатися з набором файлів, на які посилаються зображення збереженого значення. Видалення зображення з тексту SHALL прибирати зв'язок, а файл лишається у сховищі. Помилка запису SHALL не залишати частково оновлених зв'язків.
+The system SHALL maintain the links of files for the images in the field `richtext` in the same transaction as the record of the value: after a write, the set of links of the owner for the role (the field key) and the language SHALL match the set of files referenced by the images of the saved value. Removing an image from the text SHALL remove the link, and the file remains in the storage. A write error SHALL NOT leave partially updated links.
 
-#### Scenario: Прив'язка
-- **WHEN** у полі `richtext` запису зберігається значення із двома різними зображеннями
-- **THEN** існують два зв'язки цього запису з роллю, що дорівнює ключу поля
+#### Scenario: Binding
+- **WHEN** a value with two different images is saved in the field `richtext` of a record
+- **THEN** there are two links of this record with the role equal to the field key
 
-#### Scenario: Те саме зображення двічі
-- **WHEN** те саме зображення вставлено в текст двічі
-- **THEN** існує один зв'язок
+#### Scenario: The same image twice
+- **WHEN** the same image is inserted into the text twice
+- **THEN** there is one link
 
-#### Scenario: Видалення зображення з тексту
-- **WHEN** запис зберігають після видалення зображення з тексту
-- **THEN** зв'язок із цим файлом видалено, файл і його запис лишилися
+#### Scenario: Removing an image from the text
+- **WHEN** the record is saved after an image was removed from the text
+- **THEN** the link with this file is removed, the file and its record remain
 
-#### Scenario: Окремі мови
-- **WHEN** зображення вставлено в переклад `uk`, а в основній мові його немає
-- **THEN** зв'язок існує лише для мови `uk`
+#### Scenario: Separate languages
+- **WHEN** an image is inserted into the translation `uk`, and it is not in the main language
+- **THEN** the link exists only for the language `uk`
 
-#### Scenario: Видалення запису чи поля
-- **WHEN** видаляється запис або поле `richtext` із зображеннями
-- **THEN** зв'язки прибрано, файли лишилися у сховищі
+#### Scenario: Deleting a record or a field
+- **WHEN** a record or a field `richtext` with images is deleted
+- **THEN** the links are removed, the files remain in the storage

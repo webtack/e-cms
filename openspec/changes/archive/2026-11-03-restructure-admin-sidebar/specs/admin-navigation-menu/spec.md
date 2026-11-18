@@ -2,74 +2,74 @@
 
 ## Purpose
 
-Меню адміна, яке налаштовує адміністратор і яке бачать усі користувачі: дерево з двох рівнів із посиланнями на типи та групами. Дає змогу винести потрібні типи в sidebar без заходу в розділи керування.
+The admin menu, which the administrator configures and which all users see: a tree of two levels with links to types and to groups. It makes it possible to bring the needed types into the sidebar without going into the sections of management.
 
 ## ADDED Requirements
 
 ### Requirement: Структура меню адміна
-Меню SHALL складатися з пунктів двох видів: посилання на тип і група. Група SHALL мати перекладну назву й містити посилання на типи; групи в групі SHALL NOT існувати. Посилання на тип SHALL стояти або в корені, або в групі. Один тип SHALL міститися в меню не більше одного разу. Порядок пунктів у корені й у групі SHALL задавати адміністратор.
+The menu SHALL consist of items of two kinds: a link to a type and a group. A group SHALL have a translatable name and contain links to types; groups within a group SHALL NOT exist. A link to a type SHALL stand either in the root or in a group. A single type SHALL be in the menu at most once. The order of the items in the root and in a group SHALL be set by the administrator.
 
-#### Scenario: Корінь і група
-- **WHEN** адміністратор додає в корінь посилання на тип A та групу з посиланнями на типи B і C
-- **THEN** меню зберігає цю структуру й порядок
+#### Scenario: Root and group
+- **WHEN** the administrator adds to the root a link to the type A and a group with links to the types B and C
+- **THEN** the menu keeps this structure and order
 
-#### Scenario: Вкладена група заборонена
-- **WHEN** адміністратор намагається помістити групу всередину іншої групи
-- **THEN** дія недоступна або відхиляється помилкою, меню не змінюється
+#### Scenario: Nested group is forbidden
+- **WHEN** the administrator tries to place a group inside another group
+- **THEN** the action is unavailable or is rejected with an error, the menu does not change
 
-#### Scenario: Повторне додавання типу
-- **WHEN** адміністратор додає тип, що вже є в меню
-- **THEN** сервер відхиляє дію помилкою валідації, меню не змінюється
+#### Scenario: Repeated adding of a type
+- **WHEN** the administrator adds a type that is already in the menu
+- **THEN** the server rejects the action with a validation error, the menu does not change
 
 ### Requirement: Сторінка налаштування меню
-Система SHALL надавати сторінку `/admin/settings/navigation` для налаштування меню: додавання, видалення, перейменування груп, додавання й видалення посилань на типи, зміна порядку та переміщення типу між коренем і групою. Сторінка й усі її запити SHALL вимагати права `settings`; без нього відповідь 403. Назва групи SHALL бути перекладною (значення за мовою, редагується базова мова); порожня назва SHALL відхилятися. Сторінка SHALL бути досяжною за посиланням унизу sidebar і зі сторінки Site.
+The system SHALL provide the page `/admin/settings/navigation` for configuring the menu: adding, deleting, renaming groups, adding and deleting links to types, changing the order and moving a type between the root and a group. The page and all its requests SHALL require the right `settings`; without it the response is 403. The name of a group SHALL be translatable (the value in the language, the base language is edited); an empty name SHALL be rejected. The page SHALL be reachable by the link at the bottom of the sidebar and from the page Site.
 
-#### Scenario: Створення групи
-- **WHEN** адміністратор із правом `settings` створює групу з назвою «Каталог»
-- **THEN** група зберігається і з'являється в меню
+#### Scenario: Creating a group
+- **WHEN** the administrator with the right `settings` creates a group with the name «Каталог» ("Catalogue")
+- **THEN** the group is saved and appears in the menu
 
-#### Scenario: Порожня назва групи
-- **WHEN** адміністратор зберігає групу з порожньою назвою
-- **THEN** сервер повертає помилку біля поля, групу не збережено
+#### Scenario: Empty name of a group
+- **WHEN** the administrator saves a group with an empty name
+- **THEN** the server returns an error next to the field, the group is not saved
 
-#### Scenario: Без права settings
-- **WHEN** користувач без права `settings` відкриває `/admin/settings/navigation` або надсилає запит на зміну меню
-- **THEN** відповідь 403
+#### Scenario: Without the right settings
+- **WHEN** a user without the right `settings` opens `/admin/settings/navigation` or sends a request to change the menu
+- **THEN** the response is 403
 
-#### Scenario: Видалення групи
-- **WHEN** адміністратор видаляє групу з посиланнями
-- **THEN** група й її посилання видаляються, типи не змінюються
+#### Scenario: Deleting a group
+- **WHEN** the administrator deletes a group with links
+- **THEN** the group and its links are deleted, the types do not change
 
 ### Requirement: Меню адміна в sidebar
-Sidebar SHALL показувати меню адміна всім користувачам під блоком «Обране» окремим блоком із заголовком «Navigation» (мовою інтерфейсу; uk: «Навігація») в тому ж стилі, що й заголовок «Обране»; без видимих пунктів блок і його заголовок SHALL NOT відображатися. Група SHALL бути розкривною, посилання на тип SHALL вести на список записів типу, а іконка SHALL визначатися видом типу (`content`, `page`, `block`), іконка групи — єдина для всіх груп. Назва групи SHALL відображатися мовою поточної локалі зі зверненням до базової мови, якщо перекладу немає. Група з активним пунктом SHALL бути розкритою.
+The sidebar SHALL show the admin menu to all users below the block «Обране» as a separate block with the heading «Navigation» (in the language of the interface; uk: «Навігація») in the same style as the heading «Обране»; without visible items the block and its heading SHALL NOT be displayed. A group SHALL be collapsible, a link to a type SHALL lead to the list of records of the type, and the icon SHALL be defined by the kind of the type (`content`, `page`, `block`); the icon of a group is the same for all groups. The name of a group SHALL be displayed in the language of the current locale, with a fallback to the base language if there is no translation. A group with the active item SHALL be expanded.
 
-#### Scenario: Заголовок блоку
-- **WHEN** у меню є хоча б один видимий пункт
-- **THEN** над ним показано заголовок «Navigation»
+#### Scenario: Heading of the block
+- **WHEN** the menu has at least one visible item
+- **THEN** the heading «Navigation» is shown above it
 
-#### Scenario: Порожнє меню без заголовка
-- **WHEN** жоден пункт меню не видимий користувачу
-- **THEN** блок і заголовок не відображаються
+#### Scenario: Empty menu without a heading
+- **WHEN** no item of the menu is visible to the user
+- **THEN** the block and the heading are not displayed
 
-#### Scenario: Показ меню
-- **WHEN** користувач із доступом до типів A і B відкриває адмінку, а в меню є посилання на A і група з B
-- **THEN** sidebar показує посилання на A і розкривну групу з B
+#### Scenario: Display of the menu
+- **WHEN** a user with access to the types A and B opens the admin, and the menu has a link to A and a group with B
+- **THEN** the sidebar shows the link to A and a collapsible group with B
 
-#### Scenario: Перехід за пунктом групи
-- **WHEN** користувач натискає тип усередині групи
-- **THEN** відкривається список записів типу, пункт активний, а його група розкрита
+#### Scenario: Navigation by an item of a group
+- **WHEN** the user clicks a type inside a group
+- **THEN** the list of records of the type opens, the item is active, and its group is expanded
 
 ### Requirement: Меню адміна відповідає доступам
-Тип SHALL показуватися в меню адміна лише коли рівень доступу користувача до записів цього типу не `none`. Група без видимих типів SHALL ховатися. Зміна доступів або видалення типу SHALL відображатися в меню без дій користувача. Збережена структура меню SHALL NOT змінюватися через те, що тип тимчасово недоступний конкретному користувачеві. Видалення типу SHALL прибирати його посилання з меню.
+A type SHALL be shown in the admin menu only when the user's level of access to the records of this type is not `none`. A group without visible types SHALL be hidden. A change of the access or the deletion of a type SHALL be displayed in the menu without any action of the user. The saved structure of the menu SHALL NOT change because a type is temporarily unavailable to a particular user. Deleting a type SHALL remove its link from the menu.
 
-#### Scenario: Тип без доступу
-- **WHEN** користувач не має доступу до типу, що є в меню
-- **THEN** цього пункту немає в його sidebar, а в інших користувачів він є
+#### Scenario: Type without access
+- **WHEN** a user has no access to a type that is in the menu
+- **THEN** this item is absent from his sidebar, while other users have it
 
-#### Scenario: Порожня група ховається
-- **WHEN** користувач не має доступу до жодного типу групи
-- **THEN** група не відображається
+#### Scenario: Empty group is hidden
+- **WHEN** a user has no access to any type of a group
+- **THEN** the group is not displayed
 
-#### Scenario: Тип видалено
-- **WHEN** тип, на який посилається меню, видаляють
-- **THEN** його пункт зникає з меню, решта структури лишається
+#### Scenario: Type deleted
+- **WHEN** a type referenced by the menu is deleted
+- **THEN** its item disappears from the menu, the rest of the structure remains

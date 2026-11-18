@@ -3,64 +3,64 @@
 ## MODIFIED Requirements
 
 ### Requirement: Бічна навігація
-Оболонка SHALL містити бічну панель з пунктом Dashboard, блоком «Обране» (особисті типи користувача), блоком «Navigation» (меню адміна: посилання на типи й групи, налаштовані адміністратором), Media Library і двома секціями в корені: «Структура» (Content Types, Page Types, Block Types, Taxonomy, Menus) та «Доступ» (Users, Roles, Site), та SHALL підсвічувати пункт, що відповідає поточній адресі. Пункту Pages і розкривного Settings SHALL NOT бути. Кожен пункт секцій SHALL показуватися за тим самим правом, що й раніше (типи — за правом `types` або рівнем `own`/`any` на типі свого виду; Taxonomy, Menus, Users, Roles, Site — за відповідними системними правами); секція без видимих пунктів SHALL ховатися. Знизу sidebar SHALL бути посилання на налаштування меню адміна (`/admin/settings/navigation`), видиме користувачам із правом `settings`. Відступи між групами SHALL бути компактними. Назви пунктів SHALL відображатися мовою інтерфейсу поточного користувача. Content Types SHALL відкривати сторінку списку типів контенту, Page Types — типів сторінок, Block Types — типів блоків, Taxonomy — список словників, Menus — список меню, Users — користувачів, Roles — ролей, Site — сторінку налаштувань сайту `/admin/settings`, а Media Library — медіатеку. Блок «Обране» й меню адміна описані у вимогах `admin-favorites` та `admin-navigation-menu`.
+The shell SHALL contain a side panel with the item Dashboard, the block «Обране» (the personal types of the user), the block «Navigation» (the admin menu: links to types and groups configured by the administrator), Media Library and two sections in the root: «Структура» ("Structure") (Content Types, Page Types, Block Types, Taxonomy, Menus) and «Доступ» ("Access") (Users, Roles, Site), and SHALL highlight the item that matches the current address. There SHALL NOT be an item Pages nor a collapsible Settings. Each item of the sections SHALL be shown by the same right as before (the types — by the right `types` or the level `own`/`any` on a type of their kind; Taxonomy, Menus, Users, Roles, Site — by the corresponding system rights); a section without visible items SHALL be hidden. At the bottom of the sidebar there SHALL be a link to the settings of the admin menu (`/admin/settings/navigation`), visible to the users with the right `settings`. The indents between the groups SHALL be compact. The names of the items SHALL be displayed in the language of the interface of the current user. Content Types SHALL open the page of the list of content types, Page Types — of page types, Block Types — of block types, Taxonomy — the list of vocabularies, Menus — the list of menus, Users — users, Roles — roles, Site — the page of the site settings `/admin/settings`, and Media Library — the media library. The block «Обране» and the admin menu are described in the requirements `admin-favorites` and `admin-navigation-menu`.
 
-#### Scenario: Підсвітка активного пункту
-- **WHEN** користувач перебуває на `/admin/dashboard`
-- **THEN** пункт Dashboard позначено як активний, а решту пунктів — ні
+#### Scenario: Highlighting of the active item
+- **WHEN** the user is on `/admin/dashboard`
+- **THEN** the item Dashboard is marked as active, and the other items are not
 
-#### Scenario: Пункт секції активний
-- **WHEN** користувач відкриває `/admin/taxonomy`
-- **THEN** пункт Taxonomy секції «Структура» підсвічено, а хлібні крихти показують його назву
+#### Scenario: Item of a section is active
+- **WHEN** the user opens `/admin/taxonomy`
+- **THEN** the item Taxonomy of the section «Структура» is highlighted, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Content Types
-- **WHEN** користувач переходить за підпунктом Content Types
-- **THEN** відкривається `/admin/content-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Content Types
+- **WHEN** the user navigates by the subitem Content Types
+- **THEN** `/admin/content-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Page Types
-- **WHEN** користувач переходить за підпунктом Page Types
-- **THEN** відкривається `/admin/page-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Page Types
+- **WHEN** the user navigates by the subitem Page Types
+- **THEN** `/admin/page-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Block Types
-- **WHEN** користувач переходить за підпунктом Block Types
-- **THEN** відкривається `/admin/block-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Block Types
+- **WHEN** the user navigates by the subitem Block Types
+- **THEN** `/admin/block-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Taxonomy
-- **WHEN** користувач переходить за підпунктом Taxonomy
-- **THEN** відкривається `/admin/taxonomy`, пункт позначено як активний (також на сторінках термінів і форм розділу), а хлібні крихти показують його назву
+#### Scenario: Working item Taxonomy
+- **WHEN** the user navigates by the subitem Taxonomy
+- **THEN** `/admin/taxonomy` opens, the item is marked as active (also on the pages of terms and the forms of the section), and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Menus
-- **WHEN** користувач переходить за підпунктом Menus
-- **THEN** відкривається `/admin/menus`, пункт позначено як активний (також на сторінках пунктів меню і форм розділу), а хлібні крихти показують його назву
+#### Scenario: Working item Menus
+- **WHEN** the user navigates by the subitem Menus
+- **THEN** `/admin/menus` opens, the item is marked as active (also on the pages of the items of a menu and the forms of the section), and the breadcrumbs show its name
 
-#### Scenario: Робочі підпункти Users і Roles
-- **WHEN** користувач із відповідним правом переходить за підпунктом Users або Roles
-- **THEN** відкривається `/admin/users` або `/admin/roles`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working subitems Users and Roles
+- **WHEN** a user with the corresponding right navigates by the subitem Users or Roles
+- **THEN** `/admin/users` or `/admin/roles` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Media Library
-- **WHEN** користувач переходить за пунктом Media Library
-- **THEN** відкривається `/admin/media`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Media Library
+- **WHEN** the user navigates by the item Media Library
+- **THEN** `/admin/media` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Settings
-- **WHEN** користувач із правом на налаштування сайту переходить за пунктом Site секції «Доступ»
-- **THEN** відкривається `/admin/settings`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Settings
+- **WHEN** a user with the right to the site settings navigates by the item Site of the section «Доступ»
+- **THEN** `/admin/settings` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Пункти за правами
-- **WHEN** користувач має лише право `taxonomy`
-- **THEN** sidebar містить секцію «Структура» з одним пунктом Taxonomy, а секції «Доступ» немає
+#### Scenario: Items by rights
+- **WHEN** the user has only the right `taxonomy`
+- **THEN** the sidebar contains the section «Структура» with a single item Taxonomy, and there is no section «Доступ»
 
-#### Scenario: Секції без доступних пунктів
-- **WHEN** користувач не має жодного права, що відкриває пункти секцій
-- **THEN** жодна з секцій «Структура» і «Доступ» у sidebar не відображається
+#### Scenario: Sections without available items
+- **WHEN** the user has no right that opens the items of the sections
+- **THEN** neither the section «Структура» nor the section «Доступ» is displayed in the sidebar
 
-#### Scenario: Макетні пункти
-- **WHEN** користувач відкриває адмінку
-- **THEN** у sidebar немає пункту Pages
+#### Scenario: Placeholder items
+- **WHEN** the user opens the admin
+- **THEN** there is no item Pages in the sidebar
 
-#### Scenario: Посилання на налаштування меню
-- **WHEN** користувач із правом `settings` дивиться на низ sidebar
-- **THEN** там є посилання на `/admin/settings/navigation`; без права `settings` його немає
+#### Scenario: Link to the settings of the menu
+- **WHEN** a user with the right `settings` looks at the bottom of the sidebar
+- **THEN** there is a link to `/admin/settings/navigation`; without the right `settings` it is absent
 
-#### Scenario: Назви пунктів українською
-- **WHEN** користувач із мовою `uk` відкриває `/admin/dashboard`
-- **THEN** назви пунктів sidebar відображаються українськими перекладами, а підсвітка активного пункту не змінюється
+#### Scenario: Item names in Ukrainian
+- **WHEN** a user with the language `uk` opens `/admin/dashboard`
+- **THEN** the names of the sidebar items are displayed in Ukrainian translations, and the highlighting of the active item does not change

@@ -3,16 +3,16 @@
 ## ADDED Requirements
 
 ### Requirement: Запуск e2e починається з англійського інтерфейсу адміністратора
-Перед виконанням тестів система SHALL повертати збережену мову облікового запису адміністратора, під яким входять e2e-тести (`ADMIN_EMAIL`), на англійську, незалежно від стану, залишеного попереднім запуском. Система SHALL NOT змінювати мову інших користувачів.
+Before running the tests the system SHALL switch the stored language of the administrator account under which the e2e tests sign in (`ADMIN_EMAIL`) to English, regardless of the state left by the previous run. The system SHALL NOT change the language of other users.
 
-#### Scenario: Попередній запуск зупинено з українською мовою
-- **WHEN** у `users.locale` адміністратора лишилась `uk` після перерваного сценарію, а розробник виконує `npm run test:e2e`
-- **THEN** до першого тесту мова адміністратора стає `en` і тести бачать англійський інтерфейс без ручних дій
+#### Scenario: The previous run was stopped with Ukrainian
+- **WHEN** the administrator's `users.locale` remained `uk` after an interrupted scenario, and the developer runs `npm run test:e2e`
+- **THEN** before the first test the administrator's language becomes `en`, and the tests see the English interface without manual steps
 
-#### Scenario: Мова вже англійська
-- **WHEN** розробник виконує `npm run test:e2e`, а мова адміністратора вже `en`
-- **THEN** скидання не змінює стан і запуск триває як зазвичай
+#### Scenario: The language is already English
+- **WHEN** the developer runs `npm run test:e2e`, and the administrator's language is already `en`
+- **THEN** the reset does not change the state, and the run continues as usual
 
-#### Scenario: Контейнер застосунку недоступний
-- **WHEN** контейнери зупинено і скинути мову неможливо
-- **THEN** запуск завершується зрозумілою помилкою про недоступність застосунку, а не десятками хибних падінь через мову
+#### Scenario: The application container is unavailable
+- **WHEN** the containers are stopped and the language cannot be reset
+- **THEN** the run finishes with a clear error about the unavailability of the application, not with dozens of false failures caused by the language

@@ -3,99 +3,99 @@
 ## MODIFIED Requirements
 
 ### Requirement: Збереження змін типу
-Надсилання форми редагування SHALL оновлювати назву, slug, батьківський тип, опис і налаштування списку записів типу за тими самими правилами, що й створення; унікальність slug SHALL перевірятися з виключенням самого типу. Ключ і вид SHALL НЕ змінюватися, навіть якщо їх передано в запиті. Порожній slug очищає значення. Батьківським SHALL не можна обрати сам тип чи його нащадка. Налаштування списку записів SHALL зберігатися в `settings.list` (`visible`, `search`, `sort`) і оновлювати лише цей ключ, не змінюючи решти ключів `settings`. Ключі в `visible` і `search` SHALL належати полям типу або (лише в `visible`) ключу `title` чи службовим ключам `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; поле сортування — полю типу або службовому ключу з цього переліку, крім `slug`; напрямок — `asc` або `desc`; невідомі ключі SHALL відхилятися помилкою біля секції. Вибір сортування «Дата створення» за зростанням SHALL не зберігати `sort`, а порожній вибір колонок і пошуку — не зберігати відповідних ключів. Форма редагування SHALL НЕ змінювати `settings.public`: цей ключ зберігається лише вкладкою «Відображення», а запит редагування з `settings.public` SHALL відхилятися помилкою валідації. Після успіху користувач SHALL лишитися на формі редагування типу з повідомленням про успіх.
+Submitting the edit form SHALL update the name, the slug, the parent type, the description and the settings of the list of records of the type by the same rules as the creation; the uniqueness of the slug SHALL be checked excluding the type itself. The key and the kind SHALL NOT change, even if they are passed in the request. An empty slug clears the value. A type itself or its descendant SHALL not be chosen as the parent. The settings of the list of records SHALL be saved in `settings.list` (`visible`, `search`, `sort`) and update only this key, without changing the other keys of `settings`. The keys in `visible` and `search` SHALL belong to the fields of the type or (only in `visible`) to the key `title` or the service keys `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; the sort field — to a field of the type or a service key from this list, except `slug`; the direction — `asc` or `desc`; unknown keys SHALL be rejected with an error next to the section. The choice of sorting «Дата створення» ("Creation date") ascending SHALL not save `sort`, and an empty choice of columns and search — does not save the corresponding keys. The edit form SHALL NOT change `settings.public`: this key is saved only by the tab «Відображення», and an edit request with `settings.public` SHALL be rejected with a validation error. After success the user SHALL stay on the edit form of the type with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву й slug наявного типу на вільні допустимі значення та зберігає
-- **THEN** зміни збережено, ключ і вид не змінились, користувач лишився на формі редагування типу з повідомленням про успіх
+#### Scenario: Successful change
+- **WHEN** the user changes the name and the slug of an existing type to free permitted values and saves
+- **THEN** the changes are saved, the key and the kind did not change, and the user stayed on the edit form of the type with a success message
 
-#### Scenario: Збереження власного slug
-- **WHEN** користувач зберігає форму, не змінюючи slug типу
-- **THEN** помилки унікальності немає
+#### Scenario: Saving one's own slug
+- **WHEN** the user saves the form without changing the slug of the type
+- **THEN** there is no uniqueness error
 
-#### Scenario: Slug іншого типу
-- **WHEN** користувач вводить slug, який уже має інший тип
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another type
+- **WHEN** the user enters a slug that another type already has
+- **THEN** the changes are not saved, an error is shown next to the slug field
 
-#### Scenario: Очищення slug
-- **WHEN** користувач стирає slug і зберігає
-- **THEN** slug типу порожній
+#### Scenario: Clearing the slug
+- **WHEN** the user erases the slug and saves
+- **THEN** the slug of the type is empty
 
-#### Scenario: Ключ у запиті ігнорується
-- **WHEN** у запиті редагування передано інший `key` або `kind`
-- **THEN** ключ і вид типу лишаються без змін
+#### Scenario: Key in the request is ignored
+- **WHEN** the edit request passes a different `key` or `kind`
+- **THEN** the key and the kind of the type remain unchanged
 
-#### Scenario: Цикл у ієрархії
-- **WHEN** батьківським типом обрано сам тип або його нащадка
-- **THEN** зміни не збережено, біля поля батьківського типу показано помилку
+#### Scenario: Cycle in the hierarchy
+- **WHEN** the type itself or its descendant is chosen as the parent
+- **THEN** the changes are not saved, an error is shown next to the field of the parent type
 
-#### Scenario: Збереження колонок, пошуку й сортування
-- **WHEN** користувач залишає `title` першою й вибирає колонки `price`, стан, `is_active`, `created_at`, `unpublished_at` у цьому порядку, пошук за `title`, сортування «Дата оновлення» за спаданням і зберігає
-- **THEN** `settings.list` типу — `visible: ["title", "price", "status", "is_active", "created_at", "unpublished_at"]`, `search: ["title"]`, `sort: {field: "updated_at", direction: "desc"}`, а список записів показує ці колонки й порядок
+#### Scenario: Saving columns, search and sorting
+- **WHEN** the user leaves `title` first, chooses the columns `price`, state, `is_active`, `created_at`, `unpublished_at` in this order, the search by `title`, the sorting «Дата оновлення» ("Update date") descending, and saves
+- **THEN** `settings.list` of the type is `visible: ["title", "price", "status", "is_active", "created_at", "unpublished_at"]`, `search: ["title"]`, `sort: {field: "updated_at", direction: "desc"}`, and the list of records shows these columns and this order
 
-#### Scenario: Позиція title зберігається
-- **WHEN** користувач ставить `title` на другу позицію після `price` і зберігає
-- **THEN** `settings.list.visible` починається з `["price", "title"]`
+#### Scenario: Position of title is kept
+- **WHEN** the user puts `title` on the second position after `price` and saves
+- **THEN** `settings.list.visible` starts with `["price", "title"]`
 
-#### Scenario: Сортування за замовчуванням не зберігається
-- **WHEN** користувач лишає сортування «Дата створення» за зростанням і зберігає
-- **THEN** у `settings.list` ключа `sort` немає
+#### Scenario: Default sorting is not saved
+- **WHEN** the user leaves the sorting «Дата створення» ascending and saves
+- **THEN** there is no key `sort` in `settings.list`
 
-#### Scenario: Невідоме поле в налаштуваннях списку
-- **WHEN** запит містить у `visible` ключ, якого немає серед полів типу й службових ключів, або в `sort.field` — `slug`
-- **THEN** зміни не збережено, біля секції «Список записів» показано помилку
+#### Scenario: Unknown field in the settings of the list
+- **WHEN** the request contains in `visible` a key that is absent among the fields of the type and the service keys, or `slug` as `sort.field`
+- **THEN** the changes are not saved, an error is shown next to the section «Список записів» ("List of records")
 
-#### Scenario: Інші ключі settings збережено
-- **WHEN** тип має в `settings` інший ключ (зокрема `public`), а користувач зберігає форму зі зміненим списком
-- **THEN** інший ключ `settings` лишається без змін
+#### Scenario: Other keys of settings are kept
+- **WHEN** the type has another key in `settings` (in particular `public`), and the user saves the form with the changed list
+- **THEN** the other key of `settings` remains unchanged
 
-#### Scenario: Публічні налаштування у формі редагування
-- **WHEN** запит редагування типу містить `settings.public`
-- **THEN** зміни не збережено, відповідь містить помилку валідації, `settings.public` типу не змінено
+#### Scenario: Public settings in the edit form
+- **WHEN** the edit request of the type contains `settings.public`
+- **THEN** the changes are not saved, the response contains a validation error, `settings.public` of the type is not changed
 
-#### Scenario: Типи сторінок і блоків
-- **WHEN** користувач зберігає налаштування списку записів у типі виду `page` або `block`
-- **THEN** вони зберігаються й діють у списку записів того самого розділу за тими самими правилами
+#### Scenario: Page and block types
+- **WHEN** the user saves the settings of the list of records in a type of kind `page` or `block`
+- **THEN** they are saved and take effect in the list of records of the same section by the same rules
 
 ### Requirement: Секція «Публічне відображення» на вкладці «Відображення»
-Вкладка «Відображення» типу SHALL містити блок «Публічне відображення» для всіх видів. Для `block` він містить лише вибір полів сторінки; для `page` — вибір полів сторінки й підблок «Мета-дані»; для `content` — також поля картки, сортування (поле + напрямок), кількість записів на сторінці, перемикач пагінатора й підблок «Мета-дані». Для вибору пропонуються лише додані поля (`is_system = false`); `title`, мета-поля й службові атрибути не пропонуються, бо завжди доступні шаблону. Підблок «Мета-дані» SHALL мати три необов'язкові вибори, кожен — з одного доданого поля або «Не вибрано»: «Заголовок» (поля типу «рядок»), «Опис» (поля типів «текст» і «форматований текст») та «Зображення» (поля типів «зображення» і «відео YouTube»); вибраний ключ SHALL зберігатися в `settings.public.meta` (`title`, `description`, `image`), а невибраний — не зберігатися. Значення полів використовує публічний сайт як мета-дані сторінки (див. вимогу публічного сайту «Мета-дані за замовчуванням»). Блок SHALL відображати збережений стан із значеннями за замовчуванням і зберігатись разом зі значеннями розділу єдиною кнопкою «Зберегти» вкладки, оновлюючи лише ключ `public` налаштувань. Форма налаштувань типу цього блоку НЕ містить.
+The tab «Відображення» of the type SHALL contain the block «Публічне відображення» for all kinds. For `block` it contains only the choice of the fields of the page; for `page` — the choice of the fields of the page and the sub-block «Мета-дані» ("Meta data"); for `content` — also the fields of the card, the sorting (field + direction), the number of records per page, the switch of the paginator and the sub-block «Мета-дані». Only added fields (`is_system = false`) are offered for the choice; `title`, the meta fields and service attributes are not offered, because they are always available to the template. The sub-block «Мета-дані» SHALL have three optional choices, each — with one added field or «Не вибрано» ("Not selected"): «Заголовок» ("Heading") (fields of the type «рядок» ("string")), «Опис» ("Description") (fields of the types «текст» ("text") and «форматований текст» ("formatted text")) and «Зображення» ("Image") (fields of the types «зображення» ("image") and «відео YouTube»); the chosen key SHALL be saved in `settings.public.meta` (`title`, `description`, `image`), and an unselected one — is not saved. The values of the fields are used by the public site as the metadata of the page (see the requirement of the public site «Мета-дані за замовчуванням» — "Default metadata"). The block SHALL show the saved state with the default values and SHALL be saved together with the values of the section by the single button «Зберегти» of the tab, updating only the key `public` of the settings. The settings form of the type does NOT contain this block.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** відкрито вкладку «Відображення» типу `content` без публічних налаштувань
-- **THEN** перемикач «Усі додані поля» для сторінки ввімкнений, картка без доданих полів, сортування «Дата публікації» за спаданням, кількість «0» (усі)
+#### Scenario: Default values
+- **WHEN** the tab «Відображення» of the type `content` without public settings is opened
+- **THEN** the switch «Усі додані поля» ("All added fields") for the page is on, the card has no added fields, the sorting is «Дата публікації» ("Publication date") descending, the number is «0» (all)
 
-#### Scenario: Явний вибір полів сторінки
-- **WHEN** адміністратор вимикає «Усі додані поля», позначає `price` і зберігає
-- **THEN** після повторного відкриття позначено лише `price`, а нове поле типу не з'являється серед позначених
+#### Scenario: Explicit choice of the fields of the page
+- **WHEN** the administrator turns off «Усі додані поля», marks `price` and saves
+- **THEN** after reopening only `price` is marked, and a new field of the type does not appear among the marked ones
 
-#### Scenario: Повернення до «усіх»
-- **WHEN** адміністратор вмикає «Усі додані поля» і зберігає
-- **THEN** ключ `page_fields` не зберігається, нове поле автоматично входить до сторінки
+#### Scenario: Returning to «all»
+- **WHEN** the administrator turns on «Усі додані поля» and saves
+- **THEN** the key `page_fields` is not saved, and a new field automatically enters the page
 
-#### Scenario: Інші ключі не затираються
-- **WHEN** вкладка зберігається зі зміненими публічними налаштуваннями
-- **THEN** `settings.list` і інші ключі `settings` лишаються без змін
+#### Scenario: Other keys are not overwritten
+- **WHEN** the tab is saved with changed public settings
+- **THEN** `settings.list` and the other keys of `settings` remain unchanged
 
-#### Scenario: Вибір мета-полів
-- **WHEN** адміністратор типу `content` обирає для «Заголовок» поле `headline`, для «Опис» — `summary`, для «Зображення» — `cover` і зберігає
-- **THEN** після повторного відкриття вибрано ті самі поля, а `settings.public.meta` має ключі `title`, `description`, `image`
+#### Scenario: Choice of meta fields
+- **WHEN** the administrator of a type `content` chooses the field `headline` for «Заголовок», `summary` for «Опис», `cover` for «Зображення» and saves
+- **THEN** after reopening the same fields are selected, and `settings.public.meta` has the keys `title`, `description`, `image`
 
-#### Scenario: Допустимі поля для кожного вибору
-- **WHEN** адміністратор відкриває вибір «Заголовок», «Опис» чи «Зображення»
-- **THEN** у «Заголовок» є лише поля типу «рядок», в «Опис» — «текст» і «форматований текст», в «Зображення» — «зображення» і «відео YouTube»
+#### Scenario: Permitted fields for each choice
+- **WHEN** the administrator opens the choice «Заголовок», «Опис» or «Зображення»
+- **THEN** «Заголовок» has only fields of the type «рядок», «Опис» — «текст» and «форматований текст», «Зображення» — «зображення» and «відео YouTube»
 
-#### Scenario: Недопустиме поле
-- **WHEN** запит зберігає `settings.public.meta.image` з ключем поля типу «рядок» або неіснуючого поля
-- **THEN** збереження відхилено з помилкою біля блоку, нічого не змінено
+#### Scenario: Invalid field
+- **WHEN** the request saves `settings.public.meta.image` with the key of a field of the type «рядок» or of a non-existent field
+- **THEN** the saving is rejected with an error next to the block, nothing is changed
 
-#### Scenario: Мета-дані без вибору
-- **WHEN** жодне мета-поле не вибрано
-- **THEN** ключ `meta` у `settings.public` не зберігається
+#### Scenario: Meta data without a choice
+- **WHEN** no meta field is chosen
+- **THEN** the key `meta` is not saved in `settings.public`
 
-#### Scenario: Тип блоку
-- **WHEN** адміністратор відкриває вкладку «Відображення» типу виду `block`
-- **THEN** підблоку «Мета-дані» немає, а запит із `settings.public.meta` для такого типу відхиляється
+#### Scenario: Type of block
+- **WHEN** the administrator opens the tab «Відображення» of a type of kind `block`
+- **THEN** there is no sub-block «Мета-дані», and a request with `settings.public.meta` for such a type is rejected
 
-#### Scenario: Форма налаштувань без публічного блоку
-- **WHEN** користувач відкриває форму налаштувань типу будь-якого виду
-- **THEN** блоку «Публічне відображення» на ній немає
+#### Scenario: Settings form without the public block
+- **WHEN** the user opens the settings form of a type of any kind
+- **THEN** there is no block «Публічне відображення» on it

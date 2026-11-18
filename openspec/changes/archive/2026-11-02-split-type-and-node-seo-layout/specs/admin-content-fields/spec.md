@@ -1,80 +1,80 @@
 ## MODIFIED Requirements
 
 ### Requirement: Сторінка полів типу
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/fields`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує поля типу контенту виду `content` із цим ключем, крім полів панелей (`meta_*`, `section_*`; див. вимогу про поля панелей) у таблиці даних у клієнтському режимі: усі поля передаються сторінці, а пошук, сортування, пагінацію й розмір сторінки виконує браузер без запитів до сервера. Таблиця SHALL НЕ мати фільтрів. Без явного сортування поля SHALL йти за вагою (`weight`), а за рівної ваги — за порядком створення. Заголовок сторінки SHALL називати тип, а над таблицею SHALL бути посилання назад до списку типів. Для ключа, якого немає серед типів виду `content` (зокрема ключа типу `page` чи `block`), сторінка SHALL відповідати 404.
+The admin SHALL have the page `/admin/content-types/{key}/fields`, available only to authenticated users with a confirmed email, which shows the fields of a content type of the kind `content` with this key, except the fields of the panels (`meta_*`, `section_*`; see the requirement about the fields of the panels), in a data table in the client mode: all fields are passed to the page, and the search, sorting, pagination and page size are performed by the browser without requests to the server. The table SHALL NOT have filters. Without an explicit sorting the fields SHALL go by the weight (`weight`), and with equal weight — by the order of creation. The heading of the page SHALL name the type, and above the table there SHALL be a link back to the list of types. For a key that is not among the types of the kind `content` (in particular the key of a type `page` or `block`), the page SHALL respond with 404.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/news/fields`
-- **THEN** він бачить таблицю полів типу `news` і заголовок із назвою типу, а в панелі таблиці немає кнопки фільтрів
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types/news/fields`
+- **THEN** they see the table of fields of the type `news` and a heading with the name of the type, and there is no button of filters in the panel of the table
 
-#### Scenario: Порядок за замовчуванням
-- **WHEN** тип має поля `title` (вага 0), `body` (вага 20) і `summary` (вага 10)
-- **THEN** без сортування таблиця показує їх у порядку `title`, `summary`, `body`
+#### Scenario: Default order
+- **WHEN** the type has the fields `title` (weight 0), `body` (weight 20) and `summary` (weight 10)
+- **THEN** without sorting the table shows them in the order `title`, `summary`, `body`
 
-#### Scenario: Пошук у браузері
-- **WHEN** користувач вводить текст у пошук таблиці
-- **THEN** таблиця звужується за назвою чи ключем поля без перезавантаження сторінки й без запиту до сервера
+#### Scenario: Search in the browser
+- **WHEN** the user types text into the search of the table
+- **THEN** the table narrows by the name or the key of the field without reloading the page and without a request to the server
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває сторінку полів для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens the page of fields for the key of a type of the kind `page`
+- **THEN** the server responds with 404
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/news/fields`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/news/fields`
+- **THEN** they are redirected to the login page
 
-#### Scenario: Поля панелей не показані
-- **WHEN** користувач відкриває сторінку полів типу, що має поля `title`, `meta_title`, `section_title` і `body`
-- **THEN** у таблиці є `title` і `body`, а `meta_title` і `section_title` немає
+#### Scenario: Fields of the panels are not shown
+- **WHEN** the user opens the page of fields of a type that has the fields `title`, `meta_title`, `section_title` and `body`
+- **THEN** the table has `title` and `body`, and there is no `meta_title` and `section_title`
 
 ### Requirement: Зміна порядку полів перетягуванням
-Таблиця полів SHALL дозволяти змінювати порядок полів перетягуванням рядків за ручкою в першій клітинці (також клавіатурою). Перетягування SHALL бути доступне, лише коли видно весь список полів у вихідному порядку: без пошуку, без сортування за колонкою, і всі поля вміщуються на одній сторінці; інакше ручки неактивні з підказкою, як зробити перетягування доступним. Після відпускання рядок SHALL одразу стати на нове місце, а новий порядок — зберегтися на сервері: ваги всіх показаних полів типу переписуються послідовно з 0 у новому порядку, і після перезавантаження сторінки порядок лишається таким самим. Якщо збереження не вдалося, порядок у таблиці SHALL повернутися до попереднього, а користувач — побачити помилку. Сервер SHALL приймати лише повний набір ключів: рівно всі показані поля цього типу (без полів панелей), без повторів і чужих ключів. Системне поле `title` теж можна переміщувати.
+The table of fields SHALL allow changing the order of fields by dragging the rows by the handle in the first cell (also with the keyboard). The dragging SHALL be available only when the whole list of fields is visible in the original order: without search, without sorting by a column, and all fields fit on one page; otherwise the handles are inactive with a hint on how to make the dragging available. After release the row SHALL immediately take the new place, and the new order SHALL be saved on the server: the weights of all shown fields of the type are rewritten sequentially from 0 in the new order, and after reloading the page the order remains the same. If the saving fails, the order in the table SHALL return to the previous one, and the user SHALL see an error. The server SHALL accept only the complete set of keys: exactly all shown fields of this type (without the fields of the panels), without repetitions and foreign keys. The system field `title` can also be moved.
 
-#### Scenario: Перетягування
-- **WHEN** користувач перетягує поле `body` над поле `summary`
-- **THEN** `body` стає перед `summary`, і після перезавантаження порядок той самий
+#### Scenario: Dragging
+- **WHEN** the user drags the field `body` above the field `summary`
+- **THEN** `body` goes before `summary`, and after reloading the order is the same
 
-#### Scenario: Ваги після зміни
-- **WHEN** порядок збережено для типу з трьома полями
-- **THEN** їхні ваги — 0, 1, 2 у новому порядку
+#### Scenario: Weights after the change
+- **WHEN** the order is saved for a type with three fields
+- **THEN** their weights are 0, 1, 2 in the new order
 
-#### Scenario: Пошук або сортування активні
-- **WHEN** користувач ввів пошук або відсортував таблицю за колонкою
-- **THEN** ручки перетягування неактивні, змінити порядок неможливо
+#### Scenario: Search or sorting is active
+- **WHEN** the user has entered a search or sorted the table by a column
+- **THEN** the drag handles are inactive, changing the order is impossible
 
-#### Scenario: Збій збереження
-- **WHEN** сервер відхиляє новий порядок
-- **THEN** рядки повертаються на попередні місця, користувач бачить помилку
+#### Scenario: Failure of saving
+- **WHEN** the server rejects the new order
+- **THEN** the rows return to their previous places, the user sees an error
 
-#### Scenario: Неповний або чужий набір ключів
-- **WHEN** на сервер надходить порядок без одного з полів типу, з повтором або з ключем, якого в типі немає
-- **THEN** порядок відхилено, ваги не змінені
+#### Scenario: Incomplete or foreign set of keys
+- **WHEN** the server receives an order without one of the fields of the type, with a repetition, or with a key that the type does not have
+- **THEN** the order is rejected, the weights are not changed
 
-#### Scenario: Тип іншого виду
-- **WHEN** запит зміни порядку надходить для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** a request to change the order arrives for the key of a type of the kind `page`
+- **THEN** the server responds with 404
 
-#### Scenario: Порядок не торкається полів панелей
-- **WHEN** користувач переставляє показані поля типу
-- **THEN** значення полів панелей і їхня наявність не змінюються, ключ поля панелі в запиті відхиляється як чужий
+#### Scenario: Order does not touch the fields of the panels
+- **WHEN** the user rearranges the shown fields of the type
+- **THEN** the values of the fields of the panels and their presence do not change, and a key of a panel field in the request is rejected as foreign
 
 ## ADDED Requirements
 
 ### Requirement: Поля панелей не налаштовуються через вкладку «Поля»
-Системні поля панелей — `meta_title`, `meta_description`, `meta_image` і `section_title`, `section_description`, `section_cover` — налаштовує система, користувач SHALL НЕ конфігурувати їх: вони SHALL бути відсутні в таблиці полів типу будь-якого виду, а сторінка редагування, збереження змін і видалення такого поля SHALL відповідати 404. Системне поле `title` лишається в таблиці й налаштовується як раніше. Значення полів панелей редагуються лише у вкладках «Розділ» і «SEO» типу та в секції «SEO» запису; приховування не змінює ні самих полів, ні їхніх значень, ні можливості використати `meta_*` як колонку таблиці записів.
+The system fields of the panels — `meta_title`, `meta_description`, `meta_image` and `section_title`, `section_description`, `section_cover` — are configured by the system, the user SHALL NOT configure them: they SHALL be absent from the table of fields of a type of any kind, and the edit page, saving changes and deleting such a field SHALL respond with 404. The system field `title` remains in the table and is configured as before. The values of the fields of the panels are edited only in the tabs «Розділ» and «SEO» of the type and in the section «SEO» of a record; hiding changes neither the fields themselves, nor their values, nor the possibility to use `meta_*` as a column of the table of records.
 
-#### Scenario: Тип сторінок
-- **WHEN** користувач відкриває сторінку полів типу виду `page`
-- **THEN** поля `meta_*` у таблиці не показані
+#### Scenario: Type of pages
+- **WHEN** the user opens the page of fields of a type of the kind `page`
+- **THEN** the fields `meta_*` are not shown in the table
 
-#### Scenario: Пряме відкриття форми редагування
-- **WHEN** користувач відкриває `/admin/content-types/news/fields/meta_title/edit`
-- **THEN** сервер відповідає 404
+#### Scenario: Direct opening of the edit form
+- **WHEN** the user opens `/admin/content-types/news/fields/meta_title/edit`
+- **THEN** the server responds with 404
 
-#### Scenario: Збереження й видалення
-- **WHEN** на сервер надходить зміна або видалення поля `section_title`
-- **THEN** сервер відповідає 404, поле й значення лишаються без змін
+#### Scenario: Saving and deleting
+- **WHEN** a change or a deletion of the field `section_title` arrives at the server
+- **THEN** the server responds with 404, the field and its value remain unchanged
 
-#### Scenario: Колонка таблиці записів
-- **WHEN** налаштування списку типу посилаються на `meta_title`
-- **THEN** поле доступне як колонка таблиці записів, як і раніше
+#### Scenario: Column of the table of records
+- **WHEN** the settings of the list of the type refer to `meta_title`
+- **THEN** the field is available as a column of the table of records, as before

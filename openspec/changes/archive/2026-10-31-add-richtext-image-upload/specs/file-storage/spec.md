@@ -3,16 +3,16 @@
 ## ADDED Requirements
 
 ### Requirement: Завантаження для поля форматованого тексту
-Запит завантаження за полем (тип контенту й ключ поля) SHALL приймати також поле типу `richtext`: профіль SHALL бути `image`, а правила SHALL бути правилами всього профілю (поле `richtext` не має файлових налаштувань). Для поля, що не тримає файлів і не є `richtext`, запит SHALL відхилятися з помилкою для поля.
+An upload request by field (the content type and the field key) SHALL also accept a field of the type `richtext`: the profile SHALL be `image`, and the rules SHALL be the rules of the whole profile (the field `richtext` has no file settings). For a field that holds no files and is not `richtext`, the request SHALL be rejected with an error for the field.
 
-#### Scenario: Завантаження за полем richtext
-- **WHEN** адміністратор надсилає PNG і поле типу `richtext`
-- **THEN** файл прийнято, профіль запису `image`, відповідь містить відносну адресу виду `/storage/{uuid}.png`
+#### Scenario: Upload by the field richtext
+- **WHEN** the administrator sends a PNG and a field of the type `richtext`
+- **THEN** the file is accepted, the record profile is `image`, and the response contains a relative address of the form `/storage/{uuid}.png`
 
-#### Scenario: Профіль не `image`
-- **WHEN** адміністратор надсилає PDF і поле типу `richtext`
-- **THEN** файл відхилено правилами профілю `image`
+#### Scenario: Profile is not `image`
+- **WHEN** the administrator sends a PDF and a field of the type `richtext`
+- **THEN** the file is rejected by the rules of the profile `image`
 
-#### Scenario: Поле без файлів
-- **WHEN** адміністратор надсилає файл і поле типу `string`
-- **THEN** запит відхилено з помилкою для поля
+#### Scenario: Field without files
+- **WHEN** the administrator sends a file and a field of the type `string`
+- **THEN** the request is rejected with an error for the field

@@ -3,28 +3,28 @@
 ## ADDED Requirements
 
 ### Requirement: Поле «термін» у формі та списку записів
-Форма запису SHALL показувати для поля типу «термін» вибір термінів його словника. Для немножинного поля SHALL бути вибір одного терміна з можливістю очистити; для множинного — вибір кількох термінів (з урахуванням ліміту елементів). Терміни SHALL показуватися деревом з відступами за глибиною, а їхні назви — базовою мовою. Збережені терміни SHALL бути позначені, а невалідний вибір (термін іншого словника, неіснуючий) SHALL відхилятися сервером з помилкою біля поля. Обов'язкове поле SHALL вимагати вибору. Список записів SHALL показувати в колонці поля назви обраних термінів через кому (базовою мовою) і SHALL не пропонувати сортування за цією колонкою.
+The form of a record SHALL show, for a field of the type «термін», the choice of terms of its vocabulary. For a non-multiple field there SHALL be a choice of one term with the possibility to clear it; for a multiple field — a choice of several terms (taking the limit of elements into account). The terms SHALL be shown as a tree with indents by depth, and their names — in the base language. The saved terms SHALL be marked, and an invalid choice (a term of another vocabulary, a non-existent one) SHALL be rejected by the server with an error next to the field. A required field SHALL require a choice. The list of records SHALL show in the column of the field the names of the chosen terms separated by commas (in the base language), and SHALL not offer sorting by this column.
 
-#### Scenario: Вибір одного терміна
-- **WHEN** користувач обирає термін «Куртки» у немножинному полі `category` і зберігає запис
-- **THEN** значення збережено, а при повторному відкритті форми «Куртки» позначено
+#### Scenario: Choice of one term
+- **WHEN** the user chooses the term «Куртки» in the non-multiple field `category` and saves the record
+- **THEN** the value is saved, and when the form is reopened «Куртки» is marked
 
-#### Scenario: Вибір кількох термінів
-- **WHEN** користувач обирає терміни «Новини» й «Спорт» у множинному полі `tags`
-- **THEN** обидва значення збережено в обраному порядку
+#### Scenario: Choice of several terms
+- **WHEN** the user chooses the terms «Новини» and «Спорт» in the multiple field `tags`
+- **THEN** both values are saved in the chosen order
 
-#### Scenario: Дерево з відступами
-- **WHEN** користувач відкриває вибір термінів словника, де «Куртки» — дитина «Одяг»
-- **THEN** «Куртки» показано нижче «Одяг» з відступом
+#### Scenario: Tree with indents
+- **WHEN** the user opens the choice of terms of a vocabulary where «Куртки» is a child of «Одяг»
+- **THEN** «Куртки» is shown below «Одяг» with an indent
 
-#### Scenario: Очищення
-- **WHEN** користувач очищає вибір у немножинному необов'язковому полі й зберігає
-- **THEN** значення поля видалено
+#### Scenario: Clearing
+- **WHEN** the user clears the choice in a non-multiple optional field and saves
+- **THEN** the value of the field is deleted
 
-#### Scenario: Назви в списку
-- **WHEN** у списку записів видима колонка `tags`, а запис має терміни «Новини» й «Спорт»
-- **THEN** клітинка показує «Новини, Спорт»
+#### Scenario: Names in the list
+- **WHEN** the column `tags` is visible in the list of records, and the record has the terms «Новини» and «Спорт»
+- **THEN** the cell shows «Новини, Спорт»
 
-#### Scenario: Колонка не сортується
-- **WHEN** користувач відкриває меню колонки `category` у списку записів
-- **THEN** сортування за цією колонкою недоступне
+#### Scenario: Column is not sorted
+- **WHEN** the user opens the menu of the column `category` in the list of records
+- **THEN** sorting by this column is unavailable

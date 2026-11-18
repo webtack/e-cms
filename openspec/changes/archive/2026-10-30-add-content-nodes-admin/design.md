@@ -2,33 +2,33 @@
 
 ## Context
 
-Мотивація й обсяг — у [proposal.md](proposal.md), вимоги — у `specs/`. Що вже є й на що спираємось (усе прочитано в коді):
+The motivation and scope are in [proposal.md](proposal.md), the requirements are in `specs/`. What already exists and what we rely on (all read in the code):
 
-- Бекенд вузлів готовий: `ContentNodeCreator::create()`, `ContentValueWriter::write()/validate()`, `ContentValueReader::load()`, `ContentNodeQuery::paginate()`.
-- Розділ типів віддається циклом маршрутів у `routes/web.php`; `kind` береться з `defaults('kind')` маршруту (трейт `ResolvesTypeSection`), `{contentType}` прив'язується за `key` у межах виду, `{field}` — за парою (тип, `key`).
-- Серверний `DataTable` живиться від `TableRequest::from()` + `TablePage::make($rows, $total, $table)`: стан таблиці парситься з адреси, а рядки контролер бере з власного джерела. Колонки `Column<Row>` оголошуються на клієнті (React), серверні `TableColumn` — для валідації `sort` і `q`.
-- `ContentNodeQuery::paginate()` сам пагінує й кидає `ValidationException` для невідомих полів, а номер сторінки поза діапазоном повертає порожньо.
-- Налаштування поля (`settings`: `min`, `max`) у формах полів не редагуються (їх немає в `sharedRules`), тож задаються лише кодом.
-- Видалення поля не чистить `settings.list` типу (`ContentField` блокує лише видалення системного поля), тому в `settings.list.visible` можуть лишитися ключі неіснуючих полів.
-- Документація: [content-values.md](../../../docs/content-values.md), [content-querying.md](../../../docs/content-querying.md), [admin-data-table.md](../../../docs/admin-data-table.md), [admin-content-types.md](../../../docs/admin-content-types.md), [admin-content-fields.md](../../../docs/admin-content-fields.md), [e2e-testing.md](../../../docs/e2e-testing.md).
+- The backend of nodes is ready: `ContentNodeCreator::create()`, `ContentValueWriter::write()/validate()`, `ContentValueReader::load()`, `ContentNodeQuery::paginate()`.
+- The section of types is served by the route loop in `routes/web.php`; `kind` is taken from `defaults('kind')` of the route (the trait `ResolvesTypeSection`), `{contentType}` is bound by `key` within the kind, `{field}` — by the pair (type, `key`).
+- The server `DataTable` is fed by `TableRequest::from()` + `TablePage::make($rows, $total, $table)`: the table state is parsed from the address, and the rows the controller takes from its own source. The columns `Column<Row>` are declared on the client (React), the server `TableColumn` — for validating `sort` and `q`.
+- `ContentNodeQuery::paginate()` paginates itself and throws `ValidationException` for unknown fields, and a page number out of range returns an empty result.
+- The settings of a field (`settings`: `min`, `max`) are not edited in the field forms (they are not in `sharedRules`), so they are set only in code.
+- Deleting a field does not clean `settings.list` of the type (`ContentField` blocks only the deletion of a system field), so keys of non-existent fields may remain in `settings.list.visible`.
+- Documentation: [content-values.md](../../../docs/content-values.md), [content-querying.md](../../../docs/content-querying.md), [admin-data-table.md](../../../docs/admin-data-table.md), [admin-content-types.md](../../../docs/admin-content-types.md), [admin-content-fields.md](../../../docs/admin-content-fields.md), [e2e-testing.md](../../../docs/e2e-testing.md).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Один контролер і одна пара запитів для вузлів `content`, без дублювання логіки значень: вся валідація й запис — через наявні `ContentNodeCreator` / `ContentValueWriter`.
-- Форма будується даними (поля типу), без жорстко закладених полів.
-- Контролер не залежить від того, що вид завжди `content` більше, ніж потрібно: вид береться з маршруту, щоб розділи `page`/`block` могли підключитися окремою зміною.
+- One controller and one pair of queries for nodes of `content`, without duplication of the value logic: all validation and writing go through the existing `ContentNodeCreator` / `ContentValueWriter`.
+- The form is built from data (the fields of the type), without hard-coded fields.
+- The controller does not depend on the kind always being `content` more than necessary: the kind is taken from the route, so that the sections `page`/`block` can be connected by a separate change.
 
 **Non-Goals:**
-- Мови, переклади, перемикач багатомовності (окрема зміна). Усе читається й пишеться з `lang = default`, мова у формі не обирається.
-- Фільтри за значеннями полів у таблиці вузлів.
-- Редагування `settings` поля чи `settings.list` типу в адмінці.
+- Languages, translations, the multilingualism switch (a separate change). Everything is read and written with `lang = default`; the language is not chosen in the form.
+- Filters by field values in the node table.
+- Editing the `settings` of a field or the `settings.list` of a type in the admin.
 
 ## Decisions
 
-### 1. Адреси й прив'язка вузла
+### 1. Addresses and binding of a node
 
-Маршрути вузлів оголошуються окремо від циклу типів у `routes/web.php`, лише для `content-types` (`->defaults('kind', 'content')`):
+The node routes are declared separately from the loop of types in `routes/web.php`, only for `content-types` (`->defaults('kind', 'content')`):
 
 ```
 GET    /admin/content-types/{contentType}/nodes                  nodes.index
@@ -39,74 +39,74 @@ PUT    /admin/content-types/{contentType}/nodes/{node}           nodes.update
 DELETE /admin/content-types/{contentType}/nodes/{node}           nodes.destroy
 ```
 
-`Route::bind('node', …)` шукає `ContentNode` за парою (`content_type = contentType.key`, `uuid`), як `{field}` за парою (тип, `key`): невідомий `uuid` або `uuid` вузла іншого типу дає 404. Рядок таблиці несе `uuid` як ідентифікатор рядка (`getRowId`) і для адрес редагування/видалення.
+`Route::bind('node', …)` looks up `ContentNode` by the pair (`content_type = contentType.key`, `uuid`), like `{field}` by the pair (type, `key`): an unknown `uuid` or the `uuid` of a node of another type gives 404. The table row carries the `uuid` as the row identifier (`getRowId`) and for the edit/delete addresses.
 
-`slug` — публічний ідентифікатор для фронтенду сайту (рішення власника); в адмінських адресах він не використовується, тож його зміна не ламає відкриті форми та посилання. Це призначення `slug` раніше ніде не було записано, тому фіксується в `content-model` (дельта) і в `docs/content-model.md`.
+`slug` is the public identifier for the frontend of the site (the owner's decision); it is not used in the admin addresses, so its change does not break open forms and links. This purpose of `slug` was not recorded anywhere before, so it is fixed in `content-model` (the delta) and in `docs/content-model.md`.
 
-*Альтернатива:* адресувати за `slug` — читабельніше, але slug змінюваний (відкрита друга вкладка отримала б 404 після зміни), а `uuid` створений саме як стабільний ідентифікатор вузла.
+*Alternative:* addressing by `slug` — more readable, but the slug is changeable (an open second tab would get 404 after the change), and the `uuid` was created precisely as the stable identifier of a node.
 
-### 2. Список: `ContentNodeQuery` за `TableRequest`
+### 2. List: `ContentNodeQuery` through `TableRequest`
 
-Контролер будує `TableRequest::from($request, $columns)`, де колонки — серверний опис того ж набору, що піде на клієнт:
+The controller builds `TableRequest::from($request, $columns)`, where the columns are a server description of the same set that goes to the client:
 
-| Колонка | Тип таблиці | sortable | searchable |
+| Column | Table type | sortable | searchable |
 | --- | --- | --- | --- |
-| `title` та видимі поля | за типом поля (`string`/`text` → `text`, `integer`/`decimal` → `number`, `boolean` → `boolean`, `date`/`datetime` → `date`) | немножинні поля | рішення за `ContentNodeQuery` |
-| `slug` | `text` | ні | ні |
+| `title` and the visible fields | by the field type (`string`/`text` → `text`, `integer`/`decimal` → `number`, `boolean` → `boolean`, `date`/`datetime` → `date`) | single-valued fields | the decision by `ContentNodeQuery` |
+| `slug` | `text` | no | no |
 
-`TableRequest` дає `search`, `sort`/`dir`, `page`, `perPage` без викидання помилок. Далі контролер викликає `ContentNodeQuery::paginate($type, new NodeQueryParams(fields: $visible, search: …, sort: …, page: …, perPage: …))` і обгортає результат у `TablePage::make($rows, $total, $table)`.
+`TableRequest` provides `search`, `sort`/`dir`, `page`, `perPage` without throwing errors. Then the controller calls `ContentNodeQuery::paginate($type, new NodeQueryParams(fields: $visible, search: …, sort: …, page: …, perPage: …))` and wraps the result in `TablePage::make($rows, $total, $table)`.
 
-Номер сторінки за межами діапазону: `paginate()` повертає порожню сторінку, тому контролер після першого виклику порівнює `page` із `lastPage()` і за потреби повторює запит для останньої сторінки (`TablePage::make` сама бере `withTotal`, але рядки мають відповідати). Один зайвий запит лише в рідкісному випадку.
+A page number out of range: `paginate()` returns an empty page, so after the first call the controller compares `page` with `lastPage()` and if needed repeats the query for the last page (`TablePage::make` itself takes `withTotal`, but the rows must match). One extra query only in a rare case.
 
-`$visible` = `settings.list.visible` ∩ наявні поля типу, з обов'язковим `title` на першому місці (див. Ризики). Рядок таблиці: `uuid` (id рядка), `slug`, ключ → значення для кожного видимого поля (множинне — рядок через кому, дата/час — рядок, булеве — булеве), плюс службове `title` для діалогу видалення (це значення поля `title`).
+`$visible` = `settings.list.visible` ∩ the existing fields of the type, with the mandatory `title` in the first place (see Risks). The table row: `uuid` (the row id), `slug`, the key → value for each visible field (multiple — a row with commas, date/time — a string, boolean — a boolean), plus the service `title` for the deletion dialog (this is the value of the field `title`).
 
-*Альтернатива:* `TablePage::fromCollection` над усіма вузлами — відхилено: не масштабується й дублює пошук/сортування, які вже є в `ContentNodeQuery`.
+*Alternative:* `TablePage::fromCollection` over all nodes — rejected: it does not scale and duplicates the search/sorting that already exist in `ContentNodeQuery`.
 
-### 3. Форма: дані поля йдуть на клієнт, віджет обирає клієнт
+### 3. Form: the field data goes to the client, the widget is chosen by the client
 
-Контролер передає `fields` (за вагою): `key`, `name`, `type`, `is_multiple`, `is_required`, `settings` (лише `min`/`max` для підказок атрибутів `min`/`max`/`maxLength`; сервер лишається арбітром) і `values` (ключ → значення, множинні — список). Значення форматуються у рядки для HTML-елементів: `date` → `Y-m-d`, `datetime` → `Y-m-d\TH:i` (формат `datetime-local`), `decimal` вже рядок, `boolean` — булеве. Мапа «тип поля → віджет» живе на клієнті в одному місці (`NodeFieldInput`): `string` → `Input`, `text` → `Textarea`, `integer` → `Input type=number step=1`, `decimal` → `Input inputMode=decimal` (текст, щоб не губити точність), `boolean` → `Checkbox`, `date` → `Input type=date`, `datetime` → `Input type=datetime-local`.
+The controller passes `fields` (by weight): `key`, `name`, `type`, `is_multiple`, `is_required`, `settings` (only `min`/`max` for the hints of the attributes `min`/`max`/`maxLength`; the server remains the arbiter) and `values` (key → value, multiple — a list). The values are formatted into strings for the HTML elements: `date` → `Y-m-d`, `datetime` → `Y-m-d\TH:i` (the format `datetime-local`), `decimal` is already a string, `boolean` — a boolean. The map "field type → widget" lives on the client in one place (`NodeFieldInput`): `string` → `Input`, `text` → `Textarea`, `integer` → `Input type=number step=1`, `decimal` → `Input inputMode=decimal` (text, so as not to lose precision), `boolean` → `Checkbox`, `date` → `Input type=date`, `datetime` → `Input type=datetime-local`.
 
-Множинне поле — `NodeFieldList` поверх того ж віджета: кнопки «Додати» і «Видалити елемент» та перестановка елементів. Порядок збережених значень = `weight` = індекс у списку (`ContentValueWriter` записує список за індексом, `ContentValueReader` читає за `weight`), тож бекенд не змінюється: форма надсилає список у новому порядку. Перестановка — перетягуванням ручкою через `@dnd-kit/core` + `@dnd-kit/sortable` (уже є в проєкті для `DataTable`) із клавіатурною підтримкою (пробіл, стрілки), як у перетягуванні рядків таблиці. Елементи в стані форми мають клієнтські ідентифікатори (стабільний `id` на елемент), бо значення можуть повторюватися й не годяться як ключі; ідентифікатори до сервера не надсилаються.
+A multiple field — `NodeFieldList` on top of the same widget: the buttons "Add" and "Remove item", and reordering of the items. The order of the stored values = `weight` = the index in the list (`ContentValueWriter` writes the list by the index, `ContentValueReader` reads by `weight`), so the backend does not change: the form sends the list in the new order. Reordering is done by dragging the handle via `@dnd-kit/core` + `@dnd-kit/sortable` (already in the project for `DataTable`) with keyboard support (space, arrows), as in the dragging of the table rows. The items in the form state have client identifiers (a stable `id` per item), because the values may repeat and are not suitable as keys; the identifiers are not sent to the server.
 
-Новий тип поля в реєстрі, якого немає в мапі віджетів, показується звичайним текстовим полем (запасний варіант), щоб розширення реєстру не ламало форму.
+A new field type in the registry that is not in the widget map is shown as a plain text field (a fallback), so that an extension of the registry does not break the form.
 
-### 4. Контракт форми й помилки
+### 4. Form contract and errors
 
-Форма надсилає `{ slug, values: { <key>: <value|list> } }`. Значення — під окремим ключем `values`, бо ключ поля може збігатися з `slug` (формат ключа це дозволяє).
+The form sends `{ slug, values: { <key>: <value|list> } }`. The values are under a separate key `values`, because a field key may coincide with `slug` (the format of the key allows this).
 
-`StoreContentNodeRequest` / `UpdateContentNodeRequest` перевіряють лише `slug` (необов'язковий при створенні; формат; унікальність через `Rule::unique('content_nodes', 'slug')`, при зміні — з `ignore($node)`, бо унікальність у моделі віддана індексу БД, а `UniqueConstraintViolationException` на оновленні дала б 500) і те, що `values` — масив. Решту значень перевіряє `ContentValueWriter::validate()` (єдине джерело правил).
+`StoreContentNodeRequest` / `UpdateContentNodeRequest` check only `slug` (optional on creation; the format; uniqueness through `Rule::unique('content_nodes', 'slug')`, on change — with `ignore($node)`, because uniqueness in the model is delegated to the DB index, and a `UniqueConstraintViolationException` on an update would give a 500) and that `values` is an array. The rest of the values are checked by `ContentValueWriter::validate()` (the single source of the rules).
 
-Контролер викликає `ContentNodeCreator::create()` / `ContentValueWriter::write()` у `try`; `ValidationException` від них має ключі без префікса (`title`, `scores.1`), тому контролер перекидає її з префіксом `values.` (`slug` лишається як є), щоб ключі збігалися з вкладеністю в `useForm` і відображалися біля потрібних полів (`values.scores.1`). Введене лишається у формі, бо Inertia повертає назад.
+The controller calls `ContentNodeCreator::create()` / `ContentValueWriter::write()` in a `try`; the `ValidationException` from them has keys without a prefix (`title`, `scores.1`), so the controller rethrows it with the prefix `values.` (`slug` stays as is), so that the keys match the nesting in `useForm` and are displayed next to the right fields (`values.scores.1`). The entered data stays in the form, because Inertia returns it back.
 
-*Альтернатива:* плоскі поля без `values` — відхилено через колізію з `slug`; окрема валідація кожного типу у FormRequest — відхилено як дубль правил реєстру.
+*Alternative:* flat fields without `values` — rejected because of the collision with `slug`; a separate validation of each type in a FormRequest — rejected as a duplicate of the registry rules.
 
-### 5. Оновлення
+### 5. Update
 
-`update` у транзакції: якщо `slug` змінився — `$node->update(['slug' => …])` (модель перевіряє формат/префікс), далі `ContentValueWriter::write($node, $allFieldValues, 'default')` зі значеннями **всіх** полів форми, щоб очищене поле втратило значення (`''`/`[]` очищають). Незмінений slug не передається в `update`. `uuid` і `content_type` не чіпаються (модель їх і так блокує). Інші мови не зачіпаються, бо `write()` замінює лише вказану мову.
+`update` in a transaction: if the `slug` changed — `$node->update(['slug' => …])` (the model checks the format/prefix), then `ContentValueWriter::write($node, $allFieldValues, 'default')` with the values of **all** fields of the form, so that a cleared field loses its value (`''`/`[]` clear). An unchanged slug is not passed to `update`. `uuid` and `content_type` are not touched (the model blocks them anyway). Other languages are not affected, because `write()` replaces only the specified language.
 
-Поле, якого форма не показала (наприклад, додане між відкриттям форми і збереженням), не надсилається й не змінюється: оновлюються тільки ключі з `values`.
+A field that the form did not show (for example, added between opening the form and saving) is not sent and is not changed: only the keys from `values` are updated.
 
-### 6. Видалення
+### 6. Deletion
 
-`$node->delete()` у контролері, без нового сервісу: значення прибирає каскад БД ([content-model.md](../../../docs/content-model.md)). Редірект на список типу з `success`. Назва вузла в діалозі — з рядка таблиці (`title`), запасний варіант — `slug`.
+`$node->delete()` in the controller, without a new service: the values are removed by the DB cascade ([content-model.md](../../../docs/content-model.md)). A redirect to the list of the type with `success`. The name of the node in the dialog — from the table row (`title`), the fallback — `slug`.
 
-### 7. Навігація й компоненти
+### 7. Navigation and components
 
-- `ContentTypeNav`: `active` розширюється значенням `'nodes'`; пункт «Вузли» додається лише при `section.kind === 'content'`.
-- `ContentTypeRowActions`: у меню «⋮» пункт «Вузли» між «Поля» і «Видалити» лише для `content`; колонка `nodes_count` у `Pages/Admin/ContentTypes/Index.tsx` отримує `cell` із `Link` лише для `content`.
-- `navigation.ts`: `patternTitles` для `/admin/content-types/{key}/nodes` («Nodes»), `/nodes/create` («Create node»), `/nodes/{uuid}/edit` («Edit node»); перший сегмент `content-types` дає проміжний пункт «Content Types» (за `isActive`).
-- Нові файли: `Pages/Admin/ContentNodes/{Index,Create,Edit}.tsx`, `Components/Admin/ContentNodes/{ContentNodeForm,NodeFieldInput,NodeFieldList,ContentNodeRowActions}.tsx`.
-- Переклади: рядки в `lang/uk.json` і `lang/en.json`.
+- `ContentTypeNav`: `active` is extended with the value `'nodes'`; the item "Nodes" is added only when `section.kind === 'content'`.
+- `ContentTypeRowActions`: in the "⋮" menu the item "Nodes" between "Fields" and "Delete" only for `content`; the column `nodes_count` in `Pages/Admin/ContentTypes/Index.tsx` gets a `cell` with a `Link` only for `content`.
+- `navigation.ts`: `patternTitles` for `/admin/content-types/{key}/nodes` ("Nodes"), `/nodes/create` ("Create node"), `/nodes/{uuid}/edit` ("Edit node"); the first segment `content-types` gives an intermediate item "Content Types" (by `isActive`).
+- New files: `Pages/Admin/ContentNodes/{Index,Create,Edit}.tsx`, `Components/Admin/ContentNodes/{ContentNodeForm,NodeFieldInput,NodeFieldList,ContentNodeRowActions}.tsx`.
+- Translations: rows in `lang/uk.json` and `lang/en.json`.
 
 ## Risks / Trade-offs
 
-- [Застарілі ключі в `settings.list.visible` після видалення поля → `ContentNodeQuery` кидає `ValidationException`] → контролер перетинає `visible`/`search`/`sort` з наявними полями, а `title` додає завжди; покрити Feature-тестом.
-- [Назва вузла для діалогу — це значення `title`, яке не обов'язково серед видимих полів] → `title` завжди входить у `$visible` (перша колонка).
-- [Зміна slug ламає зовнішні посилання на нього] → у специфікації це допустима явна дія; `uuid` лишається стабільним. Попередження в UI не додаємо (відкладено).
-- [Булеве поле без значення неможливо відрізнити від «Ні» у формі з прапорцем] → неочищений прапорець зберігається як «Ні». Допустимо для першої версії; потреба в трьох станах — окреме рішення.
-- [Дата й час: часові пояси] → `datetime` зберігається як `Y-m-d H:i:s` без пояса ([DateTimeType]); форма передає значення «як є» без перетворення поясів. Поведінка збігається з бекендом, UI її не змінює.
-- [Номер сторінки поза діапазоном → зайвий запит] → лише в крайньому випадку.
+- [Stale keys in `settings.list.visible` after deleting a field → `ContentNodeQuery` throws `ValidationException`] → the controller intersects `visible`/`search`/`sort` with the existing fields, and always adds `title`; cover with a Feature test.
+- [The node name for the dialog is the value of `title`, which is not necessarily among the visible fields] → `title` is always included in `$visible` (the first column).
+- [A change of slug breaks external links to it] → in the specification it is an allowed explicit action; the `uuid` remains stable. No warning in the UI is added (deferred).
+- [A boolean field without a value cannot be distinguished from "No" in a form with a checkbox] → an uncleared checkbox is stored as "No". Acceptable for the first version; the need for three states is a separate decision.
+- [Date and time: time zones] → `datetime` is stored as `Y-m-d H:i:s` without a zone ([DateTimeType]); the form passes the value "as is" without converting zones. The behaviour matches the backend, the UI does not change it.
+- [A page number out of range → an extra query] → only in the extreme case.
 
 ## Migration Plan
 
-Міграцій БД немає: змін схеми не потрібно. Розгортання — звичайна збірка фронтенду (`npm run build`). Відкат — прибрати маршрути й сторінки; дані не зачіпаються.
+There are no DB migrations: no schema changes are needed. The deployment is a regular frontend build (`npm run build`). Rollback — remove the routes and pages; the data is not affected.

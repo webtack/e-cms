@@ -2,36 +2,36 @@
 
 ## Context
 
-Скалярні значення, що посилаються на інші сутності, вже є: `TermType` (uuid терміна в `content_values_string`, `ValidatesSettings`, `LocksReferences`, `TermUsage`, захист від видалення в `Term::booted`). Нові типи повторюють цей шаблон. `title` запису — системне поле (`SystemFields`), значення мови `default` у `content_values_string` (`field_key = 'title'`). `key` типу — первинний ключ `content_types.key`. Опис компонентів: `docs/content-values.md`, `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`.
+Scalar values that reference other entities already exist: `TermType` (the uuid of a term in `content_values_string`, `ValidatesSettings`, `LocksReferences`, `TermUsage`, protection against deletion in `Term::booted`). The new types repeat this pattern. The `title` of a record is a system field (`SystemFields`), the value of the language `default` in `content_values_string` (`field_key = 'title'`). The `key` of a type is the primary key of `content_types.key`. Description of the components: `docs/content-values.md`, `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Два класи типів за зразком `TermType`; жодних міграцій.
-- Пошук на сервері з обмеженою відповіддю; форма не завантажує всі типи/записи.
-- Цілісність: цілі не видаляються, поки на них є посилання.
+- Two classes of types by the pattern of `TermType`; no migrations.
+- A search on the server with a limited response; the form does not load all types/records.
+- Integrity: the targets are not deleted while there are references to them.
 
 **Non-Goals:**
-- Фільтри за вкладеними полями цілі, зворотні посилання, публічне розгортання (expand) цілі.
-- Зміна `kind`/`content_type` у поля, що вже має значення.
-- Мультимовний пошук і підписи (лише `default`).
+- Filters by the nested fields of the target, back references, the public expansion (expand) of the target.
+- Changing the `kind`/`content_type` of a field that already has values.
+- Multilingual search and labels (only `default`).
 
 ## Decisions
 
-- **Ключі типів**: `type_ref`, `node_ref`. Сховище — `content_values_string`; `type_ref` пише `key` типу, `node_ref` — `uuid` (нижній регістр, `prepare()`), як `term`.
-- **Налаштування** (`ValidatesSettings`): `type_ref` — `settings.kind` ∈ `config('content.kinds')`, обов'язкове; `node_ref` — `settings.content_type` — ключ наявного типу, обов'язкове. Після появи значень змінювати не можна (як `vocabulary`). Для обох інші ключі `settings` заборонені; `ContentFieldForm` відправляє лише потрібний ключ.
-- **Валідація значення**: `type_ref` — рядок, наявний тип потрібного `kind`; `node_ref` — `uuid`, наявний запис у `content_nodes` з `content_type` = налаштуванню. Фільтри (порожнє поле, як у `term`) перевіряють лише наявність. Оператори: `eq`, `in`.
-- **Блокування**: обидва типи реалізують `LocksReferences` (shared lock на `content_types` / `content_nodes` у транзакції запису).
-- **Захист від видалення**: `Term`-подібна перевірка в `static::deleting` моделей `ContentNode` і `ContentType`: запит до `content_values_string` ⨝ `content_fields` (`f.type = 'node_ref'` і `v.value = uuid`; для типу — `f.type = 'type_ref'` і `v.value = key`) → `ValidationException` («використовується»). Для `ContentType::deleting` також значення полів самого типу видаляються каскадом і не рахуються як використання (рахуємо лише значення з інших типів/власників). Альтернатива — залишати «висячі» значення й показувати порожньо: відкинуто, бо тихо ламає вміст сайту.
-- **Пошук**: JSON-ендпоінти в адмін-групі: `GET /lookup/content-types?kind=&q=` (пошук по `name` типу, LIKE, до 20 результатів, `{key, name}`) і `GET /lookup/nodes?content_type=&q=` (пошук по `title` мови `default`, до 20, `{uuid, title}`); `q` порожній — перші N у стабільному порядку (`name` / `title`). Параметри обов'язкові й перевіряються (невідомий `kind`/тип → 422). Ендпоінти не залежать від конкретного поля — права ті самі, що й в адмінки. Альтернатива — ендпоінт на поле (`fields/{field}/options`): ще один шар прив'язки, не потрібен.
-- **Початковий підпис**: при відкритті форми підпис вибраних значень не шукається окремо: `ContentNodeController` разом з даними запису віддає `labels` (`{value: label}`) одним запитом на тип (як `termNames()`), клієнт показує їх до першого пошуку. Якщо цілі вже немає (не повинно бути), підпис — саме значення.
-- **Клієнт**: один компонент `RefAutocomplete` (Popover + Command/Input зі сторінкою результатів, debounce 250 мс, скасування застарілих запитів), використовується обома типами; `NodeFieldInput` обирає ендпоінт за типом поля. Множинні поля працюють через `NodeFieldList` без змін. Значення форми — рядок (`''` — немає значення).
-- **Таблиця**: `ContentNodeController` збирає `name` типів (з `kind`) і `title` записів (з `content_type`) сторінки по одному запиту на тип поля (як `termNames`) і віддає комірці об'єкт `{label, href}`; `href` — адреса редагування цілі в розділі її виду (`{section}.edit` типу, `{section}.nodes.edit` запису). `NodeCell` малює звичайний Inertia `<Link>` без `target`, тобто в тому ж вікні. Колонка `text`.
-- **Сортування**: `ContentNodeQuery::applySort` для `type_ref` / `node_ref` приєднує до першого значення (`weight = 0`) таблицю підписів (`content_types.name` / значення `title` мови `default` запису) і сортує за підписом, а не за `key`/`uuid`; записи без значення — останні, вторинний порядок — як для інших полів. `NodeListSettings::sortable()` більше не виключає ці типи, вони доступні в `sortOptions` і як сортування за замовчуванням. Альтернатива — сортувати за сирим значенням: відкинуто, бо порядок не збігається з видимим підписом.
+- **Key types**: `type_ref`, `node_ref`. The storage — `content_values_string`; `type_ref` writes the `key` of the type, `node_ref` — the `uuid` (lower case, `prepare()`), as `term`.
+- **Settings** (`ValidatesSettings`): `type_ref` — `settings.kind` ∈ `config('content.kinds')`, required; `node_ref` — `settings.content_type` — the key of an existing type, required. After the values appear they cannot be changed (as `vocabulary`). For both the other keys of `settings` are forbidden; `ContentFieldForm` sends only the needed key.
+- **Validation of the value**: `type_ref` — a string, an existing type of the required `kind`; `node_ref` — a `uuid`, an existing record in `content_nodes` with `content_type` = the setting. The filters (an empty field, as in `term`) check only the existence. Operators: `eq`, `in`.
+- **Locking**: both types implement `LocksReferences` (a shared lock on `content_types` / `content_nodes` in the transaction of writing).
+- **Protection against deletion**: a `Term`-like check in `static::deleting` of the models `ContentNode` and `ContentType`: a query to `content_values_string` ⨝ `content_fields` (`f.type = 'node_ref'` and `v.value = uuid`; for a type — `f.type = 'type_ref'` and `v.value = key`) → `ValidationException` («використовується» — "is used"). For `ContentType::deleting` the values of the fields of the type itself are also deleted by the cascade and are not counted as usage (we count only the values of other types/owners). Alternative — leave «dangling» values and show them empty: rejected, because it silently breaks the content of the site.
+- **Search**: JSON endpoints in the admin group: `GET /lookup/content-types?kind=&q=` (search by the `name` of the type, LIKE, up to 20 results, `{key, name}`) and `GET /lookup/nodes?content_type=&q=` (search by the `title` of the language `default`, up to 20, `{uuid, title}`); an empty `q` — the first N in a stable order (`name` / `title`). The parameters are required and checked (an unknown `kind`/type → 422). The endpoints do not depend on a particular field, the rights are the same as in the admin. Alternative — an endpoint per field (`fields/{field}/options`): one more layer of binding, not needed.
+- **Initial label**: when the form is opened, the label of the selected values is not searched separately: `ContentNodeController` together with the data of the record gives `labels` (`{value: label}`) in one request per type (as `termNames()`), the client shows them before the first search. If the target does not exist yet (it must not happen), the label is the value itself.
+- **Client**: one component `RefAutocomplete` (Popover + Command/Input with a page of results, debounce 250 ms, cancelling of outdated requests), used by both types; `NodeFieldInput` chooses the endpoint by the type of the field. The multiple fields work through `NodeFieldList` without changes. The value of the form is a string (`''` — no value).
+- **Table**: `ContentNodeController` collects the `name` of the types (with `kind`) and the `title` of the records (with `content_type`) of the page with one request per type of the field (as `termNames`) and gives the cell an object `{label, href}`; `href` — the address of editing of the target in the section of its kind (`{section}.edit` of the type, `{section}.nodes.edit` of the record). `NodeCell` draws an ordinary Inertia `<Link>` without `target`, i.e. in the same window. The column is `text`.
+- **Sorting**: `ContentNodeQuery::applySort` for `type_ref` / `node_ref` joins to the first value (`weight = 0`) the table of labels (`content_types.name` / the value `title` of the language `default` of the record) and sorts by the label, not by `key`/`uuid`; records without a value — last, the secondary order — as for the other fields. `NodeListSettings::sortable()` no longer excludes these types, they are available in `sortOptions` and as the default sorting. Alternative — sort by the raw value: rejected, because the order does not match the visible label.
 
 ## Risks / Trade-offs
 
-- [Захист від видалення додає запит у `deleting`] → один індексований запит; блокує лише за наявності посилань.
-- [Видалення типу каскадом знищує його записи, на які можуть вказувати інші] → у перевірці `ContentType::deleting` враховуються також `node_ref`, що вказують на записи цього типу (`settings->content_type`), і `type_ref` на сам тип.
-- [Пошук LIKE `%q%` по `title` повільний на великих обсягах] → ліміт 20, префіксний індекс не потрібен на цьому масштабі; винести в майбутній зміні.
-- [Запис у корені змінює `title` — підпис застаріває] → підпис завжди береться з БД, не зберігається.
+- [The protection against deletion adds a request in `deleting`] → one indexed request; it blocks only when there are references.
+- [Deleting a type by cascade destroys its records, which others may point to] → the check of `ContentType::deleting` also takes into account the `node_ref` that point to the records of this type (`settings->content_type`), and `type_ref` to the type itself.
+- [Search LIKE `%q%` on `title` is slow on large volumes] → a limit of 20; a prefix index is not needed at this scale; move it to a future change.
+- [A change of the `title` in the root makes the label outdated] → the label is always taken from the DB, it is not stored.

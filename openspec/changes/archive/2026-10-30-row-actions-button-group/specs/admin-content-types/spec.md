@@ -1,24 +1,24 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню дій рядка
-Кожен рядок SHALL мати групу кнопок: основну кнопку «Налаштування» і поруч кнопку меню «⋮». «Налаштування» SHALL відкривати форму редагування цього типу. Меню «⋮» SHALL мати пункти «Редагувати», «Поля» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено від інших). «Редагувати» SHALL відкривати форму редагування цього типу, «Поля» — сторінку полів цього типу, «Видалити» — запускати видалення з підтвердженням.
+Each row SHALL have a group of buttons: the main button «Налаштування» and next to it the menu button «⋮». «Налаштування» SHALL open the edit form of this type. The menu «⋮» SHALL have the items «Редагувати», «Поля» and «Видалити» (in this order; «Видалити» is visually highlighted as a destructive action and separated from the others). «Редагувати» SHALL open the edit form of this type, «Поля» — the page of fields of this type, «Видалити» — start the deletion with confirmation.
 
-#### Scenario: Склад групи
-- **WHEN** користувач бачить рядок типу
-- **THEN** у ньому видно активну кнопку «Налаштування» та поруч кнопку меню «⋮» з доступною назвою
+#### Scenario: Composition of the group
+- **WHEN** the user sees the row of a type
+- **THEN** the active button «Налаштування» is visible in it, and next to it the menu button «⋮» with an accessible name
 
-#### Scenario: Налаштування
-- **WHEN** користувач натискає «Налаштування» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Settings
+- **WHEN** the user presses «Налаштування» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку типу
-- **THEN** він бачить активні пункти «Редагувати», «Поля», «Видалити» з перекладеними підписами
+#### Scenario: Composition of the menu
+- **WHEN** the user opens the menu «⋮» in the row of a type
+- **THEN** they see the active items «Редагувати», «Поля», «Видалити» with translated labels
 
-#### Scenario: Редагувати
-- **WHEN** користувач обирає «Редагувати» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Edit
+- **WHEN** the user selects «Редагувати» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Пункти неактивні
-- **WHEN** користувач обирає «Поля» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/fields`
+#### Scenario: Items are inactive
+- **WHEN** the user selects «Поля» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/fields` opens

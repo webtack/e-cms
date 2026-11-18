@@ -2,233 +2,233 @@
 
 ## Purpose
 
-Описує, як адміністратор визначає структуру контенту даними: типи контенту, їхні поля та вузли контенту, без змін схеми БД і коду.
+Describes how the administrator defines the structure of content as data: content types, their fields and content nodes, without changes to the DB schema and code.
 
 ## ADDED Requirements
 
-### Requirement: Тип контенту визначається записом
-Система SHALL дозволяти створити тип контенту записом із унікальним машинним ключем, назвою та опціональним текстовим описом (`description`), без нових міграцій і змін коду. Ключ типу SHALL відповідати формату `^[a-z][a-z0-9_]*$` (до 64 символів) і SHALL НЕ змінюватися після створення; назву й опис змінювати дозволено.
+### Requirement: A content type is defined by a record
+The system SHALL allow creating a content type as a record with a unique machine key, a name and an optional text description (`description`), without new migrations and code changes. The type key SHALL match the format `^[a-z][a-z0-9_]*$` (up to 64 characters) and SHALL NOT change after creation; the name and the description may be changed.
 
-#### Scenario: Створення типу
-- **WHEN** створюється тип контенту з ключем `article` і назвою «Стаття»
-- **THEN** тип збережено, і його можна використати для створення вузлів контенту; опис не обов'язковий
+#### Scenario: Creating a type
+- **WHEN** a content type with the key `article` and the name "Article" is created
+- **THEN** the type is saved, and it can be used to create content nodes; the description is optional
 
-#### Scenario: Опис типу
-- **WHEN** тип контенту створюється або змінюється з довільним текстовим описом
-- **THEN** опис збережено й повертається при читанні; відсутній опис — `null`
+#### Scenario: Type description
+- **WHEN** a content type is created or changed with an arbitrary text description
+- **THEN** the description is saved and returned on reading; a missing description is `null`
 
-#### Scenario: Дублікат ключа
-- **WHEN** створюється тип контенту з ключем, який уже існує
-- **THEN** система відхиляє створення з помилкою унікальності
+#### Scenario: Duplicate key
+- **WHEN** a content type is created with a key that already exists
+- **THEN** the system rejects the creation with a uniqueness error
 
-#### Scenario: Недопустимий формат ключа
-- **WHEN** створюється тип контенту з ключем `My Type` або `1news`
-- **THEN** створення відхилено з помилкою валідації
+#### Scenario: Invalid key format
+- **WHEN** a content type is created with the key `My Type` or `1news`
+- **THEN** the creation is rejected with a validation error
 
-#### Scenario: Спроба змінити ключ типу
-- **WHEN** змінюється `key` наявного типу контенту
-- **THEN** зміну відхилено, ключ лишається попереднім; зміна назви допустима
+#### Scenario: Attempt to change the type key
+- **WHEN** the `key` of an existing content type is changed
+- **THEN** the change is rejected, the key remains the previous one; changing the name is allowed
 
-### Requirement: Вид типу контенту
-Система SHALL зберігати для кожного типу контенту вид `kind` з переліку `content`, `page`, `block` (за замовчуванням `content`), і SHALL відхиляти будь-яке інше значення. Усі види SHALL використовувати однакові поля, значення, переклади та механізм вибірки. Вид SHALL НЕ змінюватися після створення типу, незалежно від наявності вузлів.
+### Requirement: Kind of a content type
+The system SHALL store for each content type its kind `kind` from the list `content`, `page`, `block` (by default `content`), and SHALL reject any other value. All kinds SHALL use the same fields, values, translations and selection mechanism. The kind SHALL NOT change after the type is created, regardless of the presence of nodes.
 
-#### Scenario: Вид за замовчуванням
-- **WHEN** створюється тип контенту без вказання виду
-- **THEN** його вид — `content`
+#### Scenario: Default kind
+- **WHEN** a content type is created without specifying a kind
+- **THEN** its kind is `content`
 
-#### Scenario: Тип сторінки й блока
-- **WHEN** створюються типи з видами `page` і `block`
-- **THEN** вони мають ті самі можливості полів, перекладів і значень, що й тип виду `content`, і автоматичне поле `title`
+#### Scenario: Page and block types
+- **WHEN** types with the kinds `page` and `block` are created
+- **THEN** they have the same field, translation and value capabilities as the type of the kind `content`, and the automatic field `title`
 
-#### Scenario: Недопустимий вид
-- **WHEN** створюється тип з видом `section`
-- **THEN** створення відхилено з помилкою валідації
+#### Scenario: Invalid kind
+- **WHEN** a type with the kind `section` is created
+- **THEN** the creation is rejected with a validation error
 
-#### Scenario: Спроба змінити вид
-- **WHEN** змінюється вид наявного типу (з вузлами чи без)
-- **THEN** зміну відхилено, вид лишається попереднім
+#### Scenario: Attempt to change the kind
+- **WHEN** the kind of an existing type is changed (with nodes or without)
+- **THEN** the change is rejected, the kind remains the previous one
 
-### Requirement: Ієрархія типів контенту
-Система SHALL дозволяти вказати для типу контенту батьківський тип (`parent_type`, `key` батька), утворюючи дерево типів будь-якої глибини. Батьківський тип SHALL мати той самий вид `kind`; цикли SHALL бути заборонені; тип із дочірніми типами SHALL НЕ видалятися. Ієрархія є лише організаційною: поля батьківського типу не успадковуються дочірніми.
+### Requirement: Hierarchy of content types
+The system SHALL allow specifying for a content type a parent type (`parent_type`, the `key` of the parent), forming a tree of types of any depth. The parent type SHALL have the same kind `kind`; cycles SHALL be forbidden; a type with child types SHALL NOT be deleted. The hierarchy is only organizational: the fields of the parent type are not inherited by the child types.
 
-#### Scenario: Дочірній тип
-- **WHEN** створюється тип `news` з батьківським типом `article` того ж виду
-- **THEN** тип збережено як дочірній; його поля визначаються лише ним самим
+#### Scenario: Child type
+- **WHEN** a type `news` with the parent type `article` of the same kind is created
+- **THEN** the type is saved as a child; its fields are defined by itself only
 
-#### Scenario: Інший вид у батька
-- **WHEN** батьківський тип має інший вид (`page` для типу виду `block`)
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Different kind in the parent
+- **WHEN** the parent type has a different kind (`page` for a type of the kind `block`)
+- **THEN** the save is rejected with a validation error
 
-#### Scenario: Цикл
-- **WHEN** тип призначається батьком самого себе або свого нащадка
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Cycle
+- **WHEN** a type is assigned as the parent of itself or of its descendant
+- **THEN** the save is rejected with a validation error
 
-#### Scenario: Видалення типу з дочірніми
-- **WHEN** видаляється тип, що має дочірні типи
-- **THEN** видалення відхилено
+#### Scenario: Deleting a type with children
+- **WHEN** a type that has child types is deleted
+- **THEN** the deletion is rejected
 
-### Requirement: Стабільний uuid вузлів
-Кожен вузол контенту SHALL мати `uuid`, унікальний у межах таблиці вузлів. Система SHALL генерувати його автоматично при створенні, якщо він не заданий, приймати явно заданий валідний вільний `uuid` (для імпорту), забороняти його зміну після створення та дозволяти знайти вузол за `uuid`. Тип контенту та поле `uuid` НЕ мають: тип ідентифікується унікальним незмінним `key`, а поле — парою (`content_type`, `key`) із незмінним `key`; усі зв'язки з типом (`content_types.parent_type`, `content_fields.content_type`, `content_nodes.content_type`) SHALL посилатися на `key` типу, а не на числовий `id`.
+### Requirement: Stable uuid of nodes
+Each content node SHALL have a `uuid`, unique within the nodes table. The system SHALL generate it automatically on creation if it is not given, accept an explicitly given valid free `uuid` (for import), forbid its change after creation, and allow finding a node by `uuid`. A content type and a field do NOT have a `uuid`: a type is identified by the unique immutable `key`, and a field — by the pair (`content_type`, `key`) with an immutable `key`; all relations to a type (`content_types.parent_type`, `content_fields.content_type`, `content_nodes.content_type`) SHALL refer to the `key` of the type, not to the numeric `id`.
 
-#### Scenario: Автоматична генерація
-- **WHEN** створюється вузол без `uuid`
-- **THEN** вузол має згенерований валідний унікальний `uuid`
+#### Scenario: Automatic generation
+- **WHEN** a node is created without a `uuid`
+- **THEN** the node has a generated valid unique `uuid`
 
-#### Scenario: Явний uuid
-- **WHEN** вузол створюється з валідним вільним `uuid`
-- **THEN** збережено саме цей `uuid`
+#### Scenario: Explicit uuid
+- **WHEN** a node is created with a valid free `uuid`
+- **THEN** exactly this `uuid` is saved
 
-#### Scenario: Дублікат або недійсний uuid
-- **WHEN** вузол створюється з `uuid`, який уже існує або не є валідним UUID
-- **THEN** створення відхилено
+#### Scenario: Duplicate or invalid uuid
+- **WHEN** a node is created with a `uuid` that already exists or is not a valid UUID
+- **THEN** the creation is rejected
 
-#### Scenario: Незмінність
-- **WHEN** змінюється `uuid` наявного вузла
-- **THEN** зміну відхилено, `uuid` лишається попереднім
+#### Scenario: Immutability
+- **WHEN** the `uuid` of an existing node is changed
+- **THEN** the change is rejected, the `uuid` remains the previous one
 
-#### Scenario: Пошук за uuid
-- **WHEN** запитано вузол за `uuid`
-- **THEN** повертається відповідний вузол, а для невідомого `uuid` — `null`
+#### Scenario: Search by uuid
+- **WHEN** a node is requested by `uuid`
+- **THEN** the corresponding node is returned, and for an unknown `uuid` — `null`
 
-#### Scenario: Пошук типу за key
-- **WHEN** запитано тип за `key`
-- **THEN** повертається відповідний тип, а для невідомого `key` — `null`
+#### Scenario: Search of a type by key
+- **WHEN** a type is requested by `key`
+- **THEN** the corresponding type is returned, and for an unknown `key` — `null`
 
-#### Scenario: Стабільність при зміні slug
-- **WHEN** змінюється `slug` вузла
-- **THEN** `uuid` вузла лишається тим самим
+#### Scenario: Stability when the slug changes
+- **WHEN** the `slug` of a node is changed
+- **THEN** the `uuid` of the node remains the same
 
-#### Scenario: Зв'язок за key типу
-- **WHEN** створюється поле, вузол або дочірній тип
-- **THEN** у `content_type` поля чи вузла збережено `key` його типу, у `parent_type` дочірнього типу — `key` батьківського; для кореневого типу `parent_type` порожній
+#### Scenario: Relation by the type key
+- **WHEN** a field, a node or a child type is created
+- **THEN** the `content_type` of the field or node stores the `key` of its type, and the `parent_type` of the child type — the `key` of the parent; for a root type `parent_type` is empty
 
-#### Scenario: Спроба змінити тип поля чи вузла
-- **WHEN** змінюється `content_type` наявного поля або вузла
-- **THEN** зміну відхилено, зв'язок лишається попереднім
+#### Scenario: Attempt to change the type of a field or node
+- **WHEN** the `content_type` of an existing field or node is changed
+- **THEN** the change is rejected, the relation remains the previous one
 
-### Requirement: Обов'язковий унікальний slug вузла
-Кожен вузол контенту SHALL мати непорожній `slug`, унікальний серед усіх вузлів усіх типів і видів (регістронезалежно). Slug SHALL складатися з малих латинських літер, цифр і дефісів без початкового, кінцевого та повторних дефісів, довжиною до 190 символів. Slug SHALL бути спільним для всіх мов (не перекладається). Зміна slug наявного вузла допустима лише явним указанням і SHALL зберігати унікальність.
+### Requirement: Mandatory unique slug of a node
+Each content node SHALL have a non-empty `slug`, unique among all nodes of all types and kinds (case-insensitively). The slug SHALL consist of lowercase Latin letters, digits and hyphens without leading, trailing and repeated hyphens, up to 190 characters long. The slug SHALL be shared for all languages (it is not translated). A change of the slug of an existing node is allowed only by an explicit specification and SHALL keep uniqueness.
 
-#### Scenario: Відсутній slug у даних
-- **WHEN** на рівні збереження вузла slug порожній або має недопустимі символи
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Missing slug in the data
+- **WHEN** at the node save level the slug is empty or has invalid characters
+- **THEN** the save is rejected with a validation error
 
-#### Scenario: Дублікат slug
-- **WHEN** створюється вузол зі slug, який уже має інший вузол (будь-якого типу чи виду)
-- **THEN** збереження відхилено з помилкою унікальності
+#### Scenario: Duplicate slug
+- **WHEN** a node is created with a slug that another node already has (of any type or kind)
+- **THEN** the save is rejected with a uniqueness error
 
-### Requirement: Автоматичний slug для сторінок і контенту
-Для вузлів типів із видом `content` або `page` система SHALL при створенні без явного slug утворювати його з `title` у мові `default` (транслітерація кирилиці, нижній регістр, роздільник `-`), а за збігу з наявним slug SHALL додавати числовий суфікс (`-2`, `-3`, …). Явно вказаний slug SHALL перевірятися на допустимість і унікальність без автоматичних змін. Зміна `title` наявного вузла НЕ змінює його slug. Префікс `block-` для цих видів НЕ обмежується й автоматичний префікс до slug НЕ додається.
+### Requirement: Automatic slug for pages and content
+For nodes of types with the kind `content` or `page` the system SHALL, when creating without an explicit slug, form it from `title` in the language `default` (transliteration of Cyrillic, lowercase, the separator `-`), and on a match with an existing slug SHALL add a numeric suffix (`-2`, `-3`, …). An explicitly given slug SHALL be checked for validity and uniqueness without automatic changes. Changing the `title` of an existing node does NOT change its slug. The prefix `block-` is NOT restricted for these kinds and the automatic prefix is NOT added to the slug.
 
-#### Scenario: Slug із title
-- **WHEN** створюється вузол типу `page` з `title` «Про нас» без slug
-- **THEN** slug утворено з назви (наприклад `pro-nas`)
+#### Scenario: Slug from title
+- **WHEN** a node of the type `page` with the `title` "Про нас" is created without a slug
+- **THEN** the slug is formed from the title (for example `pro-nas`)
 
-#### Scenario: Збіг slug
-- **WHEN** slug, утворений із `title`, уже існує
-- **THEN** до нього додано числовий суфікс (`pro-nas-2`)
+#### Scenario: Slug match
+- **WHEN** the slug formed from the `title` already exists
+- **THEN** a numeric suffix is added to it (`pro-nas-2`)
 
-#### Scenario: Явний slug
-- **WHEN** вузол `content` створюється з явним slug `about`
-- **THEN** збережено саме `about`; якщо він зайнятий, створення відхилено
+#### Scenario: Explicit slug
+- **WHEN** a node `content` is created with the explicit slug `about`
+- **THEN** exactly `about` is saved; if it is taken, the creation is rejected
 
-#### Scenario: Title без придатних символів
-- **WHEN** `title` не містить жодного символу, придатного для slug
-- **THEN** використовується запасний slug `node` із числовим суфіксом за потреби
+#### Scenario: Title without suitable characters
+- **WHEN** the `title` contains no character suitable for a slug
+- **THEN** the fallback slug `node` is used, with a numeric suffix if needed
 
-#### Scenario: Slug із префіксом block- для сторінки
-- **WHEN** створюється вузол типу `page` з `title` «Block-1» без slug
-- **THEN** slug `block-1` збережено без змін і без додаткового префікса
+#### Scenario: Slug with the prefix block- for a page
+- **WHEN** a node of the type `page` with the `title` "Block-1" is created without a slug
+- **THEN** the slug `block-1` is saved without changes and without an additional prefix
 
-#### Scenario: Зміна title
-- **WHEN** змінюється `title` наявного вузла
-- **THEN** його slug залишається без змін
+#### Scenario: Change of title
+- **WHEN** the `title` of an existing node is changed
+- **THEN** its slug remains unchanged
 
-### Requirement: Ідентифікатор блока
-Для вузлів типів із видом `block` slug SHALL бути ідентифікатором для явного використання в шаблонах і SHALL завжди починатися з `block-`. Його можна вказати вручну (з дотриманням формату slug); якщо його не вказано, система SHALL згенерувати `block-` + 8 випадкових малих латинських літер та гарантувати унікальність (за збігу генерація повторюється).
+### Requirement: Identifier of a block
+For nodes of types with the kind `block` the slug SHALL be an identifier for explicit use in templates and SHALL always start with `block-`. It can be specified manually (complying with the slug format); if it is not specified, the system SHALL generate `block-` + 8 random lowercase Latin letters and guarantee uniqueness (on a match the generation is repeated).
 
-#### Scenario: Автоматичний ідентифікатор
-- **WHEN** створюється вузол виду `block` без slug
-- **THEN** slug має вигляд `block-` та 8 малих латинських літер і є унікальним
+#### Scenario: Automatic identifier
+- **WHEN** a node of the kind `block` is created without a slug
+- **THEN** the slug has the form `block-` and 8 lowercase Latin letters and is unique
 
-#### Scenario: Ручний ідентифікатор
-- **WHEN** блок створюється зі slug `block-footer-menu`
-- **THEN** збережено саме `block-footer-menu`
+#### Scenario: Manual identifier
+- **WHEN** a block is created with the slug `block-footer-menu`
+- **THEN** exactly `block-footer-menu` is saved
 
-#### Scenario: Ручний ідентифікатор без префікса
-- **WHEN** блок створюється зі slug `footer-menu`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Manual identifier without the prefix
+- **WHEN** a block is created with the slug `footer-menu`
+- **THEN** the save is rejected with a validation error
 
-### Requirement: Обов'язкове системне поле title
-Система SHALL при створенні будь-якого типу контенту автоматично створювати в ньому поле `title` типу «короткий текст» (обов'язкове, немножинне, перекладне, найменшої ваги (`weight = 0`)) і SHALL забороняти видаляти це поле, змінювати його тип, множинність та обов'язковість (ключ незмінний для всіх полів); назву, вагу й налаштування змінювати дозволено.
+### Requirement: Mandatory system field title
+The system SHALL, on creation of any content type, automatically create in it a field `title` of the type "short text" (required, single-valued, translatable, of the lowest weight (`weight = 0`)), and SHALL forbid deleting this field, changing its type, multiplicity and requiredness (the key is immutable for all fields); the name, the weight and the settings may be changed.
 
-#### Scenario: Автоматичне створення
-- **WHEN** створюється новий тип контенту
-- **THEN** він одразу містить поле `title` типу «короткий текст»
+#### Scenario: Automatic creation
+- **WHEN** a new content type is created
+- **THEN** it immediately contains the field `title` of the type "short text"
 
-#### Scenario: Спроба видалити title
-- **WHEN** виконується видалення поля `title`
-- **THEN** видалення відхилено, поле й значення залишаються
+#### Scenario: Attempt to delete title
+- **WHEN** the field `title` is deleted
+- **THEN** the deletion is rejected, the field and the values remain
 
-#### Scenario: Заборонені зміни title
-- **WHEN** змінюється тип, множинність або обов'язковість поля `title`
-- **THEN** зміну відхилено
+#### Scenario: Forbidden changes of title
+- **WHEN** the type, multiplicity or requiredness of the field `title` is changed
+- **THEN** the change is rejected
 
-#### Scenario: Видалення типу
-- **WHEN** видаляється тип контенту
-- **THEN** він видаляється разом із полем `title` (заборона на видалення `title` не блокує видалення всього типу)
+#### Scenario: Deleting a type
+- **WHEN** a content type is deleted
+- **THEN** it is deleted together with the field `title` (the ban on deleting `title` does not block deleting the whole type)
 
-### Requirement: Поле визначається записом
-Система SHALL дозволяти додати до типу контенту поле із ключем (унікальним у межах типу), назвою, типом значення із реєстру, ознаками множинності, обов'язковості та перекладності, вагою (`weight`) й опціональними налаштуваннями (JSON). Ключ поля SHALL відповідати формату `^[a-z][a-z0-9_]*$` (до 64 символів) і SHALL НЕ змінюватися після створення; назву, вагу й налаштування змінювати дозволено.
+### Requirement: A field is defined by a record
+The system SHALL allow adding to a content type a field with a key (unique within the type), a name, a value type from the registry, the flags of multiplicity, requiredness and translatability, a weight (`weight`) and optional settings (JSON). The field key SHALL match the format `^[a-z][a-z0-9_]*$` (up to 64 characters) and SHALL NOT change after creation; the name, the weight and the settings may be changed.
 
-#### Scenario: Додавання поля
-- **WHEN** до типу `article` додається поле `views` типу «ціле число»
-- **THEN** поле збережено, і вузли цього типу можуть мати для нього значення
+#### Scenario: Adding a field
+- **WHEN** a field `views` of the type "integer" is added to the type `article`
+- **THEN** the field is saved, and the nodes of this type can have values for it
 
-#### Scenario: Невідомий тип значення
-- **WHEN** додається поле з типом, якого немає в реєстрі типів полів
-- **THEN** система відхиляє збереження поля з помилкою валідації
+#### Scenario: Unknown value type
+- **WHEN** a field with a type that is not in the registry of field types is added
+- **THEN** the system rejects saving the field with a validation error
 
-#### Scenario: Дублікат ключа в межах типу
-- **WHEN** до того ж типу додається друге поле з наявним ключем
-- **THEN** збереження відхилено; той самий ключ в іншому типі контенту допустимий
+#### Scenario: Duplicate key within a type
+- **WHEN** a second field with an existing key is added to the same type
+- **THEN** the save is rejected; the same key in another content type is allowed
 
-#### Scenario: Недопустимий формат ключа поля
-- **WHEN** до типу додається поле з ключем `My Field` або `1price`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Invalid field key format
+- **WHEN** a field with the key `My Field` or `1price` is added to a type
+- **THEN** the save is rejected with a validation error
 
-#### Scenario: Спроба змінити ключ поля
-- **WHEN** змінюється `key` наявного поля
-- **THEN** зміну відхилено, ключ лишається попереднім; зміна назви допустима
+#### Scenario: Attempt to change a field key
+- **WHEN** the `key` of an existing field is changed
+- **THEN** the change is rejected, the key remains the previous one; changing the name is allowed
 
-### Requirement: Незмінність типу значення поля
-Система SHALL забороняти змінювати тип значення поля, для якого вже існують значення, і SHALL дозволяти змінювати його назву, вагу та налаштування.
+### Requirement: Immutability of the value type of a field
+The system SHALL forbid changing the value type of a field for which values already exist, and SHALL allow changing its name, weight and settings.
 
-#### Scenario: Спроба змінити тип
-- **WHEN** змінюється тип поля, що має збережені значення
-- **THEN** зміну відхилено, наявні значення не змінюються
+#### Scenario: Attempt to change the type
+- **WHEN** the type of a field that has stored values is changed
+- **THEN** the change is rejected, the existing values do not change
 
-### Requirement: Вузол контенту належить типу контенту
-Система SHALL зберігати вузол контенту як запис, що належить рівно одному типу контенту, і SHALL видаляти разом із ним усі його значення в усіх мовах.
+### Requirement: A content node belongs to a content type
+The system SHALL store a content node as a record belonging to exactly one content type, and SHALL delete together with it all its values in all languages.
 
-#### Scenario: Видалення вузла
-- **WHEN** вузол із значеннями видаляється
-- **THEN** усі його значення в усіх типізованих таблицях і всіх мовах також видалено
+#### Scenario: Deleting a node
+- **WHEN** a node with values is deleted
+- **THEN** all its values in all typed tables and in all languages are also deleted
 
-### Requirement: Каскадне видалення конфігурації
-Система SHALL видаляти значення поля при видаленні цього поля, а при видаленні типу контенту — його поля, вузли та їхні значення.
+### Requirement: Cascade deletion of configuration
+The system SHALL delete the values of a field when this field is deleted, and when a content type is deleted — its fields, nodes and their values.
 
-#### Scenario: Видалення поля
-- **WHEN** видаляється не системне поле
-- **THEN** значення цього поля у всіх вузлах і мовах видалено, значення інших полів збережено
+#### Scenario: Deleting a field
+- **WHEN** a non-system field is deleted
+- **THEN** the values of this field in all nodes and languages are deleted, the values of other fields are kept
 
-### Requirement: Налаштування типу контенту та списку за замовчуванням
-Система SHALL зберігати в налаштуваннях типу контенту (`settings`) конфігурацію списку за замовчуванням: перелік видимих полів, полів пошуку та сортування за замовчуванням, і SHALL відхиляти налаштування, що посилаються на неіснуючі в цьому типі поля.
+### Requirement: Settings of a content type and of the default list
+The system SHALL store in the settings of a content type (`settings`) the configuration of the default list: the set of visible fields, the search fields and the default sorting, and SHALL reject settings that refer to fields not existing in this type.
 
-#### Scenario: Посилання на чуже поле
-- **WHEN** у налаштуваннях списку типу `article` указано ключ поля, якого в цьому типі немає
-- **THEN** збереження налаштувань відхилено з помилкою валідації
+#### Scenario: Reference to a foreign field
+- **WHEN** the list settings of the type `article` specify a field key that does not exist in this type
+- **THEN** saving the settings is rejected with a validation error
 
-#### Scenario: Налаштування типу без списку
-- **WHEN** тип контенту створюється без налаштувань
-- **THEN** `settings` порожні, і вибірка використовує власні значення за замовчуванням
+#### Scenario: Type settings without a list
+- **WHEN** a content type is created without settings
+- **THEN** `settings` is empty, and the selection uses its own default values

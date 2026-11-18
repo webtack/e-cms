@@ -1,60 +1,60 @@
 ## ADDED Requirements
 
 ### Requirement: Тип поля «посилання»
-Система SHALL підтримувати тип поля `url`. Його значення SHALL складатися з посилання (скалярне значення, у таблиці рядкових значень) і необов'язкового заголовка (додаткові дані). Посилання SHALL зберігатися так, як його ввели, після обрізання пробілів на краях. Приймані форми: абсолютні посилання зі схемою `http` або `https` і хостом, посилання `mailto:` і `tel:` з непорожньою адресою, та відносні — шлях від кореня (`/…`, але не `//…`), `./…`, `../…`, фрагмент (`#…`) і запит (`?…`). Посилання з пробільними чи керівними символами всередині та з іншими схемами (`javascript:`, `data:`, `ftp:` тощо) SHALL відхилятися. Довжина посилання не більша за 512 символів, заголовка — не більша за 255. Заголовок SHALL бути необов'язковим: порожній чи складений лише з пробілів заголовок не зберігається й читається як `null`. Значення без посилання SHALL вважатися порожнім, навіть якщо заголовок заповнено. Тип SHALL не мати налаштувань поля. Збереження SHALL не звертатися до мережі й не перевіряти, що посилання відкривається. Для множинного поля та перекладів SHALL діяти загальні правила. Фільтр за типом SHALL підтримувати рівність (`eq`), перелік (`in`) і входження (`contains`) за посиланням.
+The system SHALL support the field type `url`. Its value SHALL consist of a link (a scalar value, in the table of string values) and an optional title (additional data). The link SHALL be stored as entered, after trimming the spaces at the edges. The accepted forms: absolute links with the scheme `http` or `https` and a host, `mailto:` and `tel:` links with a non-empty address, and relative ones — a path from the root (`/…`, but not `//…`), `./…`, `../…`, a fragment (`#…`) and a query (`?…`). Links with whitespace or control characters inside and with other schemes (`javascript:`, `data:`, `ftp:` etc.) SHALL be rejected. The length of the link SHALL be no more than 512 characters, of the title — no more than 255. The title SHALL be optional: an empty title or one consisting only of spaces is not stored and is read as `null`. A value without a link SHALL be considered empty, even if the title is filled. The type SHALL have no settings of the field. Saving SHALL NOT access the network nor check that the link opens. The general rules SHALL apply to a multiple field and to translations. The filter by the type SHALL support equality (`eq`), a list (`in`) and containment (`contains`) by the link.
 
-#### Scenario: Збереження й читання абсолютного посилання
-- **WHEN** у поле `url` записують посилання `https://example.com/page?a=1#top` і заголовок `Приклад`
-- **THEN** при читанні повертаються те саме посилання і заголовок `Приклад`
+#### Scenario: Saving and reading an absolute link
+- **WHEN** the link `https://example.com/page?a=1#top` and the title `Приклад` are written to the field `url`
+- **THEN** on reading the same link and the title `Приклад` are returned
 
-#### Scenario: Відносне посилання
-- **WHEN** у поле записують `/about`, `./team`, `../docs/a.pdf`, `#contacts` або `?page=2`
-- **THEN** значення збережено без змін
+#### Scenario: Relative link
+- **WHEN** `/about`, `./team`, `../docs/a.pdf`, `#contacts` or `?page=2` are written to the field
+- **THEN** the value is stored unchanged
 
-#### Scenario: Посилання без заголовка
-- **WHEN** у поле записують посилання без заголовка або із заголовком із самих пробілів
-- **THEN** значення збережено, а заголовок читається як `null`
+#### Scenario: Link without a title
+- **WHEN** a link without a title or with a title of only spaces is written to the field
+- **THEN** the value is stored, and the title is read as `null`
 
-#### Scenario: Пошта й телефон
-- **WHEN** у поле записують `mailto:info@example.com` або `tel:+380441234567`
-- **THEN** значення збережено без змін
+#### Scenario: Mail and phone
+- **WHEN** `mailto:info@example.com` or `tel:+380441234567` is written to the field
+- **THEN** the value is stored unchanged
 
-#### Scenario: Обрізання пробілів
-- **WHEN** у поле записують `  /about  `
-- **THEN** збережено `/about`
+#### Scenario: Trimming of spaces
+- **WHEN** `  /about  ` is written to the field
+- **THEN** `/about` is stored
 
-#### Scenario: Заборонена схема
-- **WHEN** у поле записують `javascript:alert(1)`, `data:text/html,x` або `ftp://example.com/a`
-- **THEN** запис відхилено з помилкою біля поля, нічого не збережено
+#### Scenario: Forbidden scheme
+- **WHEN** `javascript:alert(1)`, `data:text/html,x` or `ftp://example.com/a` is written to the field
+- **THEN** the write is rejected with an error next to the field, nothing is stored
 
-#### Scenario: Протокольно-відносне посилання
-- **WHEN** у поле записують `//example.com/a`
-- **THEN** запис відхилено з помилкою біля поля
+#### Scenario: Protocol-relative link
+- **WHEN** `//example.com/a` is written to the field
+- **THEN** the write is rejected with an error next to the field
 
-#### Scenario: Пробіли всередині посилання
-- **WHEN** у поле записують `/about us`
-- **THEN** запис відхилено з помилкою біля поля
+#### Scenario: Spaces inside the link
+- **WHEN** `/about us` is written to the field
+- **THEN** the write is rejected with an error next to the field
 
-#### Scenario: Занадто довгі дані
-- **WHEN** посилання довше за 512 символів або заголовок довший за 255
-- **THEN** запис відхилено з помилкою біля поля
+#### Scenario: Data that is too long
+- **WHEN** the link is longer than 512 characters or the title is longer than 255
+- **THEN** the write is rejected with an error next to the field
 
-#### Scenario: Обов'язкове поле
-- **WHEN** обов'язкове поле `url` лишається без посилання, але із заповненим заголовком
-- **THEN** запис відхилено з помилкою біля поля
+#### Scenario: Required field
+- **WHEN** a required field `url` remains without a link but with a filled title
+- **THEN** the write is rejected with an error next to the field
 
-#### Scenario: Налаштування заборонені
-- **WHEN** полю типу `url` передають `settings`
-- **THEN** запис поля відхилено, як і для інших типів без налаштувань
+#### Scenario: Settings are forbidden
+- **WHEN** `settings` are passed to a field of the type `url`
+- **THEN** the write of the field is rejected, as for the other types without settings
 
-#### Scenario: Множинне поле
-- **WHEN** у множинне поле `url` записують список значень із різними заголовками
-- **THEN** кожен елемент зберігається окремим рядком зі своїм заголовком, порядок збережено
+#### Scenario: Multiple field
+- **WHEN** a list of values with different titles is written to a multiple field `url`
+- **THEN** each element is stored in a separate row with its own title, the order is kept
 
-#### Scenario: Пошук за посиланням
-- **WHEN** записи фільтрують за полем `url` входженням `example.com`
-- **THEN** повертаються записи, посилання яких містить `example.com`
+#### Scenario: Search by link
+- **WHEN** the records are filtered by the field `url` with containment `example.com`
+- **THEN** the records whose link contains `example.com` are returned
 
-#### Scenario: Тип не змінює загальний механізм
-- **WHEN** додається тип `url`
-- **THEN** змін потребують лише його клас і рядок у реєстрі типів; нових таблиць немає
+#### Scenario: The type does not change the general mechanism
+- **WHEN** the type `url` is added
+- **THEN** only its class and a row in the registry of types need changes; there are no new tables

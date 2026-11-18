@@ -2,71 +2,71 @@
 
 ## Context
 
-- Тема `default` (`themes/default/`) уже має всі шаблони: `html`, `layout`, `home`, `pages/page`, `content/{list,preview,details}`, `blocks/block`, `menus/{menu,list}`, `errors/404` і `fields/field-*` для 15 типів. Розмітка без стилів, класи-хуки вже стабільні (див. `docs/theme-templates.md`).
-- `themes/default/assets/css/app.css` — звичайний CSS на кілька рядків. Його підключає `@vite($assets)` у `html` через `App\Theme\ThemeManager::assets()` (`docs/site-themes.md#ресурси-теми-vite`).
-- `vite.config.js` уже містить `@tailwindcss/vite` і збирає `themes/*/assets/{css,js}/*`. Адмінка збирає Tailwind 4 з `resources/css/app.css`. Нових залежностей для Tailwind не треба: `tailwindcss` і `@tailwindcss/vite` є в `package.json`.
-- Публічна сторінка не завантажує шрифт `Instrument Sans` (його підключає лише адмінка через плагін fonts). Щоб не додавати зовнішні запити, тема використовує системний стек шрифтів.
-- Значення `richtext` приходять як HTML з редактора без класів, тож стилізувати їх утилітами в розмітці неможливо.
+- The theme `default` (`themes/default/`) already has all the templates: `html`, `layout`, `home`, `pages/page`, `content/{list,preview,details}`, `blocks/block`, `menus/{menu,list}`, `errors/404` and `fields/field-*` for 15 types. The markup without styles, the hook classes are already stable (see `docs/theme-templates.md`).
+- `themes/default/assets/css/app.css` is plain CSS of a few lines. It is connected by `@vite($assets)` in `html` through `App\Theme\ThemeManager::assets()` (`docs/site-themes.md#ресурси-теми-vite`).
+- `vite.config.js` already contains `@tailwindcss/vite` and builds `themes/*/assets/{css,js}/*`. The admin builds Tailwind 4 from `resources/css/app.css`. No new dependencies are needed for Tailwind: `tailwindcss` and `@tailwindcss/vite` are in `package.json`.
+- The public page does not load the font `Instrument Sans` (the admin connects it only through the plugin fonts). To avoid adding external requests, the theme uses the system font stack.
+- The values of `richtext` come as HTML from the editor without classes, so they cannot be styled with utilities in the markup.
 
-Мотивація й перелік змін — у proposal.md (розділи «Why» і «What Changes»).
+The motivation and the list of changes — in proposal.md («Why» and «What Changes» sections).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Тема `default` виглядає прийнятно на 375px і на 1440px без нових залежностей і без JavaScript.
-- Стилі живуть у збірці теми, а не в адмінці: `resources/css/app.css` і `vite.config.js` не змінюються.
-- Класи-хуки з `docs/theme-templates.md` лишаються, тож інші теми працюють як раніше.
+- The theme `default` looks acceptable at 375px and at 1440px without new dependencies and without JavaScript.
+- The styles live in the build of the theme, not in the admin: `resources/css/app.css` and `vite.config.js` do not change.
+- The hook classes from `docs/theme-templates.md` remain, so the other themes work as before.
 
 **Non-Goals:**
-- Темний режим, перемикач тем, токени кольорів для адмінки.
-- Бургер-меню з JavaScript: меню переноситься на кілька рядків, без скриптів.
-- Стилі для блоків поза типовим `blocks/block` (окремі блоки теми перевизначають самі).
-- Підключення шрифтів з CDN і сторонніх бібліотек типографіки.
+- Dark mode, a switcher of themes, colour tokens for the admin.
+- A burger menu with JavaScript: the menu wraps onto several lines, without scripts.
+- Styles for the blocks outside the typical `blocks/block` (the separate blocks of the theme override them themselves).
+- Connecting fonts from a CDN and third-party typography libraries.
 
 ## Decisions
 
-### Tailwind 4 через наявний `@tailwindcss/vite`
-Файл `themes/default/assets/css/app.css` стає точкою входу Tailwind: `@import 'tailwindcss';` і `@source` на `../../views` (шаблони `default`) та на `views` інших тем, щоб їхні утиліти теж потрапляли в збірку. Альтернатива: простий CSS без Tailwind. Відхилено, бо користувач просив Tailwind, а інструмент уже налаштований у проєкті.
+### Tailwind 4 through the existing `@tailwindcss/vite`
+The file `themes/default/assets/css/app.css` becomes the entry of Tailwind: `@import 'tailwindcss';` and `@source` on `../../views` (the templates of `default`) and on `views` of the other themes, so that their utilities also get into the build. Alternative: plain CSS without Tailwind. Rejected, because the user asked for Tailwind and the tool is already configured in the project.
 
-### Токени в `@theme` файла теми
-Кольори, шрифт `system-ui` і базові відступи задаються в `@theme { ... }` того самого файла. Адмінка їх не бачить, бо її `@theme` у `resources/css/app.css`. Альтернатива: спільний `@theme` у `resources/`. Відхилено, щоб тема не залежала від адмінки й могла перевизначати токени.
+### Tokens in `@theme` of the file of the theme
+The colours, the font `system-ui` and the base indents are set in `@theme { ... }` of the same file. The admin does not see them, because its `@theme` is in `resources/css/app.css`. Alternative: a shared `@theme` in `resources/`. Rejected, so that the theme does not depend on the admin and can override the tokens.
 
-### Утиліти в шаблонах, звичайні селектори для richtext
-- Стилі елементів — класи Tailwind прямо в розмітці: `html` (на `<body>` — базові шрифт і колір), `layout`, `home`, меню, картки, поля, 404. Класи, які шаблони вже віддають (`site-header`, `menu__item`, `field__label`, `card`, `record-list` тощо), лишаються без змін і служать хуками для інших тем.
-- `richtext` (HTML із редактора, без класів) стилізується звичайними CSS-селекторами під класом `richtext`, який додається до `field__item`: `.richtext h2 { … }`, `.richtext ul { … }`, `.richtext a { … }` тощо. Без `@apply` і без `@layer`; значення пишуться звичайним CSS (або посилаються на токени `@theme` через `var(--…)`).
-- `app.css` містить `@import 'tailwindcss';`, `@source`, `@theme` (токени) і блок селекторів `.richtext`.
-- Альтернативи відхилено: арбітрарні варіанти для `richtext` (довго й важко читати), `@apply` для картки/меню (дублює стилі поруч із розміткою), `@tailwindcss/typography` (нова залежність заради одного поля).
+### Utilities in the templates, ordinary selectors for richtext
+- The styles of the elements — the classes of Tailwind directly in the markup: `html` (on `<body>` — the base font and colour), `layout`, `home`, the menu, the cards, the fields, 404. The classes that the templates already output (`site-header`, `menu__item`, `field__label`, `card`, `record-list` etc.) remain unchanged and serve as hooks for the other themes.
+- `richtext` (HTML from the editor, without classes) is styled by ordinary CSS selectors under the class `richtext`, which is added to `field__item`: `.richtext h2 { … }`, `.richtext ul { … }`, `.richtext a { … }` etc. Without `@apply` and without `@layer`; the values are written in ordinary CSS (or refer to the tokens of `@theme` through `var(--…)`).
+- `app.css` contains `@import 'tailwindcss';`, `@source`, `@theme` (the tokens) and the block of the selectors `.richtext`.
+- Alternatives rejected: arbitrary variants for `richtext` (long and hard to read), `@apply` for the card/menu (duplicates the styles next to the markup), `@tailwindcss/typography` (a new dependency for the sake of one field).
 
-### Класи-хуки залишаються, утиліти додаються
-`site-header`, `menu__item`, `field__label` тощо лишаються як є. Утиліти додаються тим самим елементам, наприклад `class="site-header mx-auto flex flex-wrap items-center gap-4 px-4 py-3"`. Тож перевизначення в іншій темі не ламає селектори, які на них спираються. Видалення класів-хуків заборонено специфікацією `default-theme-styling`.
+### The hook classes remain, the utilities are added
+`site-header`, `menu__item`, `field__label` etc. remain as they are. The utilities are added to the same elements, for example `class="site-header mx-auto flex flex-wrap items-center gap-4 px-4 py-3"`. So the override in another theme does not break the selectors that rely on them. The removal of the hook classes is forbidden by the specification `default-theme-styling`.
 
-### Адаптивність через `flex-wrap` і брейкпоінти `sm`/`lg`
-Шапка й меню: `flex-wrap`, пункти переносяться. Основна зона: `px-4` на телефоні, `max-w-3xl`/`max-w-5xl` з `mx-auto` на десктопі. Відео: `aspect-video` з `w-full`. Зображення: `max-w-full h-auto`. Горизонтальна прокрутка сторінки відсутня, бо кожен широкий блок має `overflow-x-auto` або `max-w-full`.
+### Adaptivity through `flex-wrap` and the breakpoints `sm`/`lg`
+The header and the menu: `flex-wrap`, the items wrap. The main zone: `px-4` on the phone, `max-w-3xl`/`max-w-5xl` with `mx-auto` on the desktop. The video: `aspect-video` with `w-full`. The images: `max-w-full h-auto`. There is no horizontal scroll of the page, because each wide block has `overflow-x-auto` or `max-w-full`.
 
-### Вигляд без зовнішнього шрифту
-`font-family` через `system-ui` у `@theme`. Це відповідає Non-Goals (без CDN) і не дає FOUT.
+### The look without an external font
+`font-family` through `system-ui` in `@theme`. This corresponds to the Non-Goals (no CDN) and avoids FOUT.
 
-### Збірка на хості
-Стилі підключаються через Vite. У розробці `npm run dev` або `npm run build` на хості (Node у Docker немає). Без збірки `html` не має `@vite`-тегів для CSS, і сайт працює без стилів, як і зараз (`docs/site-themes.md`).
+### The build on the host
+The styles are connected through Vite. In development `npm run dev` or `npm run build` on the host (Node is not in Docker). Without the build the `html` has no `@vite` tags for CSS, and the site works without styles, as now (`docs/site-themes.md`).
 
 ## Risks / Trade-offs
 
-- [`@source` не знаходить шаблони інших тем або глоб не розпізнається] → перевірити в apply, що клас з `themes/default/views/menus/list.blade.php` є в згенерованому CSS (`public/build/assets/*.css`). Це явна перевірка збірки, не покладання на автовизначення.
-- [Класи в Blade не потрапляють у збірку, якщо файл поза `@source`] → `@source` на всі `views` тем, плюс перевірка сторінки в браузері на 375px.
-- [Розмір CSS дублюється з адмінкою] → Tailwind генерує лише використані утиліти, а сторінки адмінки не завантажують цей файл; ризик мінімальний.
-- [Зміна вигляду ламає e2e-тести, які шукають текст або структуру] → `e2e/public-site.spec.js` і `e2e/smoke.spec.js` запускаються в tasks; селектори за класами-хуками лишаються.
-- [Утиліти в розмітці ускладнюють читання для інших тем] → документація класів у `docs/theme-templates.md` і коментарі Blade-шаблонів англійською залишаються.
+- [`@source` does not find the templates of other themes, or the glob is not recognized] → check in apply that a class from `themes/default/views/menus/list.blade.php` is in the generated CSS (`public/build/assets/*.css`). This is an explicit check of the build, not relying on automatic detection.
+- [Classes in Blade do not get into the build if the file is outside `@source`] → `@source` on all `views` of the themes, plus a check of the page in the browser at 375px.
+- [The size of the CSS is duplicated with the admin] → Tailwind generates only the used utilities, and the pages of the admin do not load this file; the risk is minimal.
+- [The change of the look breaks the e2e tests that look for text or structure] → `e2e/public-site.spec.js` and `e2e/smoke.spec.js` are run in the tasks; the selectors by the hook classes remain.
+- [The utilities in the markup complicate reading for the other themes] → the documentation of the classes in `docs/theme-templates.md` and the comments of the Blade templates in English remain.
 
 ## Migration Plan
 
-Зміна не має даних і міграцій. Відкат: повернути `themes/default/assets/css/app.css` і шаблони з git. Після деплою потрібна збірка ресурсів (`npm run build`), інакше сайт віддасть без стилів.
+The change has no data and no migrations. Rollback: return `themes/default/assets/css/app.css` and the templates from git. After the deployment the build of the resources is needed (`npm run build`), otherwise the site serves without styles.
 
 ## Documentation
 
-- `docs/theme-templates.md`: розділ «Шаблони `default`» і опис класів, якщо змінюється розмітка, описана там (шапка, футер, меню).
-- `docs/site-themes.md`: розділ «Ресурси теми (Vite)» — `default/assets/css/app.css` є Tailwind-збіркою, `@source` охоплює шаблони тем.
-- `docs/e2e-testing.md`: без змін, якщо не змінюються рядки таблиць; рядок «Шаблони теми» вже покриває `public-site` і `smoke`.
+- `docs/theme-templates.md`: the section «Шаблони `default`» — "Templates of `default`" and the description of the classes, if the markup described there changes (the header, the footer, the menu).
+- `docs/site-themes.md`: the section «Ресурси теми (Vite)» — `default/assets/css/app.css` is the Tailwind build, `@source` covers the templates of the themes.
+- `docs/e2e-testing.md`: without changes, if the rows of the tables do not change; the row «Шаблони теми» ("Templates of the theme") already covers `public-site` and `smoke`.
 
 ## Open Questions
 
-Немає: рішення вище можна прийняти без власника. Точний синтаксис `@source` для шляху `views` інших тем перевіряється в apply збіркою, це не змінює специфікацію.
+None: the decisions above can be taken without the owner. The exact syntax of `@source` for the path to the `views` of other themes is checked by the build in apply, this does not change the specification.

@@ -2,21 +2,21 @@
 
 ## ADDED Requirements
 
-### Requirement: Перетягування рядків
-Клієнтська таблиця SHALL мати необов'язкову можливість зміни порядку рядків перетягуванням. Коли її ввімкнено, кожен рядок SHALL мати ручку в першій клітинці, доступну також з клавіатури (фокус на ручці, піднятий рядок переміщується стрілками), з перекладеною доступною назвою. Після завершення перетягування таблиця SHALL повідомити сторінку про новий порядок ідентифікаторів усіх рядків і одразу показати його. Ручки SHALL бути неактивними, поки порядок не є вихідним і повним: коли діє пошук, сортування за колонкою або не всі рядки вміщуються на одній сторінці. Без цієї можливості таблиця SHALL працювати як раніше, без ручок. У серверному режимі можливість недоступна.
+### Requirement: Dragging rows
+The client table SHALL have an optional capability of changing the order of rows by dragging. When it is enabled, each row SHALL have a handle in the first cell, also available from the keyboard (focus on the handle, the lifted row is moved with the arrow keys), with a translated accessible name. After dragging ends, the table SHALL notify the page of the new order of the identifiers of all rows and show it immediately. The handles SHALL be inactive while the order is not the original and complete one: when a search is active, a column sorting is applied, or not all rows fit on one page. Without this capability the table SHALL work as before, without handles. In server mode the capability is not available.
 
-#### Scenario: Ручки є лише за ввімкнення
-- **WHEN** таблицю відкрито без можливості перетягування
-- **THEN** ручок у рядках немає, а розмітка не відрізняється від попередньої
+#### Scenario: Handles appear only when enabled
+- **WHEN** the table is opened without the dragging capability
+- **THEN** there are no handles in the rows, and the markup does not differ from the previous one
 
-#### Scenario: Перетягування мишею
-- **WHEN** користувач перетягує рядок на нове місце
-- **THEN** рядок стає на нове місце, сторінка отримує повний новий порядок ідентифікаторів
+#### Scenario: Dragging with the mouse
+- **WHEN** the user drags a row to a new place
+- **THEN** the row takes the new place, and the page receives the full new order of identifiers
 
-#### Scenario: Перетягування клавіатурою
-- **WHEN** користувач фокусує ручку, піднімає рядок пробілом, переміщує стрілками й підтверджує
-- **THEN** результат такий самий, як і після перетягування мишею
+#### Scenario: Dragging with the keyboard
+- **WHEN** the user focuses a handle, lifts the row with the space bar, moves it with the arrow keys and confirms
+- **THEN** the result is the same as after dragging with the mouse
 
-#### Scenario: Ручки неактивні
-- **WHEN** у таблиці введено пошук, обрано сортування або рядків більше, ніж вміщує сторінка
-- **THEN** ручки неактивні з підказкою, порядок змінити неможливо
+#### Scenario: Handles are inactive
+- **WHEN** a search is entered in the table, a sorting is selected, or there are more rows than one page holds
+- **THEN** the handles are inactive with a hint, and the order cannot be changed

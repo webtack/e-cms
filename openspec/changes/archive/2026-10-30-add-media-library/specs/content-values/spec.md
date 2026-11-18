@@ -2,90 +2,90 @@
 
 ## ADDED Requirements
 
-### Requirement: Типи полів «зображення» і «файл»
-Система SHALL підтримувати типи полів `image` і `file`, значення яких посилається на файл зі сховища. Значення SHALL зберігатися рядком `{uuid}.{розширення}` разом зі значеннями рядкового типу, без нової таблиці значень. Тип SHALL визначати профіль завантаження, який є верхньою межею правил: `image` — профіль `image`, `file` — профіль `document`. Поле SHALL мати необов'язкові налаштування: `mimes` — дозволені типи файлів (підмножина типів профілю) і `max_size` — максимальний розмір у кілобайтах (не більше ліміту профілю); без налаштувань діють правила всього профілю. Налаштування SHALL лише звужувати правила профілю й ніколи не розширювати їх. Для множинного поля система SHALL зберігати впорядкований список таких рядків за загальними правилами множинних значень, а переклади — за загальними правилами перекладів.
+### Requirement: Field types "image" and "file"
+The system SHALL support the field types `image` and `file`, whose value references a file from the storage. The value SHALL be stored as the string `{uuid}.{extension}` together with the values of the string type, without a new values table. The type SHALL define the upload profile, which is the upper limit of the rules: `image` — the profile `image`, `file` — the profile `document`. A field SHALL have optional settings: `mimes` — the allowed file types (a subset of the types of the profile) and `max_size` — the maximum size in kilobytes (not more than the limit of the profile); without settings the rules of the whole profile apply. The settings SHALL only narrow the rules of the profile and SHALL never widen them. For a multiple field the system SHALL store an ordered list of such strings by the general rules of multiple values, and translations by the general rules of translations.
 
-#### Scenario: Збереження й читання зображення
-- **WHEN** у поле `image` записують файл профілю `image`
-- **THEN** при читанні повертається той самий рядок `{uuid}.{розширення}`
+#### Scenario: Saving and reading an image
+- **WHEN** a file of the profile `image` is written into the field `image`
+- **THEN** on reading the same string `{uuid}.{extension}` is returned
 
-#### Scenario: Збереження й читання файлу
-- **WHEN** у поле `file` записують файл профілю `document`
-- **THEN** при читанні повертається той самий рядок `{uuid}.{розширення}`
+#### Scenario: Saving and reading a file
+- **WHEN** a file of the profile `document` is written into the field `file`
+- **THEN** on reading the same string `{uuid}.{extension}` is returned
 
-#### Scenario: Посилання без додаткових запитів
-- **WHEN** читається набір записів з полями `image` і `file`
-- **THEN** посилання на файли будуються з прочитаних значень, без додаткових запитів до сховища файлів
+#### Scenario: Link without additional queries
+- **WHEN** a set of records with the fields `image` and `file` is read
+- **THEN** the links to the files are built from the read values, without additional queries to the file storage
 
-#### Scenario: Очищення
-- **WHEN** полю `image` або `file` передають `null`
-- **THEN** значення видалено, файл лишається у сховищі
+#### Scenario: Clearing
+- **WHEN** `null` is passed to the field `image` or `file`
+- **THEN** the value is deleted, and the file remains in the storage
 
-### Requirement: Валідація значення полів «зображення» і «файл»
-Система SHALL приймати значення поля `image` або `file` лише у форматі `{uuid}.{розширення}`, де `uuid` — ідентифікатор наявного файлу, його профіль збігається з профілем типу поля, тип файлу входить до дозволених типів поля, розмір не перевищує максимального розміру поля, а розширення збігається з розширенням файлу у сховищі. Інші рядки (зокрема з розділювачами шляху) SHALL відхилятися з помилкою для цього поля.
+### Requirement: Validation of the value of the fields "image" and "file"
+The system SHALL accept a value of the field `image` or `file` only in the format `{uuid}.{extension}`, where `uuid` is the identifier of an existing file, its profile matches the profile of the field type, the file type is among the allowed types of the field, the size does not exceed the maximum size of the field, and the extension matches the extension of the file in the storage. Other strings (in particular with path separators) SHALL be rejected with an error for this field.
 
-#### Scenario: Файл потрібного профілю
-- **WHEN** значення є рядком `{uuid}.{розширення}` наявного файлу профілю типу поля
-- **THEN** запис приймається
+#### Scenario: File of the required profile
+- **WHEN** the value is a string `{uuid}.{extension}` of an existing file of the profile of the field type
+- **THEN** the record is accepted
 
-#### Scenario: Документ у полі зображення
-- **WHEN** у поле `image` записують файл профілю `document`
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Document in the image field
+- **WHEN** a file of the profile `document` is written into the field `image`
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Зображення у полі файлу
-- **WHEN** у поле `file` записують файл профілю `image`
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Image in the file field
+- **WHEN** a file of the profile `image` is written into the field `file`
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Неіснуючий файл
-- **WHEN** значення має правильний формат, але такого файлу немає
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Non-existing file
+- **WHEN** the value has the correct format, but there is no such file
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Неправильне розширення
-- **WHEN** `uuid` належить наявному файлу, а розширення в значенні інше
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Wrong extension
+- **WHEN** the `uuid` belongs to an existing file, and the extension in the value is different
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Довільний рядок
-- **WHEN** у поле `image` або `file` передано `../secret.png` або рядок довільного вигляду
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Arbitrary string
+- **WHEN** `../secret.png` or a string of an arbitrary form is passed to the field `image` or `file`
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Тип поза налаштуваннями поля
-- **WHEN** поле `image` дозволяє лише `image/png`, а в нього записують файл `image/jpeg` профілю `image`
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Type outside the field settings
+- **WHEN** the field `image` allows only `image/png`, and a file `image/jpeg` of the profile `image` is written into it
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Перевищення розміру поля
-- **WHEN** поле має `max_size` 1024 КБ, а записують файл розміром 2 МБ
-- **THEN** запис відхилено з помилкою для цього поля
+#### Scenario: Size above the field limit
+- **WHEN** the field has `max_size` of 1024 KB, and a file of 2 MB is written
+- **THEN** the record is rejected with an error for this field
 
-#### Scenario: Один файл у різних полях
-- **WHEN** той самий файл `image/jpeg` записують у поле, що дозволяє JPEG, і в поле, що дозволяє лише PNG
-- **THEN** у перше поле запис приймається, у друге відхиляється
+#### Scenario: One file in different fields
+- **WHEN** the same file `image/jpeg` is written into a field that allows JPEG, and into a field that allows only PNG
+- **THEN** the record is accepted in the first field, and rejected in the second
 
-#### Scenario: Зміна налаштувань не чіпає збережене
-- **WHEN** після звуження дозволених типів поле вже має збережені значення файлів, що тепер не відповідають налаштуванням
-- **THEN** збережені значення читаються без змін, а нові правила діють при наступному записі значення
+#### Scenario: Changing the settings does not touch the stored values
+- **WHEN** after narrowing the allowed types the field already has stored file values that now do not match the settings
+- **THEN** the stored values are read without changes, and the new rules apply at the next write of a value
 
-### Requirement: Налаштування не розширюють профіль
-Система SHALL відхиляти налаштування поля `image` або `file`, що містять тип, якого немає в профілі типу, чи розмір понад ліміт профілю. Налаштування SHALL не дозволяти виконувані файли й SVG, навіть якщо профіль було помилково розширено.
+### Requirement: Settings do not widen the profile
+The system SHALL reject settings of an `image` or `file` field that contain a type missing from the profile of the type, or a size above the profile's limit. The settings SHALL NOT allow executable files and SVG, even if the profile was mistakenly widened.
 
-#### Scenario: Тип поза профілем
-- **WHEN** для поля `image` у налаштуваннях вказано `application/pdf`
-- **THEN** налаштування відхилено з помилкою
+#### Scenario: Type outside the profile
+- **WHEN** for the field `image` the settings specify `application/pdf`
+- **THEN** the settings are rejected with an error
 
-#### Scenario: Розмір понад профіль
-- **WHEN** для поля `image` вказано `max_size` більший за ліміт профілю `image`
-- **THEN** налаштування відхилено з помилкою
+#### Scenario: Size above the profile
+- **WHEN** for the field `image` a `max_size` greater than the limit of the profile `image` is specified
+- **THEN** the settings are rejected with an error
 
-#### Scenario: Порожні налаштування
-- **WHEN** поле створено без налаштувань
-- **THEN** діють типи й розмір усього профілю типу
+#### Scenario: Empty settings
+- **WHEN** the field is created without settings
+- **THEN** the types and the size of the whole profile of the type apply
 
-### Requirement: Типи «зображення» і «файл» не змінюють загальний механізм
-Додавання типів `image` і `file` SHALL не змінювати загальний механізм запису, читання й вибірки значень: поля цих типів створюються, записуються, читаються й фільтруються тими самими засобами, що й інші типи, а фільтр за значенням працює як для короткого тексту. Тип значення поля, що має збережені значення, SHALL не змінюватися між `string`, `image` і `file`.
+### Requirement: The types "image" and "file" do not change the general mechanism
+Adding the types `image` and `file` SHALL NOT change the general mechanism of writing, reading and selecting values: fields of these types are created, written, read and filtered by the same means as other types, and the filter by value works as for a short text. The type of the value of a field that has stored values SHALL NOT change between `string`, `image` and `file`.
 
-#### Scenario: Фільтр за файлом
-- **WHEN** записи фільтруються за значенням поля `image` або `file`, що дорівнює певному `{uuid}.{розширення}`
-- **THEN** повертаються записи, що містять цей файл у цьому полі
+#### Scenario: Filter by file
+- **WHEN** records are filtered by the value of the field `image` or `file` equal to a certain `{uuid}.{extension}`
+- **THEN** the records that contain this file in this field are returned
 
-#### Scenario: Зміна типу поля зі значеннями
-- **WHEN** тип поля `string` або `image`, що має збережені значення, змінюють на `file`
-- **THEN** зміну відхилено, значення не змінюються
+#### Scenario: Changing the type of a field with values
+- **WHEN** the type of a field `string` or `image` that has stored values is changed to `file`
+- **THEN** the change is rejected, the values do not change

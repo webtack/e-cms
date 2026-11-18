@@ -2,37 +2,37 @@
 
 ## Why
 
-Адмінка відкрита кожному користувачу з підтвердженим email: ролей і прав немає, а єдиний обліковий запис — адміністратор із сидера (у `routes/web.php` прямо сказано «open to every verified admin until roles exist»). Щоб передати частину роботи редакторам і не віддавати їм налаштування системи, потрібна модель «доступ за роллю»: роль визначає, які розділи користувач бачить і які записи може змінювати.
+The admin is open to every user with a confirmed email: there are no roles and no rights, and the only account is the administrator from the seeder (`routes/web.php` says directly «open to every verified admin until roles exist»). To pass part of the work to editors without giving them the settings of the system, a model «access by role» is needed: the role defines which sections the user sees and which records he can change.
 
 ## What Changes
 
-- Нова сутність **роль**; кожен користувач має рівно одну роль (`users.role_id`). Системна роль `admin` має всі права, її не можна змінити чи видалити.
-- Права ролі зберігаються як набір записів «область → рівень»:
-  - системні права (так/ні): користувачі, ролі, меню, налаштування сайту, таксономія, типи (створення/налаштування);
-  - **рівень** (`none` / `own` / `any`) окремо для кожного типу контенту (усіх видів `content`, `page`, `block`) і для медіатеки. `own` — створювати та змінювати/видаляти лише свої записи (за автором), `any` — будь-які. Чужі записи при `own` лишаються видимими у списку.
-- Нові сторінки адмінки **«Користувачі»** і **«Ролі»**: CRUD, матриця прав на екрані ролі. Користувач отримує `is_active`: деактивований не входить, його відкриті сесії блокуються; видалити можна лише користувача без записів.
-- Усі маршрути `/admin/*` (крім дашборда, профілю та допоміжних ендпойнтів) перевіряють права на сервері; sidebar ховає недоступні пункти; недоступний URL відповідає 403.
-- Допоміжні ендпойнти: `lookup/*` залишаються відкритими для кожного активного користувача; `files.store` і `youtube/lookup` потребують рівня `own`/`any` хоча б на одному типі або на медіа.
-- Захисти: не можна видалити роль із користувачами; не можна деактивувати, видалити чи позбавити ролі `admin` останнього активного адміністратора; користувач не може деактивувати себе.
-- Нові типи контенту за замовчуванням мають `none` для всіх ролей, крім `admin`.
-- Міграція створює роль `admin` і призначає її всім наявним користувачам.
-- Окремого права «публікувати» немає: `is_active`, `published_at`, `unpublished_at` записів змінюються тим самим правом, що й сам запис.
-- **BREAKING**: після міграції користувач без ролі не може бути створений; будь-який новий користувач потребує ролі.
+- A new entity **role**; each user has exactly one role (`users.role_id`). The system role `admin` has all the rights; it cannot be changed or deleted.
+- The rights of a role are stored as a set of records «area → level»:
+  - system rights (yes/no): users, roles, menus, site settings, taxonomy, types (creation/settings);
+  - a **level** (`none` / `own` / `any`) separately for each content type (all kinds `content`, `page`, `block`) and for the media library. `own` — create and change/delete only own records (by the author), `any` — any. Foreign records at the level `own` remain visible in the list.
+- New admin pages **«Користувачі»** ("Users") and **«Ролі»** ("Roles"): CRUD, the matrix of rights on the screen of the role. A user gets `is_active`: a deactivated one cannot log in, his open sessions are blocked; a user can be deleted only if he has no records.
+- All routes `/admin/*` (except the dashboard, the profile and the auxiliary endpoints) check the rights on the server; the sidebar hides the unavailable items; an unavailable URL responds with 403.
+- Auxiliary endpoints: `lookup/*` remain open for every active user; `files.store` and `youtube/lookup` require the level `own`/`any` on at least one type or on the media.
+- Protections: a role with users cannot be deleted; the last active administrator cannot be deactivated, deleted or deprived of the role `admin`; a user cannot deactivate himself.
+- New content types by default have `none` for all roles except `admin`.
+- The migration creates the role `admin` and assigns it to all existing users.
+- There is no separate right «publish»: `is_active`, `published_at`, `unpublished_at` of records are changed by the same right as the record itself.
+- **BREAKING**: after the migration a user without a role cannot be created; any new user needs a role.
 
 ## Capabilities
 
 ### New Capabilities
-- `access-control`: модель ролей і прав (системні права, рівні `none/own/any` на типи й медіа), правила перевірки на сервері, поведінка при відмові, допоміжні ендпойнти, початкова роль `admin`.
-- `admin-users`: сторінки керування користувачами, роль і активність користувача, правила видалення/деактивації.
-- `admin-roles`: сторінки керування ролями та матриця прав, захист системної ролі та ролей із користувачами.
+- `access-control`: the model of roles and rights (system rights, the levels `none/own/any` for types and media), the rules of checking on the server, the behaviour on refusal, the auxiliary endpoints, the initial role `admin`.
+- `admin-users`: the pages of managing users, the role and the activity of a user, the rules of deletion/deactivation.
+- `admin-roles`: the pages of managing roles and the matrix of rights, the protection of the system role and of the roles with users.
 
 ### Modified Capabilities
-- `admin-auth`: деактивований користувач не може увійти, а вже відкрита сесія припиняється.
-- `admin-shell`: sidebar показує лише пункти, доступні ролі користувача, і містить нові пункти «Користувачі» та «Ролі».
+- `admin-auth`: a deactivated user cannot log in, and an already open session is terminated.
+- `admin-shell`: the sidebar shows only the items available to the role of the user, and contains the new items «Користувачі» and «Ролі».
 
 ## Impact
 
-- Код: міграції (`roles`, `role_permissions`, `users.role_id`, `users.is_active`), моделі й сервіс перевірки прав, policies/gates, middleware активності, контролери й запити `Admin/User*`, `Admin/Role*`, авторизація в наявних контролерах (`ContentNode`, `ContentType`/`Field`, `Menu`, `Vocabulary`/`Term`, `Media`, `File`), `HandleInertiaRequests` (передача прав на клієнт), сидер, фабрики, React-сторінки `Admin/Users`, `Admin/Roles`, `navigation.ts`/sidebar.
-- Тести: PHP Feature-тести прав по областях, e2e-спек для користувачів/ролей.
-- Документація (нові): `docs/access-control.md`, `docs/admin-users.md`, `docs/admin-roles.md`.
-- Документація (оновлення): `docs/README.md`, `docs/admin-auth.md`, `docs/admin-shell.md`, `docs/admin-content-nodes.md`, `docs/media-library.md`, `docs/e2e-testing.md`, а також згадки «відкрито всім» в `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-content-types.md`.
+- Code: migrations (`roles`, `role_permissions`, `users.role_id`, `users.is_active`), the models and the service of checking the rights, policies/gates, the middleware of activity, the controllers and requests `Admin/User*`, `Admin/Role*`, the authorization in the existing controllers (`ContentNode`, `ContentType`/`Field`, `Menu`, `Vocabulary`/`Term`, `Media`, `File`), `HandleInertiaRequests` (passing the rights to the client), the seeder, the factories, the React pages `Admin/Users`, `Admin/Roles`, `navigation.ts`/sidebar.
+- Tests: PHP Feature tests of the rights by areas, an e2e spec for users/roles.
+- Documentation (new): `docs/access-control.md`, `docs/admin-users.md`, `docs/admin-roles.md`.
+- Documentation (updates): `docs/README.md`, `docs/admin-auth.md`, `docs/admin-shell.md`, `docs/admin-content-nodes.md`, `docs/media-library.md`, `docs/e2e-testing.md`, and the mentions «open to everyone» in `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-content-types.md`.

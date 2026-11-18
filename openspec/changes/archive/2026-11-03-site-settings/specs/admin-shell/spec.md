@@ -3,44 +3,44 @@
 ## MODIFIED Requirements
 
 ### Requirement: Бічна навігація
-Оболонка SHALL містити бічну панель з пунктами Dashboard, Content Types, Page Types, Block Types, Taxonomy, Menus, Pages, Media Library і Settings та SHALL підсвічувати пункт, що відповідає поточній адресі. Назви пунктів SHALL відображатися мовою інтерфейсу поточного користувача. Пункт Content Types SHALL відкривати сторінку списку типів контенту, пункт Page Types — сторінку списку типів сторінок, пункт Block Types — сторінку списку типів блоків, пункт Taxonomy — сторінку списку словників, пункт Menus — сторінку списку меню, пункт Media Library — сторінку медіатеки, а пункт Settings — сторінку налаштувань сайту.
+The shell SHALL contain a side panel with the items Dashboard, Content Types, Page Types, Block Types, Taxonomy, Menus, Pages, Media Library and Settings, and SHALL highlight the item that matches the current address. The names of the items SHALL be displayed in the language of the interface of the current user. The item Content Types SHALL open the page of the list of content types, the item Page Types — the page of the list of page types, the item Block Types — the page of the list of block types, the item Taxonomy — the page of the list of vocabularies, the item Menus — the page of the list of menus, the item Media Library — the page of the media library, and the item Settings — the page of the site settings.
 
-#### Scenario: Підсвітка активного пункту
-- **WHEN** користувач перебуває на `/admin/dashboard`
-- **THEN** пункт Dashboard позначено як активний, а решту пунктів — ні
+#### Scenario: Highlighting of the active item
+- **WHEN** the user is on `/admin/dashboard`
+- **THEN** the item Dashboard is marked as active, and the other items are not
 
-#### Scenario: Робочий пункт Content Types
-- **WHEN** користувач переходить за пунктом Content Types
-- **THEN** відкривається `/admin/content-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Content Types
+- **WHEN** the user navigates by the item Content Types
+- **THEN** `/admin/content-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Page Types
-- **WHEN** користувач переходить за пунктом Page Types
-- **THEN** відкривається `/admin/page-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Page Types
+- **WHEN** the user navigates by the item Page Types
+- **THEN** `/admin/page-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Block Types
-- **WHEN** користувач переходить за пунктом Block Types
-- **THEN** відкривається `/admin/block-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Block Types
+- **WHEN** the user navigates by the item Block Types
+- **THEN** `/admin/block-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Taxonomy
-- **WHEN** користувач переходить за пунктом Taxonomy
-- **THEN** відкривається `/admin/taxonomy`, пункт позначено як активний (також на сторінках термінів і форм розділу), а хлібні крихти показують його назву
+#### Scenario: Working item Taxonomy
+- **WHEN** the user navigates by the item Taxonomy
+- **THEN** `/admin/taxonomy` opens, the item is marked as active (also on the pages of terms and the forms of the section), and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Menus
-- **WHEN** користувач переходить за пунктом Menus
-- **THEN** відкривається `/admin/menus`, пункт позначено як активний (також на сторінках пунктів меню і форм розділу), а хлібні крихти показують його назву
+#### Scenario: Working item Menus
+- **WHEN** the user navigates by the item Menus
+- **THEN** `/admin/menus` opens, the item is marked as active (also on the pages of the items of a menu and the forms of the section), and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Media Library
-- **WHEN** користувач переходить за пунктом Media Library
-- **THEN** відкривається `/admin/media`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Media Library
+- **WHEN** the user navigates by the item Media Library
+- **THEN** `/admin/media` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Робочий пункт Settings
-- **WHEN** користувач із правом на налаштування сайту переходить за пунктом Settings
-- **THEN** відкривається `/admin/settings`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working item Settings
+- **WHEN** a user with the right to the site settings navigates by the item Settings
+- **THEN** `/admin/settings` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Макетні пункти
-- **WHEN** користувач бачить пункт Pages
-- **THEN** він відображається як макет і не відкриває робочих функцій цього етапу
+#### Scenario: Placeholder item
+- **WHEN** the user sees the item Pages
+- **THEN** it is displayed as a mock-up and does not open working functions of this stage
 
-#### Scenario: Назви пунктів українською
-- **WHEN** користувач із мовою `uk` відкриває `/admin/dashboard`
-- **THEN** назви пунктів sidebar відображаються українськими перекладами, а підсвітка активного пункту не змінюється
+#### Scenario: Item names in Ukrainian
+- **WHEN** a user with the language `uk` opens `/admin/dashboard`
+- **THEN** the names of the sidebar items are displayed in Ukrainian translations, and the highlighting of the active item does not change

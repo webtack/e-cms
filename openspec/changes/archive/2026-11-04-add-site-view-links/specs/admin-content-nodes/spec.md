@@ -1,24 +1,24 @@
 ## ADDED Requirements
 
 ### Requirement: Кнопка «Перегляд» у формі редагування запису
-Форма редагування запису сторінки (`page`) або типу `content` SHALL містити в нижній панелі дій кнопку «Перегляд» — посилання на публічну адресу цього запису, що відкривається в новій вкладці браузера: для сторінки `/{slug}`, для запису `content` — `/{slug типу}/{slug запису}`. Адреса SHALL відповідати збереженому slug (не незбереженим змінам у формі). Для запису типу `block` кнопки SHALL НЕ бути, бо блок не має власної адреси. У формі створення кнопки SHALL НЕ бути. Кнопка є простим посиланням: для запису, який сайт не показує (вимкнений, запланований, завершений), сайт відповідає 404 за правилами публічного сайту.
+The form of editing a record of a page (`page`) or of a type `content` SHALL contain in the bottom action panel the button «Перегляд» ("Preview") — a link to the public address of this record, which opens in a new browser tab: for a page `/{slug}`, for a record `content` — `/{slug of the type}/{slug of the record}`. The address SHALL match the saved slug (not the unsaved changes in the form). For a record of the type `block` there SHALL be NO button, because a block has no address of its own. In the form of creating there SHALL be NO button. The button is a simple link: for a record that the site does not show (disabled, scheduled, expired) the site responds with 404 according to the rules of the public site.
 
-#### Scenario: Перегляд сторінки
-- **WHEN** користувач відкриває форму редагування сторінки зі slug `about` і натискає «Перегляд»
-- **THEN** у новій вкладці відкривається `/about`
+#### Scenario: Preview of a page
+- **WHEN** the user opens the form of editing a page with the slug `about` and clicks «Перегляд» ("Preview")
+- **THEN** `/about` opens in a new tab
 
-#### Scenario: Перегляд запису content
-- **WHEN** користувач відкриває форму редагування запису `hello` типу зі slug `news`
-- **THEN** кнопка «Перегляд» веде на `/news/hello` і відкривається в новій вкладці
+#### Scenario: Preview of a record content
+- **WHEN** the user opens the form of editing a record `hello` of a type with the slug `news`
+- **THEN** the button «Перегляд» ("Preview") leads to `/news/hello` and opens in a new tab
 
-#### Scenario: Блок без перегляду
-- **WHEN** користувач відкриває форму редагування запису блоку
-- **THEN** кнопки «Перегляд» немає
+#### Scenario: Block without preview
+- **WHEN** the user opens the form of editing a record of a block
+- **THEN** there is no button «Перегляд» ("Preview")
 
-#### Scenario: Форма створення
-- **WHEN** користувач відкриває форму створення запису
-- **THEN** кнопки «Перегляд» немає
+#### Scenario: Form of creating
+- **WHEN** the user opens the form of creating a record
+- **THEN** there is no button «Перегляд» ("Preview")
 
-#### Scenario: Невидимий запис
-- **WHEN** користувач натискає «Перегляд» у вимкненого запису
-- **THEN** у новій вкладці відкривається 404 сайту, а форма в адмінці лишається без змін
+#### Scenario: Invisible record
+- **WHEN** the user clicks «Перегляд» ("Preview") on a disabled record
+- **THEN** the 404 of the site opens in a new tab, and the form in the admin remains unchanged

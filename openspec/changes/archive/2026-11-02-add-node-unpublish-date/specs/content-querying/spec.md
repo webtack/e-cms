@@ -3,36 +3,36 @@
 ## MODIFIED Requirements
 
 ### Requirement: Видимість записів для публічної вибірки
-Вибірка SHALL мати режим «лише видимі», у якому вона повертає тільки записи з `is_active = true`, `published_at` не пізніше за поточний момент (включно) і порожнім `unpublished_at` або `unpublished_at` пізніше за поточний момент (строго): у момент `unpublished_at` запис уже невидимий. Режим SHALL застосовуватися до списку, лічильника загальної кількості й пошуку за slug (для публічного споживача), SHALL поєднуватися з фільтрами, пошуком і сортуванням та SHALL бути вимкненим за замовчуванням, щоб адмінка бачила всі записи. Вимкнений запис SHALL бути невидимим незалежно від дат; запис із `published_at` у майбутньому SHALL бути невидимим до настання цього моменту; запис із `unpublished_at` не пізніше за поточний момент SHALL бути невидимим. Видимість SHALL обчислюватися на момент запиту без фонових завдань: запис зникає з вибірки сам, коли настає `unpublished_at`.
+The selection SHALL have a mode «only visible», in which it returns only the records with `is_active = true`, `published_at` not later than the current moment (inclusive), and an empty `unpublished_at` or `unpublished_at` later than the current moment (strictly): at the moment of `unpublished_at` the record is already invisible. The mode SHALL apply to the list, to the counter of the total number, and to the search by slug (for the public consumer), SHALL combine with filters, search and sorting, and SHALL be disabled by default, so that the admin sees all records. A disabled record SHALL be invisible regardless of the dates; a record with `published_at` in the future SHALL be invisible until this moment arrives; a record with `unpublished_at` not later than the current moment SHALL be invisible. The visibility SHALL be computed at the moment of the request without background tasks: the record disappears from the selection by itself when `unpublished_at` arrives.
 
-#### Scenario: Опублікований запис
-- **WHEN** запит у режимі «лише видимі» і запис має `is_active = true`, `published_at` у минулому та порожній `unpublished_at`
-- **THEN** запис входить до результату
+#### Scenario: Published record
+- **WHEN** a request in the mode «only visible» and the record has `is_active = true`, `published_at` in the past and an empty `unpublished_at`
+- **THEN** the record is included in the result
 
-#### Scenario: Відкладена публікація
-- **WHEN** запит у режимі «лише видимі» і запис має `published_at` у майбутньому
-- **THEN** запис не входить до результату й не враховується в загальній кількості
+#### Scenario: Deferred publication
+- **WHEN** a request in the mode «only visible» and the record has `published_at` in the future
+- **THEN** the record is not included in the result and is not counted in the total number
 
-#### Scenario: Вимкнений запис
-- **WHEN** запит у режимі «лише видимі» і запис має `is_active = false` та `published_at` у минулому
-- **THEN** запис не входить до результату
+#### Scenario: Disabled record
+- **WHEN** a request in the mode «only visible» and the record has `is_active = false` and `published_at` in the past
+- **THEN** the record is not included in the result
 
-#### Scenario: Запис у інтервалі показу
-- **WHEN** запит у режимі «лише видимі», запис активний, `published_at` у минулому, а `unpublished_at` у майбутньому
-- **THEN** запис входить до результату
+#### Scenario: Record within the display interval
+- **WHEN** a request in the mode «only visible», the record is active, `published_at` is in the past, and `unpublished_at` is in the future
+- **THEN** the record is included in the result
 
-#### Scenario: Запис знято з публікації
-- **WHEN** запит у режимі «лише видимі» і запис активний, `published_at` у минулому, а `unpublished_at` у минулому
-- **THEN** запис не входить до результату й не враховується в загальній кількості
+#### Scenario: Record unpublished
+- **WHEN** a request in the mode «only visible», the record is active, `published_at` is in the past, and `unpublished_at` is in the past
+- **THEN** the record is not included in the result and is not counted in the total number
 
-#### Scenario: Межа дати зняття
-- **WHEN** запит у режимі «лише видимі» виконується рівно в момент `unpublished_at` запису
-- **THEN** запис не входить до результату
+#### Scenario: Boundary of the unpublish date
+- **WHEN** a request in the mode «only visible» is executed exactly at the moment `unpublished_at` of the record
+- **THEN** the record is not included in the result
 
-#### Scenario: Пошук за slug
-- **WHEN** публічний споживач шукає за slug вимкнений, ще не опублікований чи вже знятий з публікації запис
-- **THEN** повідомляється, що запис не знайдено
+#### Scenario: Search by slug
+- **WHEN** a public consumer searches by slug for a disabled, not yet published or already unpublished record
+- **THEN** it is reported that the record was not found
 
-#### Scenario: Адмінка бачить усе
-- **WHEN** вибірка виконується без режиму «лише видимі»
-- **THEN** повертаються записи в будь-якому стані, зокрема зняті з публікації
+#### Scenario: The admin sees everything
+- **WHEN** the selection is executed without the mode «only visible»
+- **THEN** records in any state are returned, including those unpublished

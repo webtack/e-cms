@@ -3,34 +3,34 @@
 ## ADDED Requirements
 
 ### Requirement: Вибір e2e-спеків для змін спільного коду
-Для змін у спільному компоненті застосунку (наприклад, `DataTable`) правила розробки SHALL вимагати запуску лише тих e2e-спеків, що залежать від цього компонента, а не повного набору. Залежні спеки SHALL визначатися за використанням компонента в застосунку та за відповідністю «спільний код → спеки», задокументованою в `docs/e2e-testing.md`. Повний набір SHALL вимагатися лише для змін `playwright.config.js`, `e2e/global-setup.js`, автентифікації та оболонки/sidebar.
+For changes in a shared component of the application (for example, `DataTable`) the development rules SHALL require running only those e2e specs that depend on this component, not the full set. The dependent specs SHALL be determined by the use of the component in the application and by the correspondence "shared code → specs" documented in `docs/e2e-testing.md`. The full set SHALL be required only for changes of `playwright.config.js`, `e2e/global-setup.js`, authentication and the shell/sidebar.
 
-#### Scenario: Зміна спільного компонента
-- **WHEN** змінено `DataTable`, який використовують не всі спеки
-- **THEN** запускаються лише спеки, що його використовують, а решта (наприклад, `smoke`, `admin-i18n`) пропускається
+#### Scenario: Change of a shared component
+- **WHEN** `DataTable` is changed, and not all specs use it
+- **THEN** only the specs that use it are run, and the rest (for example, `smoke`, `admin-i18n`) is skipped
 
-#### Scenario: Зміна, що зачіпає всі спеки
-- **WHEN** змінено `playwright.config.js`, `e2e/global-setup.js`, автентифікацію або оболонку/sidebar
-- **THEN** запускається повний `npm run test:e2e`
+#### Scenario: A change that touches all specs
+- **WHEN** `playwright.config.js`, `e2e/global-setup.js`, authentication or the shell/sidebar is changed
+- **THEN** the full `npm run test:e2e` is run
 
-#### Scenario: Межу впливу не визначити з коду
-- **WHEN** з коду й таблиці не можна визначити, які спеки залежать від зміни, або обраний набір майже збігається з повним
-- **THEN** замість мовчазного вибору розробника питають, чи запускати повний набір
+#### Scenario: The boundary of the impact cannot be determined from the code
+- **WHEN** from the code and the table it cannot be determined which specs depend on the change, or the chosen set almost coincides with the full one
+- **THEN** instead of a silent choice by the developer, they are asked whether to run the full set
 
 ### Requirement: Звіт про запущені та пропущені e2e-спеки
-Наприкінці завдання чи правки звіт SHALL називати, які e2e-спеки запущено, а які пропущено, і причину пропуску кожного. Вибір спеків SHALL NOT вимагати підтвердження перед запуском.
+At the end of a task or an edit the report SHALL name which e2e specs were run and which were skipped, and the reason for each skip. The choice of specs SHALL NOT require confirmation before the run.
 
-#### Scenario: Вибірковий прогін
-- **WHEN** завершено правку, для якої запущено частину спеків
-- **THEN** у звіті перелічено запущені спеки та пропущені з причиною (наприклад, «не використовує `DataTable`»)
+#### Scenario: Selective run
+- **WHEN** an edit is finished for which a part of the specs was run
+- **THEN** the report lists the run specs and the skipped ones with a reason (for example, "does not use `DataTable`")
 
-#### Scenario: e2e не запускались
-- **WHEN** правка не чіпає браузерну поведінку
-- **THEN** у звіті сказано, що e2e пропущено, і чому
+#### Scenario: e2e was not run
+- **WHEN** the edit does not touch the browser behaviour
+- **THEN** the report says that e2e was skipped, and why
 
 ### Requirement: Підтримка відповідності «спільний код → спеки»
-Додавання нового e2e-спека або нового споживача спільного компонента SHALL супроводжуватися оновленням відповідних рядків у таблицях `docs/e2e-testing.md`.
+Adding a new e2e spec or a new consumer of a shared component SHALL be accompanied by an update of the corresponding rows in the tables of `docs/e2e-testing.md`.
 
-#### Scenario: Новий споживач компонента
-- **WHEN** нова сторінка починає використовувати `DataTable`, а її спек додано
-- **THEN** спек з'являється і в таблиці «область → спек», і в переліку залежних від `DataTable` спеків
+#### Scenario: A new consumer of the component
+- **WHEN** a new page starts using `DataTable`, and its spec is added
+- **THEN** the spec appears both in the table "area → spec" and in the list of specs dependent on `DataTable`

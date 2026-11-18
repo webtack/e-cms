@@ -2,42 +2,42 @@
 
 ## Why
 
-У CMS немає місця для загальних відомостей про сайт: назви, логотипів, контактів, соцмереж, графіка роботи й глобального прапорця індексації. Фронтенд їх потребуватиме в шапці, підвалі та `meta`, а право ролі `settings` уже існує, але не застосовується ні до чого («її ще немає» у `docs/access-control.md`), і пункт Settings у sidebar лишається макетом.
+The CMS has no place for general information about the site: the name, the logos, the contacts, the social networks, the working hours and the global indexing flag. The frontend will need them in the header, the footer and `meta`, and the right of the role `settings` already exists, but is not applied to anything («ще немає» — "there is none yet" in `docs/access-control.md`), and the item Settings in the sidebar remains a mock-up.
 
 ## What Changes
 
-- Нова сторінка `GET/PUT /admin/settings` («Налаштування сайту») під правом `settings`; пункт Settings у sidebar перестає бути макетом.
-- Нові налаштування в `app_settings` з префіксом `site.`:
-  - `site.name`, `site.short_name`, `site.schedule` — перекладні (`{ "default": ... }`);
-  - `site.logo_large`, `site.logo_small` — перекладні файли профілю `image` (`{ "default": "{uuid}.{ext}" }`), необов'язкові;
-  - `site.emails`, `site.phones` — списки `{ value, label? }`, `label` перекладний (`{ "default": ... }`);
-  - `site.socials` — список `{ network, url, label? }`, `network` з фіксованого довідника в `config/`, дублі дозволені, `label` перекладний;
-  - `site.indexable` — `bool`, за замовчуванням `false`.
-- Графік роботи — список рядків, у кожному 4 однорядкові тексти (колонки), без обмеження змісту; межа кількості рядків — у валідації.
-- Списки (`emails`, `phones`, `socials`, `schedule`) мають додавання, видалення й порядок перетягуванням.
-- Формат даних готовий до мов (усі перекладні значення зберігаються під ключем `default`), а UI показує й редагує лише `default`; мовний UI — окрема майбутня зміна.
-- Читач `SiteSettings` поверх `AppSettings` для шаблонів із фолбеком на `default`.
-- Логотипи відстежуються в `media_relations` новим власником `site_setting`, тож використаний файл не можна видалити з медіатеки; медіатека показує власника з посиланням на сторінку налаштувань.
-- Поза межами: виведення `meta robots`, `X-Robots-Tag`, `robots.txt` (фронтенду немає), мовний UI, ефект `site.indexable` в адмінці.
+- A new page `GET/PUT /admin/settings` («Налаштування сайту» — "Site settings") under the right `settings`; the item Settings in the sidebar stops being a mock-up.
+- New settings in `app_settings` with the prefix `site.`:
+  - `site.name`, `site.short_name`, `site.schedule` — translatable (`{ "default": ... }`);
+  - `site.logo_large`, `site.logo_small` — translatable files of the profile `image` (`{ "default": "{uuid}.{ext}" }`), optional;
+  - `site.emails`, `site.phones` — lists `{ value, label? }`, `label` is translatable (`{ "default": ... }`);
+  - `site.socials` — a list `{ network, url, label? }`, `network` from a fixed directory in `config/`, duplicates are allowed, `label` is translatable;
+  - `site.indexable` — `bool`, by default `false`.
+- The working hours are a list of rows, each row has 4 single-line texts (the columns), without a limit on the content; the limit of the number of rows is in the validation.
+- The lists (`emails`, `phones`, `socials`, `schedule`) have adding, deleting and the order by drag-and-drop.
+- The data format is ready for languages (all translatable values are stored under the key `default`), and the UI shows and edits only `default`; the language UI is a separate future change.
+- The reader `SiteSettings` over `AppSettings` for the templates with a fallback to `default`.
+- The logos are tracked in `media_relations` by the new owner `site_setting`, so the used file cannot be deleted from the media library; the media library shows the owner with a link to the settings page.
+- Out of scope: the output of `meta robots`, `X-Robots-Tag`, `robots.txt` (there is no frontend), the language UI, the effect of `site.indexable` in the admin.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `admin-site-settings`: сторінка налаштувань сайту в адмінці — поля, валідація, списки з перетягуванням, збереження, доступ за правом `settings`.
-- `site-settings`: сховище й читач налаштувань сайту (`site.*`) — формат значень, значення за замовчуванням, фолбек на `default`, довідник соцмереж.
+- `admin-site-settings`: the page of the site settings in the admin — the fields, the validation, the lists with drag-and-drop, the saving, the access by the right `settings`.
+- `site-settings`: the storage and the reader of the site settings (`site.*`) — the format of the values, the default values, the fallback to `default`, the directory of social networks.
 
 ### Modified Capabilities
 
-- `admin-shell`: пункт Settings у sidebar стає робочим (більше не макет) і веде на `/admin/settings`.
-- `media-library`: з'являється власник зв'язків `site_setting` (логотипи), який медіатека описує підписом і посиланням.
+- `admin-shell`: the item Settings in the sidebar becomes working (no longer a mock-up) and leads to `/admin/settings`.
+- `media-library`: the owner of the links `site_setting` appears (the logos), which the media library describes by a caption and a link.
 
-Спека `access-control` не змінюється: системне право «налаштування сайту» вже в ній визначене, а його застосування до сторінки описує `admin-site-settings`. Оновлюється лише `docs/access-control.md`.
+The spec `access-control` does not change: the system right «налаштування сайту» ("site settings") is already defined in it, and its application to the page is described by `admin-site-settings`. Only `docs/access-control.md` is updated.
 
 ## Impact
 
-- **Код:** `routes/web.php`; контролер `Admin\SiteSettingsController`; form request; `App\Settings\SiteSettings` (читач і писач) та довідник `config/social_networks.php`; `App\Files\Owners\SiteSettingOwner` і рядок у `config/files.php`; `resources/js/Pages/Admin/Settings/Site.tsx` із компонентами списків; `navigation.ts` (прибрати `mock`, заголовок сторінки); переклади (`lang`).
-- **БД:** міграцій немає — використовується наявна `app_settings` і `media_relations`.
-- **Залежності:** нових немає; перетягування — наявний `@dnd-kit`.
-- **Docs:** створити `docs/admin-site-settings.md`; оновити `docs/app-settings.md` (префікс `site.`), `docs/access-control.md` (право `settings`), `docs/admin-shell.md` (пункт Settings), `docs/media-library.md` (власник `site_setting`), `docs/README.md` (індекс), `docs/e2e-testing.md` (новий спек у «Область → спек»).
-- **Тести:** Feature-тести `tests/Feature/Settings` (читач) і `tests/Feature/Admin` (сторінка), новий спек `e2e/admin-site-settings.spec.js`.
+- **Code:** `routes/web.php`; the controller `Admin\SiteSettingsController`; a form request; `App\Settings\SiteSettings` (the reader and the writer) and the directory `config/social_networks.php`; `App\Files\Owners\SiteSettingOwner` and a row in `config/files.php`; `resources/js/Pages/Admin/Settings/Site.tsx` with the components of the lists; `navigation.ts` (remove `mock`, the heading of the page); translations (`lang`).
+- **DB:** there are no migrations — the existing `app_settings` and `media_relations` are used.
+- **Dependencies:** no new ones; the drag-and-drop — the existing `@dnd-kit`.
+- **Docs:** create `docs/admin-site-settings.md`; update `docs/app-settings.md` (the prefix `site.`), `docs/access-control.md` (the right `settings`), `docs/admin-shell.md` (the item Settings), `docs/media-library.md` (the owner `site_setting`), `docs/README.md` (the index), `docs/e2e-testing.md` (the new spec in «Область → спек»).
+- **Tests:** Feature tests `tests/Feature/Settings` (the reader) and `tests/Feature/Admin` (the page), a new spec `e2e/admin-site-settings.spec.js`.

@@ -2,192 +2,192 @@
 
 ## Purpose
 
-Дає адмінці керування полями типу контенту: список полів у таблиці, створення, редагування й видалення з урахуванням правил системного поля та полів зі значеннями.
+Gives the admin the management of the fields of a content type: the list of fields in a table, creation, editing and deletion, subject to the rules of the system field and of fields with values.
 
 ## ADDED Requirements
 
-### Requirement: Сторінка полів типу
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/fields`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує всі поля типу контенту виду `content` із цим ключем у таблиці даних у клієнтському режимі: усі поля передаються сторінці, а пошук, сортування, пагінацію й розмір сторінки виконує браузер без запитів до сервера. Таблиця SHALL НЕ мати фільтрів. Без явного сортування поля SHALL йти за вагою (`weight`), а за рівної ваги — за порядком створення. Заголовок сторінки SHALL називати тип, а над таблицею SHALL бути посилання назад до списку типів. Для ключа, якого немає серед типів виду `content` (зокрема ключа типу `page` чи `block`), сторінка SHALL відповідати 404.
+### Requirement: Fields page of a type
+The admin SHALL have a page `/admin/content-types/{key}/fields`, available only to authenticated users with a confirmed email, which shows all fields of the content type of the `content` kind with this key in the data table in client mode: all fields are passed to the page, and search, sorting, pagination and page size are performed by the browser without requests to the server. The table SHALL NOT have filters. Without an explicit sorting the fields SHALL follow their weight (`weight`), and with equal weight — the creation order. The page title SHALL name the type, and above the table SHALL be a link back to the list of types. For a key that is not among the types of the `content` kind (including a key of a `page` or `block` type), the page SHALL respond 404.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/news/fields`
-- **THEN** він бачить таблицю полів типу `news` і заголовок із назвою типу, а в панелі таблиці немає кнопки фільтрів
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types/news/fields`
+- **THEN** they see the table of fields of the type `news` and a title with the name of the type, and the table toolbar has no filter button
 
-#### Scenario: Порядок за замовчуванням
-- **WHEN** тип має поля `title` (вага 0), `body` (вага 20) і `summary` (вага 10)
-- **THEN** без сортування таблиця показує їх у порядку `title`, `summary`, `body`
+#### Scenario: Default order
+- **WHEN** the type has the fields `title` (weight 0), `body` (weight 20) and `summary` (weight 10)
+- **THEN** without sorting the table shows them in the order `title`, `summary`, `body`
 
-#### Scenario: Пошук у браузері
-- **WHEN** користувач вводить текст у пошук таблиці
-- **THEN** таблиця звужується за назвою чи ключем поля без перезавантаження сторінки й без запиту до сервера
+#### Scenario: Search in the browser
+- **WHEN** the user types text into the table search
+- **THEN** the table is narrowed by the name or key of the field without a page reload and without a request to the server
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває сторінку полів для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: A type of another kind
+- **WHEN** the user opens the fields page for the key of a type of the `page` kind
+- **THEN** the server responds 404
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/news/fields`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/news/fields`
+- **THEN** they are redirected to the login page
 
-### Requirement: Колонки таблиці полів
-Таблиця SHALL показувати для кожного поля: назву, ключ, тип значення, ознаки «множинне», «обов'язкове» й «перекладне» та вагу. Системні поля SHALL мати помітку «Системне» під назвою. Колонки назви й ключа SHALL бути не приховуваними. Ознаки SHALL відображатися як «Так»/«Ні» мовою інтерфейсу.
+### Requirement: Columns of the fields table
+The table SHALL show for each field: the name, the key, the value type, the flags "multiple", "required" and "translatable", and the weight. System fields SHALL have a "System" note under the name. The name and key columns SHALL be non-hideable. The flags SHALL be displayed as "Yes"/"No" in the interface language.
 
-#### Scenario: Поле title
-- **WHEN** користувач дивиться рядок поля `title`
-- **THEN** він бачить тип «string», ознаки «обов'язкове» й «перекладне» зі значенням «Так», «множинне» — «Ні» та помітку «Системне»
+#### Scenario: The title field
+- **WHEN** the user looks at the row of the field `title`
+- **THEN** they see the type "string", the flags "required" and "translatable" with the value "Yes", "multiple" — "No", and the "System" note
 
-#### Scenario: Звичайне поле
-- **WHEN** користувач дивиться рядок додаткового поля без системної ознаки
-- **THEN** помітки «Системне» в рядку немає
+#### Scenario: An ordinary field
+- **WHEN** the user looks at the row of an additional field without the system flag
+- **THEN** there is no "System" note in the row
 
-### Requirement: Кнопка створення поля
-Над таблицею полів SHALL бути активна кнопка «Створити» в панелі інструментів, що відкриває форму створення поля цього типу.
+### Requirement: Create field button
+Above the fields table there SHALL be an active "Create" button in the toolbar, which opens the form for creating a field of this type.
 
-#### Scenario: Перехід до форми
-- **WHEN** користувач натискає «Створити» на сторінці полів типу `news`
-- **THEN** відкривається `/admin/content-types/news/fields/create`
+#### Scenario: Going to the form
+- **WHEN** the user clicks "Create" on the fields page of the type `news`
+- **THEN** `/admin/content-types/news/fields/create` opens
 
-### Requirement: Меню дій рядка поля
-Кожен рядок таблиці полів SHALL мати меню «⋮» з пунктами «Редагувати» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено). Для системного поля пункт «Видалити» SHALL бути неактивним; для поля, що має значення, він лишається активним, але діалог не дає підтвердити видалення (див. «Видалення поля»).
+### Requirement: Field row action menu
+Each row of the fields table SHALL have a "⋮" menu with the items "Edit" and "Delete" (in this order; "Delete" is visually highlighted as a destructive action and separated). For a system field the "Delete" item SHALL be inactive; for a field that has values it stays active, but the dialog does not allow confirming the deletion (see "Deleting a field").
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку звичайного поля
-- **THEN** він бачить активні пункти «Редагувати» й «Видалити»
+#### Scenario: Menu content
+- **WHEN** the user opens the "⋮" menu in the row of an ordinary field
+- **THEN** they see the active items "Edit" and "Delete"
 
-#### Scenario: Системне поле
-- **WHEN** користувач відкриває меню «⋮» у рядку поля `title`
-- **THEN** пункт «Видалити» неактивний, а «Редагувати» активний
+#### Scenario: System field
+- **WHEN** the user opens the "⋮" menu in the row of the field `title`
+- **THEN** the "Delete" item is inactive, and "Edit" is active
 
-### Requirement: Форма створення поля
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/fields/create` з формою: ключ (обов'язкове), назва (обов'язкове), тип значення (обов'язковий вибір серед зареєстрованих типів), прапорці «множинне», «обов'язкове», «перекладне» та вага. Вага за замовчуванням SHALL дорівнювати найбільшій вазі полів типу плюс одиниця. Форма SHALL мати кнопку збереження й посилання «Скасувати», що повертає до списку полів без змін. Підписи, підказки й повідомлення про помилки SHALL відображатися мовою інтерфейсу.
+### Requirement: Create field form
+The admin SHALL have a page `/admin/content-types/{key}/fields/create` with a form: key (required), name (required), value type (a required choice among the registered types), the flags "multiple", "required", "translatable" and weight. The default weight SHALL equal the highest weight of the fields of the type plus one. The form SHALL have a save button and a "Cancel" link, which returns to the list of fields without changes. Labels, hints and error messages SHALL be displayed in the interface language.
 
-#### Scenario: Відкриття форми
-- **WHEN** користувач відкриває форму створення поля типу, чиє найбільше поле має вагу 20
-- **THEN** він бачить поля форми, а вага попередньо заповнена значенням 21
+#### Scenario: Opening the form
+- **WHEN** the user opens the create-field form of a type whose highest field has weight 20
+- **THEN** they see the form fields, and the weight is pre-filled with 21
 
-#### Scenario: Скасування
-- **WHEN** користувач натискає «Скасувати»
-- **THEN** він повертається до списку полів типу, нове поле не створено
+#### Scenario: Cancel
+- **WHEN** the user clicks "Cancel"
+- **THEN** they return to the list of fields of the type, and no new field is created
 
-### Requirement: Збереження нового поля
-Надсилання форми створення SHALL створювати поле в цьому типі з наданими значеннями. Ключ SHALL мати формат ключів полів (малі латинські літери, цифри й `_`, починається з літери, до 64 символів) і бути унікальним у межах типу (той самий ключ в іншому типі допустимий); назва — до 255 символів; тип значення SHALL бути зареєстрованим; вага SHALL бути цілим числом від 0 до 65535. Зайві пробіли по краях назви й ключа обрізаються. Системною ознакою створене поле SHALL НЕ мати, навіть якщо запит її містить. Після успіху користувач SHALL потрапити на список полів типу з повідомленням про успіх, а нове поле SHALL бути в таблиці.
+### Requirement: Saving a new field
+Submitting the create form SHALL create a field in this type with the given values. The key SHALL match the format of field keys (lowercase Latin letters, digits and `_`, starts with a letter, up to 64 characters) and be unique within the type (the same key in another type is allowed); the name — up to 255 characters; the value type SHALL be registered; the weight SHALL be an integer from 0 to 65535. Extra spaces at the edges of the name and key are trimmed. The created field SHALL NOT have the system flag, even if the request contains it. After success the user SHALL land on the list of fields of the type with a success message, and the new field SHALL be in the table.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач заповнює ключ `views`, назву «Перегляди», тип «integer» і зберігає
-- **THEN** поле створено, користувача повернено до списку полів із повідомленням про успіх, `views` є в таблиці
+#### Scenario: Successful creation
+- **WHEN** the user fills in the key `views`, the name "Views", the type "integer" and saves
+- **THEN** the field is created, the user is returned to the list of fields with a success message, and `views` is in the table
 
-#### Scenario: Обов'язкові значення
-- **WHEN** користувач зберігає форму без ключа або назви
-- **THEN** поле не створено, біля відповідного поля показано помилку
+#### Scenario: Required values
+- **WHEN** the user saves the form without a key or a name
+- **THEN** the field is not created, and an error is shown next to the corresponding field
 
-#### Scenario: Недопустимий ключ
-- **WHEN** користувач вводить ключ `My Field` або `1price`
-- **THEN** поле не створено, біля поля ключа показано помилку
+#### Scenario: Invalid key
+- **WHEN** the user enters the key `My Field` or `1price`
+- **THEN** the field is not created, and an error is shown next to the key field
 
-#### Scenario: Дублікат ключа в типі
-- **WHEN** користувач вводить ключ, що вже є серед полів цього типу (зокрема `title`)
-- **THEN** поле не створено, біля поля ключа показано помилку
+#### Scenario: Duplicate key in a type
+- **WHEN** the user enters a key that is already among the fields of this type (including `title`)
+- **THEN** the field is not created, and an error is shown next to the key field
 
-#### Scenario: Незареєстрований тип значення
-- **WHEN** запит містить тип значення, якого немає в реєстрі
-- **THEN** поле не створено, біля поля типу показано помилку
+#### Scenario: Unregistered value type
+- **WHEN** the request contains a value type that is not in the registry
+- **THEN** the field is not created, and an error is shown next to the type field
 
-#### Scenario: Недопустима вага
-- **WHEN** користувач вводить вагу -1 або 70000
-- **THEN** поле не створено, біля поля ваги показано помилку
+#### Scenario: Invalid weight
+- **WHEN** the user enters the weight -1 or 70000
+- **THEN** the field is not created, and an error is shown next to the weight field
 
-#### Scenario: Спроба створити системне поле
-- **WHEN** запит створення містить ознаку системного поля
-- **THEN** поле створено як несистемне
+#### Scenario: Attempt to create a system field
+- **WHEN** the create request contains the system field flag
+- **THEN** the field is created as a non-system field
 
-### Requirement: Форма редагування поля
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/fields/{fieldKey}/edit` з тією самою формою, заповненою поточними значеннями поля. Ключ SHALL бути лише для читання з підказкою про незмінність. Для системного поля тип значення, «множинне» й «обов'язкове» SHALL бути заблоковані; для поля, що має збережені значення, заблокованим SHALL бути тип значення. Для ключа поля, якого немає в цьому типі, сторінка SHALL відповідати 404.
+### Requirement: Edit field form
+The admin SHALL have a page `/admin/content-types/{key}/fields/{fieldKey}/edit` with the same form, filled with the current values of the field. The key SHALL be read-only with a hint about its immutability. For a system field the value type, "multiple" and "required" SHALL be blocked; for a field that has stored values, the value type SHALL be blocked. For a field key that does not exist in this type, the page SHALL respond 404.
 
-#### Scenario: Відкриття форми
-- **WHEN** користувач обирає «Редагувати» для поля `views` типу `news`
-- **THEN** відкривається `/admin/content-types/news/fields/views/edit` з поточними значеннями, а ключ неможливо змінити
+#### Scenario: Opening the form
+- **WHEN** the user chooses "Edit" for the field `views` of the type `news`
+- **THEN** `/admin/content-types/news/fields/views/edit` opens with the current values, and the key cannot be changed
 
-#### Scenario: Системне поле
-- **WHEN** користувач відкриває форму поля `title`
-- **THEN** тип значення, «множинне» й «обов'язкове» заблоковані, а назва, «перекладне» і вага доступні
+#### Scenario: System field
+- **WHEN** the user opens the form of the field `title`
+- **THEN** the value type, "multiple" and "required" are blocked, and the name, "translatable" and weight are available
 
-#### Scenario: Поле зі значеннями
-- **WHEN** користувач відкриває форму поля, для якого існують значення
-- **THEN** тип значення заблокований, решта полів доступні
+#### Scenario: Field with values
+- **WHEN** the user opens the form of a field for which values exist
+- **THEN** the value type is blocked, the other fields are available
 
-#### Scenario: Невідоме поле
-- **WHEN** користувач відкриває форму для ключа, якого немає в типі
-- **THEN** сервер відповідає 404
+#### Scenario: Unknown field
+- **WHEN** the user opens the form for a key that does not exist in the type
+- **THEN** the server responds 404
 
-### Requirement: Збереження змін поля
-Надсилання форми редагування SHALL оновлювати назву, вагу, ознаки й тип значення поля; ключ і тип-власник SHALL НЕ змінюватися, значення цих параметрів із запиту ігноруються. Сервер SHALL відхиляти зміну типу значення, множинності й обов'язковості системного поля та зміну типу значення поля, що має збережені значення, з помилкою біля відповідного поля, незалежно від стану форми. Валідація назви й ваги збігається з валідацією створення. Після успіху користувач SHALL потрапити на список полів типу з повідомленням про успіх.
+### Requirement: Saving changes to a field
+Submitting the edit form SHALL update the name, weight, flags and value type of the field; the key and the owner type SHALL NOT change, and the values of these parameters from the request are ignored. The server SHALL reject a change of the value type, multiplicity and requiredness of a system field, and a change of the value type of a field that has stored values, with an error next to the corresponding field, regardless of the state of the form. The validation of name and weight matches the validation of creation. After success the user SHALL land on the list of fields of the type with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву поля `views` та вагу й зберігає
-- **THEN** зміни збережено, користувача повернено до списку полів із повідомленням про успіх, у таблиці нові значення
+#### Scenario: Successful change
+- **WHEN** the user changes the name and the weight of the field `views` and saves
+- **THEN** the changes are saved, the user is returned to the list of fields with a success message, and the table shows the new values
 
-#### Scenario: Тип поля зі значеннями
-- **WHEN** запит змінює тип значення поля, що має збережені значення
-- **THEN** зміни не збережено, біля поля типу показано помилку, значення не змінюються
+#### Scenario: Type of a field with values
+- **WHEN** the request changes the value type of a field that has stored values
+- **THEN** the changes are not saved, an error is shown next to the type field, and the values do not change
 
-#### Scenario: Тип поля без значень
-- **WHEN** користувач змінює тип значення поля без збережених значень
-- **THEN** новий тип збережено
+#### Scenario: Type of a field without values
+- **WHEN** the user changes the value type of a field without stored values
+- **THEN** the new type is saved
 
-#### Scenario: Заборонені зміни title
-- **WHEN** запит змінює тип, множинність або обов'язковість поля `title`
-- **THEN** зміни не збережено, показано помилку, поле лишається попереднім
+#### Scenario: Forbidden changes to title
+- **WHEN** the request changes the type, multiplicity or requiredness of the field `title`
+- **THEN** the changes are not saved, an error is shown, and the field remains as it was
 
-#### Scenario: Ключ у запиті
-- **WHEN** запит редагування містить інший ключ поля
-- **THEN** ключ не змінюється
+#### Scenario: Key in the request
+- **WHEN** the edit request contains a different field key
+- **THEN** the key does not change
 
-### Requirement: Видалення поля
-Користувач SHALL мати змогу видалити несистемне поле, що не має збережених значень, через пункт «Видалити» меню рядка після підтвердження в діалозі, що називає поле. Видалення SHALL бути заборонене для системного поля `title` і для поля, що має збережені значення: поле лишається незмінним, а користувач бачить повідомлення про причину. Діалог SHALL показувати причину заборони й не давати підтвердити видалення, якщо вона відома з даних рядка. Сервер SHALL перевіряти заборону самостійно, незалежно від діалогу. Після успіху користувач SHALL лишатися на списку полів типу з повідомленням про успіх, а поля в таблиці немає.
+### Requirement: Deleting a field
+The user SHALL be able to delete a non-system field that has no stored values, via the "Delete" item of the row menu after confirmation in a dialog that names the field. Deletion SHALL be forbidden for the system field `title` and for a field that has stored values: the field stays unchanged, and the user sees a message with the reason. The dialog SHALL show the reason for the ban and SHALL NOT allow confirming the deletion if the reason is known from the row data. The server SHALL check the ban itself, regardless of the dialog. After success the user SHALL stay on the list of fields of the type with a success message, and the field is not in the table.
 
-#### Scenario: Видалення поля без значень
-- **WHEN** користувач обирає «Видалити» для поля без значень і підтверджує
-- **THEN** поле видалено, у таблиці його немає, показано повідомлення про успіх
+#### Scenario: Deleting a field without values
+- **WHEN** the user chooses "Delete" for a field without values and confirms
+- **THEN** the field is deleted, it is not in the table, and a success message is shown
 
-#### Scenario: Поле зі значеннями
-- **WHEN** користувач обирає «Видалити» для поля, що має значення
-- **THEN** діалог називає причину («спочатку видаліть значення поля») і не має кнопки підтвердження; поле й значення лишаються
+#### Scenario: Field with values
+- **WHEN** the user chooses "Delete" for a field that has values
+- **THEN** the dialog names the reason ("delete the field's values first") and has no confirm button; the field and the values remain
 
-#### Scenario: Скасування
-- **WHEN** користувач закриває діалог без підтвердження
-- **THEN** поле лишається, нічого не змінюється
+#### Scenario: Cancel
+- **WHEN** the user closes the dialog without confirming
+- **THEN** the field remains, and nothing changes
 
-#### Scenario: Системне поле
-- **WHEN** на сервер надходить запит на видалення поля `title`
-- **THEN** поле лишається, користувач бачить повідомлення про причину
+#### Scenario: System field
+- **WHEN** a request to delete the field `title` arrives at the server
+- **THEN** the field remains, and the user sees a message with the reason
 
-#### Scenario: Запит на видалення поля зі значеннями
-- **WHEN** на сервер надходить запит на видалення поля, що має значення (минаючи діалог)
-- **THEN** поле й значення лишаються, користувач бачить повідомлення про причину
+#### Scenario: Request to delete a field with values
+- **WHEN** a request to delete a field that has values arrives at the server (bypassing the dialog)
+- **THEN** the field and the values remain, and the user sees a message with the reason
 
-### Requirement: Зміна порядку полів перетягуванням
-Таблиця полів SHALL дозволяти змінювати порядок полів перетягуванням рядків за ручкою в першій клітинці (також клавіатурою). Перетягування SHALL бути доступне, лише коли видно весь список полів у вихідному порядку: без пошуку, без сортування за колонкою, і всі поля вміщуються на одній сторінці; інакше ручки неактивні з підказкою, як зробити перетягування доступним. Після відпускання рядок SHALL одразу стати на нове місце, а новий порядок — зберегтися на сервері: ваги всіх полів типу переписуються послідовно з 0 у новому порядку, і після перезавантаження сторінки порядок лишається таким самим. Якщо збереження не вдалося, порядок у таблиці SHALL повернутися до попереднього, а користувач — побачити помилку. Сервер SHALL приймати лише повний набір ключів: рівно всі поля цього типу, без повторів і чужих ключів. Системне поле `title` теж можна переміщувати.
+### Requirement: Changing the order of fields by dragging
+The fields table SHALL allow changing the order of fields by dragging the rows via the handle in the first cell (also with the keyboard). Dragging SHALL be available only when the whole list of fields is visible in its original order: without search, without sorting by a column, and all fields fit on one page; otherwise the handles are inactive with a hint on how to make dragging available. After release the row SHALL immediately take the new place, and the new order SHALL be saved on the server: the weights of all fields of the type are rewritten sequentially from 0 in the new order, and after a page reload the order remains the same. If saving fails, the order in the table SHALL return to the previous one, and the user SHALL see an error. The server SHALL accept only a complete set of keys: exactly all fields of this type, without duplicates and foreign keys. The system field `title` may also be moved.
 
-#### Scenario: Перетягування
-- **WHEN** користувач перетягує поле `body` над поле `summary`
-- **THEN** `body` стає перед `summary`, і після перезавантаження порядок той самий
+#### Scenario: Dragging
+- **WHEN** the user drags the field `body` above the field `summary`
+- **THEN** `body` comes before `summary`, and after a reload the order is the same
 
-#### Scenario: Ваги після зміни
-- **WHEN** порядок збережено для типу з трьома полями
-- **THEN** їхні ваги — 0, 1, 2 у новому порядку
+#### Scenario: Weights after a change
+- **WHEN** the order is saved for a type with three fields
+- **THEN** their weights are 0, 1, 2 in the new order
 
-#### Scenario: Пошук або сортування активні
-- **WHEN** користувач ввів пошук або відсортував таблицю за колонкою
-- **THEN** ручки перетягування неактивні, змінити порядок неможливо
+#### Scenario: Search or sorting is active
+- **WHEN** the user has entered a search or sorted the table by a column
+- **THEN** the drag handles are inactive, and the order cannot be changed
 
-#### Scenario: Збій збереження
-- **WHEN** сервер відхиляє новий порядок
-- **THEN** рядки повертаються на попередні місця, користувач бачить помилку
+#### Scenario: Save failure
+- **WHEN** the server rejects the new order
+- **THEN** the rows return to their previous places, and the user sees an error
 
-#### Scenario: Неповний або чужий набір ключів
-- **WHEN** на сервер надходить порядок без одного з полів типу, з повтором або з ключем, якого в типі немає
-- **THEN** порядок відхилено, ваги не змінені
+#### Scenario: Incomplete or foreign set of keys
+- **WHEN** an order arrives at the server without one of the fields of the type, with a repeat, or with a key that does not exist in the type
+- **THEN** the order is rejected, and the weights are not changed
 
-#### Scenario: Тип іншого виду
-- **WHEN** запит зміни порядку надходить для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** a request to change the order arrives for the key of a type of the `page` kind
+- **THEN** the server responds 404

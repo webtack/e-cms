@@ -2,47 +2,47 @@
 
 ## Context
 
-Поточний стан (перевірено в коді): `config/app.php` має `locale = env('APP_LOCALE','en')` і `fallback_locale = en`; каталогу `lang/` немає, але `LoginRequest` уже використовує `__('auth.failed')` та `__('auth.throttle')`. `resources/views/app.blade.php` виставляє `<html lang>` з `app()->getLocale()`. Усі рядки React (`Login`, `VerifyEmail`, `Dashboard`, `Profile`, `UserMenu`, `ThemeToggle`, `AdminHeader`, `AppSidebar`) і заголовки в `navigation.ts` — англійські літерали. `HandleInertiaRequests` ділить `auth.user` (явний allow-list полів) і `flash`. `User` не має поля локалі. Мотивація — див. `proposal.md`, поведінка — `specs/admin-i18n` і `specs/admin-shell`.
+Current state (verified in code): `config/app.php` has `locale = env('APP_LOCALE','en')` and `fallback_locale = en`; there is no `lang/` directory, but `LoginRequest` already uses `__('auth.failed')` and `__('auth.throttle')`. `resources/views/app.blade.php` sets `<html lang>` from `app()->getLocale()`. All React strings (`Login`, `VerifyEmail`, `Dashboard`, `Profile`, `UserMenu`, `ThemeToggle`, `AdminHeader`, `AppSidebar`) and the titles in `navigation.ts` are English literals. `HandleInertiaRequests` shares `auth.user` (an explicit allow-list of fields) and `flash`. `User` has no locale field. The motivation is in `proposal.md`, the behaviour is in `specs/admin-i18n` and `specs/admin-shell`.
 
-Компоненти описані в нових/оновлених `docs/admin-i18n.md` та `docs/admin-shell.md`; логін — у `docs/admin-auth.md`.
+The components are described in the new/updated `docs/admin-i18n.md` and `docs/admin-shell.md`; the login is in `docs/admin-auth.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Один набір перекладів (`lang/*.json`) для React; серверні повідомлення — стандартні `lang/{locale}/*.php`.
-- Додати третю мову = додати запис у конфіг, `lang/xx.json` (копія `en.json`) і за потреби `lang/xx/*.php`, без правок коду.
-- Нові екрани одразу пишуться через `t()`; відсутній переклад ніколи не ламає сторінку.
+- One set of translations (`lang/*.json`) for React; server messages are the standard `lang/{locale}/*.php`.
+- Adding a third language = adding an entry to the config, `lang/xx.json` (a copy of `en.json`) and, if needed, `lang/xx/*.php`, without code changes.
+- New screens are written through `t()` from the start; a missing translation never breaks a page.
 
 **Non-Goals:**
-- Переклад контенту CMS, локалізовані URL, дати/числа (`Intl`), plural, RTL, SSR.
-- Вибір мови в профілі як окрема форма (профіль — заглушка; перемикач у шапці та на логіні).
-- Автогенерація/витяг ключів зі сторінок (інструмент типу i18next-parser).
+- Translating CMS content, localized URLs, dates/numbers (`Intl`), plurals, RTL, SSR.
+- Choosing the language in the profile as a separate form (the profile is a stub; the switcher is in the header and on the login page).
+- Automatic generation/extraction of keys from pages (a tool like i18next-parser).
 
 ## Decisions
 
-- **Конфіг мов.** `config/app.php`: `available_locales` = `['en' => 'English', 'uk' => 'Українська']` (власні назви для перемикача). `locale` лишається `env('APP_LOCALE','en')`; `fallback_locale = en`. Альтернатива — окремий `config/locales.php`: зайвий файл, бо це розширення app-конфігу.
-- **Ключі — англійські фрази** (`"Log in": "Увійти"`), як у Laravel JSON-перекладах; `en.json` містить ті самі ключі з тими самими значеннями. Альтернатива — dotted-ключі (`auth.login.title`): стійкіші до правки тексту, але важче читати код і ширший розрив між ключем і видимим текстом. `en.json` потрібен явно, щоб тест паритету ключів мав еталон і щоб копіювання `en.json` було шаблоном нової мови.
-- **Визначення мови — middleware `SetLocale`** у групі `web`, **перед** `HandleInertiaRequests` (бо той читає `app()->getLocale()`). Порядок: `Auth::user()?->locale` → cookie `locale` → `$request->getPreferredLanguage(array_keys(available_locales))` → `config('app.locale')`; кожне значення перевіряється на належність до `available_locales`. `app()->setLocale()` застосовується на запит. `getPreferredLanguage` має зіставляти `uk-UA` з `uk`; це перевіряється тестом під час реалізації.
-- **Збереження.** Колонка `users.locale` — `string(5)`, nullable (null = «не обирав», тоді працює визначення за cookie/Accept-Language). Нова міграція, існуючі не чіпаємо. Для гостя — cookie `locale` (`Cookie::forever`, через стандартне шифрування cookie). Для авторизованого одночасно ставиться й cookie, щоб після виходу логін лишився тією ж мовою. Альтернатива «лише сесія» відкинута: сесія знищується при logout і мова втрачалась би саме на сторінці входу.
-- **`POST /locale` (`LocaleController`, name `locale.update`)** поза групою `auth` (потрібен гостям). Валідація `Rule::in(array_keys(available_locales))`; відповідь `back()` (302 безпечний для Inertia POST). `throttle:30,1` від зловживань. Це змінює стан → POST, а не GET-посилання.
-- **Доставка в React — спільний проп `locale`** у `HandleInertiaRequests::share`: `{ current, available: [{code, name}], messages }`, де `messages` = вміст `lang/{current}.json` (файл повертається як є, також для `en`, щоб `t()` не мала особливих гілок). Розмір JSON невеликий; за зростання (сотні ключів) перейти на розбиття за сторінками — окрема зміна.
-- **Клієнт.** `lib/i18n.ts` — чиста функція `translate(messages, key, replace?)`: `messages[key] ?? key`, потім заміна `:name` (довші імена першими, як у Laravel, щоб `:minutes` не зачепило `:min`). `hooks/useTranslation.ts` читає `usePage().props.locale` і повертає `{ t, locale, locales }`. Альтернатива `react-i18next` відхилена власником: друге джерело перекладів поряд із `lang/`.
-- **Навігація.** `navigation.ts` зберігає **ключі** (англійські фрази) у `title`; переклад виконують компоненти (`AppSidebar`, `Breadcrumbs`) через `t(item.title)`. `getBreadcrumbs` і далі повертає ключі — функція лишається чистою й не залежить від React. Заголовок «Admin» теж ключ.
-- **Перемикач.** `Components/Admin/LocaleSwitcher.tsx` — DropdownMenu (є `ui/dropdown-menu`) з іконкою `Languages`; обрана мова позначена галочкою; дія `router.post('/locale', { locale }, { preserveScroll: true, preserveState: true })`. Persistent layout не перемонтується, тож стан sidebar зберігається. На логіні той самий компонент у куті сторінки (поза `AdminLayout`).
-- **`<Head title>`** і `aria-label` також через `t()`. Серверні повідомлення: `lang/uk/auth.php` (повний переклад), `lang/uk/validation.php` (правила, які реально використовуються, + `attributes`); відсутні ключі дають fallback на `en`. Англійські `lang/en/auth.php`/`validation.php` публікуються `php artisan lang:publish` (у Laravel 13 їх у скелеті немає).
-- **Значення за замовчуванням.** `APP_LOCALE` лишається `en`: e2e і поточні тести покладаються на англійські підписи, а Playwright за замовчуванням шле `Accept-Language: en-US`. Власник змінює дефолт через env.
-- **Тести.** PHPUnit: визначення мови (user → cookie → Accept-Language → default, недопустиме значення), `POST /locale` (гість/авторизований/невалідне), спільний проп `locale`, паритет ключів `en.json`/`uk.json`, `auth.failed` українською. Playwright `e2e/admin-i18n.spec.js`: перемикання на логіні й в адмінці, збереження після logout; тест у `afterEach` повертає `en` для seeded-користувача, щоб не ламати `admin-shell.spec.js`.
+- **Language config.** `config/app.php`: `available_locales` = `['en' => 'English', 'uk' => 'Українська']` (native names for the switcher). `locale` stays `env('APP_LOCALE','en')`; `fallback_locale = en`. Alternative: a separate `config/locales.php`: an extra file for what is an extension of the app config.
+- **Keys are English phrases** (`"Log in": "Увійти"`), as in Laravel JSON translations; `en.json` contains the same keys with the same values. Alternative: dotted keys (`auth.login.title`): more stable against text edits, but harder to read in code and a wider gap between the key and the visible text. `en.json` is needed explicitly so that the key-parity test has a reference and so that copying `en.json` works as a template for a new language.
+- **Locale detection — the `SetLocale` middleware** in the `web` group, **before** `HandleInertiaRequests` (because that one reads `app()->getLocale()`). Order: `Auth::user()?->locale` → cookie `locale` → `$request->getPreferredLanguage(array_keys(available_locales))` → `config('app.locale')`; each value is checked for membership in `available_locales`. `app()->setLocale()` is applied per request. `getPreferredLanguage` must map `uk-UA` to `uk`; this is verified by a test during implementation.
+- **Storage.** Column `users.locale` — `string(5)`, nullable (null = "not chosen", then detection by cookie/Accept-Language applies). A new migration; existing migrations are not touched. For a guest — the cookie `locale` (`Cookie::forever`, through the standard cookie encryption). For an authenticated user the cookie is set at the same time, so after logout the login page stays in the same language. The "session only" alternative was rejected: the session is destroyed on logout and the language would be lost precisely on the login page.
+- **`POST /locale` (`LocaleController`, name `locale.update`)** outside the `auth` group (guests need it). Validation `Rule::in(array_keys(available_locales))`; response `back()` (302 is safe for an Inertia POST). `throttle:30,1` against abuse. This changes state → POST, not a GET link.
+- **Delivery to React — a shared `locale` prop** in `HandleInertiaRequests::share`: `{ current, available: [{code, name}], messages }`, where `messages` = the contents of `lang/{current}.json` (the file is returned as is, including for `en`, so that `t()` has no special branches). The JSON size is small; if it grows (hundreds of keys), switch to splitting by page — a separate change.
+- **Client.** `lib/i18n.ts` — a pure function `translate(messages, key, replace?)`: `messages[key] ?? key`, then replacement of `:name` (longer names first, as in Laravel, so that `:minutes` does not match `:min`). `hooks/useTranslation.ts` reads `usePage().props.locale` and returns `{ t, locale, locales }`. The alternative `react-i18next` was rejected by the owner: a second source of translations next to `lang/`.
+- **Navigation.** `navigation.ts` keeps **keys** (English phrases) in `title`; the components (`AppSidebar`, `Breadcrumbs`) do the translation via `t(item.title)`. `getBreadcrumbs` still returns keys — the function stays pure and does not depend on React. The "Admin" title is also a key.
+- **Switcher.** `Components/Admin/LocaleSwitcher.tsx` — a DropdownMenu (`ui/dropdown-menu` exists) with a `Languages` icon; the selected language is marked with a check; the action is `router.post('/locale', { locale }, { preserveScroll: true, preserveState: true })`. The persistent layout is not remounted, so the sidebar state is kept. On the login page the same component sits in the corner of the page (outside `AdminLayout`).
+- **`<Head title>`** and `aria-label` also go through `t()`. Server messages: `lang/uk/auth.php` (full translation), `lang/uk/validation.php` (the rules that are actually used + `attributes`); missing keys fall back to `en`. The English `lang/en/auth.php`/`validation.php` are published with `php artisan lang:publish` (Laravel 13 does not include them in the skeleton).
+- **Default value.** `APP_LOCALE` stays `en`: the e2e and current tests rely on English labels, and Playwright sends `Accept-Language: en-US` by default. The owner changes the default through env.
+- **Tests.** PHPUnit: locale detection (user → cookie → Accept-Language → default, invalid value), `POST /locale` (guest/authenticated/invalid), the shared `locale` prop, key parity of `en.json`/`uk.json`, `auth.failed` in Ukrainian. Playwright `e2e/admin-i18n.spec.js`: switching on the login page and in the admin, persistence after logout; a test in `afterEach` returns `en` for the seeded user so as not to break `admin-shell.spec.js`.
 
 ## Risks / Trade-offs
 
-- [Правка англійського тексту ламає ключ і переклад] → паритет-тест ловить розсинхрон `en`/`uk`; ключі міняються разом з обома файлами.
-- [Усі переклади йдуть у кожній відповіді] → поки ключів мало — прийнятно; пункт на майбутнє — розбиття за доменами.
-- [Забули обгорнути рядок у `t()`] → не ловиться автоматично; зафіксувати правило в `docs/admin-i18n.md` та у перевірці під час apply (grep по літералах у JSX).
-- [E2E залежать від стану `users.locale` seeded-користувача] → відновлення мови в `afterEach`, пояснення в `docs/e2e-testing.md`.
-- [Cookie `locale` шифрується і не читається клієнтським JS] → це очікувано: мову віддає сервер у пропсі, JS cookie не читає.
-- [Cache-Control/CDN] → адмінка за авторизацією, публічного кешування немає; для публічного сайту це окрема тема.
+- [Editing an English text breaks the key and its translation] → the parity test catches a `en`/`uk` mismatch; keys are changed together with both files.
+- [All translations go in every response] → while there are few keys this is acceptable; an item for the future — splitting by domain.
+- [Forgetting to wrap a string in `t()`] → not caught automatically; the rule is recorded in `docs/admin-i18n.md` and checked during apply (grep for literals in JSX).
+- [E2E depend on the `users.locale` state of the seeded user] → the language is restored in `afterEach`, explained in `docs/e2e-testing.md`.
+- [The `locale` cookie is encrypted and not readable by client JS] → this is expected: the server provides the language in a prop, JS does not read the cookie.
+- [Cache-Control/CDN] → the admin is behind authentication, there is no public caching; for the public site this is a separate topic.
 
 ## Migration Plan
 
-1. `php artisan migrate` додає `users.locale` (nullable) — існуючі користувачі не змінюються, працює визначення за cookie/Accept-Language.
-2. Відкат: `migrate:rollback` видаляє колонку; middleware без колонки не використовуємо, тож відкат змін коду та міграції — разом.
+1. `php artisan migrate` adds `users.locale` (nullable) — existing users are not changed; detection by cookie/Accept-Language applies.
+2. Rollback: `migrate:rollback` removes the column; the middleware is not used without the column, so the rollback of code changes and of the migration goes together.

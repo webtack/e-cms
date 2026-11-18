@@ -2,119 +2,119 @@
 
 ## ADDED Requirements
 
-### Requirement: Сторінка таблиці типів блоків
-Адмінка SHALL мати сторінку `/admin/block-types`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує всі типи контенту виду `block` у таблиці даних у серверному режимі: пошук, сортування, пагінацію й розмір сторінки виконує сервер, а стан живе в адресі. Типи видів `content` і `page` на цій сторінці SHALL НЕ показуватися. Таблиця SHALL показувати для кожного типу назву з описом, ключ, ключ батьківського типу, кількість полів і кількість вузлів; колонок `slug` і виду (`kind`) та фільтрів таблиця SHALL НЕ мати. Без явного сортування рядки SHALL йти за назвою.
+### Requirement: Block types table page
+The admin SHALL have a page `/admin/block-types`, available only to authenticated users with a confirmed email, which shows all content types of the kind `block` in the data table in server mode: search, sorting, pagination and page size are performed by the server, and the state lives in the address. Types of the kinds `content` and `page` SHALL NOT be shown on this page. The table SHALL show for each type the name with the description, the key, the parent type key, the number of fields and the number of nodes; the table SHALL NOT have a `slug` column, a kind column (`kind`) or filters. Without an explicit sorting the rows SHALL follow the name.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/block-types`
-- **THEN** він бачить таблицю типів блоків, а заголовок відповідає мові інтерфейсу
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/block-types`
+- **THEN** they see the table of block types, and the title matches the interface language
 
-#### Scenario: Лише вид block
-- **WHEN** у системі є типи видів `content`, `page` і `block`
-- **THEN** таблиця показує лише типи виду `block`
+#### Scenario: Only the block kind
+- **WHEN** the system has types of the kinds `content`, `page` and `block`
+- **THEN** the table shows only the types of the kind `block`
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/block-types`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/block-types`
+- **THEN** they are redirected to the login page
 
-#### Scenario: Без slug
-- **WHEN** користувач дивиться на колонки таблиці
-- **THEN** колонки slug немає
+#### Scenario: Without slug
+- **WHEN** the user looks at the table columns
+- **THEN** there is no slug column
 
-### Requirement: Меню дій рядка типу блоку
-Кожен рядок таблиці типів блоків SHALL мати групу кнопок дій: кнопку «Налаштування» (форма редагування) і меню з пунктами «Редагувати», «Поля» й «Видалити», де «Видалити» відокремлено як руйнівну дію. Кнопка «Створити» над таблицею SHALL вести до форми створення типу блоку.
+### Requirement: Row action menu of a block type
+Each row of the block types table SHALL have a group of action buttons: a "Settings" button (the edit form) and a menu with the items "Edit", "Fields" and "Delete", where "Delete" is separated as a destructive action. The "Create" button above the table SHALL lead to the creation form of a block type.
 
-#### Scenario: Перехід до полів
-- **WHEN** користувач обирає в меню рядка пункт «Поля»
-- **THEN** відкривається `/admin/block-types/{key}/fields`
+#### Scenario: Going to the fields
+- **WHEN** the user chooses the "Fields" item in the row menu
+- **THEN** `/admin/block-types/{key}/fields` opens
 
-#### Scenario: Кнопка створення
-- **WHEN** користувач натискає «Створити» над таблицею
-- **THEN** відкривається `/admin/block-types/create`
+#### Scenario: Create button
+- **WHEN** the user clicks "Create" above the table
+- **THEN** `/admin/block-types/create` opens
 
-### Requirement: Створення типу блоку
-Адмінка SHALL мати форму `/admin/block-types/create` з полями: назва, ключ, батьківський тип і опис; поля slug у формі немає. Збереження SHALL створювати тип виду `block` незалежно від значень у запиті (вид не передається з форми), разом із системним полем `title`. Батьківським типом SHALL можна обрати лише тип виду `block`. Помилки валідації SHALL показуватися біля полів із збереженням введеного. Після успіху користувач SHALL потрапляти на список типів блоків із повідомленням про успіх.
+### Requirement: Creating a block type
+The admin SHALL have a form `/admin/block-types/create` with the fields: name, key, parent type and description; there is no slug field in the form. Saving SHALL create a type of the kind `block` regardless of the values in the request (the kind is not passed from the form), together with the system field `title`. Only a type of the kind `block` can be chosen as the parent type. Validation errors SHALL be shown next to the fields with the entered values kept. After success the user SHALL land on the list of block types with a success message.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач заповнює назву й унікальний ключ і зберігає форму
-- **THEN** створено тип виду `block` із системним полем `title`, а користувача перенаправлено на `/admin/block-types` з повідомленням
+#### Scenario: Successful creation
+- **WHEN** the user fills in the name and a unique key and saves the form
+- **THEN** a type of the kind `block` with the system field `title` is created, and the user is redirected to `/admin/block-types` with a message
 
-#### Scenario: Вид у запиті ігнорується
-- **WHEN** запит створення містить `kind=content` чи `kind=page` або `slug`
-- **THEN** тип створюється з видом `block` і без slug
+#### Scenario: Kind in the request is ignored
+- **WHEN** the create request contains `kind=content` or `kind=page` or a `slug`
+- **THEN** the type is created with the kind `block` and without a slug
 
-#### Scenario: Батько іншого виду
-- **WHEN** запит створення вказує як батьківський тип ключ типу виду `content` чи `page`
-- **THEN** збереження відхилено з помилкою біля поля батьківського типу
+#### Scenario: Parent of another kind
+- **WHEN** the create request specifies as the parent type the key of a type of the kind `content` or `page`
+- **THEN** the save is rejected with an error next to the parent type field
 
-#### Scenario: Дубль ключа
-- **WHEN** ключ уже зайнятий будь-яким типом
-- **THEN** збереження відхилено з помилкою біля поля ключа
+#### Scenario: Duplicate key
+- **WHEN** the key is already taken by any type
+- **THEN** the save is rejected with an error next to the key field
 
-### Requirement: Редагування типу блоку
-Адмінка SHALL мати форму `/admin/block-types/{key}/edit` з полями назви, батьківського типу й опису та ключем лише для читання. Збереження SHALL змінювати лише назву, батьківський тип і опис; `key` і `kind` не змінюються. Батьківським не можна обрати сам тип чи його нащадка. Для ключа, якого немає серед типів виду `block` (зокрема ключа типу `content` чи `page`), усі маршрути розділу SHALL відповідати 404, а `/admin/content-types/{key}/**` і `/admin/page-types/{key}/**` для типу `block` — також 404.
+### Requirement: Editing a block type
+The admin SHALL have a form `/admin/block-types/{key}/edit` with the fields name, parent type and description, and the key read-only. Saving SHALL change only the name, the parent type and the description; `key` and `kind` do not change. The type itself or its descendant cannot be chosen as the parent. For a key that is not among the types of the kind `block` (including the key of a type `content` or `page`), all routes of the section SHALL respond 404, and `/admin/content-types/{key}/**` and `/admin/page-types/{key}/**` for a type `block` — also 404.
 
-#### Scenario: Успішне збереження
-- **WHEN** користувач змінює назву типу блоку й зберігає
-- **THEN** назву оновлено, а користувача перенаправлено на `/admin/block-types` з повідомленням
+#### Scenario: Successful save
+- **WHEN** the user changes the name of a block type and saves
+- **THEN** the name is updated, and the user is redirected to `/admin/block-types` with a message
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває `/admin/block-types/{key}/edit` для ключа типу виду `content` чи `page`
-- **THEN** відповідь 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens `/admin/block-types/{key}/edit` for the key of a type of the kind `content` or `page`
+- **THEN** the response is 404
 
-#### Scenario: Інші розділи не відкривають тип блоку
-- **WHEN** користувач відкриває `/admin/content-types/{key}/edit` або `/admin/page-types/{key}/edit` для ключа типу виду `block`
-- **THEN** відповідь 404
+#### Scenario: Other sections do not open a block type
+- **WHEN** the user opens `/admin/content-types/{key}/edit` or `/admin/page-types/{key}/edit` for the key of a type of the kind `block`
+- **THEN** the response is 404
 
-#### Scenario: Нащадок як батько
-- **WHEN** запит редагування вказує як батька нащадка типу
-- **THEN** збереження відхилено з помилкою біля поля батьківського типу
+#### Scenario: Descendant as the parent
+- **WHEN** the edit request specifies a descendant of the type as its parent
+- **THEN** the save is rejected with an error next to the parent type field
 
-### Requirement: Видалення типу блоку
-Меню рядка SHALL відкривати діалог підтвердження видалення з назвою типу. Тип, що має вузли або дочірні типи, SHALL НЕ видалятися: діалог пояснює причину без кнопки підтвердження, а сервер відмовляє з повідомленням про помилку. Інакше тип видаляється разом із полями, а користувач потрапляє на список із повідомленням про успіх.
+### Requirement: Deleting a block type
+The row menu SHALL open a deletion confirmation dialog with the name of the type. A type that has nodes or child types SHALL NOT be deleted: the dialog explains the reason without a confirmation button, and the server refuses with an error message. Otherwise the type is deleted together with its fields, and the user lands on the list with a success message.
 
-#### Scenario: Видалення порожнього типу
-- **WHEN** користувач підтверджує видалення типу без вузлів і дочірніх типів
-- **THEN** тип і його поля видалено, а користувач на `/admin/block-types` бачить повідомлення про успіх
+#### Scenario: Deleting an empty type
+- **WHEN** the user confirms the deletion of a type without nodes and child types
+- **THEN** the type and its fields are deleted, and the user sees a success message on `/admin/block-types`
 
-#### Scenario: Тип із вузлами
-- **WHEN** тип має вузли
-- **THEN** діалог не має кнопки підтвердження, а запит видалення відхиляється повідомленням про помилку
+#### Scenario: Type with nodes
+- **WHEN** the type has nodes
+- **THEN** the dialog has no confirmation button, and the deletion request is rejected with an error message
 
-#### Scenario: Тип із дочірніми типами
-- **WHEN** тип має дочірні типи
-- **THEN** видалення відхилено повідомленням про помилку
+#### Scenario: Type with child types
+- **WHEN** the type has child types
+- **THEN** the deletion is rejected with an error message
 
-### Requirement: Меню розділу типу блоку
-Сторінки редагування типу блоку, списку полів, створення й редагування поля SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/block-types/{key}/edit`) і «Поля» (`/admin/block-types/{key}/fields`) та посилання назад до списку типів блоків. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля». На сторінці створення типу меню немає.
+### Requirement: Section menu of a block type
+The pages of editing a block type, the list of fields, creation and editing of a field SHALL have a horizontal section menu with the items "Settings" (`/admin/block-types/{key}/edit`) and "Fields" (`/admin/block-types/{key}/fields`) and a link back to the list of block types. The active item SHALL be highlighted; on the create and edit pages of a field the active item is "Fields". On the page of creating a type there is no menu.
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу блоку обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching sections
+- **WHEN** the user on the edit page of a block type chooses "Fields"
+- **THEN** the list of fields of the type opens, and the item "Fields" is active
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу блоку
-- **THEN** відкривається `/admin/block-types`
+#### Scenario: Link back
+- **WHEN** the user clicks the link back on the fields page of a block type
+- **THEN** `/admin/block-types` opens
 
-### Requirement: Поля типу блоку
-Адмінка SHALL надавати для типів виду `block` ті самі сторінки й дії над полями, що й для типів контенту, за адресами `/admin/block-types/{key}/fields`, `/fields/create`, `/fields/{field}/edit`: список (клієнтська таблиця, порядок за вагою), створення, редагування, видалення та впорядкування перетягуванням, з тими самими правилами валідації й заборонами (системне поле `title` та поле зі значеннями не видаляються, ключ поля незмінний). Після дій користувач SHALL повертатися на список полів типу блоку.
+### Requirement: Fields of a block type
+The admin SHALL provide for types of the kind `block` the same pages and field actions as for content types, at the addresses `/admin/block-types/{key}/fields`, `/fields/create`, `/fields/{field}/edit`: the list (a client table, ordered by weight), creation, editing, deletion and ordering by dragging, with the same validation rules and bans (the system field `title` and a field with values are not deleted, the field key is immutable). After the actions the user SHALL return to the list of fields of the block type.
 
-#### Scenario: Список полів
-- **WHEN** користувач відкриває `/admin/block-types/{key}/fields`
-- **THEN** бачить усі поля типу блоку, зокрема системне `title`, у порядку ваги
+#### Scenario: List of fields
+- **WHEN** the user opens `/admin/block-types/{key}/fields`
+- **THEN** they see all fields of the block type, including the system `title`, in the order of weight
 
-#### Scenario: Створення поля
-- **WHEN** користувач створює поле з унікальним ключем у типі блоку
-- **THEN** поле додано, а користувача перенаправлено на `/admin/block-types/{key}/fields` з повідомленням
+#### Scenario: Creating a field
+- **WHEN** the user creates a field with a unique key in a block type
+- **THEN** the field is added, and the user is redirected to `/admin/block-types/{key}/fields` with a message
 
-#### Scenario: Видалення системного поля
-- **WHEN** надходить запит видалення поля `title`
-- **THEN** поле лишається, а користувач бачить повідомлення про помилку
+#### Scenario: Deleting the system field
+- **WHEN** a deletion request for the field `title` arrives
+- **THEN** the field remains, and the user sees an error message
 
-#### Scenario: Зміна порядку
-- **WHEN** користувач перетягує поле на нове місце
-- **THEN** нова послідовність зберігається в `weight` і зберігається після перезавантаження
+#### Scenario: Changing the order
+- **WHEN** the user drags a field to a new place
+- **THEN** the new sequence is saved in `weight` and persists after a reload
 
-#### Scenario: Поле чужого типу
-- **WHEN** адреса вказує ключ поля, якого немає в цьому типі блоку
-- **THEN** відповідь 404
+#### Scenario: Field of another type
+- **WHEN** the address specifies a field key that does not exist in this block type
+- **THEN** the response is 404

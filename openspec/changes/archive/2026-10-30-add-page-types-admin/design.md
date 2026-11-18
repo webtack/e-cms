@@ -2,30 +2,30 @@
 
 ## Context
 
-Див. proposal.md — Why. Сьогодні `ContentTypeController`, `ContentFieldController`, form requests і Inertia-сторінки жорстко прив'язані до виду `content`: `Route::bind('contentType', …)` у `routes/web.php` відбирає лише `ofKind('content')`, `store()` пише `'kind' => 'content'`, `parentOptions()` і правило `parent_type` фільтрують за `content`, а фронтенд має шляхи `/admin/content-types/...` у `ContentTypeForm`, `ContentTypeRowActions`, `ContentTypeNav`, `ContentFieldForm`, `ContentFieldRowActions` та сторінках полів. Модель вже кінд-агностична: slug заборонено для `page`, батько мусить мати той самий вид (`ContentType::assertValid()`), системне поле `title` додається для всіх видів. Описано в `docs/content-model.md`, `docs/admin-content-types.md`, `docs/admin-content-fields.md`, `docs/admin-shell.md`.
+See proposal.md — Why. Today `ContentTypeController`, `ContentFieldController`, the form requests and the Inertia pages are hard-bound to the kind `content`: `Route::bind('contentType', …)` in `routes/web.php` selects only `ofKind('content')`, `store()` writes `'kind' => 'content'`, `parentOptions()` and the rule `parent_type` filter by `content`, and the frontend has paths `/admin/content-types/...` in `ContentTypeForm`, `ContentTypeRowActions`, `ContentTypeNav`, `ContentFieldForm`, `ContentFieldRowActions` and the field pages. The model is already kind-agnostic: the slug is forbidden for `page`, the parent must have the same kind (`ContentType::assertValid()`), the system field `title` is added for all kinds. Described in `docs/content-model.md`, `docs/admin-content-types.md`, `docs/admin-content-fields.md`, `docs/admin-shell.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Сторінки `page` повністю повторюють функціональність `content` без копіювання контролерів і React-сторінок.
-- Старі адреси `/admin/content-types/**` поводяться як раніше (404 для `page`/`block`).
+- The `page` pages fully repeat the functionality of `content` without copying controllers and React pages.
+- The old addresses `/admin/content-types/**` behave as before (404 for `page`/`block`).
 
 **Non-Goals:**
-- Типи виду `block` та вузли (сторінки-вузли, дерево сторінок, маршрутизація) — окремі зміни; макетний пункт «Pages» не чіпаємо.
-- Зміни моделі, міграцій чи конфігурації видів.
+- The kind `block` and nodes (node pages, the page tree, routing) — separate changes; the layout item "Pages" is not touched.
+- Changes to the model, migrations or the configuration of kinds.
 
 ## Decisions
 
-- **Вид задає маршрут.** Другий набір маршрутів `/admin/page-types/**` реєструється з тими самими контролерами та `->defaults('kind', 'page')` (для `content` — `'content'`); реєстрація обох наборів робиться одним циклом/групою, щоб вони не розходилися. `Route::bind('contentType')` бере вид із `$route->defaults['kind']` і відбирає `ofKind($kind)`. Альтернатива — окремі `PageTypeController`/`PageTypeFieldController`: відкинуто, бо це ~300 рядків дубльованої логіки (видалення, порядок, `valuedKeys`), яка б розходилась.
-- **Вид у контролерах.** Контролери читають вид із маршруту (`$request->route('kind')`) і використовують його у `index()` (`ofKind`), `store()` (`'kind' => $kind`) та `parentOptions()`. Імена маршрутів: `admin.page-types.*`, `admin.page-types.fields.*`; редіректи після дій будуються від імені поточного маршруту (префікс `content-types`/`page-types`), а не жорстким `to_route('admin.content-types.index')`.
-- **Валідація.** `StoreContentTypeRequest::sharedRules()` отримує вид: правило `parent_type` фільтрує `where('kind', $kind)`, а `slug` входить у правила лише для `content` (для `page` ключ `slug` не в правилах, тож відкидається з `validated()`). `UpdateContentTypeRequest` бере вид із типу маршруту.
-- **Фронтенд — один набір сторінок.** Контролер передає в Inertia-пропси `section`: `{ kind, basePath, titles… }` або мінімум `basePath` (`/admin/content-types` чи `/admin/page-types`) і `kind`. `ContentTypeForm`, `ContentTypeRowActions`, `ContentTypeNav`, `ContentFieldForm`, `ContentFieldRowActions` та сторінки `Pages/Admin/ContentTypes/*`, `ContentFields/*` замість жорсткого шляху використовують `basePath`; slug-поле й колонка slug показуються лише для `kind === 'content'`. Заголовки/діалоги («Page Types», «Delete page type») беруться з перекладів за видом. Альтернатива — окремі сторінки `Pages/Admin/PageTypes/*`: відкинуто через дублювання.
-- **Навігація.** У `navigation.ts` додається пункт `{ title: 'Page Types', href: '/admin/page-types', icon: FileStack }` після Content Types, у `extraTitles`/`patternTitles` — записи для `/admin/page-types/create`, `/{key}/edit`, `/fields…` (заголовки «Create page type», «Edit page type»). Хлібні крихти спільні для обох розділів: шаблони узагальнюються до `(content|page)-types`.
-- **Адреса розділу.** `/admin/page-types` (ключ у URL, як у решти сутностей); імена `page-types`, щоб не плутати з майбутнім `/admin/pages` для вузлів.
+- **The route defines the kind.** A second set of routes `/admin/page-types/**` is registered with the same controllers and `->defaults('kind', 'page')` (for `content` — `'content'`); both sets are registered in one loop/group so that they do not diverge. `Route::bind('contentType')` takes the kind from `$route->defaults['kind']` and selects `ofKind($kind)`. Alternative — separate `PageTypeController`/`PageTypeFieldController`: rejected, because it is ~300 lines of duplicated logic (deletion, ordering, `valuedKeys`), which would diverge.
+- **The kind in the controllers.** The controllers read the kind from the route (`$request->route('kind')`) and use it in `index()` (`ofKind`), `store()` (`'kind' => $kind`) and `parentOptions()`. Route names: `admin.page-types.*`, `admin.page-types.fields.*`; redirects after actions are built from the name of the current route (the prefix `content-types`/`page-types`), not from a hard-coded `to_route('admin.content-types.index')`.
+- **Validation.** `StoreContentTypeRequest::sharedRules()` receives the kind: the rule `parent_type` filters with `where('kind', $kind)`, and `slug` is in the rules only for `content` (for `page` the key `slug` is not in the rules, so it is dropped from `validated()`). `UpdateContentTypeRequest` takes the kind from the route's type.
+- **Frontend — one set of pages.** The controller passes in the Inertia props `section`: `{ kind, basePath, titles… }` or at least `basePath` (`/admin/content-types` or `/admin/page-types`) and `kind`. `ContentTypeForm`, `ContentTypeRowActions`, `ContentTypeNav`, `ContentFieldForm`, `ContentFieldRowActions` and the pages `Pages/Admin/ContentTypes/*`, `ContentFields/*` use `basePath` instead of a hard-coded path; the slug field and the slug column are shown only for `kind === 'content'`. The headers/dialogs ("Page Types", "Delete page type") are taken from the translations by the kind. Alternative — separate pages `Pages/Admin/PageTypes/*`: rejected because of duplication.
+- **Navigation.** In `navigation.ts` the item `{ title: 'Page Types', href: '/admin/page-types', icon: FileStack }` is added after Content Types, and in `extraTitles`/`patternTitles` — entries for `/admin/page-types/create`, `/{key}/edit`, `/fields…` (the titles "Create page type", "Edit page type"). The breadcrumbs are shared by both sections: the templates are generalized to `(content|page)-types`.
+- **The section address.** `/admin/page-types` (the key in the URL, as for the other entities); the names `page-types`, so as not to confuse them with the future `/admin/pages` for nodes.
 
 ## Risks / Trade-offs
 
-- [Регресія для `content` після узагальнення] → наявні Feature-тести й e2e `content-types`/`content-fields` лишаються без змін і мусять проходити; додається перевірка, що `/admin/content-types/**` для `page` — 404.
-- [Вид береться з `route defaults`, неявна залежність] → один допоміжний метод у контролері й коментар; Feature-тест на кожен вид.
-- [Жорсткі шляхи, які можна пропустити у фронтенді] → пошук `grep "/admin/content-types"` по `resources/js` у завданнях; e2e проходить обидва розділи.
-- [Спільні переклади «Content type» у діалогах] → окремі ключі для `page`, `lang/*.json` перевіряються тестом/збіркою.
+- [A regression for `content` after the generalization] → the existing Feature tests and e2e of `content-types`/`content-fields` remain unchanged and must pass; a check is added that `/admin/content-types/**` for `page` is 404.
+- [The kind taken from `route defaults` is an implicit dependency] → one helper method in the controller and a comment; a Feature test for each kind.
+- [Hard-coded paths that can be missed in the frontend] → a search for `"/admin/content-types"` in `resources/js` in the tasks; e2e passes both sections.
+- [Shared translations "Content type" in dialogs] → separate keys for `page`; `lang/*.json` are checked by a test/build.

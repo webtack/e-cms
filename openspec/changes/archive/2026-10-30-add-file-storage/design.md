@@ -2,53 +2,53 @@
 
 ## Context
 
-Мотивацію й обсяг див. у [proposal.md](proposal.md), вимоги — у [specs/file-storage/spec.md](specs/file-storage/spec.md).
+The motivation and scope are in [proposal.md](proposal.md), the requirements are in [specs/file-storage/spec.md](specs/file-storage/spec.md).
 
-Що є в проєкті (перевірено в коді):
+What is in the project (checked in the code):
 
-- `config/filesystems.php`: диски `local` (`storage/app/private`), `public` (`storage/app/public`, URL `APP_URL/storage`, посилання `public/storage` через `storage:link`) і `s3`. Файлового коду немає.
-- Значення полів — EAV: `content_values_{тип}` з колонкою `value` і складеними FK; новий тип поля = клас + міграція + рядок у `config/content.php`. Запис іде через `ContentValueWriter`, який працює з простими значеннями. Тип `file` (значення = `files.id`) додасть наступна зміна; ядро запису від цієї зміни не залежить.
-- Адмін-маршрути — у групі `auth`+`verified` з префіксом `admin` (`routes/web.php`). Форми — Inertia `useForm` (JSON). Є зразок демо-сторінки компонента: `Ui/DataTableDemoController` (404 у production).
-- Scheduler: `routes/console.php` містить лише `inspire`.
-- PHP-розширення `gd`, `fileinfo`, `exif` є; `imagick` і пакетів обробки зображень немає. Ліміти PHP у контейнері — `upload_max_filesize=2M`, `post_max_size=8M` (в `docker/php/Dockerfile` ini не задається); `client_max_body_size` nginx — 64M.
-- Тести: PHPUnit на SQLite in-memory; зовнішні ключі в SQLite у Laravel увімкнені.
+- `config/filesystems.php`: the disks `local` (`storage/app/private`), `public` (`storage/app/public`, URL `APP_URL/storage`, the link `public/storage` via `storage:link`) and `s3`. There is no file code.
+- Field values are EAV: `content_values_{type}` with the column `value` and composite FKs; a new field type = a class + a migration + a line in `config/content.php`. Writing goes through `ContentValueWriter`, which works with simple values. The type `file` (value = `files.id`) will be added by the next change; the write core does not depend on this change.
+- Admin routes are in the group `auth`+`verified` with the prefix `admin` (`routes/web.php`). Forms are Inertia `useForm` (JSON). There is a sample demo page of a component: `Ui/DataTableDemoController` (404 in production).
+- Scheduler: `routes/console.php` contains only `inspire`.
+- The PHP extensions `gd`, `fileinfo`, `exif` are present; `imagick` and image processing packages are not. The PHP limits in the container — `upload_max_filesize=2M`, `post_max_size=8M` (the ini is not set in `docker/php/Dockerfile`); nginx `client_max_body_size` — 64M.
+- Tests: PHPUnit on in-memory SQLite; foreign keys in SQLite are enabled in Laravel.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Один сервіс, через який усі споживачі зберігають, адресують і видаляють файли; споживач знає лише `file_id`.
-- Правила (диск, каталог, типи, розмір) описує розробник у конфігурації; користувач їх не обирає й не обходить.
-- Цілісність забезпечує БД (FK `RESTRICT`), а очищення безпечне навіть при помилці в конфігурації.
+- One service through which all consumers store, address and delete files; a consumer knows only the `file_id`.
+- The rules (disk, directory, types, size) are described by the developer in the configuration; the user does not choose or bypass them.
+- The integrity is ensured by the DB (FK `RESTRICT`), and the cleanup is safe even with an error in the configuration.
 
 **Non-Goals:**
-- Приватні файли й маршрут віддачі з перевіркою прав: сервіс `url()` залишає для цього місце, але маршруту немає.
-- Мініатюри, похідні розміри, обробка зображень, дедуплікація, медіатека, ролі та права.
-- Тип поля `file`, аватар, логотип — окремі зміни.
+- Private files and a delivery route with an access check: the service `url()` leaves a place for this, but there is no route.
+- Thumbnails, derived sizes, image processing, deduplication, a media library, roles and permissions.
+- The field type `file`, an avatar, a logo — separate changes.
 
 ## Decisions
 
-### D1. Таблиця `files`, споживачі зберігають `file_id`
+### D1. The table `files`, consumers store `file_id`
 
-Колонки: `id`, `uuid` (UUID v7, як у `content_nodes`), `profile` (string 64), `disk` (string 64), `path` (string 512), `original_name` (string 255), `mime` (string 127), `size` (unsigned bigint), `hash` (char 64, sha256), `width`/`height` (nullable unsigned int), `timestamps`. Індекс по `created_at` (для `files:prune`). Модель `App\Models\File`.
+Columns: `id`, `uuid` (UUID v7, as in `content_nodes`), `profile` (string 64), `disk` (string 64), `path` (string 512), `original_name` (string 255), `mime` (string 127), `size` (unsigned bigint), `hash` (char 64, sha256), `width`/`height` (nullable unsigned int), `timestamps`. An index on `created_at` (for `files:prune`). The model `App\Models\File`.
 
-Альтернатива — лише шлях у колонці споживача: відкинуто (метадані розмазані, немає єдиного очищення, повторне використання неможливе). Дедуплікація за `hash` не робиться: хеш зберігається, але рядок створюється завжди — це спрощує життєвий цикл (кожен рядок має власний шлях і незалежне видалення). Унікального індексу на `hash` немає.
+Alternative — only the path in the consumer's column: rejected (the metadata is scattered, there is no single cleanup, reuse is impossible). Deduplication by `hash` is not done: the hash is stored, but a row is always created — this simplifies the lifecycle (each row has its own path and independent deletion). There is no unique index on `hash`.
 
-### D2. Профілі в `config/files.php`
+### D2. Profiles in `config/files.php`
 
 ```php
 'profiles' => [
-    'image' => ['disk' => 'public', 'directory' => 'images', 'mimes' => [image/jpeg, image/png, image/webp, image/gif], 'max_size' => 5 * 1024],   // КБ
+    'image' => ['disk' => 'public', 'directory' => 'images', 'mimes' => [image/jpeg, image/png, image/webp, image/gif], 'max_size' => 5 * 1024],   // KB
     'document' => ['disk' => 'public', 'directory' => 'documents', 'mimes' => [application/pdf, ...docx, ...xlsx], 'max_size' => 20 * 1024],
 ],
 'references' => [],   // [['table' => ..., 'column' => ...], ...]
 'prune_after_hours' => 24,
 ```
 
-`FileProfiles` (клас-читач конфігурації) повертає профіль за ключем або кидає `InvalidArgumentException`; ендпоінт перед цим перевіряє ключ правилом `Rule::in(array_keys(...))`. Диск і каталог беруться з профілю, а не із запиту. Новий профіль — один блок у конфігурації.
+`FileProfiles` (a class that reads the configuration) returns a profile by key or throws `InvalidArgumentException`; the endpoint checks the key beforehand with the rule `Rule::in(array_keys(...))`. The disk and the directory are taken from the profile, not from the request. A new profile is one block in the configuration.
 
-Альтернатива: правила (mimes, max) з клієнта — відкинуто, клієнту довіряти не можна. Диск в одному місці для всього застосунку — відкинуто: різні споживачі можуть потребувати різних дисків, а `files.disk` уже є в кожному рядку.
+Alternative: rules (mimes, max) from the client — rejected, the client cannot be trusted. One disk for the whole application — rejected: different consumers may need different disks, and `files.disk` is already in each row.
 
-### D3. `FileStorage` — єдина точка
+### D3. `FileStorage` — the single point
 
 ```
 store(UploadedFile $file, string $profile): File
@@ -57,65 +57,65 @@ delete(File $file): void
 ```
 
 `store`:
-1. Профіль зі `FileProfiles`.
-2. Перевірка до запису на диск: розмір ≤ `max_size`; mime за вмістом (`finfo` через `UploadedFile::getMimeType()`, який читає вміст) входить у `mimes` профілю; **глобальний чорний список**: mime/розширення виконуваних файлів (`php`, `phtml`, `phar`, `sh`, `exe` тощо) і `image/svg+xml` відхиляються навіть якщо профіль їх дозволив; невдача → `ValidationException` з ключем `file`.
-3. Для зображень `getimagesize` дає ширину/висоту; якщо вміст не читається як зображення при mime `image/*` → відхилення.
-4. Ім'я на диску: `{directory}/{uuid}.{розширення з mime}`; розширення береться з відповідності дозволеного mime, а не з оригінального імені. Запис на диск — `Storage::disk($disk)->putFileAs(...)`.
-5. Рядок у `files`. Якщо вставка впала — файл на диску видаляється (компенсація, бо транзакція БД диск не відкотить).
+1. The profile from `FileProfiles`.
+2. A check before writing to the disk: size ≤ `max_size`; the mime by content (`finfo` via `UploadedFile::getMimeType()`, which reads the content) is in the `mimes` of the profile; **a global blacklist**: the mime/extensions of executable files (`php`, `phtml`, `phar`, `sh`, `exe` etc.) and `image/svg+xml` are rejected even if the profile allowed them; a failure → `ValidationException` with the key `file`.
+3. For images `getimagesize` gives the width/height; if the content cannot be read as an image with the mime `image/*` → rejection.
+4. The name on the disk: `{directory}/{uuid}.{extension from the mime}`; the extension is taken from the matching allowed mime, not from the original name. Writing to the disk — `Storage::disk($disk)->putFileAs(...)`.
+5. A row in `files`. If the insert failed — the file on the disk is deleted (compensation, because a DB transaction does not roll back the disk).
 
-`url`: `Storage::disk($file->disk)->url($file->path)` — для `public` це `/storage/...`, для `s3` — URL диска. Приватний режим (`temporaryUrl`/маршрут) додається пізніше в цьому ж методі. `delete`: спершу рядок у БД (FK може відмовити → виняток, диск не чіпаємо), потім файл на диску; відсутній на диску файл — не помилка.
+`url`: `Storage::disk($file->disk)->url($file->path)` — for `public` this is `/storage/...`, for `s3` — the URL of the disk. The private mode (`temporaryUrl`/a route) is added later in this same method. `delete`: first the row in the DB (an FK may refuse → an exception, the disk is not touched), then the file on the disk; a file missing on the disk is not an error.
 
-Сервіс — singleton у контейнері, без фасада (за зразком `AppSettings`).
+The service is a singleton in the container, without a facade (following the sample `AppSettings`).
 
-### D4. Ендпоінт `POST /admin/files`
+### D4. The endpoint `POST /admin/files`
 
-`App\Http\Controllers\Admin\FileController::store` + `StoreFileRequest` (`file` обов'язковий + `profile` з `Rule::in`). Маршрут у наявній групі `auth`+`verified`, ім'я `admin.files.store`. Відповідь JSON 201: `id`, `uuid`, `profile`, `name` (оригінальне ім'я), `mime`, `size`, `width`, `height`, `url`. Помилки — стандартні 422 Laravel для AJAX. Ендпоінт нічого не знає про споживача; належність файлу профілю поля перевіряє споживач правилом з D5.
+`App\Http\Controllers\Admin\FileController::store` + `StoreFileRequest` (`file` required + `profile` with `Rule::in`). The route is in the existing group `auth`+`verified`, the name `admin.files.store`. The JSON response 201: `id`, `uuid`, `profile`, `name` (the original name), `mime`, `size`, `width`, `height`, `url`. Errors — the standard 422 of Laravel for AJAX. The endpoint knows nothing about the consumer; whether the file belongs to the profile of a field is checked by the consumer with the rule from D5.
 
-Throttle не додається: доступ мають лише автентифіковані користувачі адмінки, окрема політика ліміту — не в цій зміні.
+No throttle is added: access is given only to authenticated admin users, a separate limit policy is not part of this change.
 
-### D5. Правило валідації для споживачів
+### D5. A validation rule for consumers
 
-`App\Files\Rules\FileOfProfile` (`ValidationRule`): значення має бути цілим, рядок `files.id` має існувати, `files.profile` має збігатися з очікуваним. Використання: `new FileOfProfile('image')`. Саме це робить подальший тип поля `file` і аватар. Повідомлення — через `lang/`.
+`App\Files\Rules\FileOfProfile` (`ValidationRule`): the value must be an integer, the row `files.id` must exist, and `files.profile` must match the expected one. Usage: `new FileOfProfile('image')`. This is what the later `file` field type and an avatar will use. The message — through `lang/`.
 
-### D6. Цілісність і очищення
+### D6. Integrity and cleanup
 
-Споживач заводить колонку `file_id` із `->constrained('files')->restrictOnDelete()` (FK `RESTRICT`) і додає свій `table.column` до `config('files.references')`. Споживач ніколи не викликає `FileStorage::delete` при зміні свого значення.
+The consumer creates a column `file_id` with `->constrained('files')->restrictOnDelete()` (FK `RESTRICT`) and adds its `table.column` to `config('files.references')`. The consumer never calls `FileStorage::delete` when its value changes.
 
-`php artisan files:prune` (`App\Console\Commands\PruneFiles`): вибирає `files` старші за `prune_after_hours` (за `created_at`), для яких для кожного елемента `references` не існує рядка з таким `file_id` (`whereNotExists`, чанками по 500); для кожного викликає `FileStorage::delete`. Помилка однієї спроби (`QueryException` через FK — збій конфігурації `references`; виняток диска) логується, файл пропускається, решта продовжується. Виводить кількість видалених. Розклад: `Schedule::command('files:prune')->daily()` у `routes/console.php`.
+`php artisan files:prune` (`App\Console\Commands\PruneFiles`): selects `files` older than `prune_after_hours` (by `created_at`), for which for each element of `references` there is no row with such a `file_id` (`whereNotExists`, in chunks of 500); for each one it calls `FileStorage::delete`. An error of a single attempt (`QueryException` through the FK — a failure of the `references` configuration; an exception of the disk) is logged, the file is skipped, the rest continues. It outputs the number of deleted files. The schedule: `Schedule::command('files:prune')->daily()` in `routes/console.php`.
 
-Подвійний захист навмисний: `references` потрібен для ефективної вибірки (не пробувати видаляти всі використовувані файли щоразу), FK `RESTRICT` — щоб помилка в конфігурації не призвела до втрати даних.
+The double protection is deliberate: `references` is needed for an efficient selection (not to try to delete all used files each time), the FK `RESTRICT` — so that an error in the configuration does not lead to data loss.
 
-Альтернатива (відкинута): споживач видаляє файл одразу — при повторному використанні потребує лічильника посилань і перевірки в кожному споживачі. Прив'язка «тимчасовий → підтверджений» (поле `confirmed_at`) — відкинута: не покриває відпущення файлу після прив'язки.
+Alternative (rejected): the consumer deletes the file immediately — on reuse it requires a reference counter and a check in each consumer. The "temporary → confirmed" binding (a `confirmed_at` field) — rejected: it does not cover releasing a file after the binding.
 
-Поки `references` порожній (споживачів ще немає), `files:prune` видаляє будь-який файл старший за 24 години — це очікувано: використовувати його ніхто не може.
+While `references` is empty (there are no consumers yet), `files:prune` deletes any file older than 24 hours — this is expected: no one can use it.
 
-### D7. Віджет `FileUpload` і демо-сторінка
+### D7. The widget `FileUpload` and the demo page
 
-`resources/js/Components/Admin/FileUpload/FileUpload.tsx`: props — `profile`, `value` (метадані файлу або `null`), `onChange(file | null)`, `accept`/`label`/`error` для відображення. Завантаження — `POST` multipart. У `resources/js` власних CSRF-запитів поза Inertia немає (пошук `axios`/`csrf`/`XSRF` порожній), тож спосіб передачі CSRF-токена (заголовок `X-XSRF-TOKEN` із cookie чи Inertia-запит) обирається в реалізації за перевіркою версії Inertia та поведінки Laravel; прогрес не обов'язковий понад індикатор «завантаження». Для `image/*` — перегляд за `url`. Форма отримує `file.id` через `onChange` і далі надсилає JSON. Компонент не знає про Inertia-форму: працює і з `useForm`, і з будь-яким станом.
+`resources/js/Components/Admin/FileUpload/FileUpload.tsx`: props — `profile`, `value` (the file metadata or `null`), `onChange(file | null)`, `accept`/`label`/`error` for the display. Uploading — a multipart `POST`. In `resources/js` there are no own CSRF requests outside Inertia (the search for `axios`/`csrf`/`XSRF` is empty), so the way the CSRF token is passed (the header `X-XSRF-TOKEN` from the cookie or an Inertia request) is chosen in the implementation after checking the Inertia version and the Laravel behaviour; progress is not required beyond a "loading" indicator. For `image/*` — a preview by `url`. The form gets `file.id` through `onChange` and then sends JSON. The component does not know about the Inertia form: it works both with `useForm` and with any state.
 
-Демо: `GET /admin/ui/file-upload` (`admin.ui.file-upload`), контролер `Ui\FileUploadDemoController`, сторінка `Pages/Admin/Ui/FileUploadDemo.tsx`; поза production, не в навігації; два екземпляри віджета (`image`, `document`). Хлібні крихти/заголовок — за зразком демо таблиці (`navigation.ts`).
+The demo: `GET /admin/ui/file-upload` (`admin.ui.file-upload`), the controller `Ui\FileUploadDemoController`, the page `Pages/Admin/Ui/FileUploadDemo.tsx`; outside production, not in the navigation; two instances of the widget (`image`, `document`). The breadcrumbs/title — following the sample demo table (`navigation.ts`).
 
 ### D8. Docker
 
-`docker/php/uploads.ini` (`upload_max_filesize=25M`, `post_max_size=30M`) копіюється в `$PHP_INI_DIR/conf.d/` у `Dockerfile`; значення з запасом над найбільшим профілем (20 МБ). Потрібно перебудувати образ: `docker compose up -d --build app`. Реальні ліміти для кожного профілю все одно забезпечує `FileStorage`; PHP-ліміт лише верхня межа транспорту.
+`docker/php/uploads.ini` (`upload_max_filesize=25M`, `post_max_size=30M`) is copied into `$PHP_INI_DIR/conf.d/` in the `Dockerfile`; the values have a margin above the largest profile (20 MB). The image must be rebuilt: `docker compose up -d --build app`. The real limits for each profile are in any case enforced by `FileStorage`; the PHP limit is only the upper bound of the transport.
 
 ## Risks / Trade-offs
 
-- **OOXML через `finfo`**: DOCX/XLSX — ZIP-контейнери; залежно від версії libmagic `finfo` може повернути `application/zip` замість `application/vnd.openxmlformats-officedocument.*`. → Тест з реальними згенерованими DOCX/XLSX на образі `app`; якщо потрібно, для `document` додається дозволений `application/zip` лише за умови, що розширення оригіналу `docx`/`xlsx` (рішення в межах цієї ж реалізації; специфікація не змінюється).
-- **Файл і БД не атомарні**: диск не відкотиться разом із транзакцією. → Компенсація в `store` (D3) і `files:prune` як страховка від залишків; файл на диску без рядка в БД (збій між кроками) цей механізм не знаходить — ризик прийнято, малоймовірний.
-- **Осиротілі файли живуть до доби** (рішення власника): диск може тимчасово містити неприв'язані файли.
-- **Забутий `references`**: новий споживач без запису в `config('files.references')` не втрачає даних (FK `RESTRICT` + пропуск у `files:prune`), але його файли щоразу потрапляють у спробу видалення й лог → документація споживача вимагає додати рядок.
-- **Піднімати PHP-ліміти ширше за потреби** збільшує поверхню для завеликих запитів → значення з запасом лише над найбільшим профілем.
-- **`config/files.php` vs `config/filesystems.php`**: профілі посилаються на диски за ім'ям; непідтримуваний диск виявиться при першому завантаженні → тест на валідність конфігурації профілів.
+- **OOXML through `finfo`**: DOCX/XLSX are ZIP containers; depending on the libmagic version `finfo` may return `application/zip` instead of `application/vnd.openxmlformats-officedocument.*`. → A test with real generated DOCX/XLSX on the `app` image; if needed, the allowed `application/zip` is added for `document` only if the original extension is `docx`/`xlsx` (a decision within this same implementation; the specification does not change).
+- **The file and the DB are not atomic**: the disk does not roll back together with the transaction. → Compensation in `store` (D3) and `files:prune` as insurance against leftovers; a file on the disk without a row in the DB (a failure between the steps) is not found by this mechanism — the risk is accepted, it is unlikely.
+- **Orphaned files live up to a day** (the owner's decision): the disk may temporarily contain unattached files.
+- **A forgotten `references`**: a new consumer without an entry in `config('files.references')` does not lose data (FK `RESTRICT` + skipping in `files:prune`), but its files each time get into an attempt to delete and a log → the consumer's documentation requires adding a line.
+- **Raising PHP limits wider than needed** increases the attack surface for oversized requests → values with a margin only above the largest profile.
+- **`config/files.php` vs `config/filesystems.php`**: profiles refer to disks by name; an unsupported disk will show up at the first upload → a test of the validity of the profile configuration.
 
 ## Migration Plan
 
-1. Міграція `files` (нова таблиця, наявні дані не зачіпаються); відкат — `dropIfExists`.
-2. Перебудувати образ `app` (ліміти PHP) і виконати `php artisan storage:link` (якщо ще не виконано).
-3. Розклад `files:prune` вмикається самим кодом; у середовищі має працювати `schedule:run` (cron/воркер) — якщо ні, команду запускають вручну.
+1. The migration `files` (a new table, existing data is not affected); rollback — `dropIfExists`.
+2. Rebuild the `app` image (PHP limits) and run `php artisan storage:link` (if not done yet).
+3. The schedule `files:prune` is enabled by the code itself; the environment must run `schedule:run` (cron/worker) — if not, the command is run manually.
 
-Відкат: прибрати маршрут/розклад, міграція `down`. Збережені файли на диску видаляються вручну (споживачів ще немає).
+Rollback: remove the route/schedule, migration `down`. The saved files on the disk are removed manually (there are no consumers yet).
 
 ## Documentation
 
-Опис — у новому `docs/file-storage.md` (модель, профілі, потік завантаження, `FileStorage`, правило `FileOfProfile`, `files:prune`, як підключити нового споживача, ліміти PHP/nginx); індекс — `docs/README.md`; демо-сторінка й віджет — `docs/file-storage.md` з посиланням із `docs/admin-shell.md`; спек e2e — `docs/e2e-testing.md`.
+The description is in the new `docs/file-storage.md` (the model, profiles, the upload flow, `FileStorage`, the rule `FileOfProfile`, `files:prune`, how to connect a new consumer, the PHP/nginx limits); the index — `docs/README.md`; the demo page and the widget — `docs/file-storage.md` with a link from `docs/admin-shell.md`; the e2e spec — `docs/e2e-testing.md`.

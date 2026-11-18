@@ -2,43 +2,43 @@
 
 ## Context
 
-Див. `proposal.md`. Поточний стан (прочитано в коді):
+See `proposal.md`. The current state (read in the code):
 
-- `update`-методи контролерів `app/Http/Controllers/Admin/*` повертають `to_route(...index)` зі `success` (типи, поля, записи, меню, пункти, словники, терміни, ролі, користувачі). Вкладки типу (`ContentTypeDisplayController`, `ContentTypeValuesController`) і `SiteSettingsController` вже повертають `back()`.
-- Адреси редагування стабільні після збереження: типи, словники, меню адресуються незмінним `key`, записи — `uuid`, поля — `key` (ключ і тип-власник не змінюються), тому `back()` не веде на 404. Змінюваний slug типу в адресу не входить.
-- Кнопка «Перегляд» у формі запису вже є: `ContentNodeController::publicUrl()` дає адресу, `ContentNodeForm` показує посилання.
-- Головна: `HomeController` → `respond(['home'], 'home')` → `PublicData::make()`; `$meta` читається лише з `$extra['values']` (`meta_*` запису), для головної й сторінок без `meta_*` він порожній, `html.blade.php` виводить `description` і `og:image` лише з `$meta`.
+- The `update` methods of the controllers `app/Http/Controllers/Admin/*` return `to_route(...index)` with `success` (types, fields, records, menus, items, vocabularies, terms, roles, users). The tab of the type (`ContentTypeDisplayController`, `ContentTypeValuesController`) and `SiteSettingsController` already return `back()`.
+- The edit addresses are stable after saving: types, vocabularies, menus are addressed by the unchanged `key`, records — by `uuid`, fields — by `key` (the key and the owner type do not change), so `back()` does not lead to 404. The changeable slug of a type is not part of the address.
+- The button «Перегляд» ("Preview") in the form of a record already exists: `ContentNodeController::publicUrl()` gives the address, `ContentNodeForm` shows the link.
+- Home page: `HomeController` → `respond(['home'], 'home')` → `PublicData::make()`; `$meta` is read only from `$extra['values']` (the `meta_*` of the record); for the home page and for pages without `meta_*` it is empty, and `html.blade.php` outputs `description` and `og:image` only from `$meta`.
 
-Документація: `docs/admin-shell.md` (flash/редірект), `docs/admin-content-types.md`, `docs/admin-page-types.md`, `docs/admin-block-types.md`, `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-roles.md`, `docs/admin-users.md`, `docs/public-site.md`, `docs/theme-templates.md`.
+Documentation: `docs/admin-shell.md` (flash/redirect), `docs/admin-content-types.md`, `docs/admin-page-types.md`, `docs/admin-block-types.md`, `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-roles.md`, `docs/admin-users.md`, `docs/public-site.md`, `docs/theme-templates.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Усі `update` в адмінці лишають користувача на формі; toast успіху показує існуючий `FlashToaster`.
-- Пункт «Перегляд» у меню рядка запису без додаткових запитів.
-- Ланцюжок мета-даних (запис → поля типу → `SiteSettings`) для всіх публічних сторінок без зміни публічних шаблонів-кандидатів.
-- Вибір мета-полів на вкладці «Відображення» без нових таблиць і міграцій (лише `settings.public`).
+- Every `update` in the admin keeps the user on the form; the success toast is shown by the existing `FlashToaster`.
+- The item «Перегляд» in the menu of a record row without additional requests.
+- The chain of metadata (record → fields of the type → `SiteSettings`) for all public pages without a change of the public candidate templates.
+- The choice of meta fields on the tab «Відображення» without new tables and migrations (only `settings.public`).
 
 **Non-Goals:**
-- Зміна поведінки після створення й видалення.
-- Нові налаштування сайту (окреме SEO-зображення, `og:title` тощо).
-- Нові поля мета-даних запису (`meta_*` уже є й лишаються пріоритетними) та `og:title`/`og:description` теги.
+- A change of the behaviour after creation and deletion.
+- New site settings (a separate SEO image, `og:title` etc.).
+- New meta fields of the record (`meta_*` already exist and remain with priority) and the tags `og:title`/`og:description`.
 
 ## Decisions
 
-1. **`back()` замість `to_route(...)` в `update`.** Простіше за явний редирект на `edit` і працює однаково для трьох розділів (`content/page/block`). Альтернатива — `to_route('…edit')` — вимагає знати ім'я маршруту й параметри в кожному контролері. Ризик: `back()` залежить від `Referer`; Inertia його завжди надсилає, а для запитів без нього Laravel повертає `/`. Для впевненості форми редагування лишаються єдиним джерелом PUT.
-2. **Публічна адреса в рядку таблиці: поле `public_url` у `row()`.** Серверна логіка `publicUrl()` уже існує; її треба зробити такою, що приймає kind/type/node (а не `Request`), і викликати з `row()` і з `edit()`. Клієнт не повторює правила побудови адреси. Альтернатива (будувати на клієнті зі slug) відкинута: правило про slug типу й блоки живе на сервері.
-3. **Пункт «Перегляд» — `<a target="_blank" rel="noopener noreferrer">` у `DropdownMenuItem asChild`,** між «Редагувати» і роздільником перед «Видалити». Рендериться, лише коли `public_url !== null`. Переклад «Перегляд» вже існує.
-4. **Ключ `settings.public.meta` = `{title?, description?, image?}`** (ключ поля або відсутній). Допустимі типи полів: `title` — `string`; `description` — `text`, `richtext`; `image` — `image`, `youtube`. Валідація форми — `UpdateContentTypeDisplayRequest` (`array:...,meta`, три необов'язкові рядки), допустимість ключів і типів — `ContentType::assertValidPublicSettings()`; для виду `block` ключ відхиляється (як ключі списку для `page`/`block`). `PublicDisplaySettings::clean()` відкидає застарілі ключі (видалене поле чи змінений тип), `formOptions()` повертає для кожного вибору перелік допустимих полів і поточний стан; порожній `meta` не зберігається. Альтернатива — окремий ключ `settings.meta` — відкинута: це публічне відображення, форма вже зберігає `public` єдиним запитом і не затирає інші ключі.
-5. **Ланцюжок мета-даних у новому класі `App\Theme\PageMeta`** (його викликає `PublicData::make()`): для кожного з `title`, `description`, `image` бере перше непорожнє значення з `meta_*` запису → вибраного поля типу → налаштувань сайту. Вхід — `$extra['type']`, `$extra['values']`; без запису (головна, 404) діє лише третє джерело. `$meta` лишається з трьома ключами; `meta.title` — значення з запису чи поля, а коли його немає, `null` (заголовок документа тоді будується як зараз: `title` запису + назва сайту). Шаблон `html.blade.php` не змінюється, тема може перевизначити виведення.
-6. **Читання значень поля:** значення беруться з уже завантажених `$values` (`ContentValueReader`). Множинне поле — перший елемент. `string`/`text` — обрізане тексту; `richtext` — `HtmlSanitizer::text()`, пробіли стискаються. Опис скорочується до `config('content.meta_description_max')` (160) по межі слова з «…». `image` — стале значення `{uuid}.{ext}` → URL через `FileStorage::urlForValue('image', …)`, як для `meta_image`; `youtube` — `screen` складеного значення (`ComposedValue`) → той самий URL; без `screen` значення відсутнє й береться наступне джерело. Альтернатива — тягнути прев'ю YouTube за адресою `img.youtube.com` — відкинута: сайт не робить запитів до YouTube під час показу сторінки, скриншот уже збережено в медіатеці.
-7. **Контракт `$meta` не змінюється** (завжди три ключі), тож `docs/theme-templates.md` лише уточнюється: `$meta` заповнюється за ланцюжком запис → поля типу → налаштування сайту.
+1. **`back()` instead of `to_route(...)` in `update`.** It is simpler than an explicit redirect to `edit` and works the same for the three sections (`content/page/block`). Alternative — `to_route('…edit')` — requires knowing the route name and the parameters in every controller. Risk: `back()` depends on the `Referer`; Inertia always sends it, and for requests without it Laravel returns `/`. To be sure, the edit forms remain the single source of PUT.
+2. **The public address in the table row: the field `public_url` in `row()`.** The server logic `publicUrl()` already exists; it must be made to accept kind/type/node (and not `Request`), and be called from `row()` and from `edit()`. The client does not repeat the rules for building the address. Alternative (building on the client from the slug) was rejected: the rule about the slug of the type and the blocks lives on the server.
+3. **The item «Перегляд» — `<a target="_blank" rel="noopener noreferrer">` in `DropdownMenuItem asChild`,** between «Редагувати» ("Edit") and the separator before «Видалити» ("Delete"). It renders only when `public_url !== null`. The translation «Перегляд» already exists.
+4. **The key `settings.public.meta` = `{title?, description?, image?}`** (the key of a field or absent). Permitted field types: `title` — `string`; `description` — `text`, `richtext`; `image` — `image`, `youtube`. Form validation — `UpdateContentTypeDisplayRequest` (`array:...,meta`, three optional strings); permissibility of the keys and types — `ContentType::assertValidPublicSettings()`; for kind `block` the key is rejected (as the list keys for `page`/`block`). `PublicDisplaySettings::clean()` drops obsolete keys (a deleted field or a changed type), `formOptions()` returns for each choice the list of permitted fields and the current state; an empty `meta` is not saved. Alternative — a separate key `settings.meta` — was rejected: this is the public display, the form already saves `public` in one request and does not overwrite the other keys.
+5. **The chain of metadata in the new class `App\Theme\PageMeta`** (it is called by `PublicData::make()`): for each of `title`, `description`, `image` it takes the first non-empty value from the `meta_*` of the record → the chosen field of the type → the settings of the site. Input — `$extra['type']`, `$extra['values']`; without a record (the home page, 404) only the third source applies. `$meta` keeps the three keys; `meta.title` is the value from the record or the field, and when there is none, `null` (the heading of the document is then built as now: `title` of the record + the name of the site). The template `html.blade.php` does not change; a theme can override the output.
+6. **Reading the values of the field:** the values are taken from the already loaded `$values` (`ContentValueReader`). For a multiple field — the first element. `string`/`text` — the trimmed text; `richtext` — `HtmlSanitizer::text()`, the spaces are collapsed. The description is shortened to `config('content.meta_description_max')` (160) at a word boundary with «…». `image` — the stored value `{uuid}.{ext}` → URL through `FileStorage::urlForValue('image', …)`, as for `meta_image`; `youtube` — `screen` of the composed value (`ComposedValue`) → the same URL; without `screen` the value is absent and the next source is taken. The alternative — pulling the YouTube preview from `img.youtube.com` — was rejected: the site makes no requests to YouTube while showing a page, the screenshot is already saved in the media library.
+7. **The contract of `$meta` does not change** (always three keys), so `docs/theme-templates.md` is only clarified: `$meta` is filled by the chain record → fields of the type → settings of the site.
 
 ## Risks / Trade-offs
 
-- [Існуючі Feature- і e2e-тести очікують редірект на список] → оновити лише ті, що перевіряють `update` (див. tasks), решта не торкається.
-- [Користувач більше не бачить список після збереження] → це бажана поведінка; «Назад» у формі й меню розділу лишаються.
-- [`back()` після помилки валідації й після успіху поводяться однаково для Inertia] → стан форми оновлюється пропсами сторінки; перевірити, що форма показує збережені значення (особливо файли й `updated_at` запису).
-- [Мале лого як `og:image`, якщо великого немає] → прийнятний запасний варіант; уточнюється власником у разі іншого бажання (див. припущення в proposal).
-- [Вибране поле змінило тип або видалене] → `clean()` ігнорує застарілі ключі, сайт падає на наступне джерело; форма показує «Не вибрано».
-- [Скорочення опису в довгих текстах з багатобайтовими символами] → використовувати `mb_*`/`Str::limit` з урахуванням UTF-8, покрити тестом українського тексту.
+- [The existing Feature and e2e tests expect a redirect to the list] → update only those that check `update` (see tasks), the rest is not touched.
+- [The user no longer sees the list after saving] → this is the desired behaviour; «Назад» ("Back") in the form and in the section menu remain.
+- [`back()` after a validation error and after success behaves the same way for Inertia] → the state of the form is updated by the props of the page; check that the form shows the saved values (especially files and `updated_at` of the record).
+- [The small logo as `og:image` if the large one is absent] → an acceptable fallback; it is specified by the owner in case of a different wish (see the assumptions in the proposal).
+- [The chosen field changed its type or was deleted] → `clean()` ignores obsolete keys, the site falls back to the next source; the form shows «Не вибрано» ("Not selected").
+- [Shortening a description of long texts with multibyte characters] → use `mb_*`/`Str::limit` with UTF-8 in mind, cover with a test of Ukrainian text.

@@ -2,105 +2,105 @@
 
 ## Purpose
 
-Публічний сайт: маршрути головної, сторінок, списків і деталей контенту, видимість записів, відповідь 404 та оболонка сторінки, у яку тема вставляє вміст.
+The public site: the routes of the home page, pages, lists and details of content, the visibility of records, the response 404 and the shell of the page into which the theme inserts the content.
 
 ## ADDED Requirements
 
 ### Requirement: Головна сторінка
-`GET /` SHALL віддавати шаблон `home` усередині оболонки сайту (`html` → `layout`) зі статусом 200.
+`GET /` SHALL render the template `home` inside the shell of the site (`html` → `layout`) with the status 200.
 
-#### Scenario: Відкриття головної
-- **WHEN** гість відкриває `/`
-- **THEN** відповідь 200 містить вміст шаблона `home` у `layout`
+#### Scenario: Opening the home page
+- **WHEN** a guest opens `/`
+- **THEN** the response 200 contains the content of the template `home` in `layout`
 
 ### Requirement: Сторінка за slug
-`GET /{slug}` SHALL віддавати запис виду `page` із цим slug, якщо запис видимий (активний, опублікований, не знятий з публікації). Для невидимого, неіснуючого або запису іншого виду відповідь SHALL бути 404.
+`GET /{slug}` SHALL render the record of the kind `page` with this slug, if the record is visible (active, published, not withdrawn from publication). For an invisible, non-existent or record of another kind, the response SHALL be 404.
 
-#### Scenario: Видима сторінка
-- **WHEN** існує активна опублікована сторінка зі slug `about`, гість відкриває `/about`
-- **THEN** відповідь 200 відображає цю сторінку
+#### Scenario: Visible page
+- **WHEN** an active published page with the slug `about` exists, and a guest opens `/about`
+- **THEN** the response 200 displays this page
 
-#### Scenario: Вимкнена сторінка
-- **WHEN** сторінка `about` має `is_active = false`
-- **THEN** `/about` відповідає 404
+#### Scenario: Disabled page
+- **WHEN** the page `about` has `is_active = false`
+- **THEN** `/about` responds with 404
 
-#### Scenario: Запланована й завершена сторінка
-- **WHEN** `published_at` сторінки в майбутньому або `unpublished_at` у минулому
-- **THEN** `/about` відповідає 404
+#### Scenario: Scheduled and expired page
+- **WHEN** `published_at` of the page is in the future or `unpublished_at` is in the past
+- **THEN** `/about` responds with 404
 
-#### Scenario: Запис не виду page
-- **WHEN** запис виду `block` або `content` має slug `about`
-- **THEN** `/about` не віддає цей запис (404, якщо немає сторінки чи типу з таким slug)
+#### Scenario: Record not of the kind page
+- **WHEN** a record of the kind `block` or `content` has the slug `about`
+- **THEN** `/about` does not render this record (404, if there is no page or type with such a slug)
 
 ### Requirement: Список записів типу content
-`GET /{type.slug}` SHALL віддавати список видимих записів типу виду `content`, чий slug збігається з першим сегментом. Невідомий slug типу SHALL давати 404.
+`GET /{type.slug}` SHALL render the list of visible records of the type of the kind `content` whose slug matches the first segment. An unknown slug of a type SHALL give 404.
 
-#### Scenario: Список типу
-- **WHEN** тип `news` виду `content` має slug `news` і два видимих записи, гість відкриває `/news`
-- **THEN** відповідь 200 містить обидва записи й не містить невидимих
+#### Scenario: List of a type
+- **WHEN** the type `news` of the kind `content` has the slug `news` and two visible records, and a guest opens `/news`
+- **THEN** the response 200 contains both records and does not contain invisible ones
 
-#### Scenario: Невідомий тип
-- **WHEN** гість відкриває `/unknown`, а ні сторінки, ні типу з таким slug немає
-- **THEN** відповідь 404
+#### Scenario: Unknown type
+- **WHEN** a guest opens `/unknown`, and there is neither a page nor a type with such a slug
+- **THEN** the response is 404
 
 ### Requirement: Деталі запису типу content
-`GET /{type.slug}/{node.slug}` SHALL віддавати видимий запис цього типу за slug запису. Запис іншого типу, невидимий або неіснуючий SHALL давати 404.
+`GET /{type.slug}/{node.slug}` SHALL render the visible record of this type by the slug of the record. A record of another type, an invisible one or a non-existent one SHALL give 404.
 
-#### Scenario: Деталі видимого запису
-- **WHEN** тип зі slug `news` має видимий запис зі slug `hello`, гість відкриває `/news/hello`
-- **THEN** відповідь 200 відображає запис
+#### Scenario: Details of a visible record
+- **WHEN** the type with the slug `news` has a visible record with the slug `hello`, and a guest opens `/news/hello`
+- **THEN** the response 200 displays the record
 
-#### Scenario: Запис іншого типу
-- **WHEN** запис `hello` належить типові зі slug `events`, гість відкриває `/news/hello`
-- **THEN** відповідь 404
+#### Scenario: Record of another type
+- **WHEN** the record `hello` belongs to the type with the slug `events`, and a guest opens `/news/hello`
+- **THEN** the response is 404
 
-#### Scenario: Невидимий запис
-- **WHEN** запис `hello` вимкнено
-- **THEN** `/news/hello` відповідає 404
+#### Scenario: Invisible record
+- **WHEN** the record `hello` is disabled
+- **THEN** `/news/hello` responds with 404
 
 ### Requirement: Службові шляхи мають пріоритет
-Публічні маршрути SHALL НЕ перекривати службових: `/admin/**`, `/login`, `/logout`, `/locale`, `/email/**`, `/up`, `/storage/**`, `/build/**` SHALL працювати як і раніше, а не трактуватися як slug сторінки чи типу.
+The public routes SHALL NOT overlap the service ones: `/admin/**`, `/login`, `/logout`, `/locale`, `/email/**`, `/up`, `/storage/**`, `/build/**` SHALL work as before, and not be treated as the slug of a page or a type.
 
-#### Scenario: Вхід і адмінка
-- **WHEN** гість відкриває `/login`, автентифікований користувач відкриває `/admin/dashboard`
-- **THEN** відповідають сторінки входу й адмінки, а не 404 сайту
+#### Scenario: Login and the admin
+- **WHEN** a guest opens `/login`, and an authenticated user opens `/admin/dashboard`
+- **THEN** the pages of the login and of the admin are answered, and not the 404 of the site
 
-#### Scenario: Службовий шлях не береться як сторінка
-- **WHEN** у БД (в обхід валідації) є сторінка зі slug `login`
-- **THEN** `/login` лишається сторінкою входу
+#### Scenario: Service path is not taken as a page
+- **WHEN** the DB has (bypassing the validation) a page with the slug `login`
+- **THEN** `/login` remains the login page
 
 ### Requirement: Сторінка 404
-Для будь-якого публічного шляху, що не відповідає запису чи типу, а також для невидимих записів система SHALL віддавати шаблон `errors/404` усередині оболонки сайту зі статусом 404. Інші HTTP-помилки адмінки не змінюються.
+For any public path that does not match a record or a type, and also for invisible records, the system SHALL render the template `errors/404` inside the shell of the site with the status 404. The other HTTP errors of the admin do not change.
 
-#### Scenario: Невідомий шлях
-- **WHEN** гість відкриває `/no/such/page/at/all`
-- **THEN** відповідь має статус 404 і вміст шаблона `errors/404` у `layout`
+#### Scenario: Unknown path
+- **WHEN** a guest opens `/no/such/page/at/all`
+- **THEN** the response has the status 404 and the content of the template `errors/404` in `layout`
 
-#### Scenario: Помилка в адмінці
-- **WHEN** автентифікований користувач відкриває неіснуючий `/admin/unknown`
-- **THEN** поведінка не змінилася відносно попередньої (стандартна відповідь, не шаблон сайту)
+#### Scenario: Error in the admin
+- **WHEN** an authenticated user opens a non-existent `/admin/unknown`
+- **THEN** the behaviour has not changed relative to before (the standard response, not the template of the site)
 
 ### Requirement: Оболонка сторінки й дані шаблонів
-Кожна публічна відповідь SHALL складатися з оболонки `html` (документ: мова, заголовок, ресурси теми) і `layout` (шапка, футер) з вмістом сторінки всередині. Шаблони SHALL отримувати щонайменше налаштування сайту (назва, логотипи, контакти), поточний запис або тип (де застосовно) і ім'я активної теми. Заголовок документа SHALL будуватися з `title` запису та назви сайту.
+Each public response SHALL consist of the shell `html` (the document: the language, the heading, the resources of the theme) and `layout` (the header, the footer) with the content of the page inside. The templates SHALL receive at least the settings of the site (the name, the logos, the contacts), the current record or type (where applicable) and the name of the active theme. The heading of the document SHALL be built from the `title` of the record and the name of the site.
 
-#### Scenario: Заголовок документа
-- **WHEN** відкрито видиму сторінку з `title` «Про нас» на сайті з назвою «Acme»
-- **THEN** `<title>` документа містить «Про нас» і «Acme»
+#### Scenario: Heading of the document
+- **WHEN** a visible page with the `title` «Про нас» is opened on a site with the name «Acme»
+- **THEN** the `<title>` of the document contains «Про нас» and «Acme»
 
-#### Scenario: Дані сайту в шаблоні
-- **WHEN** шаблон `layout` виводить назву сайту
-- **THEN** відображається назва з налаштувань сайту
+#### Scenario: Data of the site in the template
+- **WHEN** the template `layout` outputs the name of the site
+- **THEN** the name from the settings of the site is displayed
 
 ### Requirement: Блоки не маршрутизуються
-Записи виду `block` SHALL НЕ мати власних публічних адрес. Їх розміщення на сторінці SHALL відбуватися лише явним викликом у шаблоні.
+The records of the kind `block` SHALL NOT have their own public addresses. Their placement on a page SHALL happen only by an explicit call in a template.
 
-#### Scenario: Прямий доступ до блока
-- **WHEN** існує блок зі slug `block-footer`, гість відкриває `/block-footer`
-- **THEN** відповідь 404
+#### Scenario: Direct access to a block
+- **WHEN** a block with the slug `block-footer` exists, and a guest opens `/block-footer`
+- **THEN** the response is 404
 
 ### Requirement: Публічні дані без Inertia
-Публічні відповіді SHALL бути звичайним HTML із Blade-шаблонів, без завантаження застосунку адмінки (React/Inertia). Глобальний middleware Inertia SHALL НЕ ламати публічних відповідей.
+The public responses SHALL be ordinary HTML from Blade templates, without loading the application of the admin (React/Inertia). The global middleware of Inertia SHALL NOT break the public responses.
 
-#### Scenario: Відповідь без Inertia
-- **WHEN** гість відкриває `/`
-- **THEN** HTML не містить кореневого елемента Inertia `<div id="app" data-page=...>`
+#### Scenario: Response without Inertia
+- **WHEN** a guest opens `/`
+- **THEN** the HTML does not contain the root element of Inertia `<div id="app" data-page=...>`

@@ -1,40 +1,40 @@
 ## MODIFIED Requirements
 
 ### Requirement: Панелі «Розділ» і «SEO» на сторінці налаштувань типу контенту
-Для типу `kind = content` меню розділу типу SHALL містити, крім «Налаштування», «Поля» і «Записи», дві окремі вкладки значень самого типу: «Розділ» (`/admin/content-types/{key}/section`, поля `section_title`, `section_description`, `section_cover`) і «SEO» (`/admin/content-types/{key}/seo`, поля `meta_title`, `meta_description`, `meta_image`). Кожна вкладка SHALL бути окремою сторінкою зі своєю формою й кнопкою збереження, що зберігає лише поля цієї вкладки. Сторінка налаштувань типу (`/admin/content-types/{key}/edit`) SHALL містити лише основну форму типу, без панелей значень. Підписи, підказки (опис поля) та обмеження довжини SHALL братися з визначень полів. Елемент введення SHALL відповідати типу поля (короткий текст, багаторядковий текст, форматований текст, вибір зображення з медіатеки). Усі значення необов'язкові; порожнє значення SHALL очищати збережене. Вкладки SHALL працювати лише з базовою мовою: перемикача мови немає, значення зберігаються як базові. Кожна вкладка SHALL мати ту саму липку панель дій унизу вікна з «Скасувати» й «Зберегти», що й решта форм адмінки; «Зберегти» відправляє форму вкладки. Збереження вкладки SHALL не змінювати значень іншої вкладки. Для типів `page` і `block` вкладок «Розділ» і «SEO» немає, а їхні адреси SHALL відповідати 404. Збереження SHALL відхилятися з помилкою біля відповідного поля, якщо значення не проходить валідацію поля.
+For a type `kind = content` the menu of the section of the type SHALL contain, besides «Налаштування» ("Settings"), «Поля» ("Fields") and «Записи» ("Records"), two separate tabs of values of the type itself: «Розділ» ("Section", `/admin/content-types/{key}/section`, the fields `section_title`, `section_description`, `section_cover`) and «SEO» (`/admin/content-types/{key}/seo`, the fields `meta_title`, `meta_description`, `meta_image`). Each tab SHALL be a separate page with its own form and save button, which saves only the fields of this tab. The settings page of a type (`/admin/content-types/{key}/edit`) SHALL contain only the main form of the type, without panels of values. The labels, the hints (the description of the field) and the length limits SHALL be taken from the definitions of the fields. The input element SHALL correspond to the type of the field (short text, multi-line text, formatted text, a choice of an image from the media library). All values are optional; an empty value SHALL clear the saved one. The tabs SHALL work only with the base language: there is no language switch, the values are saved as base ones. Each tab SHALL have the same sticky action bar at the bottom of the window with «Скасувати» ("Cancel") and «Зберегти» ("Save") as the other forms of the admin; «Зберегти» submits the form of the tab. Saving a tab SHALL not change the values of the other tab. For the types `page` and `block` there are no tabs «Розділ» and «SEO», and their addresses SHALL respond with 404. A saving SHALL be rejected with an error next to the corresponding field, if the value does not pass the validation of the field.
 
-#### Scenario: Меню типу контенту
-- **WHEN** користувач відкриває будь-яку сторінку типу `news` виду `content`
-- **THEN** меню типу містить вкладки «Налаштування», «Розділ», «SEO», «Поля», «Записи», і активна поточна
+#### Scenario: Menu of a content type
+- **WHEN** the user opens any page of the type `news` of the kind `content`
+- **THEN** the menu of the type contains the tabs «Налаштування», «Розділ», «SEO», «Поля», «Записи», and the current one is active
 
-#### Scenario: Відкриття сторінки налаштувань
-- **WHEN** користувач відкриває налаштування типу `news` виду `content`
-- **THEN** сторінка містить лише основну форму типу; панелей «Розділ» і «SEO» на ній немає
+#### Scenario: Opening the settings page
+- **WHEN** the user opens the settings of the type `news` of the kind `content`
+- **THEN** the page contains only the main form of the type; there are no panels «Розділ» and «SEO» on it
 
-#### Scenario: Відкриття вкладки «Розділ»
-- **WHEN** користувач відкриває вкладку «Розділ» типу `news`
-- **THEN** він бачить поля розділу з поточними значеннями базової мови й не бачить полів SEO
+#### Scenario: Opening the tab «Розділ»
+- **WHEN** the user opens the tab «Розділ» of the type `news`
+- **THEN** they see the fields of the section with the current values of the base language, and they do not see the SEO fields
 
-#### Scenario: Збереження значень розділу
-- **WHEN** користувач заповнює `section_title` «Новини», вибирає `section_cover` з медіатеки й зберігає на вкладці «Розділ»
-- **THEN** значення збережено для типу, після перезавантаження сторінки вони показані
+#### Scenario: Saving values of the section
+- **WHEN** the user fills in `section_title` «Новини», chooses `section_cover` from the media library and saves on the tab «Розділ»
+- **THEN** the values are saved for the type, after reloading the page they are shown
 
-#### Scenario: Липка панель дій на вкладках
-- **WHEN** користувач відкриває вкладку «Розділ» або «SEO» у вікні висотою 400 px (на 1280 і 390 px завширшки)
-- **THEN** панель з «Скасувати» й «Зберегти» повністю видно внизу вікна
+#### Scenario: Sticky action bar on the tabs
+- **WHEN** the user opens the tab «Розділ» or «SEO» in a window 400 px high (at 1280 and 390 px wide)
+- **THEN** the panel with «Скасувати» and «Зберегти» is fully visible at the bottom of the window
 
-#### Scenario: Збереження SEO не торкається розділу
-- **WHEN** користувач змінює `meta_title` на вкладці «SEO» і зберігає
-- **THEN** значення `section_*` типу лишаються без змін
+#### Scenario: Saving SEO does not touch the section
+- **WHEN** the user changes `meta_title` on the tab «SEO» and saves
+- **THEN** the values `section_*` of the type remain unchanged
 
-#### Scenario: Очищення значення
-- **WHEN** користувач очищає `meta_description` на вкладці «SEO» і зберігає
-- **THEN** збережене значення видалено
+#### Scenario: Clearing a value
+- **WHEN** the user clears `meta_description` on the tab «SEO» and saves
+- **THEN** the saved value is deleted
 
-#### Scenario: Недопустиме значення
-- **WHEN** значення `meta_title` перевищує допустиму довжину
-- **THEN** збереження відхилено, біля поля показано помилку, значення лишаються попередніми
+#### Scenario: Invalid value
+- **WHEN** the value of `meta_title` exceeds the permitted length
+- **THEN** the saving is rejected, an error is shown next to the field, the values remain the previous ones
 
-#### Scenario: Тип сторінок або блоків
-- **WHEN** користувач відкриває налаштування типу виду `page` або `block`
-- **THEN** вкладок «Розділ» і «SEO» у меню немає, а адреси `/section` і `/seo` цих видів відповідають 404
+#### Scenario: Type of pages or blocks
+- **WHEN** the user opens the settings of a type of the kind `page` or `block`
+- **THEN** there are no tabs «Розділ» and «SEO» in the menu, and the addresses `/section` and `/seo` of these kinds respond with 404

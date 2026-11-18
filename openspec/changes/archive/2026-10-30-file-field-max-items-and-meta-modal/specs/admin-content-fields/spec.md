@@ -2,25 +2,25 @@
 
 ## ADDED Requirements
 
-### Requirement: Максимальна кількість елементів множинного поля
-Множинне поле типу контенту SHALL мати налаштування «Максимальна кількість елементів» — ціле число від 0 до 65535; `0` (за замовчуванням) означає відсутність обмеження. Форми створення й редагування поля SHALL показувати це налаштування лише коли ввімкнено прапорець «Множинне», з підказкою, що `0` — без обмеження. Для немножинного поля налаштування SHALL ігноруватися й зберігатися як `0`. Недопустиме значення (від'ємне, не число, більше за 65535) SHALL відхилятися помилкою біля поля без втрати введеного. Налаштування SHALL бути однаковим для всіх типів значень, включно з `image` і `file`.
+### Requirement: Maximum number of items of a multiple field
+A multiple field of a content type SHALL have the setting "Maximum number of items" — an integer from 0 to 65535; `0` (the default) means no limit. The create and edit field forms SHALL show this setting only when the checkbox "Multiple" is enabled, with the hint that `0` means no limit. For a non-multiple field the setting SHALL be ignored and stored as `0`. An invalid value (negative, not a number, greater than 65535) SHALL be rejected with an error next to the field without losing the entered text. The setting SHALL be the same for all value types, including `image` and `file`.
 
-#### Scenario: Налаштування за замовчуванням
-- **WHEN** користувач створює множинне поле й не змінює «Максимальна кількість елементів»
-- **THEN** поле збережено з `0`, а форма редагування показує `0`
+#### Scenario: Default setting
+- **WHEN** the user creates a multiple field and does not change "Maximum number of items"
+- **THEN** the field is saved with `0`, and the edit form shows `0`
 
-#### Scenario: Задання ліміту
-- **WHEN** користувач створює множинне поле `image` з лімітом 5
-- **THEN** поле збережено з лімітом 5, а форма редагування показує 5
+#### Scenario: Setting a limit
+- **WHEN** the user creates a multiple field `image` with a limit of 5
+- **THEN** the field is saved with the limit 5, and the edit form shows 5
 
-#### Scenario: Налаштування приховане для одиночного поля
-- **WHEN** прапорець «Множинне» вимкнено
-- **THEN** поле «Максимальна кількість елементів» не показується
+#### Scenario: Setting is hidden for a single field
+- **WHEN** the checkbox "Multiple" is disabled
+- **THEN** the field "Maximum number of items" is not shown
 
-#### Scenario: Скидання при вимкненні множинності
-- **WHEN** користувач вимикає «Множинне» у полі з лімітом 5 і зберігає
-- **THEN** поле збережено без ліміту (`0`)
+#### Scenario: Reset when multiplicity is disabled
+- **WHEN** the user disables "Multiple" in a field with a limit of 5 and saves
+- **THEN** the field is saved without a limit (`0`)
 
-#### Scenario: Недопустиме значення
-- **WHEN** користувач вводить від'ємне число й зберігає
-- **THEN** збереження відхилено, біля поля показано помилку, введене збережено
+#### Scenario: Invalid value
+- **WHEN** the user enters a negative number and saves
+- **THEN** the save is rejected, an error is shown next to the field, and the entered value is kept

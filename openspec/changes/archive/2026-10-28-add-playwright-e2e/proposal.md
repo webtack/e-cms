@@ -2,28 +2,28 @@
 
 ## Why
 
-Проєкт працює в Docker (nginx на `http://localhost:8080`), але в ньому немає браузерного тестування: PHPUnit у `tests/` не перевіряє UI. Потрібен e2e-інструмент, який працює з уже запущеним застосунком, не ламаючи правило «npm тільки на хості».
+The project runs in Docker (nginx at `http://localhost:8080`), but there is no browser testing in it: PHPUnit in `tests/` does not check the UI. We need an e2e tool that works with the already running application without breaking the rule "npm only on the host".
 
 ## What Changes
 
-- Додати `@playwright/test` як dev-залежність на хості та встановити лише браузер Chromium.
-- Додати `playwright.config.js` з `baseURL` `http://localhost:8080`, без власного `webServer` (застосунок уже запущено в Docker).
-- Тести e2e лежать в `e2e/`, окремо від PHPUnit у `tests/`; додати скрипт `test:e2e` у `package.json` і мінімальний smoke-тест.
-- Додати розділ про Playwright у `CLAUDE.md` (запуск з хоста, база `http://localhost:8080`, тести в `e2e/`).
-- Додати `context` у `openspec/config.yaml` (Laravel в Docker, URL, npm на хості, Playwright) і правило для `tasks`: PHP-команди йдуть через `docker compose exec app`.
-- Змінити `APP_URL` у `.env.example` на `http://localhost:8080`.
-- Додати документацію українською: `docs/e2e-testing.md` та індекс `docs/README.md`.
+- Add `@playwright/test` as a dev dependency on the host and install only the Chromium browser.
+- Add `playwright.config.js` with `baseURL` `http://localhost:8080`, without its own `webServer` (the application is already running in Docker).
+- The e2e tests live in `e2e/`, separate from PHPUnit in `tests/`; add a `test:e2e` script in `package.json` and a minimal smoke test.
+- Add a section about Playwright to `CLAUDE.md` (running from the host, the base `http://localhost:8080`, tests in `e2e/`).
+- Add `context` to `openspec/config.yaml` (Laravel in Docker, the URL, npm on the host, Playwright) and a rule for `tasks`: PHP commands go through `docker compose exec app`.
+- Change `APP_URL` in `.env.example` to `http://localhost:8080`.
+- Add documentation in Ukrainian: `docs/e2e-testing.md` and the index `docs/README.md`.
 
 ## Capabilities
 
 ### New Capabilities
-- `e2e-testing`: запуск браузерних e2e-тестів Chromium з хоста проти застосунку, що працює в Docker на `http://localhost:8080`.
+- `e2e-testing`: running browser e2e tests with Chromium from the host against the application running in Docker at `http://localhost:8080`.
 
 ### Modified Capabilities
 
 ## Impact
 
-- Файли: `package.json`, `package-lock.json`, `playwright.config.js`, `e2e/`, `CLAUDE.md`, `openspec/config.yaml`, `.env.example`, `.gitignore` (артефакти Playwright).
-- Документація: створюються `docs/e2e-testing.md` і `docs/README.md`.
-- Залежності: `@playwright/test` (dev) і завантажений на хост Chromium.
-- Docker-конфігурація не змінюється.
+- Files: `package.json`, `package-lock.json`, `playwright.config.js`, `e2e/`, `CLAUDE.md`, `openspec/config.yaml`, `.env.example`, `.gitignore` (Playwright artifacts).
+- Documentation: `docs/e2e-testing.md` and `docs/README.md` are created.
+- Dependencies: `@playwright/test` (dev) and Chromium downloaded to the host.
+- The Docker configuration does not change.

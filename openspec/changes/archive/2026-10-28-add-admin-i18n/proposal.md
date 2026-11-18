@@ -2,30 +2,30 @@
 
 ## Why
 
-Увесь інтерфейс адмінки зараз захардкоджений англійською (меню в `navigation.ts`, сторінки, aria-підписи, повідомлення валідації без `lang/`). Чим більше сторінок додається, тим дорожче потім виносити рядки в переклади. Закласти механізм багатомовності треба зараз, до появи типів контенту, конструктора сторінок і медіатеки: тоді кожен новий екран одразу пишеться через переклади.
+The whole admin interface is currently hard-coded in English (the menu in `navigation.ts`, pages, aria labels, validation messages without `lang/`). The more pages are added, the more expensive it becomes to move strings into translations later. The multilingual mechanism has to be laid down now, before content types, the page builder and the media library appear: then every new screen is written through translations from the start.
 
 ## What Changes
 
-- Додати механізм мови інтерфейсу адмінки з двома мовами на старті: українська (`uk`) і англійська (`en`); перелік доступних мов задається в конфігурації, щоб додати мову можна було без змін коду.
-- Визначати мову запиту: збережений вибір авторизованого користувача → вибір гостя (cookie) → `Accept-Language` → `APP_LOCALE`; невідомі значення ігнорувати.
-- Додати поле `users.locale` (nullable) та `POST /locale` для зміни мови: для авторизованого зберігається в користувача, для гостя — лише в cookie.
-- Передавати в React поточну мову, список мов і переклади через спільні пропси Inertia; додати хук `useTranslation()` з функцією `t(key, replace?)` (джерело — `lang/{locale}.json`, ключі — англійські фрази, плейсхолдери `:name` як у Laravel).
-- Перекласти існуючий інтерфейс: сторінки входу, verify-email, Dashboard, Profile, меню, хлібні крихти, шапку, user menu, перемикач теми, aria-підписи, заголовки `<Head>`; серверні повідомлення (`auth.failed`, `auth.throttle`, валідація) — файлами `lang/uk/*.php`.
-- Додати перемикач мови: у шапці адмінки (для авторизованих) і на сторінці входу (для гостей).
-- Оновити e2e та PHPUnit-тести, документацію.
-- Не входить: переклад контенту (сторінок/записів), локалізація URL (`/uk/admin`), форматування дат/чисел, множина (plural), RTL, SSR.
+- Add an admin interface language mechanism with two languages at the start: Ukrainian (`uk`) and English (`en`); the list of available languages is set in the configuration, so a language can be added without code changes.
+- Detect the language of a request: the saved choice of an authenticated user → the choice of a guest (cookie) → `Accept-Language` → `APP_LOCALE`; ignore unknown values.
+- Add the field `users.locale` (nullable) and `POST /locale` to change the language: for an authenticated user it is stored on the user, for a guest — only in a cookie.
+- Pass the current language, the list of languages and the translations to React through shared Inertia props; add the `useTranslation()` hook with the function `t(key, replace?)` (source — `lang/{locale}.json`, keys — English phrases, `:name` placeholders as in Laravel).
+- Translate the existing interface: the login page, verify-email, Dashboard, Profile, the menu, breadcrumbs, the header, the user menu, the theme switcher, aria labels, `<Head>` titles; server messages (`auth.failed`, `auth.throttle`, validation) — in files `lang/uk/*.php`.
+- Add a language switcher: in the admin header (for authenticated users) and on the login page (for guests).
+- Update the e2e and PHPUnit tests, and the documentation.
+- Not included: translation of content (pages/entries), localized URLs (`/uk/admin`), date/number formatting, plurals, RTL, SSR.
 
 ## Capabilities
 
 ### New Capabilities
-- `admin-i18n`: визначення, збереження й перемикання мови інтерфейсу адмінки; доставка перекладів до React; локалізація серверних повідомлень.
+- `admin-i18n`: detection, storage and switching of the admin interface language; delivery of translations to React; localization of server messages.
 
 ### Modified Capabilities
-- `admin-shell`: назви пунктів бічної навігації відображаються поточною мовою інтерфейсу.
+- `admin-shell`: the names of the sidebar navigation items are displayed in the current interface language.
 
 ## Impact
 
-- Код: `config/app.php` (`available_locales`), нова міграція `users.locale`, `App\Models\User`, новий middleware `SetLocale` і `HandleInertiaRequests` (спільні пропси `locale`), новий `LocaleController` + маршрут у `routes/web.php`, `bootstrap/app.php`; `lang/en.json`, `lang/uk.json`, `lang/uk/{auth,validation}.php`; фронтенд: `resources/js/lib/i18n.ts`, `resources/js/hooks/useTranslation.ts`, `Components/Admin/LocaleSwitcher.tsx`, правки існуючих компонентів і сторінок, `types/index.d.ts`.
-- Тести: PHPUnit `tests/Feature/Locale/*`, перевірка однакового набору ключів `en.json`/`uk.json`; Playwright `e2e/admin-i18n.spec.js`.
-- Залежності: нових npm/composer-пакетів немає.
-- Документація: створити `docs/admin-i18n.md`; оновити `docs/admin-shell.md` (навігація як ключі перекладу), `docs/admin-auth.md` (перемикач на сторінці входу), `docs/e2e-testing.md` (ізоляція станів мови), `docs/README.md` (індекс).
+- Code: `config/app.php` (`available_locales`), a new migration for `users.locale`, `App\Models\User`, a new middleware `SetLocale` and `HandleInertiaRequests` (shared `locale` prop), a new `LocaleController` + a route in `routes/web.php`, `bootstrap/app.php`; `lang/en.json`, `lang/uk.json`, `lang/uk/{auth,validation}.php`; frontend: `resources/js/lib/i18n.ts`, `resources/js/hooks/useTranslation.ts`, `Components/Admin/LocaleSwitcher.tsx`, edits to the existing components and pages, `types/index.d.ts`.
+- Tests: PHPUnit `tests/Feature/Locale/*`, a check that `en.json`/`uk.json` have the same set of keys; Playwright `e2e/admin-i18n.spec.js`.
+- Dependencies: no new npm/composer packages.
+- Documentation: create `docs/admin-i18n.md`; update `docs/admin-shell.md` (navigation as translation keys), `docs/admin-auth.md` (the switcher on the login page), `docs/e2e-testing.md` (isolation of language states), `docs/README.md` (index).

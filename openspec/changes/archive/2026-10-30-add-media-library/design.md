@@ -2,131 +2,131 @@
 
 ## Context
 
-Мотивацію й обсяг див. у [proposal.md](proposal.md), вимоги — у `specs/`. Що є в коді (перевірено):
+The motivation and scope are in [proposal.md](proposal.md), the requirements are in `specs/`. What is in the code (checked):
 
-- `files` (див. `docs/file-storage.md`; ця зміна перейменовує таблицю на `media`): `uuid` — `char(36)` UUID v7 з дефісами, генерується в `File::booted` і в `FileStorage::store` (`Str::uuid7()`); `path` = `{directory}/{uuid}.{ext}`; `disk` фіксується в рядку. Колонки користувача немає. Споживачів немає, `config('files.references')` порожній.
-- `FileOfProfile` приймає числовий `id`; `POST /admin/files` повертає `id` і `uuid`; віджет `FileUpload` передає формі `id`.
-- Ядро контенту: `FieldTypeRegistry::tables()` і `ContentValueReader`/`ContentNodeQuery`/`ContentFieldController` групують за `table()`, тож два ключі типів можуть ділити одну таблицю. `ContentValueWriter::replace` видаляє й вставляє рядки напряму через `DB::table`. Забороняє зміну типу поля з наявними значеннями лише за таблицею початкового типу (`ContentField::hasStoredValues`).
-- Форма поля не має налаштувань типу (min/max задаються лише в даних); форма запису мапить тип на віджет в одному місці — `NodeFieldInput.tsx`.
-- Видалення типу контенту заборонене, якщо він має записи (`ContentTypeController::destroy`), тож значення зникають лише разом із записом (`ContentNode`) або полем (`ContentField`).
-- `navigation.ts` має `Media Library` як `mock` на `/admin/media`.
+- `files` (see `docs/file-storage.md`; this change renames the table to `media`): `uuid` — `char(36)` UUID v7 with hyphens, generated in `File::booted` and in `FileStorage::store` (`Str::uuid7()`); `path` = `{directory}/{uuid}.{ext}`; `disk` is recorded in the row. There is no user column. There are no consumers, `config('files.references')` is empty.
+- `FileOfProfile` accepts a numeric `id`; `POST /admin/files` returns `id` and `uuid`; the widget `FileUpload` passes `id` to the form.
+- Content core: `FieldTypeRegistry::tables()` and `ContentValueReader`/`ContentNodeQuery`/`ContentFieldController` group by `table()`, so two type keys can share one table. `ContentValueWriter::replace` deletes and inserts rows directly through `DB::table`. Changing a field type with stored values is forbidden only by the table of the original type (`ContentField::hasStoredValues`).
+- The form of a field has no type settings (min/max are given only in data); the record form maps a type to a widget in one place — `NodeFieldInput.tsx`.
+- Deleting a content type is forbidden if it has records (`ContentTypeController::destroy`), so values disappear only together with the record (`ContentNode`) or the field (`ContentField`).
+- `navigation.ts` has `Media Library` as a `mock` at `/admin/media`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Медіатека показує всі файли й кількість використань кожного; невикористаний видаляється вручну.
-- Усі зв'язки «файл → власник» зведено в одну таблицю, з якої беруться і лічильник, і «де використано».
-- Типи `image` і `file` вписуються в існуючий EAV без нової таблиці значень і без змін у читанні/вибірці.
-- Відображення значення поля (URL) не робить запитів до БД.
+- The media library shows all files and the number of uses of each; an unused file is deleted manually.
+- All links "file → owner" are gathered in one table, from which both the counter and "where it is used" are taken.
+- The types `image` and `file` fit into the existing EAV without a new values table and without changes in reading/selection.
+- Displaying a field value (URL) makes no DB queries.
 
 **Non-Goals:**
-- Пікер файлів, ролі й права, мініатюри, папки й теги, `media:reconcile`, приватні файли.
-- Автоматичне очищення.
+- A file picker, roles and permissions, thumbnails, folders and tags, `media:reconcile`, private files.
+- Automatic cleanup.
 
 ## Decisions
 
-### D1. Таблиця `files` → `media` і `media.uuid` — `char(32)` без дефісів
+### D1. The table `files` → `media` and `media.uuid` — `char(32)` without hyphens
 
-Окрема міграція `Schema::rename('files', 'media')` (заархівовану міграцію `create_files_table` не правимо); модель `File` лишається і задає `protected $table = 'media'`, а `FileFactory` та решта коду (`FileStorage`, `config/files.php`, `POST /admin/files`, `FileOfProfile`, `FileUpload`, тип поля `file`) без перейменувань. Колонка `media_relations.file_uuid` лишає назву. Міграція змінює колонку `uuid` на `char(32)`, перетворює наявні значення (прибирає дефіси) і для кожного рядка перейменовує файл на диску з `{uuid-з-дефісами}.{ext}` на `{uuid32}.{ext}`, оновлюючи `path`. Новий `uuid` — `str_replace('-', '', (string) Str::uuid7())`, один хелпер, який використовують `File::booted` і `FileStorage::store` (зараз дубль).
+A separate migration `Schema::rename('files', 'media')` (the archived migration `create_files_table` is not edited); the model `File` stays and sets `protected $table = 'media'`, and `FileFactory` and the rest of the code (`FileStorage`, `config/files.php`, `POST /admin/files`, `FileOfProfile`, `FileUpload`, the field type `file`) are not renamed. The column `media_relations.file_uuid` keeps its name. The migration changes the column `uuid` to `char(32)`, converts the existing values (removes the hyphens) and for each row renames the file on the disk from `{uuid-with-hyphens}.{ext}` to `{uuid32}.{ext}`, updating `path`. The new `uuid` is `str_replace('-', '', (string) Str::uuid7())`, one helper used by `File::booted` and `FileStorage::store` (now a duplicate).
 
-Альтернативи: залишити дефіси в таблиці й прибирати їх на межах (відкинуто: дві форми ідентифікатора і конвертація в кожному правилі); хеш вмісту як ім'я (відкинуто: дедуплікація, що суперечить «кожен рядок має власний файл і незалежне видалення»). uuid v7 обрано за впорядкованість індексів.
+Alternatives: keep the hyphens in the table and remove them at the boundaries (rejected: two forms of the identifier and a conversion in each rule); the content hash as the name (rejected: deduplication, which contradicts "each row has its own file and independent deletion"). uuid v7 is chosen for the ordering of the indexes.
 
-Каталогу немає: файл лежить у корені диска, а корінь задає стандартне налаштування диска в `config/filesystems.php`. Міграція переносить наявні файли з каталогів профілів (`images/`, `documents/`) у корінь диска. Інваріант: `path === {uuid}.{ext}`. Саме на ньому тримається D6.
+There is no directory: the file lies in the root of the disk, and the root is set by the standard disk setting in `config/filesystems.php`. The migration moves the existing files from the profile directories (`images/`, `documents/`) to the root of the disk. Invariant: `path === {uuid}.{ext}`. D6 rests on it.
 
-### D2. Таблиця `media_relations`
+### D2. The table `media_relations`
 
-| Колонка | Тип | Призначення |
+| Column | Type | Purpose |
 | --- | --- | --- |
 | `id` | bigint | — |
-| `file_uuid` | char(32) | FK на `media.uuid`, `restrictOnDelete` (на `uuid` є унікальний індекс) |
-| `owner_type` | string(64) | Ключ типу власника (`content_node`) |
-| `owner_id` | unsigned bigint | Ідентифікатор власника |
-| `role` | string(64) | Ключ поля (для контенту) |
-| `lang` | string(16), бінарне порівняння | Мова значення (`default` або код), як у `content_values_*` |
+| `file_uuid` | char(32) | FK to `media.uuid`, `restrictOnDelete` (there is a unique index on `uuid`) |
+| `owner_type` | string(64) | The key of the owner's type (`content_node`) |
+| `owner_id` | unsigned bigint | The identifier of the owner |
+| `role` | string(64) | The key of the field (for content) |
+| `lang` | string(16), binary comparison | The language of the value (`default` or a code), as in `content_values_*` |
 | `timestamps` | — | — |
 
-Унікальність: (`file_uuid`, `owner_type`, `owner_id`, `role`, `lang`). Індекс (`owner_type`, `owner_id`) для синхронізації й прибирання. Власник поліморфний, тож FK на нього немає; цілісність тримають хуки (D4).
+Uniqueness: (`file_uuid`, `owner_type`, `owner_id`, `role`, `lang`). An index (`owner_type`, `owner_id`) for synchronization and cleanup. The owner is polymorphic, so there is no FK to it; the integrity is kept by the hooks (D4).
 
-Зв'язок за `uuid`, а не за числовим `id` — за рішенням власника. Копію `file_id` не зберігаємо: два ключі потребували б складеного FK для узгодженості.
+The link is by `uuid`, not by the numeric `id` — by the owner's decision. We do not store a copy of `file_id`: two keys would need a composite FK for consistency.
 
-### D3. Сервіс `FileRelations`
+### D3. The service `FileRelations`
 
-`sync(string $ownerType, int $ownerId, string $role, string $lang, array $fileUuids): void` порівнює поточні рядки власника в цій ролі й мові з заданим набором, видаляє зайві й вставляє нові. Не відкриває власної транзакції: працює в транзакції викликача. `forgetOwner(ownerType, ownerId)` і `forgetRole(ownerType, ownerId?, role)` для прибирання (D4). `usageCounts`/`usages` — читання для медіатеки.
+`sync(string $ownerType, int $ownerId, string $role, string $lang, array $fileUuids): void` compares the current rows of the owner in this role and language with the given set, deletes the extra ones and inserts the new ones. It does not open its own transaction: it works in the transaction of the caller. `forgetOwner(ownerType, ownerId)` and `forgetRole(ownerType, ownerId?, role)` for cleanup (D4). `usageCounts`/`usages` — reads for the media library.
 
-### D4. Хук запису й прибирання
+### D4. The write hook and cleanup
 
-Необов'язковий інтерфейс `App\Content\FieldTypes\TracksFiles` з методом `fileUuids(mixed $storedValue): array`. `ContentValueWriter::replace` після вставки викликає, якщо тип його реалізує, `FileRelations::sync('content_node', $node->id, $field->key, $lang, $type->fileUuids($value))`; `replace` вже виконується в транзакції `write()`. Решта ядра не змінюється.
+An optional interface `App\Content\FieldTypes\TracksFiles` with the method `fileUuids(mixed $storedValue): array`. `ContentValueWriter::replace`, after the insert, calls — if the type implements it — `FileRelations::sync('content_node', $node->id, $field->key, $lang, $type->fileUuids($value))`; `replace` already runs in the transaction of `write()`. The rest of the core does not change.
 
-Прибирання: події моделей `ContentNode::deleted` (усі зв'язки запису) і `ContentField::deleted` (зв'язки цього поля). Тип без записів не має значень, тож його видалення зв'язків не залишає. Запис і поле повинні видалятися через модель, а не сирим SQL; це правило записується в документацію.
+Cleanup: the model events `ContentNode::deleted` (all relations of the record) and `ContentField::deleted` (the relations of this field). A type without records has no values, so deleting it leaves no relations. A record and a field must be deleted through the model, not through raw SQL; this rule is written into the documentation.
 
-Альтернатива: тримати зв'язок прямо в `content_values_*` (колонка `file_uuid`), що дало б каскад. Відкинуто: торкається спільного контракту таблиць значень і ламає «значення `image`/`file` лежить у `content_values_string`».
+Alternative: keep the relation directly in `content_values_*` (a column `file_uuid`), which would give a cascade. Rejected: it touches the shared contract of the value tables and breaks "the value of `image`/`file` lies in `content_values_string`".
 
-### D5. Типи `image` і `file`
+### D5. The types `image` and `file`
 
-Абстрактний `AbstractFileFieldType extends AbstractFieldType implements TracksFiles` задає спільне: `table()` = `content_values_string`, операція `eq`, не бере участі в текстовому пошуку, правило значення. Конкретні типи лише називають профіль: `ImageType` (`key()` = `image`, профіль `image`) і `FileType` (`key()` = `file`, профіль `document`); профіль-стеля визначається типом, а поле звужує його налаштуваннями (D12). Обидва реєструються в `config/content.php`. `rules()` повертає правило, що (а) вимагає формат `^[0-9a-f]{32}\.[a-z0-9]{1,8}$`, (б) викликає `FileOfProfile` із профілем типу, (в) перевіряє збіг розширення з розширенням `media.path`, (г) перевіряє, що `media.mime` входить у дозволені типи поля, а `media.size` не перевищує `max_size` поля (D12). `prepare`/`cast` — без змін.
+The abstract `AbstractFileFieldType extends AbstractFieldType implements TracksFiles` sets the common parts: `table()` = `content_values_string`, the operation `eq`, does not take part in the text search, the value rule. The concrete types only name the profile: `ImageType` (`key()` = `image`, profile `image`) and `FileType` (`key()` = `file`, profile `document`); the ceiling profile is defined by the type, and the field narrows it with its settings (D12). Both are registered in `config/content.php`. `rules()` returns a rule that (a) requires the format `^[0-9a-f]{32}\.[a-z0-9]{1,8}$`, (b) calls `FileOfProfile` with the profile of the type, (c) checks that the extension matches the extension of `media.path`, (d) checks that `media.mime` is among the allowed types of the field, and that `media.size` does not exceed `max_size` of the field (D12). `prepare`/`cast` — unchanged.
 
-Тип поля не можна змінити між `string`, `image` і `file`, коли є значення: перевірка в `ContentField` порівнює лише таблиці початкового типу, а вона спільна. Тож `ContentField` порівнює ключі типів, коли таблиці однакові, і відхиляє зміну між цими трьома типами для поля зі значеннями. Це єдина правка в ядрі моделі поля.
+The type of a field cannot be changed between `string`, `image` and `file` when there are values: the check in `ContentField` compares only the tables of the original type, and this one is shared. So `ContentField` compares the type keys when the tables are the same, and rejects a change between these three types for a field with values. This is the only edit in the core of the field model.
 
-### D6. URL без запитів до БД
+### D6. URL without DB queries
 
-`FileStorage::urlForValue(string $profile, string $value): string` будує `Storage::disk(профіль.disk)->url($value)`. Профіль визначається типом поля (`image` → `image`, `file` → `document`) і потрібен лише для диска. Запитів до `media` немає.
+`FileStorage::urlForValue(string $profile, string $value): string` builds `Storage::disk(profile.disk)->url($value)`. The profile is defined by the type of the field (`image` → `image`, `file` → `document`) and is needed only for the disk. There are no queries to `media`.
 
-Наслідок: від конфігурації залежить лише `disk` профілю; його зміна й так означає перенесення файлів між сховищами, тож це свідома операція. Каталог із профілів прибрано (ключ `directory` у `config/files.php` видаляється), тож випадково зламати шляхи правкою конфігурації не можна. Розташування задає лише корінь диска у `config/filesystems.php`. Фіксуємо в документації і тестом `media.path === {uuid}.{ext}` для кожного збереженого файлу.
+Consequence: only the `disk` of the profile depends on the configuration; its change already means moving files between storages, so it is a deliberate operation. The directory from the profiles is removed (the key `directory` in `config/files.php` is deleted), so the paths cannot be broken accidentally by editing the configuration. The location is set only by the root of the disk in `config/filesystems.php`. We record this in the documentation and with a test `media.path === {uuid}.{ext}` for each saved file.
 
-### D7. Імена файлів у адмінці
+### D7. File names in the admin
 
-URL потрібен скрізь, але оригінальне ім'я (`original_name`) є лише в `media`. Сторінки адмінки (форма редагування запису, таблиця записів) завантажують імена для значень, що зараз на екрані, **одним** `whereIn('uuid', …)` на сторінку по `media`. Публічне читання контенту цього запиту не робить. Якщо файлу немає (видалений поза сервісом), показується збережений рядок.
+The URL is needed everywhere, but the original name (`original_name`) exists only in `media`. The admin pages (the edit form of a record, the table of records) load the names for the values that are now on the screen with **one** `whereIn('uuid', …)` per page on `media`. The public reading of content does not make this query. If the file is missing (deleted outside the service), the stored value is shown.
 
-### D8. Медіатека
+### D8. The media library
 
-`MediaController`: `index` (Inertia, `DataTable` із серверною пагінацією, пошуком за іменем, сортуванням; за зразком `ContentNodeController` і `docs/admin-data-table.md`), `show` (JSON: метадані й перелік використань), `destroy`. Запит `index`: `File::query()->withCount('relations')->with('uploader')`. Колонки з специфікації; кількість використань 0 виділяється.
+`MediaController`: `index` (Inertia, a `DataTable` with server pagination, search by name, sorting; following `ContentNodeController` and `docs/admin-data-table.md`), `show` (JSON: metadata and the list of uses), `destroy`. The `index` query: `File::query()->withCount('relations')->with('uploader')`. The columns from the specification; the number of uses 0 is highlighted.
 
-`destroy`: у транзакції перераховує зв'язки з блокуванням (`lockForUpdate` по файлу); якщо є — повертає помилку без видалення; інакше `FileStorage::delete`. FK `RESTRICT` залишається другим захистом від гонки із записом значення.
+`destroy`: in a transaction it recounts the relations with a lock (`lockForUpdate` on the file); if there are some — it returns an error without deleting; otherwise `FileStorage::delete`. The FK `RESTRICT` remains the second protection against a race with writing a value.
 
-### D9. Реєстр власників
+### D9. The owner registry
 
-`config/files.php`, ключ `owners`: `owner_type => клас, що реалізує MediaOwner`. `MediaOwner::describe(array $ids): array` повертає для кожного id підпис і посилання на редагування (або `null`). Для `content_node` — заголовок (`title`, мова `default`) і адреса `/admin/content-types/{type}/nodes/{uuid}/edit`. Невідомий тип власника не ламає сторінку: показується `owner_type #id` без посилання.
+`config/files.php`, the key `owners`: `owner_type => class implementing MediaOwner`. `MediaOwner::describe(array $ids): array` returns for each id a label and an edit link (or `null`). For `content_node` — the title (`title`, language `default`) and the address `/admin/content-types/{type}/nodes/{uuid}/edit`. An unknown owner type does not break the page: `owner_type #id` is shown without a link.
 
-### D10. Власник файлу
+### D10. The owner of a file
 
-Міграція додає `media.user_id` (nullable unsigned bigint, FK `users`, `nullOnDelete`); `FileStorage::store` приймає необов'язкового користувача, `FileController` передає `$request->user()`. У медіатеці колонка «Завантажив» (ім'я користувача або порожньо).
+A migration adds `media.user_id` (nullable unsigned bigint, FK `users`, `nullOnDelete`); `FileStorage::store` accepts an optional user, `FileController` passes `$request->user()`. In the media library there is a column "Uploaded by" (the user's name or empty).
 
-### D11. Прибирання `prune`
+### D11. Cleanup `prune`
 
-Видаляються `app/Console/Commands/PruneFiles.php`, `tests/Feature/Files/PruneFilesTest.php`, запис у `routes/console.php`, ключі `references` і `prune_after_hours` у `config/files.php`, розділ «Життєвий цикл і очищення» в `docs/file-storage.md` (замінюється посиланням на `docs/media-library.md`). Накопичення файлів — свідомий компроміс; видаляються вони вручну в медіатеці.
+Removed: `app/Console/Commands/PruneFiles.php`, `tests/Feature/Files/PruneFilesTest.php`, the entry in `routes/console.php`, the keys `references` and `prune_after_hours` in `config/files.php`, the section "Lifecycle and cleanup" in `docs/file-storage.md` (replaced by a link to `docs/media-library.md`). The accumulation of files is a deliberate compromise; they are deleted manually in the media library.
 
-### D12. Налаштування поля: типи й розмір
+### D12. The settings of a field: types and size
 
-Налаштування зберігаються в `content_fields.settings` (JSON): `mimes` — список дозволених mime (підмножина `profile.mimes`), `max_size` — максимальний розмір у КБ (не більше `profile.max_size`, як і в профілі). Відсутні налаштування означають увесь профіль. Правила звуження живуть в одному місці — `App\Files\UploadRules::forField(ContentField): UploadRules` (перетин типів, мінімум розмірів) і `forProfile(string)`; їх використовують ендпоінт, `FileType` і форма поля (для переліку доступних типів).
+The settings are stored in `content_fields.settings` (JSON): `mimes` — a list of allowed mimes (a subset of `profile.mimes`), `max_size` — the maximum size in KB (not more than `profile.max_size`, as in the profile). Missing settings mean the whole profile. The narrowing rules live in one place — `App\Files\UploadRules::forField(ContentField): UploadRules` (the intersection of types, the minimum of sizes) and `forProfile(string)`; they are used by the endpoint, `FileType` and the form of the field (for the list of available types).
 
-- **Ендпоінт.** `POST /admin/files` приймає `profile` **або** пару `content_type` + `field_key` (одночасно — помилка валідації). За полем сервер перевіряє, що поле існує й має тип `image`/`file`, бере профіль типу й застосовує звуження. `FileStorage::store` отримує необов'язковий параметр звужених правил; без нього діє профіль. Звужені правила ніколи не розширюють профіль: перетин із `profile.mimes` і мінімум з `profile.max_size` гарантують це навіть за пошкоджених даних у `settings`.
-- **Збереження запису.** `FileType::rules` перевіряє `media.mime` і `media.size` за налаштуваннями поля. Це авторитетна перевірка: той самий файл можна спробувати вставити в інше поле з вужчими правилами.
-- **Зміна налаштувань.** Не змінює й не видаляє збережені значення; нові правила діють при наступному записі значення. Профіль поля заблокованим не стає, бо його немає (визначається типом).
-- **Віджет.** `FileUpload` отримує `accept` і `maxSize` з налаштувань поля лише для підказки й швидкої відмови; сервер перевіряє незалежно.
+- **Endpoint.** `POST /admin/files` accepts `profile` **or** the pair `content_type` + `field_key` (both at once — a validation error). For a field the server checks that the field exists and has the type `image`/`file`, takes the profile of the type and applies the narrowing. `FileStorage::store` receives an optional parameter with the narrowed rules; without it the profile applies. The narrowed rules never widen the profile: the intersection with `profile.mimes` and the minimum with `profile.max_size` guarantee this even with corrupted data in `settings`.
+- **Saving a record.** `FileType::rules` checks `media.mime` and `media.size` against the settings of the field. This is the authoritative check: the same file can be tried for insertion into another field with narrower rules.
+- **Changing the settings.** It does not change or delete the stored values; the new rules apply at the next write of a value. The profile of the field does not become locked, because there is none (it is defined by the type).
+- **Widget.** `FileUpload` receives `accept` and `maxSize` from the settings of the field only as a hint and for a fast rejection; the server checks independently.
 
-Альтернативи: правила в тілі запиту від клієнта (відкинуто, довіряти не можна); правила лише при збереженні запису (відкинуто: файл вже лежить на диску, а користувач дізнається про помилку пізно); повна відмова від профілів на користь налаштувань поля (відкинуто: споживачі без поля — аватар, логотип — лишилися б без місця для правил).
+Alternatives: rules in the body of the request from the client (rejected, cannot be trusted); rules only when saving a record (rejected: the file already lies on the disk, and the user learns about the error late); a complete rejection of profiles in favour of field settings (rejected: consumers without a field — an avatar, a logo — would be left without a place for rules).
 
-### D13. Віджет і ендпоінт на `uuid`
+### D13. The widget and the endpoint on `uuid`
 
-Відповідь `POST /admin/files` не містить `id` (лише `uuid`, `profile`, `name`, `mime`, `size`, `width`, `height`, `url`). `FileUpload` передає `uuid` у `onChange`; елементи `image` і `file` у `NodeFieldInput` зберігають в значенні `{uuid}.{ext}` (розширення береться з відповіді як частина `url`/`name` — ендпоінт додатково повертає `value`). Профіль для віджета визначається типом поля, а `accept`/`maxSize` — налаштуваннями поля (D12). Елемент `image` показує перегляд зображення, `file` — іконку й ім'я файлу; на сайті типи виводяться по-різному (зображення з розмірами, посилання на файл), це справа клієнтського коду.
+The response of `POST /admin/files` does not contain `id` (only `uuid`, `profile`, `name`, `mime`, `size`, `width`, `height`, `url`). `FileUpload` passes `uuid` in `onChange`; the elements `image` and `file` in `NodeFieldInput` store in the value `{uuid}.{ext}` (the extension is taken from the response as part of `url`/`name` — the endpoint additionally returns `value`). The profile for the widget is defined by the type of the field, and `accept`/`maxSize` — by the settings of the field (D12). The element `image` shows an image preview, `file` — an icon and the file name; on the site the types are output differently (an image with dimensions, a link to the file), which is the business of the client code.
 
 ## Risks / Trade-offs
 
-- **Лічильник може розійтися з реальністю** (значення записано мимо `ContentValueWriter`, запис видалено сирим SQL) → невикористаний файл виглядає використаним (безпечно, видалити не вдасться) або навпаки, використаний — невикористаним (небезпечно: ручне видалення прибере файл, який ще вживається на сторінці). Пом'якшення: єдиний шлях запису в транзакції, правило «видаляти через модель» у документації, діалог видалення називає файл. Команда звірки `media:reconcile` свідомо відкладена; якщо розходження виявляться, додається окремою зміною.
-- **Зміна `disk` профілю ламає значення** (D6) → правило в документації: зміна диска супроводжується перенесенням файлів; тест відповідності шляху. Файли різних профілів лежать в одному корені диска, розрізнити їх можна лише через `media`.
-- **Міграція перейменовує файли на диску** (D1): збій посеред міграції лишає частину файлів перейменованою → міграція йде по рядках, перейменування й оновлення `path` для кожного рядка разом, відсутній на диску файл не зупиняє міграцію; на SQLite у тестах диск — `Storage::fake`.
-- **Звужені правила розходяться зі збереженими значеннями** (адмін звузив типи після того, як у записах з'явилися файли) → значення не чіпаються, нові правила діють при наступному записі; у специфікації це зафіксовано.
-- **Накопичення файлів без автоочищення** → прийнято; видно в медіатеці.
-- **Сторінка суперадміна без ролей доступна кожному адміну** → записано в специфікації й документації, ролі додаються окремою зміною.
-- **`char(32)` + FK на `uuid`**: MySQL вимагає унікальний індекс на посилальній колонці (він є); у SQLite тестів FK увімкнені.
+- **The counter can diverge from reality** (a value written bypassing `ContentValueWriter`, a record deleted by raw SQL) → an unused file looks used (safe, it cannot be deleted) or the reverse, a used file looks unused (dangerous: a manual deletion removes a file that is still used on a page). Mitigation: a single write path in a transaction, the rule "delete through the model" in the documentation, the deletion dialog names the file. The reconciliation command `media:reconcile` is deliberately postponed; if discrepancies are found, it is added in a separate change.
+- **Changing the `disk` of a profile breaks values** (D6) → a rule in the documentation: a change of disk is accompanied by moving the files; a test of the path correspondence. Files of different profiles lie in the same root of the disk and can be told apart only through `media`.
+- **The migration renames files on the disk** (D1): a failure in the middle of the migration leaves some files renamed → the migration goes row by row, the renaming and the update of `path` for each row together; a file missing on the disk does not stop the migration; on SQLite in tests the disk is `Storage::fake`.
+- **Narrowed rules diverge from the stored values** (the admin narrowed the types after files appeared in records) → the values are not touched, the new rules apply at the next write; this is recorded in the specification.
+- **Accumulation of files without automatic cleanup** → accepted; it is visible in the media library.
+- **A superadmin page without roles is available to every admin** → recorded in the specification and the documentation, roles are added in a separate change.
+- **`char(32)` + FK on `uuid`**: MySQL requires a unique index on the referenced column (it exists); in the SQLite tests FKs are enabled.
 
 ## Migration Plan
 
-1. Міграції: `media.uuid` → `char(32)` з перейменуванням файлів; `media.user_id`; `media_relations`. Відкат: зворотне перетворення `uuid` не відновлює дефіси, тож `down` для `uuid` кидає виняток («необоротно»); `user_id` і `media_relations` відкочуються `drop`.
-2. Розгорнути код, прибрати розклад `files:prune` із cron-обгортки, якщо вона була.
-3. Профілі `image`/`document` не змінюються.
+1. Migrations: `media.uuid` → `char(32)` with the renaming of files; `media.user_id`; `media_relations`. Rollback: the reverse conversion of `uuid` does not restore the hyphens, so `down` for `uuid` throws an exception ("irreversible"); `user_id` and `media_relations` are rolled back with `drop`.
+2. Deploy the code, remove the schedule `files:prune` from the cron wrapper, if there was one.
+3. The profiles `image`/`document` do not change.
 
 ## Documentation
 
-- новий `docs/media-library.md` (сторінка, `media_relations`, реєстр власників, правила для споживача: синхронізація, видалення через модель);
-- `docs/file-storage.md` (uuid без дефісів, `user_id`, прибрані `prune` і `references`), `docs/content-values.md` (типи `image` і `file`, налаштування поля), `docs/admin-content-fields.md` (налаштування типів і розміру), `docs/admin-content-nodes.md` (віджети), `docs/admin-shell.md`, `docs/e2e-testing.md`, індекс `docs/README.md`.
+- the new `docs/media-library.md` (the page, `media_relations`, the registry of owners, the rules for a consumer: synchronization, deletion through the model);
+- `docs/file-storage.md` (uuid without hyphens, `user_id`, the removed `prune` and `references`), `docs/content-values.md` (the types `image` and `file`), `docs/admin-content-fields.md` (the settings of the type and size), `docs/admin-content-nodes.md` (the widgets), `docs/admin-shell.md`, `docs/e2e-testing.md`, the index `docs/README.md`.

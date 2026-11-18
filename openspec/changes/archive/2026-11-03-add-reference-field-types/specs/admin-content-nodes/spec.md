@@ -1,54 +1,54 @@
 ## ADDED Requirements
 
 ### Requirement: Елементи введення полів-посилань
-Форма запису SHALL для `type_ref` показувати вибір типу, а для `node_ref` — вибір запису; обидва — як випадний автокомпліт із пошуком на сервері, що запитує варіанти під час введення (з затримкою) і показує обмежену кількість результатів. Для `type_ref` пошук іде за `name` типу вибраного в налаштуваннях поля виду; варіант показує `name` (і `key` приглушено). Для `node_ref` пошук іде за `title` (мова `default`) записів вибраного в налаштуваннях типу. Вибране значення SHALL показувати підпис (`name` / `title`) одразу при відкритті форми, без введення; значення форми — `key` / `uuid`. Вибір SHALL можна очистити, і тоді значення очищається. Для множинного поля кожен елемент SHALL мати свій автокомпліт за загальними правилами форми. Помилки сервера SHALL показуватися біля поля, а вибір SHALL зберігатися.
+The form of a record SHALL show for `type_ref` a choice of a type, and for `node_ref` a choice of a record; both as a drop-down autocomplete with a search on the server, which requests the options while typing (with a delay) and shows a limited number of results. For `type_ref` the search goes by the `name` of the type of the kind chosen in the settings of the field; an option shows the `name` (and the `key` muted). For `node_ref` the search goes by the `title` (the language `default`) of the records of the type chosen in the settings. The selected value SHALL show its label (`name` / `title`) immediately when the form is opened, without typing; the value of the form is `key` / `uuid`. The choice SHALL be clearable, and then the value is cleared. For a multiple field each element SHALL have its own autocomplete by the general rules of the form. The errors of the server SHALL be shown next to the field, and the choice SHALL be kept.
 
-#### Scenario: Пошук типу
-- **WHEN** користувач вводить частину `name` типу в полі `type_ref`
-- **THEN** список показує типи потрібного виду, що відповідають запиту, і вибір записує `key`
+#### Scenario: Search of a type
+- **WHEN** the user types a part of the `name` of a type in the field `type_ref`
+- **THEN** the list shows the types of the required kind that match the request, and the choice records `key`
 
-#### Scenario: Пошук запису
-- **WHEN** користувач вводить частину `title` у полі `node_ref`
-- **THEN** список показує записи потрібного типу, що відповідають запиту, і вибір записує `uuid`
+#### Scenario: Search of a record
+- **WHEN** the user types a part of the `title` in the field `node_ref`
+- **THEN** the list shows the records of the required type that match the request, and the choice records `uuid`
 
-#### Scenario: Збережене значення
-- **WHEN** користувач відкриває запис із збереженим значенням
-- **THEN** поле показує підпис вибраної цілі
+#### Scenario: Saved value
+- **WHEN** the user opens a record with a saved value
+- **THEN** the field shows the label of the selected target
 
-#### Scenario: Очищення вибору
-- **WHEN** користувач очищає вибір і зберігає
-- **THEN** значення поля прибрано
+#### Scenario: Clearing the choice
+- **WHEN** the user clears the choice and saves
+- **THEN** the value of the field is removed
 
 ### Requirement: Ендпоінти пошуку для полів-посилань
-Адмінка SHALL надавати авторизованим адміністраторам JSON-пошук типів за `name` у межах виду і записів за `title` (мова `default`) у межах типу. Пошук SHALL повертати не більше 20 результатів у стабільному порядку, а порожній запит — перші 20. Невідомий вид чи тип SHALL давати помилку валідації, а неавторизований запит — відмову.
+The admin SHALL provide to authorized administrators a JSON search of types by `name` within the kind and of records by `title` (the language `default`) within the type. The search SHALL return no more than 20 results in a stable order, and an empty request — the first 20. An unknown kind or type SHALL give a validation error, and an unauthorized request — a refusal.
 
-#### Scenario: Пошук типів
-- **WHEN** адмін запитує типи виду `block` за `q = hero`
-- **THEN** відповідь містить до 20 типів цього виду з `key` і `name`, що містять `hero`
+#### Scenario: Search of types
+- **WHEN** the admin requests the types of the kind `block` for `q = hero`
+- **THEN** the response contains up to 20 types of this kind with `key` and `name` that contain `hero`
 
-#### Scenario: Пошук записів
-- **WHEN** адмін запитує записи типу `article` за `q = news`
-- **THEN** відповідь містить до 20 записів із `uuid` і `title`, що містять `news`
+#### Scenario: Search of records
+- **WHEN** the admin requests the records of the type `article` for `q = news`
+- **THEN** the response contains up to 20 records with `uuid` and `title` that contain `news`
 
-#### Scenario: Невідомий тип
-- **WHEN** запит указує тип, якого немає
-- **THEN** відповідь — помилка валідації
+#### Scenario: Unknown type
+- **WHEN** the request specifies a type that does not exist
+- **THEN** the response is a validation error
 
-#### Scenario: Без авторизації
-- **WHEN** неавторизований користувач викликає пошук
-- **THEN** запит відхилено
+#### Scenario: Without authorization
+- **WHEN** an unauthenticated user calls the search
+- **THEN** the request is rejected
 
 ### Requirement: Значення полів-посилань у таблиці записів
-Якщо поле `type_ref` / `node_ref` вибране колонкою списку записів, комірка SHALL показувати `name` типу / `title` запису (мова `default`) як посилання на сторінку редагування цієї сутності; посилання SHALL відкриватися в тому ж вікні (без `target="_blank"`). Для множинного поля — кілька посилань у збереженому порядку; якщо підпис недоступний — саме значення без посилання. Колонка SHALL сортуватися за підписом (`name` / `title` мови `default`), для множинного поля — за першим значенням; записи без значення SHALL йти останніми в обох напрямках. Колонка SHALL бути доступна як сортування за замовчуванням у налаштуваннях списку.
+If the field `type_ref` / `node_ref` is chosen as a column of the list of records, the cell SHALL show the `name` of the type / the `title` of the record (the language `default`) as a link to the edit page of this entity; the link SHALL open in the same window (without `target="_blank"`). For a multiple field — several links in the saved order; if the label is not available — the value itself without a link. The column SHALL be sorted by the label (`name` / `title` of the language `default`), for a multiple field — by the first value; records without a value SHALL go last in both directions. The column SHALL be available as the default sorting in the settings of the list.
 
-#### Scenario: Комірка
-- **WHEN** запис має `node_ref` на запис із `title = Новини`
-- **THEN** комірка показує посилання `Новини`, що веде на редагування цього запису й відкривається в тому ж вікні
+#### Scenario: Cell
+- **WHEN** a record has a `node_ref` to a record with `title = Новини`
+- **THEN** the cell shows the link `Новини`, which leads to editing this record and opens in the same window
 
-#### Scenario: Посилання на тип
-- **WHEN** запис має `type_ref` на тип `Герой` виду `block`
-- **THEN** комірка показує посилання `Герой` на редагування цього типу
+#### Scenario: Link to a type
+- **WHEN** a record has a `type_ref` to the type `Герой` of the kind `block`
+- **THEN** the cell shows the link `Герой` to editing this type
 
-#### Scenario: Сортування за підписом
-- **WHEN** список сортується за таким полем за зростанням
-- **THEN** записи йдуть за алфавітом підписів цілей, а записи без значення — останніми
+#### Scenario: Sorting by the label
+- **WHEN** the list is sorted by this field in ascending order
+- **THEN** the records go in the alphabetical order of the labels of the targets, and the records without a value — last

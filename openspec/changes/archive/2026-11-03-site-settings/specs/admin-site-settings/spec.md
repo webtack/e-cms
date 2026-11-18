@@ -2,165 +2,165 @@
 
 ## Purpose
 
-Описує сторінку «Налаштування сайту» в адмінці: які поля вона показує, як користувач редагує списки, як перевіряються й зберігаються значення та хто має доступ.
+Describes the page «Налаштування сайту» ("Site settings") in the admin: which fields it shows, how the user edits the lists, how the values are validated and saved, and who has access.
 
 ## ADDED Requirements
 
 ### Requirement: Доступ до сторінки налаштувань
-Сторінка налаштувань сайту SHALL бути доступна за адресою `/admin/settings` лише автентифікованому підтвердженому користувачу, роль якого має системне право на налаштування сайту. Користувач без цього права SHALL отримувати 403 і на перегляд, і на збереження; гість SHALL перенаправлятися на сторінку входу.
+The page of the site settings SHALL be available at `/admin/settings` only to an authenticated confirmed user whose role has the system right to the site settings. A user without this right SHALL receive 403 both for viewing and for saving; a guest SHALL be redirected to the login page.
 
-#### Scenario: Роль із правом
-- **WHEN** користувач ролі з правом на налаштування сайту відкриває `/admin/settings`
-- **THEN** сторінка відкривається з поточними значеннями
+#### Scenario: Role with the right
+- **WHEN** a user of a role with the right to the site settings opens `/admin/settings`
+- **THEN** the page opens with the current values
 
-#### Scenario: Роль без права
-- **WHEN** користувач без права на налаштування сайту відкриває `/admin/settings` або надсилає збереження
-- **THEN** відповідь 403, значення не змінено
+#### Scenario: Role without the right
+- **WHEN** a user without the right to the site settings opens `/admin/settings` or sends a save
+- **THEN** the response is 403, the values are not changed
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/settings`
-- **THEN** його перенаправлено на `/login`
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/settings`
+- **THEN** he is redirected to `/login`
 
-#### Scenario: Адміністратор
-- **WHEN** користувач ролі `admin` відкриває `/admin/settings`
-- **THEN** сторінка відкривається
+#### Scenario: Administrator
+- **WHEN** a user of the role `admin` opens `/admin/settings`
+- **THEN** the page opens
 
 ### Requirement: Поля сторінки
-Сторінка SHALL містити одну форму з блоками: назва й скорочена назва (однорядкові тексти), необов'язковий опис сайту (багаторядкове текстове поле), велике й мале лого (завантаження зображення), email-и, телефони, соцмережі, графік роботи та прапорець індексації. Усі блоки, окрім прапорця, SHALL бути необов'язковими. Форма SHALL показувати й редагувати лише значення базової мови (`default`), без перемикача мов.
+The page SHALL contain one form with the blocks: the name and the short name (single-line texts), an optional description of the site (a multi-line text field), the large and the small logo (image upload), emails, phones, social networks, working hours and the indexing flag. All blocks except the flag SHALL be optional. The form SHALL show and edit only the values of the base language (`default`), without a language switcher.
 
-#### Scenario: Порожня установка
-- **WHEN** користувач відкриває сторінку, коли нічого не збережено
-- **THEN** поля порожні, списки без рядків, прапорець індексації знято
+#### Scenario: Empty setup
+- **WHEN** the user opens the page when nothing has been saved
+- **THEN** the fields are empty, the lists have no rows, the indexing flag is unchecked
 
-#### Scenario: Збережені значення
-- **WHEN** користувач відкриває сторінку після збереження налаштувань
-- **THEN** форма показує збережені значення мови `default`, лого з попереднім переглядом і списки в збереженому порядку
+#### Scenario: Saved values
+- **WHEN** the user opens the page after saving the settings
+- **THEN** the form shows the saved values of the language `default`, the logo with a preview, and the lists in the saved order
 
-#### Scenario: Немає перемикача мов
-- **WHEN** на сайті ввімкнено кілька мов контенту і користувач відкриває сторінку
-- **THEN** форма все одно показує лише значення `default`, без перемикача мов
+#### Scenario: No language switcher
+- **WHEN** several content languages are enabled on the site and the user opens the page
+- **THEN** the form still shows only the values of `default`, without a language switcher
 
 ### Requirement: Email-и та телефони
-Блок email-ів і блок телефонів SHALL бути списками записів, де кожен запис має значення та необов'язковий підпис. Користувач SHALL мати змогу додавати, видаляти й змінювати порядок записів. Значення email SHALL бути коректною адресою електронної пошти, значення телефону — рядком із цифр і символів `+`, пробілу, дужок та дефіса. Кількість записів у кожному списку SHALL обмежуватися розумною межею.
+The block of emails and the block of phones SHALL be lists of records, where each record has a value and an optional caption. The user SHALL be able to add, delete and change the order of the records. The value of an email SHALL be a valid email address, the value of a phone — a string of digits and the symbols `+`, space, brackets and hyphen. The number of records in each list SHALL be limited by a reasonable bound.
 
-#### Scenario: Додавання email з підписом
-- **WHEN** користувач додає email `info@example.com` з підписом «Загальні питання» і зберігає
-- **THEN** запис збережено, і після перезавантаження він показаний із підписом
+#### Scenario: Adding an email with a caption
+- **WHEN** the user adds the email `info@example.com` with the caption «Загальні питання» («General questions») and saves
+- **THEN** the record is saved, and after reloading it is shown with the caption
 
-#### Scenario: Email без підпису
-- **WHEN** користувач додає телефон без підпису
-- **THEN** запис приймається
+#### Scenario: Phone without a caption
+- **WHEN** the user adds a phone without a caption
+- **THEN** the record is accepted
 
-#### Scenario: Некоректний email
-- **WHEN** користувач вводить значення, що не є адресою пошти
-- **THEN** збереження відхилено, помилка показана біля відповідного рядка
+#### Scenario: Invalid email
+- **WHEN** the user enters a value that is not an email address
+- **THEN** the saving is rejected, the error is shown next to the corresponding row
 
-#### Scenario: Некоректний телефон
-- **WHEN** користувач вводить у телефон літери
-- **THEN** збереження відхилено, помилка показана біля відповідного рядка
+#### Scenario: Invalid phone
+- **WHEN** the user enters letters into a phone
+- **THEN** the saving is rejected, the error is shown next to the corresponding row
 
-#### Scenario: Порожній запис
-- **WHEN** користувач додає рядок, залишає значення порожнім і зберігає
-- **THEN** збереження відхилено з помилкою біля значення; підпис без значення не зберігається
+#### Scenario: Empty record
+- **WHEN** the user adds a row, leaves the value empty and saves
+- **THEN** the saving is rejected with an error next to the value; a caption without a value is not saved
 
-#### Scenario: Перевищення межі
-- **WHEN** кількість записів списку перевищує встановлену межу
-- **THEN** збереження відхилено з помилкою списку
+#### Scenario: Exceeding the limit
+- **WHEN** the number of records of a list exceeds the set limit
+- **THEN** the saving is rejected with an error of the list
 
 ### Requirement: Соцмережі
-Блок соцмереж SHALL бути списком записів, кожен з яких складається з мережі (вибір із фіксованого довідника), посилання та необов'язкового підпису. Кнопка додавання SHALL додавати новий рядок із вибором мережі, полем посилання й полем підпису. Користувач SHALL мати змогу додавати кілька записів однієї мережі, видаляти записи й змінювати їхній порядок. Посилання SHALL бути коректною адресою `http` або `https`.
+The block of social networks SHALL be a list of records, each of which consists of a network (a choice from the fixed directory), a link and an optional caption. The add button SHALL add a new row with the choice of a network, a link field and a caption field. The user SHALL be able to add several records of the same network, delete records and change their order. The link SHALL be a valid address `http` or `https`.
 
-#### Scenario: Додавання мережі
-- **WHEN** користувач натискає «Додати», обирає мережу, вводить посилання і зберігає
-- **THEN** запис збережено, і після перезавантаження він показаний у тому самому порядку
+#### Scenario: Adding a network
+- **WHEN** the user clicks «Додати» («Add»), chooses a network, enters a link and saves
+- **THEN** the record is saved, and after reloading it is shown in the same order
 
-#### Scenario: Дві сторінки однієї мережі
-- **WHEN** користувач додає два записи з мережею Instagram і різними посиланнями
-- **THEN** обидва збережено
+#### Scenario: Two pages of the same network
+- **WHEN** the user adds two records with the network Instagram and different links
+- **THEN** both are saved
 
-#### Scenario: Некоректне посилання
-- **WHEN** користувач вводить посилання без схеми `http`/`https`
-- **THEN** збереження відхилено, помилка показана біля поля посилання
+#### Scenario: Invalid link
+- **WHEN** the user enters a link without the scheme `http`/`https`
+- **THEN** the saving is rejected, the error is shown next to the link field
 
-#### Scenario: Мережу не обрано
-- **WHEN** користувач додає рядок і зберігає без вибору мережі
-- **THEN** збереження відхилено, помилка показана біля вибору мережі
+#### Scenario: Network not chosen
+- **WHEN** the user adds a row and saves without choosing a network
+- **THEN** the saving is rejected, the error is shown next to the choice of the network
 
 ### Requirement: Графік роботи
-Блок графіка роботи SHALL бути списком рядків, кожен з яких складається з чотирьох однорядкових текстових значень (колонок). Користувач SHALL мати змогу додавати рядки, видаляти їх і змінювати порядок. Значення колонок SHALL бути довільним текстом без жодних вимог до формату. Кількість рядків SHALL обмежуватися розумною межею. Рядок, у якому всі колонки порожні, SHALL не зберігатися.
+The block of working hours SHALL be a list of rows, each of which consists of four single-line text values (the columns). The user SHALL be able to add rows, delete them and change their order. The values of the columns SHALL be arbitrary text without any requirements to the format. The number of rows SHALL be limited by a reasonable bound. A row in which all the columns are empty SHALL NOT be saved.
 
-#### Scenario: Додавання рядка
-- **WHEN** користувач додає рядок і вводить «Пн–Пт», «9:00», «18:00», «обід 13–14»
-- **THEN** після збереження чотири значення показані в тих самих колонках
+#### Scenario: Adding a row
+- **WHEN** the user adds a row and enters «Пн–Пт» («Mon–Fri»), «9:00», «18:00», «обід 13–14» («lunch 13–14»)
+- **THEN** after saving the four values are shown in the same columns
 
-#### Scenario: Часткове заповнення
-- **WHEN** користувач заповнює лише першу колонку рядка
-- **THEN** рядок зберігається, порожні колонки лишаються порожніми
+#### Scenario: Partial filling
+- **WHEN** the user fills in only the first column of a row
+- **THEN** the row is saved, the empty columns remain empty
 
-#### Scenario: Порожній рядок
-- **WHEN** користувач додає рядок і залишає всі колонки порожніми
-- **THEN** після збереження цього рядка немає
+#### Scenario: Empty row
+- **WHEN** the user adds a row and leaves all the columns empty
+- **THEN** after saving this row does not exist
 
-#### Scenario: Перевищення межі
-- **WHEN** кількість рядків перевищує встановлену межу
-- **THEN** збереження відхилено з помилкою блока
+#### Scenario: Exceeding the limit
+- **WHEN** the number of rows exceeds the set limit
+- **THEN** the saving is rejected with an error of the block
 
 ### Requirement: Зміна порядку перетягуванням
-У списках email-ів, телефонів, соцмереж і графіка роботи користувач SHALL змінювати порядок записів перетягуванням за ручку, а також клавіатурою. Збережений порядок SHALL відтворюватися при наступному відкритті сторінки та в читачі налаштувань.
+In the lists of emails, phones, social networks and working hours the user SHALL change the order of the records by dragging the handle, and also by the keyboard. The saved order SHALL be reproduced at the next opening of the page and in the reader of the settings.
 
-#### Scenario: Перетягування
-- **WHEN** користувач переносить другий телефон на перше місце і зберігає
-- **THEN** після перезавантаження телефони йдуть у новому порядку
+#### Scenario: Drag-and-drop
+- **WHEN** the user moves the second phone to the first place and saves
+- **THEN** after reloading the phones go in the new order
 
-#### Scenario: Клавіатура
-- **WHEN** користувач переносить запис ручкою за допомогою клавіатури
-- **THEN** порядок змінюється так само, як при перетягуванні мишею
+#### Scenario: Keyboard
+- **WHEN** the user moves a record by the handle with the keyboard
+- **THEN** the order changes in the same way as with the drag by the mouse
 
 ### Requirement: Логотипи в формі
-Блок логотипів SHALL містити два незалежні завантаження: велике й мале лого, обидва з профілем `image` і з попереднім переглядом обраного файлу. Користувач SHALL мати змогу обрати завантажений файл, замінити його та очистити лого. Збереження SHALL відхиляти файл не профілю `image`.
+The block of logos SHALL contain two independent uploads: the large and the small logo, both with the profile `image` and with a preview of the chosen file. The user SHALL be able to choose the uploaded file, replace it and clear the logo. The saving SHALL reject a file that is not of the profile `image`.
 
-#### Scenario: Завантаження лого
-- **WHEN** користувач завантажує зображення як велике лого і зберігає
-- **THEN** після перезавантаження лого показане з попереднім переглядом
+#### Scenario: Uploading a logo
+- **WHEN** the user uploads an image as the large logo and saves
+- **THEN** after reloading the logo is shown with a preview
 
-#### Scenario: Очищення
-- **WHEN** користувач очищає лого і зберігає
-- **THEN** лого більше не показується, а файл лишається в медіатеці
+#### Scenario: Clearing
+- **WHEN** the user clears the logo and saves
+- **THEN** the logo is no longer shown, and the file remains in the media library
 
-#### Scenario: Недозволений файл
-- **WHEN** користувач надсилає як лого файл іншого профілю
-- **THEN** збереження відхилено, помилка показана біля відповідного поля
+#### Scenario: Forbidden file
+- **WHEN** the user sends a file of another profile as the logo
+- **THEN** the saving is rejected, the error is shown next to the corresponding field
 
 ### Requirement: Прапорець індексації
-Форма SHALL містити прапорець «сайт індексується», який за замовчуванням знято. Прапорець SHALL лише зберігатися для використання на публічному фронтенді; в адмінці він не змінює жодної поведінки.
+The form SHALL contain the flag «сайт індексується» («the site is indexed»), which is unchecked by default. The flag SHALL only be saved for use on the public frontend; in the admin it does not change any behaviour.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** користувач уперше відкриває сторінку
-- **THEN** прапорець знято
+#### Scenario: Default value
+- **WHEN** the user opens the page for the first time
+- **THEN** the flag is unchecked
 
-#### Scenario: Вмикання
-- **WHEN** користувач ставить прапорець і зберігає
-- **THEN** після перезавантаження прапорець встановлено
+#### Scenario: Enabling
+- **WHEN** the user checks the flag and saves
+- **THEN** after reloading the flag is set
 
-#### Scenario: Без впливу на адмінку
-- **WHEN** прапорець встановлено
-- **THEN** сторінки адмінки поводяться так само, як і при знятому прапорці
+#### Scenario: No effect on the admin
+- **WHEN** the flag is set
+- **THEN** the pages of the admin behave in the same way as with the flag unchecked
 
 ### Requirement: Збереження сторінки
-Сторінка SHALL зберігати всі налаштування однією дією: або всі значення збережено, або (при помилці валідації) нічого не змінено. При успіху користувач SHALL бачити повідомлення про збереження, при помилці — повідомлення біля відповідних полів із збереженим введенням. Повторне збереження незмінених значень SHALL не змінювати даних. Значення, яких немає у формі, SHALL не затиратися.
+The page SHALL save all the settings in one action: either all values are saved or (on a validation error) nothing is changed. On success the user SHALL see a message about saving, on an error — messages next to the corresponding fields with the entered data kept. A repeated saving of unchanged values SHALL not change the data. The values that are absent from the form SHALL not be wiped out.
 
-#### Scenario: Успішне збереження
-- **WHEN** користувач змінює назву й додає телефон і натискає «Зберегти»
-- **THEN** обидві зміни збережено, показано повідомлення про успіх
+#### Scenario: Successful saving
+- **WHEN** the user changes the name, adds a phone and clicks «Зберегти» («Save»)
+- **THEN** both changes are saved, a success message is shown
 
-#### Scenario: Помилка в одному блоці
-- **WHEN** один блок має помилку валідації, а інший змінено коректно
-- **THEN** нічого не збережено, помилка показана біля поля, введені значення лишаються у формі
+#### Scenario: Error in one block
+- **WHEN** one block has a validation error, and another one is changed correctly
+- **THEN** nothing is saved, the error is shown next to the field, the entered values remain in the form
 
-#### Scenario: Чужі налаштування
-- **WHEN** у сховищі є налаштування з іншими префіксами
-- **THEN** збереження сторінки їх не змінює
+#### Scenario: Foreign settings
+- **WHEN** the storage has settings with other prefixes
+- **THEN** saving the page does not change them
 
-#### Scenario: Очищення назви
-- **WHEN** користувач очищає назву й зберігає
-- **THEN** назва порожня, інші налаштування не змінено
+#### Scenario: Clearing the name
+- **WHEN** the user clears the name and saves
+- **THEN** the name is empty, the other settings are not changed

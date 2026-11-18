@@ -2,57 +2,57 @@
 
 ## Purpose
 
-Дає змогу керувати ролями та їхніми правами: створювати й змінювати ролі, налаштовувати матрицю доступу до розділів, типів контенту та медіатеки.
+Allows managing roles and their rights: creating and changing roles, configuring the matrix of access to the sections, the content types and the media library.
 
 ## ADDED Requirements
 
 ### Requirement: Список ролей
-Система SHALL надавати сторінку `/admin/roles` зі списком ролей (назва, кількість користувачів, ознака системної). Сторінка доступна лише за правом керування ролями.
+The system SHALL provide the page `/admin/roles` with a list of roles (the name, the number of users, the sign of a system role). The page is available only with the right of managing roles.
 
-#### Scenario: Доступ за правом
-- **WHEN** користувач із правом керування ролями відкриває `/admin/roles`
-- **THEN** він бачить ролі, а системну роль `admin` позначено
+#### Scenario: Access by the right
+- **WHEN** a user with the right of managing roles opens `/admin/roles`
+- **THEN** he sees the roles, and the system role `admin` is marked
 
-#### Scenario: Без права
-- **WHEN** користувач без цього права відкриває `/admin/roles`
-- **THEN** відповідь 403
+#### Scenario: Without the right
+- **WHEN** a user without this right opens `/admin/roles`
+- **THEN** the response is 403
 
 ### Requirement: Створення та редагування ролі
-Система SHALL дозволяти створити роль з унікальною назвою й налаштувати її права та змінювати їх згодом. Зміна прав діє на всіх користувачів ролі з наступного запиту.
+The system SHALL allow creating a role with a unique name and configuring its rights, and changing them later. A change of rights takes effect for all users of the role from the next request.
 
-#### Scenario: Нова роль
-- **WHEN** адміністратор створює роль із унікальною назвою
-- **THEN** роль збережено без жодних прав
+#### Scenario: New role
+- **WHEN** the administrator creates a role with a unique name
+- **THEN** the role is saved without any rights
 
-#### Scenario: Дубль назви
-- **WHEN** вказано назву наявної ролі
-- **THEN** збереження відхилено з помилкою біля поля назви
+#### Scenario: Duplicate name
+- **WHEN** the name of an existing role is specified
+- **THEN** the saving is rejected with an error next to the field of the name
 
 ### Requirement: Матриця прав ролі
-Екран ролі SHALL показувати системні права як перемикачі й для кожного типу контенту та медіатеки вибір рівня `none`, `own`, `any`. Типи згруповано за видом (`content`, `page`, `block`), і перелік відповідає типам, що існують у момент відкриття екрана.
+The screen of a role SHALL show the system rights as switches, and for each content type and for the media library a choice of the level `none`, `own`, `any`. The types are grouped by kind (`content`, `page`, `block`), and the list corresponds to the types that exist at the moment the screen is opened.
 
-#### Scenario: Тип, створений після ролі
-- **WHEN** після створення ролі додано новий тип і відкрито екран ролі
-- **THEN** тип є в матриці з рівнем `none`
+#### Scenario: Type created after the role
+- **WHEN** a new type is added after the creation of a role and the screen of the role is opened
+- **THEN** the type is in the matrix with the level `none`
 
-#### Scenario: Збереження матриці
-- **WHEN** адміністратор змінює рівні та зберігає
-- **THEN** збережені рівні відображаються при наступному відкритті екрана
+#### Scenario: Saving the matrix
+- **WHEN** the administrator changes the levels and saves
+- **THEN** the saved levels are displayed when the screen is opened next time
 
 ### Requirement: Захист системної ролі
-Системну роль `admin` SHALL бути неможливо змінити чи видалити. Її матриця показується лише для перегляду.
+The system role `admin` SHALL be impossible to change or delete. Its matrix is shown only for viewing.
 
-#### Scenario: Спроба змінити admin
-- **WHEN** надходить запит на зміну або видалення ролі `admin`
-- **THEN** відповідь 403 або помилка валідації, роль не змінено
+#### Scenario: Attempt to change admin
+- **WHEN** a request to change or delete the role `admin` arrives
+- **THEN** the response is 403 or a validation error, the role is not changed
 
 ### Requirement: Видалення ролі
-Система SHALL дозволяти видалити роль лише тоді, коли жоден користувач її не має.
+The system SHALL allow deleting a role only when no user has it.
 
-#### Scenario: Роль із користувачами
-- **WHEN** видаляється роль, яку має хоча б один користувач
-- **THEN** видалення відхилено з поясненням, роль збережено
+#### Scenario: Role with users
+- **WHEN** a role that at least one user has is being deleted
+- **THEN** the deletion is rejected with an explanation, the role is kept
 
-#### Scenario: Порожня роль
-- **WHEN** видаляється роль без користувачів
-- **THEN** роль і її права видалено
+#### Scenario: Empty role
+- **WHEN** a role without users is being deleted
+- **THEN** the role and its rights are deleted

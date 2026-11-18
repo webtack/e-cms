@@ -2,26 +2,26 @@
 
 ## Context
 
-Шапка — `AdminHeader`; форма запису — `ContentNodeForm` з нижньою `FormActionBar` (children зліва, «Скасувати/Зберегти» справа). Публічні адреси: сторінка `/{slug}`, запис `content` `/{type.slug}/{node.slug}`, блоки без адреси (`docs/public-site.md`). `ContentNodeController::edit` віддає `node` без публічної адреси. Див. proposal.md.
+The header — `AdminHeader`; the form of a record — `ContentNodeForm` with the bottom `FormActionBar` (children on the left, «Скасувати/Зберегти» — "Cancel/Save" on the right). The public addresses: the page `/{slug}`, the record `content` `/{type.slug}/{node.slug}`, the blocks have no address (`docs/public-site.md`). `ContentNodeController::edit` gives `node` without a public address. See proposal.md.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Одна кнопка в шапці й одна в формі ноди, обидві `target="_blank"`.
+- One button in the header and one in the form of the node, both with `target="_blank"`.
 
 **Non-Goals:**
-- Перегляд чернеток/запланованих записів, мовні версії, зміна публічних маршрутів.
+- The viewing of drafts/scheduled records, language versions, a change of the public routes.
 
 ## Decisions
 
-- **Адресу рахує сервер.** `edit` додає проп `publicUrl` (`string|null`): `url('/'.$node->slug)` для `page`, `url('/'.$type->slug.'/'.$node->slug)` для `content`, `null` для `block`. Так фронтенд не дублює правила маршрутів. Альтернатива — збирати на клієнті зі `slug` — відкинута: потрібен slug типу й знання kind.
-- **Відносна чи абсолютна адреса.** Використовуємо відносний шлях (`/about`), бо адмінка й сайт на одному домені; не залежить від `APP_URL`.
-- **Адреса з збереженого slug.** Проп береться з БД, тому не реагує на правки slug у формі до збереження (після збереження Inertia оновить проп).
-- **Посилання, не Inertia `Link`.** Звичайний `<a target="_blank" rel="noopener noreferrer">` усередині `Button asChild`; сайт — не Inertia-сторінка.
-- **Іконка шапки.** `ExternalLink` (lucide) у `Button variant="ghost" size="icon"`, `aria-label`/`title` «Open site», поруч із перемикачем мови, перед ним.
-- **Розміщення «Перегляд».** У `FormActionBar` ліворуч (children) разом із кнопкою «Деталі»; на вузьких екранах лишається видимою (іконка + текст допустимо скоротити до іконки з `aria-label`).
+- **The address is computed by the server.** `edit` adds the prop `publicUrl` (`string|null`): `url('/'.$node->slug)` for `page`, `url('/'.$type->slug.'/'.$node->slug)` for `content`, `null` for `block`. This way the frontend does not duplicate the rules of the routes. The alternative — to assemble on the client from `slug` — was rejected: it needs the slug of the type and the knowledge of the kind.
+- **A relative or an absolute address.** We use the relative path (`/about`), because the admin and the site are on one domain; it does not depend on `APP_URL`.
+- **The address from the saved slug.** The prop is taken from the DB, so it does not react to the changes of the slug in the form before saving (after saving Inertia will update the prop).
+- **A link, not an Inertia `Link`.** An ordinary `<a target="_blank" rel="noopener noreferrer">` inside `Button asChild`; the site is not an Inertia page.
+- **The icon in the header.** `ExternalLink` (lucide) in `Button variant="ghost" size="icon"`, `aria-label`/`title` «Open site», next to the switch of the language, before it.
+- **The placement of «Перегляд» ("Preview").** In `FormActionBar` on the left (children) together with the button «Деталі» ("Details"); on narrow screens it remains visible (the icon + text may be shortened to the icon with `aria-label`).
 
 ## Risks / Trade-offs
 
-- Для невидимого запису «Перегляд» дає 404 — свідомо прийнято (простий варіант); якщо стане незручно, окрема зміна додасть захищений перегляд чернеток.
-- Зміна slug без збереження: кнопка веде на стару адресу до збереження.
+- For an invisible record «Перегляд» gives 404 — deliberately accepted (the simple variant); if it becomes inconvenient, a separate change will add a protected preview of drafts.
+- A change of the slug without saving: the button leads to the old address until saving.

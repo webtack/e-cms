@@ -1,38 +1,36 @@
-# Spec Delta
-
 ## MODIFIED Requirements
 
 ### Requirement: Поле визначається рядком у БД
-Система SHALL дозволяти додати до типу контенту поле із ключем (унікальним у межах типу), назвою, типом значення із реєстру, ознаками множинності, обов'язковості та перекладності, вагою (`weight`) й опціональними налаштуваннями (JSON). Ключ поля SHALL відповідати формату `^[a-z][a-z0-9_]*$` (до 64 символів), SHALL НЕ збігатися із зарезервованим ключем і SHALL НЕ змінюватися після створення; назву, вагу й налаштування змінювати дозволено. Зарезервовані ключі: ключі службових колонок таблиці записів (`uuid`, `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`) та ключі системних полів метаданих і розділу (`meta_title`, `meta_description`, `meta_image`, `section_title`, `section_description`, `section_cover`), які заводить лише система. Заборона зарезервованих ключів SHALL діяти лише при створенні поля користувачем: поля, що вже мають такий ключ, лишаються чинними й редагуються як раніше, а ключі службових колонок у таблиці записів не пропонуються як колонки.
+The system SHALL allow adding to a content type a field with a key (unique within the type), a name, a value type from the registry, flags of multiplicity, required status and translatability, a weight (`weight`) and optional settings (JSON). The key of the field SHALL match the format `^[a-z][a-z0-9_]*$` (up to 64 characters), SHALL NOT coincide with a reserved key and SHALL NOT change after creation; the name, the weight and the settings may be changed. Reserved keys: the keys of the service columns of the table of records (`uuid`, `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`) and the keys of the system fields of metadata and section (`meta_title`, `meta_description`, `meta_image`, `section_title`, `section_description`, `section_cover`), which only the system creates. The prohibition of reserved keys SHALL apply only when a field is created by the user: fields that already have such a key remain valid and are edited as before, and the keys of the service columns of the table of records are not offered as columns.
 
-#### Scenario: Додавання поля
-- **WHEN** до типу `article` додається поле `views` типу «ціле число»
-- **THEN** поле збережено, і записи цього типу можуть мати для нього значення
+#### Scenario: Adding a field
+- **WHEN** the field `views` of the type «ціле число» is added to the type `article`
+- **THEN** the field is saved, and the records of this type can have values for it
 
-#### Scenario: Невідомий тип значення
-- **WHEN** додається поле з типом, якого немає в реєстрі типів полів
-- **THEN** система відхиляє збереження поля з помилкою валідації
+#### Scenario: Unknown value type
+- **WHEN** a field with a type that is not in the registry of field types is added
+- **THEN** the system rejects saving the field with a validation error
 
-#### Scenario: Дублікат ключа в межах типу
-- **WHEN** до того ж типу додається друге поле з наявним ключем
-- **THEN** збереження відхилено; той самий ключ в іншому типі контенту допустимий
+#### Scenario: Duplicate key within the type
+- **WHEN** a second field with an existing key is added to the same type
+- **THEN** the saving is rejected; the same key in another content type is allowed
 
-#### Scenario: Недопустимий формат ключа поля
-- **WHEN** до типу додається поле з ключем `My Field` або `1price`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Invalid format of a field key
+- **WHEN** a field with the key `My Field` or `1price` is added to a type
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Зарезервований ключ поля
-- **WHEN** до типу додається поле з ключем `slug`, `uuid`, `status`, `is_active`, `created_at`, `updated_at`, `published_at` або `unpublished_at`
-- **THEN** збереження відхилено з помилкою валідації біля ключа, а поле не створено
+#### Scenario: Reserved field key
+- **WHEN** a field with the key `slug`, `uuid`, `status`, `is_active`, `created_at`, `updated_at`, `published_at` or `unpublished_at` is added to a type
+- **THEN** the saving is rejected with a validation error next to the key, and the field is not created
 
-#### Scenario: Ключ системного поля метаданих
-- **WHEN** користувач додає до типу поле з ключем `meta_title` або `section_cover`
-- **THEN** збереження відхилено з помилкою валідації біля ключа, а поле не створено
+#### Scenario: Key of a system metadata field
+- **WHEN** the user adds to a type a field with the key `meta_title` or `section_cover`
+- **THEN** the saving is rejected with a validation error next to the key, and the field is not created
 
-#### Scenario: Наявне поле із зарезервованим ключем
-- **WHEN** оновлюється назва чи вага поля, ключ якого був створений до введення резервування (наприклад, `status`)
-- **THEN** зміну збережено без помилки
+#### Scenario: Existing field with a reserved key
+- **WHEN** the name or the weight of a field is updated, whose key was created before the reservation was introduced (for example, `status`)
+- **THEN** the change is saved without an error
 
-#### Scenario: Спроба змінити ключ поля
-- **WHEN** змінюється `key` наявного поля
-- **THEN** зміну відхилено, ключ лишається попереднім; зміна назви допустима
+#### Scenario: Attempt to change the key of a field
+- **WHEN** the `key` of an existing field is changed
+- **THEN** the change is rejected, the key remains the previous one; changing the name is allowed

@@ -2,96 +2,96 @@
 
 ## Purpose
 
-Надає спільну адмін-оболонку (бічна навігація, шапка, тема, сповіщення) та стартову сторінку, на яких будуватимуться наступні розділи CMS.
+Provides the shared admin shell (sidebar navigation, header, theme, notifications) and the start page, on which the next CMS sections will be built.
 
 ## ADDED Requirements
 
-### Requirement: Стартова сторінка адмінки
-Система SHALL відображати сторінку `/admin/dashboard` в адмін-оболонці для автентифікованого користувача.
+### Requirement: Admin start page
+The system SHALL display the page `/admin/dashboard` in the admin shell for an authenticated user.
 
-#### Scenario: Відкриття дашборду
-- **WHEN** автентифікований користувач з підтвердженим email відкриває `/admin/dashboard`
-- **THEN** відповідь успішна, відображаються оболонка (sidebar і header) та вміст сторінки дашборду
+#### Scenario: Opening the dashboard
+- **WHEN** an authenticated user with a confirmed email opens `/admin/dashboard`
+- **THEN** the response is successful, and the shell (sidebar and header) and the content of the dashboard page are displayed
 
-### Requirement: Збереження оболонки між переходами
-Адмін-оболонка SHALL залишатися змонтованою при переході між сторінками адмінки, без повного перезавантаження сторінки, а стан sidebar (розгорнутий/згорнутий) SHALL зберігатися під час таких переходів.
+### Requirement: Shell persistence across navigation
+The admin shell SHALL remain mounted when navigating between admin pages, without a full page reload, and the sidebar state (expanded/collapsed) SHALL be kept during such navigation.
 
-#### Scenario: Навігація між сторінками
-- **WHEN** користувач згортає sidebar і переходить на іншу сторінку адмінки через посилання
-- **THEN** sidebar залишається згорнутим, повне перезавантаження сторінки не відбувається
+#### Scenario: Navigation between pages
+- **WHEN** the user collapses the sidebar and navigates to another admin page through a link
+- **THEN** the sidebar stays collapsed, and no full page reload happens
 
-### Requirement: Бічна навігація
-Оболонка SHALL містити бічну панель з пунктами Dashboard, Content Types, Pages, Media Library і Settings та SHALL підсвічувати пункт, що відповідає поточній адресі.
+### Requirement: Sidebar navigation
+The shell SHALL contain a sidebar with the items Dashboard, Content Types, Pages, Media Library and Settings and SHALL highlight the item that matches the current address.
 
-#### Scenario: Підсвітка активного пункту
-- **WHEN** користувач перебуває на `/admin/dashboard`
-- **THEN** пункт Dashboard позначено як активний, а решту пунктів — ні
+#### Scenario: Highlighting the active item
+- **WHEN** the user is on `/admin/dashboard`
+- **THEN** the Dashboard item is marked as active, and the other items are not
 
-#### Scenario: Макетні пункти
-- **WHEN** користувач бачить пункти Content Types, Pages, Media Library і Settings
-- **THEN** вони відображаються як макет і не відкривають робочих функцій цього етапу
+#### Scenario: Layout items
+- **WHEN** the user sees the items Content Types, Pages, Media Library and Settings
+- **THEN** they are displayed as a layout and do not open working features of this stage
 
-### Requirement: Згортання sidebar на десктопі
-На широких екранах sidebar SHALL мати два стани: розгорнутий (іконки й підписи) та згорнутий до іконок, і користувач SHALL мати змогу перемикати їх.
+### Requirement: Collapsing the sidebar on desktop
+On wide screens the sidebar SHALL have two states: expanded (icons and labels) and collapsed to icons, and the user SHALL be able to switch between them.
 
-#### Scenario: Згортання до іконок
-- **WHEN** користувач на десктопі натискає перемикач sidebar у розгорнутому стані
-- **THEN** sidebar показує лише іконки, а вміст сторінки займає звільнене місце
+#### Scenario: Collapsing to icons
+- **WHEN** on desktop the user clicks the sidebar toggle in the expanded state
+- **THEN** the sidebar shows only icons, and the page content takes the freed space
 
-### Requirement: Мобільна навігація
-На вузьких екранах sidebar SHALL бути прихований за замовчуванням і відкриватися як висувна панель (drawer) за кнопкою-гамбургером у шапці.
+### Requirement: Mobile navigation
+On narrow screens the sidebar SHALL be hidden by default and SHALL open as a slide-in panel (drawer) by the hamburger button in the header.
 
-#### Scenario: Відкриття drawer
-- **WHEN** користувач на мобільному екрані натискає кнопку-гамбургер
-- **THEN** відкривається панель навігації з тими ж пунктами
+#### Scenario: Opening the drawer
+- **WHEN** on a mobile screen the user taps the hamburger button
+- **THEN** the navigation panel opens with the same items
 
-### Requirement: Хлібні крихти
-Шапка SHALL відображати хлібні крихти, що відповідають поточній сторінці адмінки.
+### Requirement: Breadcrumbs
+The header SHALL display breadcrumbs that correspond to the current admin page.
 
-#### Scenario: Крихти на дашборді
-- **WHEN** користувач відкриває `/admin/dashboard`
-- **THEN** шапка показує шлях, що закінчується назвою сторінки Dashboard
+#### Scenario: Breadcrumbs on the dashboard
+- **WHEN** the user opens `/admin/dashboard`
+- **THEN** the header shows a path that ends with the name of the Dashboard page
 
-### Requirement: Перемикач теми
-Шапка SHALL надавати перемикання між світлою і темною темою; обраний вибір SHALL зберігатися між відвідуваннями, а за відсутності вибору — відповідати системній темі.
+### Requirement: Theme switcher
+The header SHALL provide switching between the light and dark themes; the chosen option SHALL be kept between visits, and without a choice it SHALL follow the system theme.
 
-#### Scenario: Перемикання на темну тему
-- **WHEN** користувач вмикає темну тему
-- **THEN** інтерфейс відображається в темній темі, і після перезавантаження сторінки тема зберігається
+#### Scenario: Switching to the dark theme
+- **WHEN** the user enables the dark theme
+- **THEN** the interface is displayed in the dark theme, and after a page reload the theme is kept
 
-#### Scenario: Початкова тема
-- **WHEN** користувач уперше відкриває адмінку без збереженого вибору
-- **THEN** застосовується системна тема браузера
+#### Scenario: Initial theme
+- **WHEN** the user opens the admin for the first time without a saved choice
+- **THEN** the browser's system theme is applied
 
-### Requirement: Меню користувача
-Шапка SHALL містити меню користувача з імʼям (та аватаром або ініціалами), посиланням на профіль і діями виходу.
+### Requirement: User menu
+The header SHALL contain a user menu with the name (and an avatar or initials), a link to the profile and logout actions.
 
-#### Scenario: Вміст меню
-- **WHEN** користувач відкриває меню користувача
-- **THEN** він бачить своє імʼя, посилання на профіль і дію виходу
+#### Scenario: Menu content
+- **WHEN** the user opens the user menu
+- **THEN** they see their name, a link to the profile and the logout action
 
-#### Scenario: Перехід на профіль
-- **WHEN** користувач обирає посилання на профіль
-- **THEN** відкривається сторінка профілю (заглушка) в адмін-оболонці
+#### Scenario: Navigation to the profile
+- **WHEN** the user selects the link to the profile
+- **THEN** the profile page (a stub) opens in the admin shell
 
-### Requirement: Сповіщення про результат дій
-Оболонка SHALL показувати toast-сповіщення для flash-повідомлень `success` і `error`, передані сервером після дії користувача.
+### Requirement: Result notifications
+The shell SHALL display toast notifications for the `success` and `error` flash messages passed by the server after a user action.
 
-#### Scenario: Успішне повідомлення
-- **WHEN** сервер повертає наступну сторінку з flash-повідомленням `success`
-- **THEN** користувач бачить toast із цим текстом
+#### Scenario: Success message
+- **WHEN** the server returns the next page with a `success` flash message
+- **THEN** the user sees a toast with this text
 
-#### Scenario: Повідомлення про помилку
-- **WHEN** сервер повертає наступну сторінку з flash-повідомленням `error`
-- **THEN** користувач бачить toast помилки з цим текстом
+#### Scenario: Error message
+- **WHEN** the server returns the next page with an `error` flash message
+- **THEN** the user sees an error toast with this text
 
-#### Scenario: Повідомлення не повторюється
-- **WHEN** користувач після показу toast переходить на іншу сторінку
-- **THEN** той самий toast не показується повторно
+#### Scenario: Message is not repeated
+- **WHEN** the user navigates to another page after a toast has been shown
+- **THEN** the same toast is not shown again
 
-### Requirement: Спільні дані для сторінок
-Кожна сторінка адмінки SHALL мати доступ до даних поточного користувача (id, імʼя, email) та flash-повідомлень; чутливі поля користувача (пароль, токени) SHALL NOT передаватися клієнту.
+### Requirement: Shared data for pages
+Every admin page SHALL have access to the data of the current user (id, name, email) and to the flash messages; sensitive user fields (password, tokens) SHALL NOT be passed to the client.
 
-#### Scenario: Дані користувача на сторінці
-- **WHEN** автентифікований користувач відкриває будь-яку сторінку адмінки
-- **THEN** оболонка відображає його імʼя, а відповідь не містить хешу пароля чи `remember_token`
+#### Scenario: User data on a page
+- **WHEN** an authenticated user opens any admin page
+- **THEN** the shell displays their name, and the response contains no password hash or `remember_token`

@@ -2,170 +2,170 @@
 
 ## Purpose
 
-Визначає словники й терміни таксономії для категоризації контенту: дерево термінів з одним батьком, переклади термінів, правила унікальності та безпечного видалення. Таксономія існує окремо від типів і записів контенту.
+Defines the vocabularies and terms of the taxonomy for the categorization of content: the tree of terms with one parent, the translations of terms, the rules of uniqueness and safe deletion. The taxonomy exists separately from the types and records of the content.
 
 ## ADDED Requirements
 
 ### Requirement: Словники термінів
-Система SHALL зберігати словники термінів, кожен із незмінним унікальним ключем (формат `^[a-z][a-z0-9_]*$`, до 64 символів), що є його ідентифікатором, назвою, необов'язковим описом і налаштуваннями. Налаштування SHALL містити необов'язкову максимальну глибину дерева (ціле число від 1); без неї глибина не обмежується. Словник SHALL бути глобальним: він не належить типові контенту, і той самий словник можуть використовувати поля різних типів. Спроба змінити ключ існуючого словника SHALL бути відхилена з помилкою валідації.
+The system SHALL store vocabularies of terms, each with an immutable unique key (format `^[a-z][a-z0-9_]*$`, up to 64 characters), which is its identifier, a name, an optional description and settings. The settings SHALL contain an optional maximum depth of the tree (an integer from 1); without it the depth is not limited. A vocabulary SHALL be global: it does not belong to a content type, and the same vocabulary can be used by the fields of different types. An attempt to change the key of an existing vocabulary SHALL be rejected with a validation error.
 
-#### Scenario: Створення словника
-- **WHEN** створюється словник із ключем `categories` і назвою «Категорії»
-- **THEN** словник збережено, а його ключ далі незмінний
+#### Scenario: Creating a vocabulary
+- **WHEN** a vocabulary with the key `categories` and the name «Категорії» is created
+- **THEN** the vocabulary is saved, and its key remains immutable
 
-#### Scenario: Недопустимий ключ
-- **WHEN** ключ словника не відповідає формату або вже зайнятий
-- **THEN** збереження відхилено з помилкою валідації за полем `key`
+#### Scenario: Invalid key
+- **WHEN** the key of a vocabulary does not match the format or is already taken
+- **THEN** the saving is rejected with a validation error for the field `key`
 
-#### Scenario: Зміна ключа
-- **WHEN** змінюється ключ існуючого словника
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the key
+- **WHEN** the key of an existing vocabulary is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Недопустима глибина
-- **WHEN** максимальна глибина словника задана як `0`, від'ємне або не ціле число
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Invalid depth
+- **WHEN** the maximum depth of a vocabulary is set as `0`, a negative or a non-integer number
+- **THEN** the saving is rejected with a validation error
 
 ### Requirement: Терміни та дерево з одним батьком
-Система SHALL зберігати терміни словника, кожен із незмінним унікальним `uuid` (UUID v7: заданий явно або згенерований), `slug`, вагою, необов'язковим батьківським терміном і перекладами; зв'язок терміна зі словником SHALL визначатися за ключем словника, а з батьком — за `uuid` батька. Набір атрибутів терміна SHALL бути фіксованим. Батько SHALL належати тому самому словнику; термін SHALL мати не більше одного батька. Дерево SHALL не містити циклів: термін не може стати власним нащадком. Словник терміна SHALL бути незмінним після створення. `slug` терміна SHALL відповідати формату slug запису (`^[a-z0-9]+(-[a-z0-9]+)*$`, до 190 символів), не перекладатися і бути унікальним у межах словника (а не батька) без урахування регістру; в різних словниках `slug` може повторюватися. Брати терміни одного батька SHALL бути впорядковані за вагою, а за рівної ваги — за внутрішнім числовим ідентифікатором.
+The system SHALL store terms of a vocabulary, each with an immutable unique `uuid` (UUID v7: set explicitly or generated), a `slug`, a weight, an optional parent term and translations; the link of a term to a vocabulary SHALL be defined by the key of the vocabulary, and to the parent — by the `uuid` of the parent. The set of attributes of a term SHALL be fixed. The parent SHALL belong to the same vocabulary; a term SHALL have at most one parent. The tree SHALL NOT contain cycles: a term cannot become its own descendant. The vocabulary of a term SHALL be immutable after creation. The `slug` of a term SHALL match the format of the slug of a record (`^[a-z0-9]+(-[a-z0-9]+)*$`, up to 190 characters), not be translated, and be unique within the vocabulary (not the parent) without regard to the case; in different vocabularies the `slug` may repeat. Sibling terms of one parent SHALL be ordered by weight, and with equal weight — by the internal numeric identifier.
 
-#### Scenario: Корінь і підтермін
-- **WHEN** створюється термін «Одяг» без батька і термін «Куртки» з батьком «Одяг»
-- **THEN** «Одяг» є коренем, «Куртки» його дитиною
+#### Scenario: Root and sub-term
+- **WHEN** the term «Одяг» without a parent and the term «Куртки» with the parent «Одяг» are created
+- **THEN** «Одяг» is a root, «Куртки» its child
 
-#### Scenario: Батько з іншого словника
-- **WHEN** батьком терміна обрано термін іншого словника
-- **THEN** збереження відхилено з помилкою валідації за полем `parent_uuid`
+#### Scenario: Parent from another vocabulary
+- **WHEN** a term of another vocabulary is chosen as the parent of a term
+- **THEN** the saving is rejected with a validation error for the field `parent_uuid`
 
-#### Scenario: Цикл
-- **WHEN** батьком терміна «Одяг» обирається його нащадок «Зимові»
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Cycle
+- **WHEN** the descendant «Зимові» of the term «Одяг» is chosen as its parent
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Термін як власний батько
-- **WHEN** батьком терміна обрано його самого
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Term as its own parent
+- **WHEN** the term itself is chosen as its parent
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Унікальність slug у словнику
-- **WHEN** у словнику вже є термін зі slug `jackets`, і створюється інший із `Jackets`
-- **THEN** збереження відхилено з помилкою валідації за полем `slug`
+#### Scenario: Uniqueness of the slug within the vocabulary
+- **WHEN** the vocabulary already has a term with the slug `jackets`, and another one with `Jackets` is created
+- **THEN** the saving is rejected with a validation error for the field `slug`
 
-#### Scenario: Однаковий slug у різних словниках
-- **WHEN** термін зі slug `news` є в словнику `categories`, і створюється термін зі slug `news` у словнику `tags`
-- **THEN** обидва терміни збережено
+#### Scenario: Same slug in different vocabularies
+- **WHEN** a term with the slug `news` is in the vocabulary `categories`, and a term with the slug `news` is created in the vocabulary `tags`
+- **THEN** both terms are saved
 
-#### Scenario: Зміна словника терміна
-- **WHEN** змінюється словник існуючого терміна
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the vocabulary of a term
+- **WHEN** the vocabulary of an existing term is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Зміна uuid терміна
-- **WHEN** змінюється `uuid` існуючого терміна
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the uuid of a term
+- **WHEN** the `uuid` of an existing term is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Порядок братніх термінів
-- **WHEN** діти одного батька мають ваги 2, 0 і 1
-- **THEN** вони повертаються в порядку ваг 0, 1, 2, а за рівної ваги — за внутрішнім ідентифікатором
+#### Scenario: Order of sibling terms
+- **WHEN** the children of one parent have weights 2, 0 and 1
+- **THEN** they are returned in the order of weights 0, 1, 2, and with equal weight — by the internal identifier
 
 ### Requirement: Обмеження глибини дерева
-Система SHALL не допускати, щоб глибина терміна (корінь має глибину 1) перевищувала максимальну глибину словника. Перенесення терміна під нового батька SHALL враховувати глибину всього його піддерева. Зменшення максимальної глибини словника нижче фактичної глибини наявного дерева SHALL бути відхилене.
+The system SHALL not allow the depth of a term (the root has depth 1) to exceed the maximum depth of the vocabulary. Moving a term under a new parent SHALL take into account the depth of its whole subtree. A reduction of the maximum depth of a vocabulary below the actual depth of the existing tree SHALL be rejected.
 
-#### Scenario: Створення на межі глибини
-- **WHEN** максимальна глибина словника 2, і створюється термін під термін другого рівня
-- **THEN** збереження відхилено з помилкою валідації за полем `parent_uuid`
+#### Scenario: Creation on the depth boundary
+- **WHEN** the maximum depth of the vocabulary is 2, and a term is created under a term of the second level
+- **THEN** the saving is rejected with a validation error for the field `parent_uuid`
 
-#### Scenario: Перенесення піддерева
-- **WHEN** максимальна глибина 3, і термін із двома рівнями нащадків переноситься під термін другого рівня
-- **THEN** перенесення відхилено, бо глибина піддерева перевищила б межу
+#### Scenario: Moving a subtree
+- **WHEN** the maximum depth is 3, and a term with two levels of descendants is moved under a term of the second level
+- **THEN** the move is rejected, because the depth of the subtree would exceed the limit
 
-#### Scenario: Плоский словник
-- **WHEN** максимальна глибина словника 1, і створюється термін із батьком
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Flat vocabulary
+- **WHEN** the maximum depth of the vocabulary is 1, and a term with a parent is created
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Зменшення межі нижче поточної глибини
-- **WHEN** у словнику є дерево глибиною 3, і максимальну глибину змінюють на 2
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Reduction of the limit below the current depth
+- **WHEN** the vocabulary has a tree of depth 3, and the maximum depth is changed to 2
+- **THEN** the change is rejected with a validation error
 
 ### Requirement: Зображення терміна
-Система SHALL дозволяти термінові одне необов'язкове зображення — файл медіатеки з профілем `image`, збережений як `{uuid}.{розширення}`. Зображення не перекладається. Зв'язок терміна з файлом SHALL бути врахований у медіатеці як використання файлу власником `taxonomy_term`; файл, що використовується терміном, SHALL бути недоступний для видалення з медіатеки. Заміна й очищення зображення, а також видалення терміна SHALL знімати зв'язок (сам файл лишається в медіатеці).
+The system SHALL allow a term one optional image — a file of the media library with the profile `image`, stored as `{uuid}.{extension}`. The image is not translated. The link of the term with the file SHALL be counted in the media library as a usage of the file by the owner `taxonomy_term`; a file used by a term SHALL be unavailable for deletion from the media library. Replacing and clearing the image, as well as deleting the term, SHALL remove the link (the file itself remains in the media library).
 
-#### Scenario: Прив'язка зображення
-- **WHEN** термінові задається зображення з медіатеки
-- **THEN** значення збережено, а медіатека показує термін серед використань файлу
+#### Scenario: Image link
+- **WHEN** an image from the media library is assigned to a term
+- **THEN** the value is saved, and the media library shows the term among the usages of the file
 
-#### Scenario: Заміна й очищення
-- **WHEN** зображення терміна замінюється іншим або очищається
-- **THEN** зв'язок із попереднім файлом знято, файл лишився в медіатеці
+#### Scenario: Replacing and clearing
+- **WHEN** the image of a term is replaced with another one or cleared
+- **THEN** the link with the previous file is removed, the file remains in the media library
 
-#### Scenario: Не зображення
-- **WHEN** як зображення вказано файл іншого профілю або неіснуючий файл
-- **THEN** збереження відхилено з помилкою валідації за полем `image`
+#### Scenario: Not an image
+- **WHEN** a file of another profile or a non-existent file is specified as the image
+- **THEN** the saving is rejected with a validation error for the field `image`
 
-#### Scenario: Видалення терміна із зображенням
-- **WHEN** видаляється термін, що має зображення
-- **THEN** зв'язок із файлом знято, файл лишився в медіатеці
+#### Scenario: Deleting a term with an image
+- **WHEN** a term that has an image is deleted
+- **THEN** the link with the file is removed, the file remains in the media library
 
 ### Requirement: Переклади термінів
-Система SHALL зберігати назву й необов'язковий опис терміна окремо для кожної мови: базова мова `default` та мови контенту, допустимі за тими самими правилами, що й переклади значень контенту (код нормалізується; додаткова мова вимагає ввімкненої багатомовності й активної мови). Назва терміна в мові `default` SHALL бути обов'язковою. Для однієї мови термін SHALL мати не більше одного перекладу. Fallback на `default` при читанні відсутнього перекладу SHALL НЕ застосовуватися: відсутній переклад повертається як відсутній.
+The system SHALL store the name and the optional description of a term separately for each language: the base language `default` and the content languages admissible by the same rules as the translations of the values of the content (the code is normalized; an additional language requires enabled multilingual support and an active language). The name of the term in the language `default` SHALL be required. For one language a term SHALL have at most one translation. The fallback to `default` when reading a missing translation SHALL NOT apply: a missing translation is returned as missing.
 
-#### Scenario: Назва в базовій мові
-- **WHEN** термін створюється без назви в мові `default`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Name in the base language
+- **WHEN** a term is created without a name in the language `default`
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Переклад назви
-- **WHEN** для терміна записується назва «Jackets» у мові `en`
-- **THEN** існують дві незалежні назви (`default` і `en`), зміна однієї не змінює іншу
+#### Scenario: Translation of the name
+- **WHEN** the name «Jackets» in the language `en` is written for a term
+- **THEN** two independent names exist (`default` and `en`), a change of one does not change the other
 
-#### Scenario: Недопустима мова
-- **WHEN** записується переклад мовою, якої немає в переліку або багатомовність вимкнена
-- **THEN** запис відхилено з помилкою валідації
+#### Scenario: Invalid language
+- **WHEN** a translation in a language that is not in the list or with multilingual support disabled is written
+- **THEN** the record is rejected with a validation error
 
-#### Scenario: Відсутній переклад
-- **WHEN** читається назва терміна мовою `en`, а англійського перекладу немає
-- **THEN** назва відсутня, а `default` не підставляється
+#### Scenario: Missing translation
+- **WHEN** the name of a term in the language `en` is read, and there is no English translation
+- **THEN** the name is missing, and `default` is not substituted
 
 ### Requirement: Нащадки терміна
-Система SHALL вміти повертати для набору термінів їхні `uuid` разом з `uuid` усіх нащадків на будь-якій глибині. Результат SHALL не містити дублів, навіть якщо вхідні терміни вкладені один в одного.
+The system SHALL be able to return for a set of terms their `uuid` together with the `uuid` of all descendants at any depth. The result SHALL contain no duplicates, even if the input terms are nested in one another.
 
-#### Scenario: Нащадки на кількох рівнях
-- **WHEN** запитано нащадків терміна «Одяг», у якого діти «Куртки» й «Взуття», а в «Куртки» дитина «Зимові»
-- **THEN** результат містить «Одяг», «Куртки», «Взуття» і «Зимові»
+#### Scenario: Descendants at several levels
+- **WHEN** the descendants of the term «Одяг» are requested, which has the children «Куртки» and «Взуття», and «Куртки» has the child «Зимові»
+- **THEN** the result contains «Одяг», «Куртки», «Взуття» and «Зимові»
 
-#### Scenario: Вкладені вхідні терміни
-- **WHEN** запитано нащадків для «Одяг» і «Куртки» одночасно
-- **THEN** кожен термін присутній у результаті один раз
+#### Scenario: Nested input terms
+- **WHEN** the descendants are requested for «Одяг» and «Куртки» at the same time
+- **THEN** each term is present in the result once
 
-#### Scenario: Термін без дітей
-- **WHEN** запитано нащадків листка
-- **THEN** результат містить лише сам листок
+#### Scenario: Term without children
+- **WHEN** the descendants of a leaf are requested
+- **THEN** the result contains only the leaf itself
 
 ### Requirement: Видалення терміна
-Система SHALL відхиляти видалення терміна, у якого є діти, і видалення терміна, що використовується значеннями полів записів. Видалення терміна та запис значення, що на нього посилається, SHALL бути серіалізовані: у разі одночасності успішним є лише одне з них. Система SHALL надавати перелік використань терміна (власник значення, поле, кількість), щоб причину відмови можна було показати. Видалення вільного листка SHALL прибирати термін разом з його перекладами. Значення полів SHALL НЕ видалятися каскадом разом з терміном.
+The system SHALL reject the deletion of a term that has children, and the deletion of a term that is used by the values of the fields of records. The deletion of a term and the writing of a value that references it SHALL be serialized: in case of simultaneity only one of them succeeds. The system SHALL provide the list of usages of a term (the owner of the value, the field, the count), so that the reason for refusal can be shown. The deletion of a free leaf SHALL remove the term together with its translations. The values of fields SHALL NOT be deleted in cascade together with the term.
 
-#### Scenario: Термін із дітьми
-- **WHEN** видаляється термін, що має дочірні терміни
-- **THEN** видалення відхилено з помилкою валідації, термін і діти лишаються
+#### Scenario: Term with children
+- **WHEN** a term that has child terms is being deleted
+- **THEN** the deletion is rejected with a validation error, the term and its children remain
 
-#### Scenario: Використовуваний термін
-- **WHEN** видаляється термін, на який посилається значення поля запису
-- **THEN** видалення відхилено з помилкою валідації, значення лишається
+#### Scenario: Used term
+- **WHEN** a term that is referenced by the value of a field of a record is being deleted
+- **THEN** the deletion is rejected with a validation error, the value remains
 
-#### Scenario: Вільний листок
-- **WHEN** видаляється термін без дітей і без використань
-- **THEN** термін і його переклади видалено
+#### Scenario: Free leaf
+- **WHEN** a term without children and without usages is being deleted
+- **THEN** the term and its translations are deleted
 
-#### Scenario: Перелік використань
-- **WHEN** запитано використання терміна, який вказано в полі `tags` двох записів
-- **THEN** результат повідомляє про два використання цього поля
+#### Scenario: List of usages
+- **WHEN** the usages of a term are requested, which is specified in the field `tags` of two records
+- **THEN** the result reports two usages of this field
 
 ### Requirement: Видалення словника
-Система SHALL відхиляти видалення словника, у якому є терміни, і словника, на який посилається налаштування `vocabulary` хоча б одного поля типу «термін». Порожній словник, на який ніхто не посилається, SHALL видалятися.
+The system SHALL reject the deletion of a vocabulary that has terms, and of a vocabulary that is referenced by the setting `vocabulary` of at least one field of the type «термін». An empty vocabulary that nobody references SHALL be deleted.
 
-#### Scenario: Словник із термінами
-- **WHEN** видаляється словник, що містить терміни
-- **THEN** видалення відхилено з помилкою валідації
+#### Scenario: Vocabulary with terms
+- **WHEN** a vocabulary that contains terms is being deleted
+- **THEN** the deletion is rejected with a validation error
 
-#### Scenario: Словник, на який посилається поле
-- **WHEN** видаляється порожній словник, який вказано в `settings.vocabulary` поля типу «термін»
-- **THEN** видалення відхилено з помилкою валідації
+#### Scenario: Vocabulary referenced by a field
+- **WHEN** an empty vocabulary that is specified in `settings.vocabulary` of a field of the type «термін» is being deleted
+- **THEN** the deletion is rejected with a validation error
 
-#### Scenario: Вільний порожній словник
-- **WHEN** видаляється словник без термінів, на який не посилається жодне поле
-- **THEN** словник видалено
+#### Scenario: Free empty vocabulary
+- **WHEN** a vocabulary without terms that no field references is being deleted
+- **THEN** the vocabulary is deleted

@@ -2,35 +2,35 @@
 
 ## Why
 
-Для розділів на кшталт «Афіша» запис має кілька дат (множинне поле `datetime`: кожен показ — окреме значення), а список треба впорядкувати за датою. Зараз і вибірка (`ContentNodeQuery`), і таблиця записів в адмінці забороняють сортування за множинним полем, тож афішу не відсортувати без дублювання дати в окремому немножинному полі.
+For sections such as "Афіша" (a schedule of events) a record has several dates (a multiple field `datetime`: each showing is a separate value), and the list has to be ordered by date. Today both the selection (`ContentNodeQuery`) and the table of records in the admin forbid sorting by a multiple field, so the schedule cannot be sorted without duplicating the date in a separate non-multiple field.
 
 ## What Changes
 
-- Єдине правило ключа сортування для адмінки й сайту: **перше значення** поля (`weight = 0`) у вказаній мові, однаково для множинного й немножинного поля. Вибірка (`ContentNodeQuery`) сортує за будь-яким полем, а адмінка не пропонує сортування за файловими полями (`file`, `image`) і `youtube`.
-- Записи без значення лишаються в кінці в обох напрямках. Другорядний порядок для явного сортування (за полем і за `published_at`) — за `title` за зростанням (записи без `title` у вказаній мові — після тих, що його мають), далі за `id`. Без явного сортування порядок не змінюється. Fallback `title` на мову `default` немає, як і в решті вибірки.
-- Обмеження за множинністю зникає: помилка «Sorting by a multiple field is not supported» у вибірці та перевірка `! is_multiple` у `ContentNodeController::sortable()` і `listSettings`. Обмеження за типом лишається лише в адмінці: `sortable()` і далі виключає `AbstractFileFieldType` і `youtube`.
-- Колонки всіх полів у таблиці записів, крім файлових (`file`, `image`) і `youtube`, сортуються, зокрема й множинні; `settings.list.sort` приймає будь-яке поле, колонка якого сортується.
-- Сортування за `published_at` не змінюється; колонки slug і стану в адмінці лишаються несортованими.
-- Фільтри не залежать від того, множинне поле чи ні: запис відповідає фільтру, якщо йому відповідає хоча б одне значення поля (OR по значеннях). Це правило стає явною вимогою, включно з випадком кількох фільтрів по одному полю (кожен фільтр виконується незалежно, можливо різними значеннями); між фільтрами лишається AND.
-- Новий оператор `in` (значення — непорожній масив): запис відповідає, якщо будь-яке його значення дорівнює будь-якому з переданих (OR усередині фільтра). Доступний для типів `string`, `text`, `richtext`, `integer`, `decimal`, `date`, `datetime`.
+- A single rule of the sort key for the admin and the site: the **first value** of the field (`weight = 0`) in the specified language, identically for a multiple and a non-multiple field. The selection (`ContentNodeQuery`) sorts by any field, and the admin does not offer sorting by file fields (`file`, `image`) and `youtube`.
+- Records without a value remain at the end in both directions. The secondary order for an explicit sorting (by a field and by `published_at`) is by `title` in ascending order (records without `title` in the specified language go after those that have it), then by `id`. Without an explicit sorting the order does not change. There is no fallback of `title` to the language `default`, as in the rest of the selection.
+- The restriction by multiplicity disappears: the error "Sorting by a multiple field is not supported" in the selection and the check `! is_multiple` in `ContentNodeController::sortable()` and `listSettings`. The restriction by type remains only in the admin: `sortable()` still excludes `AbstractFileFieldType` and `youtube`.
+- The columns of all fields in the table of records, except the file ones (`file`, `image`) and `youtube`, are sortable, including the multiple ones; `settings.list.sort` accepts any field whose column is sortable.
+- The sorting by `published_at` does not change; the columns of the slug and the state in the admin remain unsorted.
+- The filters do not depend on whether the field is multiple or not: a record matches the filter if at least one value of the field matches it (OR over the values). This rule becomes an explicit requirement, including the case of several filters on one field (each filter is executed independently, possibly by different values); between the filters AND remains.
+- A new operator `in` (the value is a non-empty array): a record matches if any of its values equals any of the passed ones (OR inside the filter). Available for the types `string`, `text`, `richtext`, `integer`, `decimal`, `date`, `datetime`.
 
-**Прийнятий наслідок.** «Перше значення» — це те, що редактор поставив першим у формі запису, а не найближча дата. Афіша сортується за датою лише тоді, коли дати введені по порядку. Фільтри ключ сортування не змінюють. Файлові поля й `youtube` зберігають ім'я файлу `{uuid}.{ext}` чи URL відео, тож змістовного порядку за ними немає: адмінка не пропонує такого сортування (колонка `sortable: false`, `sort` в адресі ігнорується). Вибірка `ContentNodeQuery` цього не забороняє (як і до зміни) і сортує за збереженим рядком.
+**Accepted consequence.** "The first value" is what the editor put first in the form of the record, not the nearest date. The schedule is sorted by date only when the dates are entered in order. The filters do not change the sort key. File fields and `youtube` store the file name `{uuid}.{ext}` or the URL of the video, so there is no meaningful order by them: the admin does not offer such sorting (the column is `sortable: false`, `sort` in the address is ignored). The selection `ContentNodeQuery` does not forbid this (as before the change) and sorts by the stored string.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `content-querying`: вимога «Сортування за типом поля» — сортування за першим значенням будь-якого поля, включно з множинним, замість заборони; вимога «Фільтрація за значенням поля» — оператор `in` і явне правило OR по значеннях.
-- `admin-content-nodes`: вимога «Пошук і сортування записів» — колонки полів сортуються за першим значенням, зокрема множинні; файлові й `youtube` лишаються несортованими.
+- `content-querying`: the requirement "Sorting by the type of a field" — sorting by the first value of any field, including a multiple one, instead of a ban; the requirement "Filtering by the value of a field" — the operator `in` and the explicit rule of OR over the values.
+- `admin-content-nodes`: the requirement "Search and sorting of records" — the columns of fields are sorted by the first value, including the multiple ones; file and `youtube` fields remain unsorted.
 
 ## Impact
 
-- Код: `app/Content/ContentNodeQuery.php` (`applySort` разом з другорядним порядком за `title`, `filterValue`, `valueCondition`), типи полів з оператором `in` (`StringType`, `TextType`, `RichTextType`, `IntegerType`, `DecimalType`, `DateType`, `DateTimeType`), `app/Http/Controllers/Admin/ContentNodeController.php` (`sortable()` без перевірки множинності, `listSettings`, докблоки).
-- Тести: `tests/Feature/Content/ContentNodeQueryTest.php`, `tests/Feature/Admin/ContentNodeIndexTest.php`.
-- Docs: `docs/content-querying.md` (розділи «Сортування» і «Оператори за типами»), `docs/admin-content-nodes.md` (сортування).
-- E2E: `e2e/admin-content-nodes.spec.js` (перевірка `?sort=tags` більше не про ігнорування).
-- Не змінюється: інтерфейс `FieldType`, пошук, поєднання фільтрів через AND, нові типи полів, порядок без явного сортування, відсутність fallback на `default`. Назва зміни лишається `allow-multiple-field-sorting`, хоча вона тепер охоплює й оператор `in`.
+- Code: `app/Content/ContentNodeQuery.php` (`applySort` together with the secondary order by `title`, `filterValue`, `valueCondition`), the field types with the operator `in` (`StringType`, `TextType`, `RichTextType`, `IntegerType`, `DecimalType`, `DateType`, `DateTimeType`), `app/Http/Controllers/Admin/ContentNodeController.php` (`sortable()` without the check of multiplicity, `listSettings`, docblocks).
+- Tests: `tests/Feature/Content/ContentNodeQueryTest.php`, `tests/Feature/Admin/ContentNodeIndexTest.php`.
+- Docs: `docs/content-querying.md` (the sections "Sorting" and "Operators by types"), `docs/admin-content-nodes.md` (sorting).
+- E2E: `e2e/admin-content-nodes.spec.js` (the check `?sort=tags` is no longer about ignoring it).
+- Not changed: the interface `FieldType`, the search, the combination of filters through AND, new field types, the order without an explicit sorting, the absence of a fallback to `default`. The name of the change remains `allow-multiple-field-sorting`, although it now also covers the operator `in`.

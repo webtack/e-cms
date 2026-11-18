@@ -1,71 +1,71 @@
 ## ADDED Requirements
 
-### Requirement: Сторінка таблиці типів
-Адмінка SHALL мати сторінку `/admin/content-types`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує всі типи контенту в таблиці даних у серверному режимі: пошук, фільтри, сортування, пагінацію й розмір сторінки виконує сервер, а стан живе в адресі.
+### Requirement: Content types table page
+The admin SHALL have a page `/admin/content-types`, available only to authenticated users with a confirmed email, which shows all content types in the data table in server mode: search, filters, sorting, pagination and page size are performed by the server, and the state lives in the address.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types`
-- **THEN** він бачить таблицю типів контенту, а заголовок відповідає мові інтерфейсу
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types`
+- **THEN** they see the table of content types, and the title matches the interface language
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types`
+- **THEN** they are redirected to the login page
 
-#### Scenario: Відновлення стану
-- **WHEN** користувач застосував пошук, сортування й другу сторінку та перезавантажив сторінку
-- **THEN** таблиця показує той самий набір рядків
+#### Scenario: State restoration
+- **WHEN** the user applied a search, a sorting and a second page, and then reloaded the page
+- **THEN** the table shows the same set of rows
 
-### Requirement: Колонки таблиці
-Таблиця SHALL показувати для кожного типу: назву, ключ, вид (`kind`), ключ батьківського типу, кількість полів, кількість вузлів і опис. Вид SHALL показуватися перекладеною назвою, відсутній батьківський тип чи опис — порожнім значенням. Колонка опису SHALL бути прихованою за замовчуванням, колонки назви й ключа — не приховуваними.
+### Requirement: Table columns
+The table SHALL show for each type: the name, the key, the kind (`kind`), the parent type key, the number of fields, the number of nodes and the description. The kind SHALL be shown with its translated name; a missing parent type or description SHALL be shown as an empty value. The description column SHALL be hidden by default; the name and key columns SHALL be non-hideable.
 
-#### Scenario: Лічильники
-- **WHEN** тип має 3 поля (разом із системним `title`) і 5 вузлів
-- **THEN** у його рядку показано 3 поля і 5 вузлів
+#### Scenario: Counters
+- **WHEN** a type has 3 fields (including the system `title`) and 5 nodes
+- **THEN** its row shows 3 fields and 5 nodes
 
-#### Scenario: Тип без батька
-- **WHEN** тип не має `parent_type`
-- **THEN** у колонці батьківського типу порожнє значення
+#### Scenario: Type without a parent
+- **WHEN** a type has no `parent_type`
+- **THEN** the parent type column shows an empty value
 
-### Requirement: Пошук, фільтри й сортування
-Таблиця SHALL підтримувати пошук за назвою, ключем і описом; фільтри за назвою, ключем, описом, видом (вибір зі списку видів), батьківським типом та лічильниками полів і вузлів; сортування за назвою, ключем, видом, батьківським типом і лічильниками. Без явного сортування типи SHALL бути впорядковані за назвою за зростанням.
+### Requirement: Search, filters and sorting
+The table SHALL support search by name, key and description; filters by name, key, description, kind (a choice from the list of kinds), parent type, and the counters of fields and nodes; sorting by name, key, kind, parent type and the counters. Without an explicit sorting the types SHALL be ordered by name in ascending order.
 
-#### Scenario: Пошук за ключем
-- **WHEN** користувач вводить частину ключа типу
-- **THEN** лишаються лише типи, у назві, ключі або описі яких є цей рядок без урахування регістру
+#### Scenario: Search by key
+- **WHEN** the user types part of a type key
+- **THEN** only the types whose name, key or description contains this string remain, case-insensitively
 
-#### Scenario: Фільтр за видом
-- **WHEN** користувач додає фільтр «вид дорівнює page»
-- **THEN** показано лише типи виду `page`, а адреса містить цей фільтр
+#### Scenario: Filter by kind
+- **WHEN** the user adds the filter "kind equals page"
+- **THEN** only the types of the kind `page` are shown, and the address contains this filter
 
-#### Scenario: Фільтр за лічильником
-- **WHEN** користувач додає фільтр «кількість вузлів не менше 1»
-- **THEN** показано лише типи, що мають хоча б один вузол
+#### Scenario: Filter by a counter
+- **WHEN** the user adds the filter "number of nodes is at least 1"
+- **THEN** only the types that have at least one node are shown
 
-#### Scenario: Типове сортування
-- **WHEN** користувач відкриває сторінку без параметрів сортування
-- **THEN** типи впорядковані за назвою за зростанням
+#### Scenario: Default sorting
+- **WHEN** the user opens the page without sorting parameters
+- **THEN** the types are ordered by name in ascending order
 
-### Requirement: Кнопка створення
-Над таблицею SHALL бути кнопка «Створити» в панелі інструментів. У цій зміні вона є лише каркасом: відображається, але неактивна, доки не з'явиться форма створення типу.
+### Requirement: Create button
+Above the table there SHALL be a "Create" button in the toolbar. In this change it is only a skeleton: it is displayed but inactive until the type creation form appears.
 
-#### Scenario: Кнопка видима
-- **WHEN** користувач відкриває сторінку
-- **THEN** у панелі інструментів видно кнопку «Створити» з перекладеним підписом, вона позначена як неактивна й не відкриває жодної сторінки
+#### Scenario: Button is visible
+- **WHEN** the user opens the page
+- **THEN** the "Create" button with a translated label is visible in the toolbar, it is marked as inactive and does not open any page
 
-### Requirement: Меню дій рядка
-Кожен рядок SHALL мати меню «⋮» з пунктами «Редагувати», «Поля» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено від інших). У цій зміні пункти є лише каркасом: відображаються, але неактивні, доки не з'являться відповідні сторінки й операції.
+### Requirement: Row action menu
+Each row SHALL have a "⋮" menu with the items "Edit", "Fields" and "Delete" (in this order; "Delete" is visually highlighted as a destructive action and separated from the others). In this change the items are only a skeleton: they are displayed but inactive until the corresponding pages and operations appear.
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку типу
-- **THEN** він бачить пункти «Редагувати», «Поля», «Видалити» з перекладеними підписами
+#### Scenario: Menu content
+- **WHEN** the user opens the "⋮" menu in a type row
+- **THEN** they see the items "Edit", "Fields", "Delete" with translated labels
 
-#### Scenario: Пункти неактивні
-- **WHEN** користувач обирає будь-який пункт меню
-- **THEN** нічого не відбувається: перехід не виконується, дані типу не змінюються й не видаляються
+#### Scenario: Items are inactive
+- **WHEN** the user chooses any menu item
+- **THEN** nothing happens: no navigation is performed, and the data of the type is not changed or deleted
 
-### Requirement: Порожній стан
-Якщо типів немає або фільтри нічого не знайшли, сторінка SHALL показувати стандартне повідомлення таблиці даних без помилки; кнопка «Створити» лишається видимою.
+### Requirement: Empty state
+If there are no types or the filters found nothing, the page SHALL show the standard message of the data table without an error; the "Create" button remains visible.
 
-#### Scenario: Немає типів
-- **WHEN** у системі немає жодного типу контенту
-- **THEN** сторінка відкривається, таблиця показує повідомлення про відсутність даних, кнопка «Створити» видима
+#### Scenario: No types
+- **WHEN** the system has no content types at all
+- **THEN** the page opens, the table shows a message about the absence of data, and the "Create" button is visible

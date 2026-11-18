@@ -2,27 +2,27 @@
 
 ## Context
 
-Див. proposal.md — Why. Поточне правило (`CLAUDE.md`, `docs/e2e-testing.md`, `openspec/config.yaml` → `rules.tasks`) має два рівні: спек змінної області під час роботи і повний прогін після будь-якої правки «спільного коду» (оболонка/sidebar, `DataTable`, автентифікація, i18n, `playwright.config.js`, `e2e/global-setup.js`). Споживачі `DataTable` у коді: `Pages/Admin/ContentTypes/Index.tsx`, `Pages/Admin/ContentFields/Index.tsx`, `Pages/Admin/Ui/DataTableDemo.tsx`. Типи сторінок і блоків відкриваються на сторінках розділу типів, тож їхні спеки теж залежать від цих компонентів (це перевіряється в завданні 1.1).
+See proposal.md — Why. The current rule (`CLAUDE.md`, `docs/e2e-testing.md`, `openspec/config.yaml` → `rules.tasks`) has two levels: the spec of the changed area during work, and a full run after any edit of "shared code" (the shell/sidebar, `DataTable`, authentication, i18n, `playwright.config.js`, `e2e/global-setup.js`). The consumers of `DataTable` in the code: `Pages/Admin/ContentTypes/Index.tsx`, `Pages/Admin/ContentFields/Index.tsx`, `Pages/Admin/Ui/DataTableDemo.tsx`. The pages of types and blocks are opened on the pages of the section of types, so their specs also depend on these components (this is checked in task 1.1).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Для спільного компонента запускати лише залежні спеки; повний набір лишити для змін, що зачіпають усе.
-- Зробити вибір прозорим через звіт про запущені/пропущені спеки, без додаткового кроку підтвердження.
+- For a shared component run only the dependent specs; keep the full set for changes that touch everything.
+- Make the choice transparent through a report of the run and skipped specs, without an extra confirmation step.
 
 **Non-Goals:**
-- Прискорення тестів, CI, `--only-changed` (не бачить коду застосунку).
-- Автоматичний інструмент, що виводить залежності (достатньо таблиці в docs і пошуку використань).
+- Speeding up the tests, CI, `--only-changed` (it does not see the application code).
+- An automatic tool that derives the dependencies (a table in docs and a search for uses are enough).
 
 ## Decisions
 
-- **Три рівні замість двох.** (1) Область змінена — її спек. (2) Спільний компонент — спеки його споживачів. (3) Конфіг/`global-setup`/автентифікація/оболонка — повний набір. i18n переходить з рівня 3 до рівня 2: це спільний код, але його впливу достатньо перелічити спеками, що перевіряють підписи (визначається в завданні 1.1 за таблицею).
-- **Джерело істини — docs.** Колонка/таблиця «Спільний код → спеки» у `docs/e2e-testing.md` доповнює наявну «область → спек»; крім неї, споживачів перевіряють пошуком використання компонента (`grep` імпортів). Розбіжність таблиці з кодом — сигнал її виправити.
-- **Звіт замість підтвердження.** Вибір не потребує питання: це повторювана механіка, а помилку видно у звіті. Питання лише у двох випадках — межу не визначити з коду («без припущень» у `CLAUDE.md`) або набір майже повний (тоді простіше запустити повний).
-- **Супровід таблиці.** Новий спек чи споживач оновлює таблицю в тій самій зміні; це закріплюється правилом `tasks` у `openspec/config.yaml`.
-- **Де живе правило.** `CLAUDE.md` (Playwright) — щоденна робота; `openspec/config.yaml` → `rules.tasks` — щоб завдання не вимагали повного прогону для спільного компонента; `docs/e2e-testing.md` — деталі й таблиці.
+- **Three levels instead of two.** (1) The area is changed — its spec. (2) A shared component — the specs of its consumers. (3) The config/`global-setup`/authentication/shell — the full set. i18n moves from level 3 to level 2: it is shared code, but its impact is enough to list by the specs that check the labels (defined in task 1.1 by the table).
+- **The source of truth is docs.** The column/table "Shared code → specs" in `docs/e2e-testing.md` complements the existing "area → spec"; in addition, the consumers are checked by searching the use of the component (`grep` of imports). A mismatch of the table with the code is a signal to fix it.
+- **A report instead of a confirmation.** The choice does not need a question: it is a repeatable mechanic, and a mistake is visible in the report. A question is asked only in two cases — the boundary cannot be determined from the code ("no assumptions" in `CLAUDE.md`) or the set is almost full (then it is simpler to run the full one).
+- **Maintaining the table.** A new spec or a new consumer updates the table in the same change; this is fixed by the rule `tasks` in `openspec/config.yaml`.
+- **Where the rule lives.** `CLAUDE.md` (Playwright) — the daily work; `openspec/config.yaml` → `rules.tasks` — so that the tasks do not require a full run for a shared component; `docs/e2e-testing.md` — the details and the tables.
 
 ## Risks / Trade-offs
 
-- [Невірно визначена залежність пропустить регресію] → звіт перелічує пропущене з причиною, а таблиця й пошук використань обмежують помилку; у сумнівному випадку — питання або повний набір.
-- [Таблиця застаріє] → оновлення входить у кожну зміну з новим спеком/споживачем (правило `tasks`).
+- [An incorrectly determined dependency skips a regression] → the report lists what was skipped with a reason, and the table and the search for uses limit the error; in a doubtful case — a question or the full set.
+- [The table becomes outdated] → the update is part of each change with a new spec/consumer (the rule `tasks`).

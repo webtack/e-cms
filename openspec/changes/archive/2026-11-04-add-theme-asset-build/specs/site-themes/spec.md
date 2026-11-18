@@ -3,75 +3,75 @@
 ## MODIFIED Requirements
 
 ### Requirement: Ресурси теми
-Ресурси теми (`assets/`) SHALL збиратися окремою збіркою теми, незалежно від збірки адмінки, а результат SHALL лежати в окремому каталозі теми зі своїм маніфестом. Шаблон `html` активної теми SHALL підключати з маніфеста теми файли `vendor` (якщо є) і `app` (якщо є) у цьому порядку: `vendor` перед `app`. Відсутність ресурсів у активної теми SHALL НЕ ламати рендер.
+The resources of a theme (`assets/`) SHALL be built by a separate build of the theme, independent of the build of the admin, and the result SHALL lie in a separate directory of the theme with its own manifest. The template `html` of the active theme SHALL connect from the manifest of the theme the files `vendor` (if any) and `app` (if any) in this order: `vendor` before `app`. The absence of resources in the active theme SHALL NOT break the rendering.
 
-#### Scenario: Збірка ресурсів теми
-- **WHEN** виконано збірку теми `default`
-- **THEN** маніфест теми містить її входи `app`, а файли збірки лежать у каталозі цієї теми, а не в каталозі збірки адмінки
+#### Scenario: Building the resources of a theme
+- **WHEN** the build of the theme `default` is performed
+- **THEN** the manifest of the theme contains its entries `app`, and the build files lie in the directory of this theme, not in the build directory of the admin
 
-#### Scenario: Порядок vendor і app
-- **WHEN** тема має і `vendor`, і `app`
-- **THEN** у `<head>` таблиця стилів і скрипт `vendor` підключені раніше за `app`
+#### Scenario: Order of vendor and app
+- **WHEN** a theme has both `vendor` and `app`
+- **THEN** in `<head>` the stylesheet and the script of `vendor` are connected before `app`
 
-#### Scenario: Тема без ресурсів
-- **WHEN** в активній темі немає каталогу `assets` або немає зібраного маніфеста теми
-- **THEN** сторінка відображається без помилки, без підключення ресурсів цієї теми
+#### Scenario: A theme without resources
+- **WHEN** the active theme has no `assets` directory or there is no built manifest of the theme
+- **THEN** the page is displayed without an error, without connecting the resources of this theme
 
 ## ADDED Requirements
 
 ### Requirement: Окрема збірка теми
-Система SHALL збирати ресурси кожної теми окремо від адмінки й від інших тем. Збірка однієї теми SHALL НЕ вимагати збірки адмінки й SHALL НЕ видаляти та НЕ змінювати файли збірки адмінки чи інших тем; збірка адмінки SHALL НЕ видаляти та НЕ змінювати файли збірок тем. Система SHALL давати команду збірки однієї теми за іменем, команду збірки всіх тем і команду dev-режиму однієї теми. Dev-режим теми SHALL працювати одночасно з dev-режимом адмінки без конфлікту й SHALL застосовуватися лише до публічних сторінок.
+The system SHALL build the resources of each theme separately from the admin and from the other themes. The build of one theme SHALL NOT require the build of the admin and SHALL NOT delete or change the build files of the admin or of the other themes; the build of the admin SHALL NOT delete or change the build files of the themes. The system SHALL provide a command to build one theme by its name, a command to build all themes and a command of the dev mode of one theme. The dev mode of a theme SHALL work simultaneously with the dev mode of the admin without a conflict and SHALL apply only to the public pages.
 
-#### Scenario: Збірка однієї теми
-- **WHEN** збирається тема `custom`
-- **THEN** змінюються лише файли збірки теми `custom`, а файли збірки адмінки й теми `default` лишаються без змін
+#### Scenario: Building one theme
+- **WHEN** the theme `custom` is built
+- **THEN** only the build files of the theme `custom` change, and the build files of the admin and of the theme `default` remain unchanged
 
-#### Scenario: Збірка адмінки не стирає теми
-- **WHEN** збирається адмінка після збірки теми `default`
-- **THEN** файли збірки теми `default` та її маніфест лишаються на місці
+#### Scenario: Building the admin does not erase the themes
+- **WHEN** the admin is built after the build of the theme `default`
+- **THEN** the build files of the theme `default` and its manifest remain in place
 
-#### Scenario: Збірка всіх тем
-- **WHEN** виконано команду збірки всіх тем
-- **THEN** кожна тема з каталогом `assets` отримала власну збірку й власний маніфест
+#### Scenario: Building all themes
+- **WHEN** the command of building all themes is run
+- **THEN** each theme with an `assets` directory received its own build and its own manifest
 
-#### Scenario: Dev-режим теми разом з dev-режимом адмінки
-- **WHEN** одночасно запущено dev-режим теми й dev-режим адмінки
-- **THEN** публічні сторінки беруть ресурси теми з dev-сервера теми, а сторінки адмінки — з dev-сервера адмінки
+#### Scenario: Dev mode of a theme together with the dev mode of the admin
+- **WHEN** the dev mode of a theme and the dev mode of the admin are running at the same time
+- **THEN** the public pages take the resources of the theme from the dev server of the theme, and the pages of the admin take them from the dev server of the admin
 
 ### Requirement: Входи теми за конвенцією
-Вхідними файлами збірки теми SHALL бути лише `assets/app` і `assets/vendor` (у кожному з розширень CSS, SCSS та JS, які існують). Усі інші файли в `assets/` SHALL вважатися частинами (partials), що підключаються імпортом, і SHALL НЕ ставати окремими входами. Скомпільовані власні стилі й скрипти теми SHALL потрапляти у файли `app`, а стилі й скрипти бібліотек, підключені у `vendor`, — у файли `vendor`.
+The entry files of the build of a theme SHALL be only `assets/app` and `assets/vendor` (in each of the extensions CSS, SCSS and JS that exist). All other files in `assets/` SHALL be considered parts (partials) that are connected by import, and SHALL NOT become separate entries. The compiled own styles and scripts of the theme SHALL get into the files `app`, and the styles and scripts of the libraries connected in `vendor` — into the files `vendor`.
 
-#### Scenario: Partial не є входом
-- **WHEN** в `assets/` є файл `_variables.scss`, який імпортує `app.scss`
-- **THEN** його вміст входить у скомпільований `app`, а окремого файла збірки для нього немає
+#### Scenario: A partial is not an entry
+- **WHEN** `assets/` has a file `_variables.scss` which is imported by `app.scss`
+- **THEN** its contents are included in the compiled `app`, and there is no separate build file for it
 
-#### Scenario: Власний код і бібліотеки в різних файлах
-- **WHEN** `vendor.js` імпортує бібліотеку, а `app.js` містить код теми
-- **THEN** код бібліотеки є у зібраному `vendor`, а код теми — у зібраному `app`
+#### Scenario: Own code and libraries in different files
+- **WHEN** `vendor.js` imports a library, and `app.js` contains the code of the theme
+- **THEN** the code of the library is in the compiled `vendor`, and the code of the theme is in the compiled `app`
 
-#### Scenario: Тільки app
-- **WHEN** тема має лише `assets/app.css` і не має `vendor`
-- **THEN** збірка успішна, а сторінка підключає лише `app`
+#### Scenario: Only app
+- **WHEN** the theme has only `assets/app.css` and no `vendor`
+- **THEN** the build is successful, and the page connects only `app`
 
 ### Requirement: SCSS і бібліотеки в темі
-Тема SHALL мати змогу писати стилі на SCSS і компілювати JavaScript. Тема SHALL мати змогу підключати бібліотеки як пакети з `node_modules` проєкту, так і файли, що лежать усередині самої теми. Бібліотека, підключена у `vendor`, SHALL бути доступна коду `app` через глобальні змінні, які виставляє сам `vendor`. Невдала збірка (помилка SCSS, відсутній імпорт) SHALL завершуватися ненульовим кодом з повідомленням про файл і причину.
+A theme SHALL be able to write styles in SCSS and to compile JavaScript. A theme SHALL be able to connect libraries both as packages from the `node_modules` of the project and as files that lie inside the theme itself. A library connected in `vendor` SHALL be available to the code of `app` through global variables that `vendor` itself sets. A failed build (an SCSS error, a missing import) SHALL finish with a non-zero code with a message about the file and the reason.
 
-#### Scenario: SCSS компілюється
-- **WHEN** тема має `assets/app.scss` зі змінними й вкладеними правилами
-- **THEN** зібраний `app` — звичайний CSS, у якому змінні розкриті, а правила розгорнуті
+#### Scenario: SCSS is compiled
+- **WHEN** the theme has `assets/app.scss` with variables and nested rules
+- **THEN** the compiled `app` is ordinary CSS in which the variables are expanded and the rules are unfolded
 
-#### Scenario: Бібліотека з node_modules
-- **WHEN** `vendor.scss` і `vendor.js` підключають пакет, встановлений у `node_modules`
-- **THEN** стилі й код пакета є у зібраних `vendor`
+#### Scenario: Library from node_modules
+- **WHEN** `vendor.scss` and `vendor.js` connect a package installed in `node_modules`
+- **THEN** the styles and the code of the package are in the compiled `vendor`
 
-#### Scenario: Бібліотека всередині теми
-- **WHEN** `vendor.js` імпортує файл за шляхом усередині `assets/` теми
-- **THEN** код цього файла є у зібраному `vendor`
+#### Scenario: Library inside the theme
+- **WHEN** `vendor.js` imports a file by a path inside the `assets/` of the theme
+- **THEN** the code of this file is in the compiled `vendor`
 
-#### Scenario: Глобальна змінна від vendor
-- **WHEN** `vendor.js` виставляє бібліотеку як глобальну змінну, а `app.js` її використовує
-- **THEN** сторінка виконує код `app` без помилки, бо `vendor` підключений раніше
+#### Scenario: Global variable from vendor
+- **WHEN** `vendor.js` sets a library as a global variable, and `app.js` uses it
+- **THEN** the page executes the code of `app` without an error, because `vendor` was connected earlier
 
-#### Scenario: Помилка збірки
-- **WHEN** `app.scss` містить помилку або імпортує файл, якого немає
-- **THEN** збірка завершується ненульовим кодом і виводить файл та причину помилки
+#### Scenario: Build error
+- **WHEN** `app.scss` contains an error or imports a file that does not exist
+- **THEN** the build finishes with a non-zero code and outputs the file and the reason of the error

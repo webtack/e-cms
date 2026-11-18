@@ -3,46 +3,46 @@
 ## ADDED Requirements
 
 ### Requirement: Мета-дані сторінки: запис, поля типу, налаштування сайту
-`<head>` кожної публічної сторінки (головної, сторінки, списку й деталей запису, 404) SHALL містити мета-дані, кожне значення якої береться окремо за першим наявним джерелом у порядку: (1) мета-значення самого запису (`meta_title`, `meta_description`, `meta_image`); (2) поле, вибране в блоці «Мета-дані» публічних налаштувань типу запису (`settings.public.meta`); (3) налаштування сайту. Для заголовка (`<title>`) третім джерелом є назва сайту, а між другим і третім — `title` запису за правилами заголовка документа; для `meta description` — опис сайту; для `og:image` — велике лого сайту, а коли його немає — мале. Коли жодного джерела немає, відповідний тег SHALL НЕ виводитися (заголовок без назви сайту — назва застосунку). Головна й сторінки без запису мають лише третє джерело.
+The `<head>` of every public page (the home page, a page, the list and the details of a record, 404) SHALL contain metadata, each value of which is taken separately from the first available source in this order: (1) the meta values of the record itself (`meta_title`, `meta_description`, `meta_image`); (2) the field chosen in the block «Мета-дані» ("Meta data") of the public settings of the type of the record (`settings.public.meta`); (3) the settings of the site. For the heading (`<title>`) the third source is the name of the site, and between the second and the third stands the `title` of the record by the rules of the document heading; for `meta description` — the description of the site; for `og:image` — the large logo of the site, and when there is none — the small one. When no source exists, the corresponding tag SHALL NOT be output (a heading without the name of the site is the name of the application). The home page and pages without a record have only the third source.
 
-Значення вибраного поля SHALL братися так: для множинного поля — перше значення; «заголовок» — з поля типу «рядок»; «опис» — з поля типу «текст» чи «форматований текст», де HTML вирізається до видимого тексту, пробіли стискаються, а результат скорочується до 160 символів (за потреби по межі слова, з «…» наприкінці); «зображення» — з поля типу «зображення» (адреса файлу) чи «відео YouTube» (адреса збереженого скриншота відео; без скриншота поле не дає значення, і береться наступне джерело). Порожнє значення поля SHALL вважатися відсутнім.
+The value of the chosen field SHALL be taken as follows: for a multiple field — the first value; «заголовок» ("heading") — from a field of the type «рядок»; «опис» ("description") — from a field of the type «текст» or «форматований текст», where the HTML is stripped to the visible text, the spaces are collapsed, and the result is shortened to 160 characters (if needed at a word boundary, with «…» at the end); «зображення» ("image") — from a field of the type «зображення» (the file address) or «відео YouTube» (the address of the saved screenshot of the video; without a screenshot the field gives no value, and the next source is taken). An empty value of a field SHALL be considered absent.
 
-#### Scenario: Мета-дані головної
-- **WHEN** в налаштуваннях сайту задано назву «Acme», опис «Best things» і велике лого, а гість відкриває `/`
-- **THEN** `<title>` дорівнює «Acme», `<head>` містить `meta name="description"` зі значенням «Best things» і `og:image` з адресою великого лого
+#### Scenario: Meta data of the home page
+- **WHEN** the name «Acme», the description «Best things» and a large logo are set in the settings of the site, and a guest opens `/`
+- **THEN** `<title>` equals «Acme», the `<head>` contains `meta name="description"` with the value «Best things» and `og:image` with the address of the large logo
 
-#### Scenario: Сторінка без власних мета-даних і без вибраних полів
-- **WHEN** сторінка не має `meta_description` і `meta_image`, тип не має `settings.public.meta`, а в налаштуваннях сайту задано опис і лого
-- **THEN** `<head>` сторінки містить опис сайту й `og:image` з логотипом сайту
+#### Scenario: A page without its own metadata and without chosen fields
+- **WHEN** a page has no `meta_description` and `meta_image`, the type has no `settings.public.meta`, and the settings of the site have a description and a logo
+- **THEN** the `<head>` of the page contains the description of the site and `og:image` with the logo of the site
 
-#### Scenario: Власні мета-дані запису мають пріоритет
-- **WHEN** запис має `meta_description` «About us», тип вибирає для опису поле `summary`, а в налаштуваннях сайту є опис
-- **THEN** `meta description` дорівнює «About us»
+#### Scenario: Own metadata of a record has priority
+- **WHEN** a record has `meta_description` «About us», the type chooses the field `summary` for the description, and the settings of the site have a description
+- **THEN** `meta description` equals «About us»
 
-#### Scenario: Поле типу замість налаштувань сайту
-- **WHEN** запис не має `meta_*`, тип вибирає для опису `summary`, для зображення `cover`, а для заголовка `headline`
-- **THEN** `meta description` містить текст `summary`, `og:image` — адресу `cover`, `<title>` — значення `headline` і назву сайту
+#### Scenario: Chosen field instead of the settings of the site
+- **WHEN** a record has no `meta_*`, the type chooses `summary` for the description, `cover` for the image and `headline` for the heading
+- **THEN** `meta description` contains the text of `summary`, `og:image` is the address `cover`, `<title>` is the value of `headline` and the name of the site
 
-#### Scenario: Множинне поле
-- **WHEN** вибране поле «зображення» множинне й має три файли
-- **THEN** `og:image` містить адресу першого файлу
+#### Scenario: Multiple field
+- **WHEN** the chosen field «зображення» is multiple and has three files
+- **THEN** `og:image` contains the address of the first file
 
-#### Scenario: HTML в описі
-- **WHEN** вибране поле «форматований текст» містить `<p>Hello <strong>world</strong></p>`
-- **THEN** `meta description` дорівнює «Hello world», без тегів
+#### Scenario: HTML in the description
+- **WHEN** the chosen field «форматований текст» contains `<p>Hello <strong>world</strong></p>`
+- **THEN** `meta description` equals «Hello world», without tags
 
-#### Scenario: Довгий опис
-- **WHEN** текст вибраного поля довший за 160 символів
-- **THEN** `meta description` має не більше 160 символів і закінчується «…»
+#### Scenario: Long description
+- **WHEN** the text of the chosen field is longer than 160 characters
+- **THEN** `meta description` has no more than 160 characters and ends with «…»
 
-#### Scenario: Скриншот відео
-- **WHEN** для зображення вибрано поле «відео YouTube», і запис має відео зі скриншотом
-- **THEN** `og:image` містить адресу скриншота
+#### Scenario: Screenshot of a video
+- **WHEN** the field «відео YouTube» is chosen for the image, and the record has a video with a screenshot
+- **THEN** `og:image` contains the address of the screenshot
 
-#### Scenario: Відео без скриншота
-- **WHEN** запис має відео без скриншота, а в налаштуваннях сайту є лого
-- **THEN** `og:image` містить адресу лого сайту
+#### Scenario: Video without a screenshot
+- **WHEN** the record has a video without a screenshot, and the settings of the site have a logo
+- **THEN** `og:image` contains the address of the logo of the site
 
-#### Scenario: Порожні налаштування
-- **WHEN** опис і лого сайту не задано, а запис не має `meta_*` і значень вибраних полів
-- **THEN** `<head>` не містить `meta description` та `og:image`
+#### Scenario: Empty settings
+- **WHEN** the description and the logo of the site are not set, and the record has no `meta_*` and no values of the chosen fields
+- **THEN** the `<head>` contains no `meta description` and no `og:image`

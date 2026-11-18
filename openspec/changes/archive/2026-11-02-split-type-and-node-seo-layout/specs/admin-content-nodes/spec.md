@@ -1,83 +1,83 @@
 ## MODIFIED Requirements
 
 ### Requirement: Панель «SEO» у формі запису
-Форма запису типу, що має поля `meta_title`, `meta_description` і `meta_image` (види `content` і `page`), SHALL показувати ці три поля не серед основних полів, а в правій службовій колонці, у секції «SEO» акордеона під секцією «Деталі». Акордеон SHALL мати дві секції: «Деталі» (відкрита за замовчуванням) і «SEO» (закрита за замовчуванням); увесь акордеон SHALL лишатися в спільній рамці бічної колонки, а кожна секція SHALL бути окремим елементом у власній вкладеній рамці. Одночасно SHALL бути відкрита не більше ніж одна секція: відкриття однієї автоматично закриває іншу; відкриту секцію можна закрити, тоді не відкрита жодна. Секція «SEO» SHALL працювати з базовою мовою, як і решта форми, зберігатися разом із записом тією самою дією та використовувати ті самі елементи введення й валідацію, що й інші поля. Значення SHALL бути необов'язковими. Якщо після невдалого збереження поле «SEO» має помилку, секція SHALL бути розгорнута, інша секція закрита, а помилка видима. Тип без цих полів (`block`) секції «SEO» не має, і акордеон показує лише «Деталі». Інші поля типу показуються в основній колонці в порядку ваги. На екрані вужчому за `lg` (мобільний) службова колонка SHALL відкриватися кнопкою в нижній шторці з тим самим акордеоном; індикатор помилок на кнопці SHALL показуватися й за помилки в полях «SEO».
+The form of a record of a type that has the fields `meta_title`, `meta_description` and `meta_image` (kinds `content` and `page`) SHALL show these three fields not among the main fields, but in the right service column, in the section «SEO» of the accordion under the section «Деталі» ("Details"). The accordion SHALL have two sections: «Деталі» (open by default) and «SEO» (closed by default); the whole accordion SHALL remain in the shared frame of the side column, and each section SHALL be a separate element in its own nested frame. At the same time no more than one section SHALL be open: opening one automatically closes the other; an open section can be closed, then no section is open. The section «SEO» SHALL work with the base language, as the rest of the form, be saved together with the record by the same action, and use the same input elements and validation as the other fields. The values SHALL be optional. If after an unsuccessful saving the field «SEO» has an error, the section SHALL be expanded, the other section closed, and the error visible. A type without these fields (`block`) has no section «SEO», and the accordion shows only «Деталі». The other fields of the type are shown, as before, in the main column in the order of weight. On a screen narrower than `lg` (mobile) the service column SHALL open by a button in the bottom sheet with the same accordion; the error indicator on the button SHALL be shown also for errors in the fields «SEO».
 
-#### Scenario: Форма запису типу контенту
-- **WHEN** користувач відкриває форму запису типу, що має поля `meta_*`, на широкому екрані
-- **THEN** у правій колонці акордеон із секціями «Деталі» (відкрита) і «SEO» (закрита), кожна у власній рамці всередині спільної рамки колонки; основна колонка не містить полів `meta_*`
+#### Scenario: Form of a record of a content type
+- **WHEN** the user opens the form of a record of a type that has the fields `meta_*`, on a wide screen
+- **THEN** in the right column there is an accordion with the sections «Деталі» (open) and «SEO» (closed), each in its own frame inside the shared frame of the column; the main column contains no fields `meta_*`
 
-#### Scenario: Розгортання секції «SEO»
-- **WHEN** користувач розгортає секцію «SEO»
-- **THEN** він бачить поля `meta_title`, `meta_description`, `meta_image` з поточними значеннями, а секція «Деталі» закрита
+#### Scenario: Expanding the section «SEO»
+- **WHEN** the user expands the section «SEO»
+- **THEN** they see the fields `meta_title`, `meta_description`, `meta_image` with the current values, and the section «Деталі» is closed
 
-#### Scenario: Одна відкрита секція
-- **WHEN** відкрита секція «Деталі», а користувач відкриває «SEO»
-- **THEN** «SEO» відкрите, «Деталі» закриті
+#### Scenario: One open section
+- **WHEN** the section «Деталі» is open, and the user opens «SEO»
+- **THEN** «SEO» is open, «Деталі» is closed
 
-#### Scenario: Окремі рамки
-- **WHEN** форма показує обидві секції
-- **THEN** кожна секція має власну рамку, а обидві разом лишаються в спільній рамці бічної колонки
+#### Scenario: Separate frames
+- **WHEN** the form shows both sections
+- **THEN** each section has its own frame, and both together remain in the shared frame of the side column
 
-#### Scenario: Збереження значень SEO
-- **WHEN** користувач заповнює поля в секції «SEO» і зберігає запис
-- **THEN** значення збережено разом із записом і показано в секції «SEO» після відкриття форми редагування
+#### Scenario: Saving SEO values
+- **WHEN** the user fills in the fields in the section «SEO» and saves the record
+- **THEN** the values are saved together with the record and shown in the section «SEO» after opening the edit form
 
-#### Scenario: Помилка в згорнутій секції
-- **WHEN** секція «SEO» згорнута, а збереження повертає помилку для `meta_title`
-- **THEN** секція «SEO» відкрита, «Деталі» закриті, і біля поля видно помилку
+#### Scenario: Error in a collapsed section
+- **WHEN** the section «SEO» is collapsed, and the saving returns an error for `meta_title`
+- **THEN** the section «SEO» is open, «Деталі» is closed, and the error is visible next to the field
 
-#### Scenario: Липка панель дій
-- **WHEN** користувач відкриває форму запису з відкритою секцією акордеона у вікні висотою 400 px (на 1280 і 390 px завширшки) і прокручує форму
-- **THEN** панель з «Скасувати» й «Зберегти» (і кнопкою деталей на вузькому екрані) лишається повністю видимою внизу вікна, не перекриває і не перекрита акордеоном
+#### Scenario: Sticky action bar
+- **WHEN** the user opens the form of a record with an open section of the accordion in a window 400 px high (at 1280 and 390 px wide) and scrolls the form
+- **THEN** the panel with «Скасувати» and «Зберегти» (and the button of details on a narrow screen) remains fully visible at the bottom of the window, does not overlap and is not overlapped by the accordion
 
-#### Scenario: Багато вмісту в правій колонці
-- **WHEN** на широкому екрані відкрита секція вища за вікно
-- **THEN** права колонка прокручується сама, не виходить за вікно і не перекриває панель дій
+#### Scenario: A lot of content in the right column
+- **WHEN** on a wide screen an open section is taller than the window
+- **THEN** the right column scrolls by itself, does not go beyond the window and does not overlap the action bar
 
-#### Scenario: Мобільний
-- **WHEN** користувач натискає кнопку «Деталі» на екрані вужчому за `lg`
-- **THEN** відкривається нижня шторка з акордеоном: «Деталі» відкриті, «SEO» закрите
+#### Scenario: Mobile
+- **WHEN** the user presses the button «Деталі» on a screen narrower than `lg`
+- **THEN** the bottom sheet with the accordion opens: «Деталі» is open, «SEO» is closed
 
-#### Scenario: Запис без значень SEO
-- **WHEN** користувач зберігає запис, не заповнюючи секцію «SEO»
-- **THEN** запис збережено без значень `meta_*`
+#### Scenario: Record without SEO values
+- **WHEN** the user saves a record without filling in the section «SEO»
+- **THEN** the record is saved without values of `meta_*`
 
-#### Scenario: Тип блоків
-- **WHEN** користувач відкриває форму запису типу виду `block`
-- **THEN** секції «SEO» немає, акордеон містить лише «Деталі»
+#### Scenario: Block type
+- **WHEN** the user opens the form of a record of a type of the kind `block`
+- **THEN** there is no section «SEO», the accordion contains only «Деталі»
 
-#### Scenario: Колонки таблиці записів
-- **WHEN** налаштування списку типу посилаються на `meta_title`
-- **THEN** поле доступне як колонка так само, як і будь-яке інше поле запису
+#### Scenario: Columns of the table of records
+- **WHEN** the settings of the list of the type refer to `meta_title`
+- **THEN** the field is available as a column in the same way as any other field of the record
 
 ### Requirement: Форма запису
-Форма створення (`/admin/content-types/{key}/nodes/create`) і редагування (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL показувати над формою меню розділу типу й по одному елементу введення на кожне поле запису типу в порядку ваги (`weight`), з назвою поля як підписом; обов'язкові поля SHALL бути позначені. Поля, що належать лише самому типу (`section_*`), у формі запису SHALL бути відсутні, а поля `meta_*` SHALL показуватися в секції «SEO» правої колонки (див. вимогу про секцію «SEO»), а не серед основних полів. Службові атрибути запису (slug та інші, див. вимогу про деталі запису) SHALL бути не серед полів типу, а в окремій службовій колонці. Елемент введення SHALL відповідати типу значення: «короткий текст» — однорядкове поле, «текст» — багаторядкове, «ціле число» і «десяткове число» — числове поле, «булеве» — прапорець, «дата» — вибір дати, «дата й час» — вибір дати й часу. Множинне поле SHALL редагуватися списком елементів, до якого можна додавати елементи, з якого можна їх видаляти та в якому можна змінювати їхній порядок (перетягуванням і з клавіатури). Форма не показує вибору мови. Форма редагування SHALL бути заповнена поточними значеннями запису в мові `default`, а slug у ній — поточним slug.
+The form of creation (`/admin/content-types/{key}/nodes/create`) and of editing (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL show above the form the menu of the section of the type, and one input element for each field of the record of the type in the order of weight (`weight`), with the name of the field as the label; required fields SHALL be marked. The fields that belong only to the type itself (`section_*`) SHALL be absent from the form of a record, and the fields `meta_*` SHALL be shown in the section «SEO» of the right column (see the requirement about the section «SEO»), not among the main fields. The service attributes of a record (slug and the others, see the requirement about the details of a record) SHALL not be among the fields of the type, but in a separate service column. The input element SHALL correspond to the value type: «короткий текст» («short text») — a single-line field, «текст» («text») — a multi-line one, «ціле число» («integer») and «десяткове число» («decimal») — a numeric field, «булеве» («boolean») — a checkbox, «дата» («date») — a date choice, «дата й час» («date and time») — a date and time choice. A multiple field SHALL be edited by a list of elements, to which elements can be added, from which they can be removed, and in which their order can be changed (by dragging and from the keyboard). The form does not show a language choice. The edit form SHALL be filled with the current values of the record in the language `default`, and its slug — with the current slug.
 
-#### Scenario: Форма створення
-- **WHEN** користувач відкриває форму створення запису типу з полями `title` (вага 0), `price` (ціле число, вага 10) і `body` (текст, вага 20)
-- **THEN** він бачить порожні поля `title`, `price` і `body` у цьому порядку, `title` позначене як обов'язкове, а порожнє поле slug — у службовій колонці
+#### Scenario: Form of creation
+- **WHEN** the user opens the form of creating a record of a type with the fields `title` (weight 0), `price` (integer, weight 10) and `body` (text, weight 20)
+- **THEN** they see empty fields `title`, `price` and `body` in this order, `title` is marked as required, and the empty slug field is in the service column
 
-#### Scenario: Елементи за типом
-- **WHEN** тип має поля типів «булеве», «дата» і «дата й час»
-- **THEN** вони показані як прапорець, вибір дати й вибір дати й часу відповідно
+#### Scenario: Elements by type
+- **WHEN** the type has fields of the types «булеве», «дата» and «дата й час»
+- **THEN** they are shown as a checkbox, a date choice and a date and time choice respectively
 
-#### Scenario: Множинне поле
-- **WHEN** тип має множинне поле `tags`, а користувач додає два елементи й видаляє перший
-- **THEN** у списку лишається один елемент, а додавання нового елемента додає порожній рядок введення
+#### Scenario: Multiple field
+- **WHEN** the type has a multiple field `tags`, and the user adds two elements and removes the first one
+- **THEN** one element remains in the list, and adding a new element adds an empty input row
 
-#### Scenario: Зміна порядку елементів
-- **WHEN** користувач переставляє елементи множинного поля `tags` зі `a, b, c` на `c, a, b` і зберігає
-- **THEN** після повторного відкриття форми редагування елементи йдуть у порядку `c, a, b`, а в списку записів значення показано як «c, a, b»
+#### Scenario: Changing the order of elements
+- **WHEN** the user rearranges the elements of the multiple field `tags` from `a, b, c` to `c, a, b` and saves
+- **THEN** after reopening the edit form the elements go in the order `c, a, b`, and in the list of records the value is shown as «c, a, b»
 
-#### Scenario: Форма редагування
-- **WHEN** користувач відкриває форму редагування запису зі slug `pro-nas`, `title` «Про нас» і `tags` `["a", "b"]`
-- **THEN** поле slug у службовій колонці містить `pro-nas`, `title` — «Про нас», а список `tags` — два елементи «a» і «b»
+#### Scenario: Edit form
+- **WHEN** the user opens the edit form of a record with the slug `pro-nas`, `title` «Про нас» and `tags` `["a", "b"]`
+- **THEN** the slug field in the service column contains `pro-nas`, `title` — «Про нас», and the list `tags` — two elements «a» and «b»
 
-#### Scenario: Поля розділу не в формі запису
-- **WHEN** користувач відкриває форму запису типу виду `content`
-- **THEN** полів `section_title`, `section_description`, `section_cover` у формі немає
+#### Scenario: Section fields are not in the form of a record
+- **WHEN** the user opens the form of a record of a type of the kind `content`
+- **THEN** the fields `section_title`, `section_description`, `section_cover` are absent from the form
 
-#### Scenario: Запис іншого типу
-- **WHEN** користувач відкриває форму редагування для `uuid` запису, що належить іншому типу
-- **THEN** сервер відповідає 404
+#### Scenario: Record of another type
+- **WHEN** the user opens the edit form for the `uuid` of a record that belongs to another type
+- **THEN** the server responds with 404

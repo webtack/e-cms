@@ -3,31 +3,31 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню розділу типу блоку
-Сторінки редагування типу блоку, списку полів, створення й редагування поля, а також записів типу SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/block-types/{key}/edit`), «Поля» (`/admin/block-types/{key}/fields`) і «Записи» (`/admin/block-types/{key}/nodes`) та посилання назад до списку типів блоків. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля», на сторінках записів — «Записи». На сторінці створення типу меню немає.
+The pages for editing a block type, the list of fields, the create and edit of a field, and the records of the type SHALL have a horizontal section menu with the items «Налаштування» (`/admin/block-types/{key}/edit`), «Поля» (`/admin/block-types/{key}/fields`) and «Записи» (`/admin/block-types/{key}/nodes`), and a link back to the list of block types. The active item SHALL be highlighted; on the create and edit pages of a field the active one is «Поля», on the pages of records — «Записи». The creation page of a type has no menu.
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу блоку обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching sections
+- **WHEN** the user on the edit page of a block type selects «Поля»
+- **THEN** the list of fields of the type opens, and the item «Поля» is active
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач на сторінці редагування типу блоку обирає «Записи»
-- **THEN** відкривається `/admin/block-types/{key}/nodes`, а пункт «Записи» активний
+#### Scenario: Transition to records
+- **WHEN** the user on the edit page of a block type selects «Записи»
+- **THEN** `/admin/block-types/{key}/nodes` opens, and the item «Записи» is active
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу блоку
-- **THEN** відкривається `/admin/block-types`
+#### Scenario: Link back
+- **WHEN** the user presses the link back on the page of fields of a block type
+- **THEN** `/admin/block-types` opens
 
 ### Requirement: Меню дій рядка типу блоку
-Кожен рядок таблиці типів блоків SHALL мати групу кнопок дій: кнопку «Налаштування» (форма редагування) і меню з пунктами «Редагувати», «Поля», «Записи» й «Видалити», де «Видалити» відокремлено як руйнівну дію. Кількість записів у рядку таблиці SHALL бути посиланням на список записів цього типу. Кнопка «Створити» над таблицею SHALL вести до форми створення типу блоку.
+Each row of the table of block types SHALL have a group of action buttons: the button «Налаштування» (the edit form) and a menu with the items «Редагувати», «Поля», «Записи» and «Видалити», where «Видалити» is separated as a destructive action. The number of records in the table row SHALL be a link to the list of records of this type. The button «Створити» above the table SHALL lead to the creation form of a block type.
 
-#### Scenario: Перехід до полів
-- **WHEN** користувач обирає в меню рядка пункт «Поля»
-- **THEN** відкривається `/admin/block-types/{key}/fields`
+#### Scenario: Transition to fields
+- **WHEN** the user selects the item «Поля» in the row menu
+- **THEN** `/admin/block-types/{key}/fields` opens
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач обирає в меню рядка пункт «Записи» або натискає кількість записів
-- **THEN** відкривається `/admin/block-types/{key}/nodes`
+#### Scenario: Transition to records
+- **WHEN** the user selects the item «Записи» in the row menu or presses the number of records
+- **THEN** `/admin/block-types/{key}/nodes` opens
 
-#### Scenario: Кнопка створення
-- **WHEN** користувач натискає «Створити» над таблицею
-- **THEN** відкривається `/admin/block-types/create`
+#### Scenario: Create button
+- **WHEN** the user presses «Створити» above the table
+- **THEN** `/admin/block-types/create` opens

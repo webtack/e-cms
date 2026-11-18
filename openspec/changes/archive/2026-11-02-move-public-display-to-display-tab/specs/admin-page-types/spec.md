@@ -1,20 +1,20 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню розділу типу сторінки
-Сторінки редагування типу сторінки, вкладки «Відображення», списку полів, створення й редагування поля, а також записів типу SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/page-types/{key}/edit`), «Відображення» (`/admin/page-types/{key}/display`), «Поля» (`/admin/page-types/{key}/fields`) і «Записи» (`/admin/page-types/{key}/nodes`) та посилання назад до списку типів сторінок. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля», на сторінках записів — «Записи», на вкладці «Відображення» — «Відображення». На сторінці створення типу меню немає. Вкладка «Відображення» типу сторінки містить лише блок «Публічне відображення» (вибір полів сторінки) і зберігається власною кнопкою «Зберегти».
+The edit pages of a page type, the tab «Відображення» ("Display"), the list of fields, the creation and editing of a field, as well as the records of the type SHALL have a horizontal menu of the section with the items «Налаштування» ("Settings", `/admin/page-types/{key}/edit`), «Відображення» ("Display", `/admin/page-types/{key}/display`), «Поля» ("Fields", `/admin/page-types/{key}/fields`) and «Записи» ("Records", `/admin/page-types/{key}/nodes`), and a link back to the list of page types. The active item SHALL be highlighted; on the pages of creating and editing a field the active item is «Поля», on the pages of records — «Записи», on the tab «Відображення» — «Відображення». On the page of creating a type there is no menu. The tab «Відображення» of a page type contains only the block «Публічне відображення» ("Public display", the choice of the fields of the page) and is saved by its own button «Зберегти» ("Save").
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching sections
+- **WHEN** the user on the edit page of a page type chooses «Поля»
+- **THEN** the list of fields of the type opens, and the item «Поля» is active
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Записи»
-- **THEN** відкривається `/admin/page-types/{key}/nodes`, а пункт «Записи» активний
+#### Scenario: Going to records
+- **WHEN** the user on the edit page of a page type chooses «Записи»
+- **THEN** `/admin/page-types/{key}/nodes` opens, and the item «Записи» is active
 
-#### Scenario: Перехід до відображення
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Відображення»
-- **THEN** відкривається `/admin/page-types/{key}/display`, пункт «Відображення» активний, а блок «Публічне відображення» не містить полів картки, сортування й кількості
+#### Scenario: Going to display
+- **WHEN** the user on the edit page of a page type chooses «Відображення»
+- **THEN** `/admin/page-types/{key}/display` opens, the item «Відображення» is active, and the block «Публічне відображення» contains no fields of the card, sorting and quantity
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу сторінки
-- **THEN** відкривається `/admin/page-types`
+#### Scenario: Link back
+- **WHEN** the user clicks the link back on the page of fields of a page type
+- **THEN** `/admin/page-types` opens

@@ -2,39 +2,39 @@
 
 ## Why
 
-Типи контенту вже створюються, редагуються й видаляються з адмінки, але поля типу (`content_fields`) можна додати лише кодом. Без керування полями тип контенту в адмінці порожній: пункт «Поля» в меню рядка типу лишається неактивним каркасом, і вузлів із власними даними не створити.
+Content types are already created, edited and deleted from the admin, but the fields of a type (`content_fields`) can be added only in code. Without field management a content type in the admin is empty: the "Fields" item in the type's row menu remains an inactive skeleton, and nodes with their own data cannot be created.
 
 ## What Changes
 
-- Нова сторінка `/admin/content-types/{key}/fields` зі списком полів типу в клієнтській `DataTable` (усі поля передаються сторінці, пошук/сортування/пагінація в браузері, **без фільтрів**), впорядкованому за `weight`.
-- Створення поля (`/fields/create`), редагування (`/fields/{field}/edit`) і видалення з підтвердженням у діалозі — для типів виду `content`.
-- Форма поля: ключ (незмінний), назва, тип значення з реєстру, ознаки «множинне», «обов'язкове», «перекладне», вага. Правила моделі (`ContentField`) віддзеркалюються в `FormRequest`-ах: помилки показуються біля полів.
-- Зміна порядку полів перетягуванням рядків таблиці: нова необов'язкова можливість `reorder` у `DataTable` (ручка в першій клітинці, клавіатурна доступність) і збереження порядку на сервері (ваги переписуються послідовно). Перетягування доступне, лише коли видно весь список у вихідному порядку.
-- Захист системного поля `title`: не видаляється, а його тип, множинність і обов'язковість у формі заблоковані.
-- Тип значення поля, що вже має значення, у формі заблокований (правило моделі).
-- **Поле, що має значення, видалити не можна** (як тип із вузлами): діалог показує причину без підтвердження, сервер перевіряє заборону сам.
-- Пункт «Поля» в меню рядка типу контенту стає активним посиланням на сторінку полів цього типу.
+- A new page `/admin/content-types/{key}/fields` with the list of the type's fields in the client `DataTable` (all fields are passed to the page, search/sorting/pagination in the browser, **without filters**), ordered by `weight`.
+- Creating a field (`/fields/create`), editing (`/fields/{field}/edit`) and deleting with confirmation in a dialog — for types of the `content` kind.
+- A field form: key (immutable), name, value type from the registry, the flags "multiple", "required", "translatable", weight. The rules of the model (`ContentField`) are mirrored in the `FormRequest`s: errors are shown next to the fields.
+- Changing the order of fields by dragging the table rows: a new optional `reorder` capability in `DataTable` (a handle in the first cell, keyboard accessibility) and saving the order on the server (the weights are rewritten sequentially). Dragging is available only when the whole list is visible in its original order.
+- Protection of the system field `title`: it is not deleted, and its type, multiplicity and requiredness are blocked in the form.
+- The value type of a field that already has values is blocked in the form (a rule of the model).
+- **A field that has values cannot be deleted** (like a type with nodes): the dialog shows the reason without a confirmation, and the server checks the ban itself.
+- The "Fields" item in the content type's row menu becomes an active link to the fields page of this type.
 
 ## Capabilities
 
 ### New Capabilities
-- `admin-content-fields`: сторінка списку полів типу контенту (клієнтська таблиця без фільтрів), форми створення/редагування, видалення з підтвердженням, зміна порядку перетягуванням, обмеження системного поля й полів зі значеннями.
+- `admin-content-fields`: the list page of the fields of a content type (a client table without filters), the create/edit forms, deletion with confirmation, changing the order by dragging, the limits of the system field and of fields with values.
 
 ### Modified Capabilities
-- `admin-content-types`: пункт «Поля» меню рядка типу стає активним і веде на сторінку полів типу (раніше — неактивний каркас).
-- `admin-data-table`: таблиця отримує необов'язкову можливість перетягування рядків для зміни порядку (`reorder`); без неї поведінка не змінюється.
+- `admin-content-types`: the "Fields" item of the type's row menu becomes active and leads to the fields page of the type (previously an inactive skeleton).
+- `admin-data-table`: the table gets an optional capability of dragging rows to change the order (`reorder`); without it the behaviour does not change.
 
 ## Impact
 
-- **Backend:** новий `App\Http\Controllers\Admin\ContentFieldController` (включно з дією зміни порядку), `StoreContentFieldRequest`/`UpdateContentFieldRequest`/`ReorderContentFieldsRequest`, маршрути в `routes/web.php` (вкладені під `content-types/{contentType}`, прив'язка поля за парою тип + ключ). Міграцій і змін моделей немає.
-- **Frontend:** сторінки `Pages/Admin/ContentFields/{Index,Create,Edit}.tsx`, `Components/Admin/ContentFields/{ContentFieldForm,ContentFieldRowActions}.tsx`, проп `reorder` у `Components/Admin/DataTable/*`, активація пункту в `ContentTypeRowActions.tsx`, хлібні крихти в `navigation.ts`, переклади в `lang/uk.json` та `lang/en.json`.
-- **Залежності:** `@dnd-kit/core` і `@dnd-kit/sortable` (npm, на хості).
-- **Тести:** Pest feature-тести контролера (список, створення, редагування, видалення, порядок, обмеження), e2e Playwright в `e2e/admin-content-fields.spec.js`, клієнтські перевірки `reorder` у e2e демо-таблиці.
-- **Документація (`docs/`):** створити `docs/admin-content-fields.md`; оновити `docs/admin-data-table.md` (проп `reorder`, `rowHandle`), `docs/admin-content-types.md` (меню рядка), `docs/content-model.md` (посилання на адмін-сторінку полів), `docs/README.md` (індекс).
+- **Backend:** a new `App\Http\Controllers\Admin\ContentFieldController` (including the reorder action), `StoreContentFieldRequest`/`UpdateContentFieldRequest`/`ReorderContentFieldsRequest`, routes in `routes/web.php` (nested under `content-types/{contentType}`, field binding by the pair type + key). There are no migrations or model changes.
+- **Frontend:** pages `Pages/Admin/ContentFields/{Index,Create,Edit}.tsx`, `Components/Admin/ContentFields/{ContentFieldForm,ContentFieldRowActions}.tsx`, the `reorder` prop in `Components/Admin/DataTable/*`, activation of the item in `ContentTypeRowActions.tsx`, breadcrumbs in `navigation.ts`, translations in `lang/uk.json` and `lang/en.json`.
+- **Dependencies:** `@dnd-kit/core` and `@dnd-kit/sortable` (npm, on the host).
+- **Tests:** Pest feature tests of the controller (list, create, edit, delete, order, limits), Playwright e2e in `e2e/admin-content-fields.spec.js`, client checks of `reorder` in the e2e of the demo table.
+- **Documentation (`docs/`):** create `docs/admin-content-fields.md`; update `docs/admin-data-table.md` (the `reorder` prop, `rowHandle`), `docs/admin-content-types.md` (the row menu), `docs/content-model.md` (a link to the admin page of fields), `docs/README.md` (index).
 
 ## Non-Goals
 
-- Редагування `settings` поля (JSON).
-- Поля для типів видів `page` і `block`.
-- Зміна моделі `ContentField` чи реєстру типів полів.
-- Перетягування в серверному режимі `DataTable` і між сторінками пагінації.
+- Editing the `settings` of a field (JSON).
+- Fields for types of the `page` and `block` kinds.
+- Changing the `ContentField` model or the registry of field types.
+- Dragging in server mode of `DataTable` and between pagination pages.

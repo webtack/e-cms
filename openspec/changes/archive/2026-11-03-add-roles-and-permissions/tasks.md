@@ -1,43 +1,43 @@
 # Tasks
 
-## 1. Схема, моделі та сервіс прав
+## 1. Schema, models and the service of rights
 
-- [x] 1.1 Міграція: таблиці `roles`, `role_permissions`, колонки `users.role_id` і `users.is_active`, створення ролі `admin` і призначення її наявним користувачам, потім `role_id` NOT NULL. Перевірка: `docker compose exec app php artisan test --compact --filter=RolesMigration` (тест на БД із користувачами до міграції і без них).
-- [x] 1.2 Моделі `Role`, `RolePermission`, зв'язок `User::role()`, поле `is_active` у `User`, фабрики; сидер створює адміністратора з роллю `admin`. Перевірка: Feature-тест `tests/Feature/Auth` (сидер) проходить; код має JSDoc/PHPDoc англійською з `@example` там, де неочевидно.
-- [x] 1.3 Сервіс `AccessResolver` (системні права, `level('node:{key}')`, медіа, `canEditAnyContent()`, `admin` = усе дозволено), `Gate::define` для системних прав. Перевірка: unit/Feature-тести `tests/Feature/Access/AccessResolverTest` для кожного рівня й для `admin`.
-- [x] 1.4 Policies `ContentNodePolicy` і `MediaPolicy` (`viewAny`, `create`, `update`, `delete`, правило `own` за автором, файл без власника лише `any`). Перевірка: `--filter=ContentNodePolicy` і `--filter=MediaPolicy`.
-- [x] 1.5 Очищення рядків `node:{key}` при видаленні типу в тій самій транзакції. Перевірка: тест видалення типу.
-- [x] 1.6 Документація: створити `docs/access-control.md` (модель, схема, рівні, ризик ролі `roles`), додати в `docs/README.md`; оновити `docs/content-model.md` (зв'язок автора з правами). Перевірка: посилання в `docs/README.md` валідні.
+- [x] 1.1 Migration: the tables `roles`, `role_permissions`, the columns `users.role_id` and `users.is_active`, the creation of the role `admin` and its assignment to the existing users, then `role_id` NOT NULL. Check: `docker compose exec app php artisan test --compact --filter=RolesMigration` (a test on a DB with users before the migration and without them).
+- [x] 1.2 Models `Role`, `RolePermission`, the relation `User::role()`, the field `is_active` in `User`, factories; the seeder creates the administrator with the role `admin`. Check: the Feature test `tests/Feature/Auth` (the seeder) passes; the code has JSDoc/PHPDoc in English with `@example` where it is not obvious.
+- [x] 1.3 The service `AccessResolver` (system rights, `level('node:{key}')`, media, `canEditAnyContent()`, `admin` = everything is allowed), `Gate::define` for the system rights. Check: the unit/Feature tests `tests/Feature/Access/AccessResolverTest` for each level and for `admin`.
+- [x] 1.4 Policies `ContentNodePolicy` and `MediaPolicy` (`viewAny`, `create`, `update`, `delete`, the rule `own` by the author, a file without an owner only `any`). Check: `--filter=ContentNodePolicy` and `--filter=MediaPolicy`.
+- [x] 1.5 Cleaning of the rows `node:{key}` on the deletion of a type in the same transaction. Check: a test of the deletion of a type.
+- [x] 1.6 Documentation: create `docs/access-control.md` (the model, the schema, the levels, the risk of the role `roles`), add it to `docs/README.md`; update `docs/content-model.md` (the link of the author with the rights). Check: the references in `docs/README.md` are valid.
 
-## 2. Активність користувача та вхід
+## 2. Activity of the user and login
 
-- [x] 2.1 Middleware `EnsureUserIsActive` у групі `web`, відмова входу деактивованого в `LoginRequest`. Перевірка: `--filter=Auth` (вхід деактивованого, розлогін відкритої сесії).
-- [x] 2.2 Документація: оновити `docs/admin-auth.md`. Перевірка: розділ про деактивацію присутній.
+- [x] 2.1 Middleware `EnsureUserIsActive` in the group `web`, refusal of the login of a deactivated user in `LoginRequest`. Check: `--filter=Auth` (the login of a deactivated user, the logout of an open session).
+- [x] 2.2 Documentation: update `docs/admin-auth.md`. Check: the section about deactivation is present.
 
-## 3. Захист маршрутів і права на клієнті
+## 3. Protection of the routes and the rights on the client
 
-- [x] 3.1 Захистити маршрути меню, таксономії, типів/полів (всі три види) системними правами через `can:` middleware. Перевірка: Feature-тести кожного розділу (`--filter=Menu`, `--filter=Taxonomy`, `--filter=ContentType`) з ролями без прав і з правами.
-- [x] 3.2 Авторизація записів (`ContentNodeController`: index, create, store, edit, update, destroy) за рівнем типу і правилом `own`; список передає ознаку «можна змінювати» для кожного запису. Перевірка: `--filter=ContentNode` (рівні none/own/any, чужий запис).
-- [x] 3.3 Авторизація медіатеки (`MediaController`) і `files.store`/`youtube/lookup` через `canEditAnyContent()`; `lookup/*` без змін. Перевірка: `--filter=Media`, `--filter=File`, `--filter=Lookup`.
-- [x] 3.4 Тест-огляд усіх маршрутів `admin.*`: кожен, крім allow-list (dashboard, profile, lookup), дає 403 ролі без прав. Перевірка: `--filter=RouteCoverage`.
-- [x] 3.5 `HandleInertiaRequests` передає `auth.user.can`; `navigation.ts`/`AppSidebar` фільтрують пункти; кнопки списку записів користуються ознакою з сервера. Перевірка: Feature-тест спільних пропсів + `npm run test:e2e -- e2e/admin-shell.spec.js`.
-- [x] 3.6 Документація: оновити `docs/admin-shell.md`, `docs/admin-content-nodes.md`, `docs/media-library.md`, `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-content-types.md` (прибрати «відкрито всім»). Перевірка: пошук `grep -n "відкрит" docs` не знаходить застарілих тверджень про доступ.
+- [x] 3.1 Protect the routes of the menus, the taxonomy, the types/fields (all three kinds) by the system rights through the `can:` middleware. Check: Feature tests of each section (`--filter=Menu`, `--filter=Taxonomy`, `--filter=ContentType`) with roles without rights and with rights.
+- [x] 3.2 Authorization of records (`ContentNodeController`: index, create, store, edit, update, destroy) by the level of the type and the rule `own`; the list passes the sign «can be changed» for each record. Check: `--filter=ContentNode` (the levels none/own/any, a foreign record).
+- [x] 3.3 Authorization of the media library (`MediaController`) and `files.store`/`youtube/lookup` through `canEditAnyContent()`; `lookup/*` unchanged. Check: `--filter=Media`, `--filter=File`, `--filter=Lookup`.
+- [x] 3.4 A test-review of all routes `admin.*`: each one, except the allow-list (dashboard, profile, lookup), gives 403 to a role without rights. Check: `--filter=RouteCoverage`.
+- [x] 3.5 `HandleInertiaRequests` passes `auth.user.can`; `navigation.ts`/`AppSidebar` filter the items; the buttons of the list of records use the sign from the server. Check: a Feature test of the shared props + `npm run test:e2e -- e2e/admin-shell.spec.js`.
+- [x] 3.6 Documentation: update `docs/admin-shell.md`, `docs/admin-content-nodes.md`, `docs/media-library.md`, `docs/admin-menus.md`, `docs/admin-taxonomy.md`, `docs/admin-content-types.md` (remove «відкрито всім» — "open to everyone"). Check: the search `grep -n "відкрит" docs` does not find outdated statements about access.
 
-## 4. Керування ролями
+## 4. Management of roles
 
-- [x] 4.1 Контролер і запити ролей (`index`, `create`, `store`, `edit`, `update`, `destroy`), матриця прав на сервері (динамічно з `content_types`, групування за видом), захист `admin` і ролей із користувачами. Перевірка: `--filter=Role`.
-- [x] 4.2 React-сторінки `Admin/Roles` (список на DataTable, форма з матрицею), пункти sidebar і переклади `uk`/`en`. Перевірка: сторінка рендериться, `npm run build` проходить.
-- [x] 4.3 e2e-спек `e2e/admin-roles.spec.js` (створення ролі, зміна матриці, спроба видалити роль із користувачами). Перевірка: `npm run test:e2e -- e2e/admin-roles.spec.js`; додати рядок у таблиці «Область → спек» у `docs/e2e-testing.md`.
-- [x] 4.4 Документація: створити `docs/admin-roles.md`, оновити `docs/README.md` і таблицю «Спільний код → спеки», якщо спек залежить від DataTable. Перевірка: посилання валідні.
+- [x] 4.1 Controller and requests of roles (`index`, `create`, `store`, `edit`, `update`, `destroy`), the matrix of rights on the server (dynamically from `content_types`, grouped by kind), protection of `admin` and of the roles with users. Check: `--filter=Role`.
+- [x] 4.2 React pages `Admin/Roles` (the list on DataTable, the form with the matrix), the items of the sidebar and the translations `uk`/`en`. Check: the page renders, `npm run build` passes.
+- [x] 4.3 e2e spec `e2e/admin-roles.spec.js` (creation of a role, change of the matrix, an attempt to delete a role with users). Check: `npm run test:e2e -- e2e/admin-roles.spec.js`; add a row to the table «Область → спек» in `docs/e2e-testing.md`.
+- [x] 4.4 Documentation: create `docs/admin-roles.md`, update `docs/README.md` and the table «Спільний код → спеки», if the spec depends on DataTable. Check: the references are valid.
 
-## 5. Керування користувачами
+## 5. Management of users
 
-- [x] 5.1 Контролер і запити користувачів (CRUD, пароль необов'язковий при зміні, `is_active`, `email_verified_at` при створенні), видалення лише без записів, заборона самодеактивації та зміни власної ролі, захист останнього адміністратора з блокуванням у транзакції. Перевірка: `--filter=User` (включно з паралельним сценарієм останнього адміна).
-- [x] 5.2 React-сторінки `Admin/Users` (список на DataTable, форма з вибором ролі й перемикачем активності), переклади. Перевірка: `npm run build` проходить.
-- [x] 5.3 e2e-спек `e2e/admin-users.spec.js` (створення користувача з роллю, деактивація, вхід деактивованого, видалення автора відхиляється). Перевірка: `npm run test:e2e -- e2e/admin-users.spec.js`; додати рядок у `docs/e2e-testing.md`.
-- [x] 5.4 Документація: створити `docs/admin-users.md`, оновити `docs/README.md`. Перевірка: посилання валідні.
+- [x] 5.1 Controller and requests of users (CRUD, the password is optional at change, `is_active`, `email_verified_at` at creation), deletion only without records, a prohibition of self-deactivation and of change of one's own role, protection of the last administrator with the locking in a transaction. Check: `--filter=User` (including the parallel scenario of the last admin).
+- [x] 5.2 React pages `Admin/Users` (the list on DataTable, the form with the choice of the role and the switch of activity), translations. Check: `npm run build` passes.
+- [x] 5.3 e2e spec `e2e/admin-users.spec.js` (creation of a user with a role, deactivation, login of a deactivated user, the deletion of an author is rejected). Check: `npm run test:e2e -- e2e/admin-users.spec.js`; add a row to `docs/e2e-testing.md`.
+- [x] 5.4 Documentation: create `docs/admin-users.md`, update `docs/README.md`. Check: the references are valid.
 
-## 6. Інтеграційна перевірка
+## 6. Integration check
 
-- [x] 6.1 Повний `docker compose exec app php artisan test` (змінені міграції, схема БД, глобальний middleware і автентифікація) та `openspec validate add-roles-and-permissions`. Перевірка: обидві команди без помилок; `docker compose exec app vendor/bin/pint --dirty --format agent` без зауважень.
-- [x] 6.2 Повний `npm run test:e2e` (змінено автентифікацію та sidebar). Перевірка: усі спеки зелені.
+- [x] 6.1 The full `docker compose exec app php artisan test` (the changed migrations, the DB schema, the global middleware and the authentication) and `openspec validate add-roles-and-permissions`. Check: both commands without errors; `docker compose exec app vendor/bin/pint --dirty --format agent` without remarks.
+- [x] 6.2 The full `npm run test:e2e` (the authentication and the sidebar changed). Check: all specs are green.

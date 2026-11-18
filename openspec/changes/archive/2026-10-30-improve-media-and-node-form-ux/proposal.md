@@ -2,33 +2,33 @@
 
 ## Why
 
-Після появи файлового сховища й медіатеки адмінка показує типи файлів довгими MIME-рядками (`application/vnd.openxmlformats-officedocument.wordprocessingml.document`), які ламають верстку й важко читаються. У медіатеці немає фільтра за типом, множинні поля «зображення» / «файл» змушують додавати файли по одному, а поля форми запису не згруповані так, як уже зроблено в налаштуваннях файлового поля.
+After the appearance of the file storage and the media library, the admin shows file types as long MIME strings (`application/vnd.openxmlformats-officedocument.wordprocessingml.document`), which break the layout and are hard to read. The media library has no filter by type, multiple fields "image" / "file" force adding files one at a time, and the fields of the record form are not grouped the way the settings of the file field are already grouped.
 
 ## What Changes
 
-- Тип файлу скрізь, де він виводиться (колонка «Тип» медіатеки, підзаголовок панелі деталей файлу, список дозволених типів у налаштуваннях файлового поля), показується коротким позначенням розширення — `docx`, `xlsx`, `pdf`, `jpg` — а не повним MIME. Позначення береться з розширень, уже заданих у профілях `config/files.php`; для типу поза профілями — запасний варіант (частина MIME після `/`).
-- Медіатека отримує фільтр за типом як випадний список (`Select`) у панелі інструментів поруч із полем пошуку, з варіантом «Усі типи». Вибір дає чіп активного фільтра під панеллю, чіп знімається хрестиком, а кнопка «Скинути» скидає і його. Для цього `DataTable` отримує загальну можливість: колонка типу `select` може бути позначена як «швидкий фільтр» і тоді виводиться у панелі селектом (без кнопки «Фільтр» і конструктора фільтрів). Фільтрація виконується в базі за `mime`, значення — коротке позначення; пошук, сортування й пагінація працюють разом із ним.
-- Множинні поля `image` і `file` у формі запису отримують множинне завантаження: користувач вибирає або перетягує кілька файлів одразу, фронтенд завантажує їх **окремими послідовними запитами** `POST /admin/files` (по одному на файл) і додає кожен успішний файл новим елементом списку. Помилки окремих файлів показуються з іменем файлу й не блокують решту. Бекенд-ендпоінт не змінюється.
-- Кожне поле форми запису (slug і кожне поле типу) обгортається у власний контейнер із рамкою (`fieldset` з `legend` — назва поля) за зразком блоку «Налаштування файлу» у формі поля; кнопки «Зберегти» / «Скасувати» лишаються під контейнерами.
+- The file type everywhere it is shown (the column "Type" of the media library, the subtitle of the file details panel, the list of allowed types in the settings of the file field) is shown with a short extension label — `docx`, `xlsx`, `pdf`, `jpg` — not with the full MIME. The label is taken from the extensions already set in the profiles of `config/files.php`; for a type outside the profiles — a fallback (the part of the MIME after `/`).
+- The media library gets a filter by type as a drop-down list (`Select`) in the toolbar next to the search field, with the option "All types". Choosing a value gives a chip of the active filter under the panel; the chip is removed with its ×, and the button "Reset" resets it too. For this, `DataTable` gets a common capability: a column of type `select` can be marked as a "quick filter", and then it is shown in the panel as a select (without the "Filter" button and without the constructor of filters). Filtering is performed in the database by `mime`, the value — the short label; search, sorting and pagination work together with it.
+- The multiple fields `image` and `file` in the record form get multiple upload: the user selects or drags several files at once, the frontend uploads them with **separate sequential requests** `POST /admin/files` (one per file) and adds each successful file as a new item of the list. Errors of individual files are shown with the file name and do not block the rest. The backend endpoint does not change.
+- Each field of the record form (the slug and each field of a type) is wrapped in its own frame container (`fieldset` with a `legend` — the name of the field), modelled on the block of the "File settings" in the field form; the buttons "Save" / "Cancel" stay under the containers.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `file-storage`: нова вимога про коротке позначення типу файлу; віджет завантаження вміє приймати кілька файлів і завантажувати їх окремими запитами.
-- `media-library`: тип у таблиці й деталях — коротке позначення; фільтр медіатеки за типом (селект у панелі).
-- `admin-data-table`: швидкий фільтр — селект колонки в панелі інструментів поруч із пошуком.
-- `admin-content-fields`: список дозволених типів у налаштуваннях файлового поля показується короткими позначеннями.
-- `admin-content-nodes`: поля форми запису в контейнері з рамкою; множинне завантаження для множинних полів `image` / `file`.
+- `file-storage`: a new requirement about the short label of a file type; the upload widget can accept several files and upload them with separate requests.
+- `media-library`: the type in the table and the details is the short label; the filter of the media library by type (a select in the panel).
+- `admin-data-table`: the quick filter — a select of a column in the toolbar panel next to the search.
+- `admin-content-fields`: the list of allowed types in the settings of the file field is shown with short labels.
+- `admin-content-nodes`: the fields of the record form in a frame container; the multiple upload for the multiple fields `image` / `file`.
 
 ## Impact
 
-- Бекенд: новий хелпер позначень типів (`app/Files/FileTypes.php`) на основі `config/files.php`; `MediaController` (колонка/фільтр `type`, поле `type` у рядках і деталях), `ContentFieldController` (позначення в `fileTypes`).
-- Фронтенд: `Components/Admin/DataTable/*` (швидкий фільтр у `DataTableToolbar`, прапорець колонки в `types.ts`), `Pages/Admin/Media/Index.tsx`, `Components/Admin/Media/MediaDetails.tsx`, `Components/Admin/ContentFields/ContentFieldForm.tsx`, `Components/Admin/FileUpload/FileUpload.tsx` (множинний режим), `Components/Admin/ContentNodes/NodeFieldList.tsx`, `NodeFieldInput.tsx`, `ContentNodeForm.tsx`; файли перекладів `lang/uk.json` / `lang/en.json` (нові підписи).
-- Тести: Feature-тести `MediaController` і `FileTypes`, оновлення e2e-спеків `admin-data-table`, `admin-media`, `admin-content-fields`, `admin-content-nodes`, `admin-file-upload`.
-- Документація (`docs/`, українською): оновити `admin-data-table.md` (швидкий фільтр), `file-storage.md` (позначення типів, множинний режим віджета), `media-library.md` (колонка й фільтр), `admin-content-fields.md` (`fileTypes` з позначеннями), `admin-content-nodes.md` (контейнер полів, множинне завантаження), `e2e-testing.md` (опис сценаріїв `admin-media`, `admin-content-nodes`, `admin-file-upload`, за потреби таблиці залежностей); індекс `docs/README.md` без змін, якщо файли не додаються.
-- Припущення, прийняті без запитань до власника: у логічного поля контейнер свій, легенда — назва поля (для slug — «Slug»); для булевого поля, чий підпис стоїть біля прапорця, легенда не потрібна — підпис лишається біля прапорця всередині рамки; у множинному полі `image` / `file` вибір кількох файлів додається поряд із наявною кнопкою «Додати елемент» (яка додає один порожній віджет); завантаження послідовне, не паралельне.
+- Backend: a new helper for type labels (`app/Files/FileTypes.php`) based on `config/files.php`; `MediaController` (the column/filter `type`, the field `type` in the rows and the details), `ContentFieldController` (the labels in `fileTypes`).
+- Frontend: `Components/Admin/DataTable/*` (the quick filter in `DataTableToolbar`, the flag of the column in `types.ts`), `Pages/Admin/Media/Index.tsx`, `Components/Admin/Media/MediaDetails.tsx`, `Components/Admin/ContentFields/ContentFieldForm.tsx`, `Components/Admin/FileUpload/FileUpload.tsx` (the multiple mode), `Components/Admin/ContentNodes/NodeFieldList.tsx`, `NodeFieldInput.tsx`, `ContentNodeForm.tsx`; translation files `lang/uk.json` / `lang/en.json` (new labels).
+- Tests: Feature tests of `MediaController` and `FileTypes`, updates of the e2e specs `admin-data-table`, `admin-media`, `admin-content-fields`, `admin-content-nodes`, `admin-file-upload`.
+- Documentation (`docs/`, in Ukrainian): update `admin-data-table.md` (the quick filter), `file-storage.md` (the labels of types, the multiple mode of the widget), `media-library.md` (the column and the filter), `admin-content-fields.md` (`fileTypes` with labels), `admin-content-nodes.md` (the container of the fields, the multiple upload), `e2e-testing.md` (the description of the scenarios `admin-media`, `admin-content-nodes`, `admin-file-upload`, the dependency tables if needed); the index `docs/README.md` unchanged, if no files are added.
+- Assumptions accepted without questions to the owner: a logical field has its own container, the legend is the name of the field (for the slug — "Slug"); for a boolean field whose label stands next to the checkbox, a legend is not needed — the label stays next to the checkbox inside the frame; in a multiple field `image` / `file` the selection of several files is added next to the existing button "Add item" (which adds one empty widget); the upload is sequential, not parallel.

@@ -3,42 +3,42 @@
 ## ADDED Requirements
 
 ### Requirement: Створення пресетів зображення при збереженні
-Система SHALL після збереження зображення створювати його стилі, позначені в конфігурації для створення при завантаженні (див. `image-styles`). Помилка створення стилю SHALL не відхиляти збереження файла.
+The system SHALL, after saving an image, create its styles marked in the configuration for creation at the upload (see `image-styles`). An error in the creation of a style SHALL NOT reject the saving of the file.
 
-#### Scenario: Збереження зображення
-- **WHEN** зберігається зображення за профілем `image`
-- **THEN** оригінал і файл пресету `thumb` лежать на диску (за налаштуванням формату стилів — WebP чи формат оригіналу)
+#### Scenario: Saving an image
+- **WHEN** an image is saved under the profile `image`
+- **THEN** the original and the file of the preset `thumb` lie on the disk (according to the setting of the format of the styles — WebP or the format of the original)
 
-#### Scenario: Збереження документа
-- **WHEN** зберігається документ
-- **THEN** стилі не створюються
+#### Scenario: Saving a document
+- **WHEN** a document is saved
+- **THEN** no styles are created
 
 ### Requirement: Видалення файла прибирає його стилі
-Система SHALL при видаленні файла сховища видаляти з диска файла також усі його створені стилі зображень (`styles/{стиль}/{uuid}.*`, незалежно від розширення). Відсутні файли стилів SHALL не бути помилкою. Правила захисту використовуваних файлів SHALL лишатися без змін: якщо видалення файла відхилено, стилі не видаляються.
+The system SHALL, when deleting a file of the storage, also delete from the disk all its created image styles (`styles/{style}/{uuid}.*`, regardless of the extension). Missing files of styles SHALL NOT be an error. The rules of protection of the used files SHALL remain unchanged: if the deletion of a file is rejected, the styles are not deleted.
 
-#### Scenario: Видалення файла зі стилями
-- **WHEN** видаляється файл, для якого створено стилі `thumb` і `300x250`
-- **THEN** оригінал і файли обох стилів відсутні на диску
+#### Scenario: Deleting a file with styles
+- **WHEN** a file is deleted for which the styles `thumb` and `300x250` were created
+- **THEN** the original and the files of both styles are absent from the disk
 
-#### Scenario: Файл без стилів
-- **WHEN** видаляється файл, для якого стилі не створювалися
-- **THEN** видалення завершується без помилки
+#### Scenario: File without styles
+- **WHEN** a file is deleted for which no styles were created
+- **THEN** the deletion completes without an error
 
-#### Scenario: Видалення відхилено
-- **WHEN** видалення файла, що використовується, відхилено
-- **THEN** оригінал і його стилі лишаються на диску
+#### Scenario: Deletion rejected
+- **WHEN** the deletion of a used file is rejected
+- **THEN** the original and its styles remain on the disk
 
 ### Requirement: Мініатюра зображення у віджеті завантаження
-Віджет завантаження SHALL для вибраного зображення показувати стиль `thumb` (поле `preview` даних файла; якщо його немає — адресу оригіналу), обгорнутий у посилання на оригінал із `target="_blank"` і `rel="noopener noreferrer"`; мініатюра SHALL мати `cursor-pointer`. Дані файла, які сервер передає віджетові (відповідь завантаження та значення форм запису, терміна, пункту меню й налаштувань сайту), SHALL містити `preview`: адресу `thumb` для зображення й `null` для іншого файла. Файл, що не є зображенням, SHALL показуватися іконкою без посилання.
+The upload widget SHALL show for the chosen image the style `thumb` (the field `preview` of the data of the file; if there is none — the address of the original), wrapped in a link to the original with `target="_blank"` and `rel="noopener noreferrer"`; the thumbnail SHALL have `cursor-pointer`. The data of the file that the server passes to the widget (the response of the upload and the values of the forms of a record, a term, a menu item and the settings of the site) SHALL contain `preview`: the address of `thumb` for an image and `null` for another file. A file that is not an image SHALL be shown as an icon without a link.
 
-#### Scenario: Щойно завантажене зображення
-- **WHEN** користувач завантажує зображення у віджет
-- **THEN** віджет показує мініатюру зі стилем `thumb`, посилання якої веде на оригінал і відкривається в новій вкладці
+#### Scenario: Image just uploaded
+- **WHEN** the user uploads an image into the widget
+- **THEN** the widget shows a thumbnail with the style `thumb`, whose link leads to the original and opens in a new tab
 
-#### Scenario: Збережене зображення у формі редагування
-- **WHEN** відкрито форму запису зі збереженим зображенням
-- **THEN** мініатюра має адресу `thumb`, а її посилання — адресу оригіналу
+#### Scenario: Saved image in the form of editing
+- **WHEN** the form of a record with a saved image is opened
+- **THEN** the thumbnail has the address `thumb`, and its link has the address of the original
 
-#### Scenario: Документ
-- **WHEN** у віджеті вибрано PDF
-- **THEN** віджет показує іконку без посилання, `preview` у даних — `null`
+#### Scenario: Document
+- **WHEN** a PDF is chosen in the widget
+- **THEN** the widget shows an icon without a link, `preview` in the data is `null`

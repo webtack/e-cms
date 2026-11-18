@@ -2,95 +2,95 @@
 
 ## Context
 
-Поведінку описують дельта-специфікації `file-storage` та `admin-content-fields` (мотивація — у `proposal.md`). Поточний стан:
+The behaviour is described by the delta specifications `file-storage` and `admin-content-fields` (the motivation is in `proposal.md`). The current state:
 
-- Єдина точка збереження — `FileStorage::store()` (`app/Files/FileStorage.php`): перевірка типу й розміру, `getimagesize`, `putFileAs` оригіналу, рядок `media` з метаданими оригіналу.
-- Правила завантаження — `UploadRules` (`app/Files/UploadRules.php`): профіль з `config/files.php` (`disk`, `mimes`, `max_size`), який поле може лише звузити через `settings` (`mimes`, `max_size`). Правила поля будують `UploadRules::forField()`, форма поля — `StoreContentFieldRequest::settingsRules()` і `ContentFieldForm.tsx`.
-- Профіль `image` використовують усі споживачі, не лише поля `image`: `richtext`, а також інші місця, що викликають `store()` з цим профілем. Межі профілю тому діятимуть і для них без змін їхнього коду.
-- Образ `app` уже містить `imagick` (`docker/php/Dockerfile`, перевірено: розширення 3.8.1, ImageMagick 7.1.1, формати JPEG, PNG, WEBP, GIF, HEIC, AVIF). Політика ImageMagick у контейнері: `area` 256MP, `memory` 1GiB, `width`/`height` 32KP. `memory_limit` PHP — 128M.
-- `intervention/image` у проєкті ще немає. Версія 4: `ImageManager::usingDriver(Driver::class)`, `decodePath()`, `scale()`, `encodeUsingFormat()`, `save()` (звірено з документацією 4.4.0).
+- The single point of saving is `FileStorage::store()` (`app/Files/FileStorage.php`): the check of the type and size, `getimagesize`, `putFileAs` of the original, a row `media` with the metadata of the original.
+- The upload rules — `UploadRules` (`app/Files/UploadRules.php`): a profile from `config/files.php` (`disk`, `mimes`, `max_size`), which a field can only narrow through `settings` (`mimes`, `max_size`). The field rules are built by `UploadRules::forField()`, the form of the field — `StoreContentFieldRequest::settingsRules()` and `ContentFieldForm.tsx`.
+- The profile `image` is used by all consumers, not only by the fields `image`: `richtext`, and other places that call `store()` with this profile. The limits of the profile will therefore apply to them too without changes to their code.
+- The `app` image already contains `imagick` (`docker/php/Dockerfile`, verified: the extension 3.8.1, ImageMagick 7.1.1, the formats JPEG, PNG, WEBP, GIF, HEIC, AVIF). The policy of ImageMagick in the container: `area` 256MP, `memory` 1GiB, `width`/`height` 32KP. The PHP `memory_limit` — 128M.
+- `intervention/image` is not yet in the project. Version 4: `ImageManager::usingDriver(Driver::class)`, `decodePath()`, `scale()`, `encodeUsingFormat()`, `save()` (checked against the documentation 4.4.0).
 
-Описані тут документи, які змінюються: `docs/file-storage.md` (профілі, `store()`), `docs/admin-content-fields.md` (налаштування `image`), `docs/content-values.md` (зображення і файли).
+The documents described here that change: `docs/file-storage.md` (the profiles, `store()`), `docs/admin-content-fields.md` (the settings of `image`), `docs/content-values.md` (the images and files).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Усі нові зображення профілю `image` не перевищують заданих меж, пропорції збережені.
-- Одна точка обробки в `FileStorage::store()`, без змін у споживачів.
-- Дані в `media` завжди описують збережений файл.
-- Надто великі зображення відхиляються керованою помилкою, а не збоєм пам'яті.
+- All new images of the profile `image` do not exceed the set limits, the proportions are preserved.
+- One processing point in `FileStorage::store()`, without changes in the consumers.
+- The data in `media` always describe the saved file.
+- Too large images are rejected with a controlled error, not with a memory failure.
 
 **Non-Goals:**
-- Мініатюри й пресети розмірів (окрема зміна).
-- Обробка вже збережених файлів, команда масового зменшення.
-- Зміна формату (JPEG → WebP тощо), обрізання, водяні знаки.
-- Обробка в черзі: збережений файл має бути остаточним у момент відповіді завантаження.
-- Підтримка HEIC/AVIF як дозволених типів: `mimes` профілю не змінюються.
+- Thumbnails and size presets (a separate change).
+- Processing of the already saved files, a command for the mass reduction.
+- A change of the format (JPEG → WebP etc.), cropping, watermarks.
+- Processing in a queue: the saved file must be final at the moment of the upload response.
+- Support of HEIC/AVIF as allowed types: the `mimes` of the profiles do not change.
 
 ## Decisions
 
-### 1. Окремий клас `App\Files\ImageResizer`, виклик із `FileStorage::store()`
+### 1. A separate class `App\Files\ImageResizer`, called from `FileStorage::store()`
 
-Клас приймає шлях до файлу, MIME і ефективні межі, а повертає або `null` (нічого не робити, зберегти оригінал), або результат (вміст/тимчасовий файл, ширина, висота). `store()` викликає його після `assertAllowed` і `getimagesize`, перед записом. Далі:
+The class takes the path to the file, the MIME and the effective limits, and returns either `null` (do nothing, save the original) or a result (the contents/temporary file, the width, the height). `store()` calls it after `assertAllowed` and `getimagesize`, before the writing. Then:
 
-- `null` → `putFileAs` оригіналу, як зараз;
-- результат → запис оброблених байтів через `Storage::disk(...)->put()`, а `size`, `hash`, `width`, `height` беруться з результату.
+- `null` → `putFileAs` of the original, as now;
+- a result → the writing of the processed bytes through `Storage::disk(...)->put()`, and `size`, `hash`, `width`, `height` are taken from the result.
 
-Альтернатива — обробка всередині `store()` — відкинута: метод уже довгий, а клас з одним завданням легко тестується без диска та БД.
+The alternative — the processing inside `store()` — was rejected: the method is already long, and a class with one task is easy to test without the disk and the DB.
 
-### 2. Межі: профіль + поле, береться менше значення
+### 2. The limits: the profile + the field, the smaller value is taken
 
-`UploadRules` отримує `maxWidth` і `maxHeight` (`?int`). `narrowed()` приймає ще два параметри і для кожної межі робить: якщо профіль задає межу, то `min(профіль, поле)`; якщо ні, то значення поля; якщо немає ні того, ні іншого, то `null` (сторона не обмежена). Некоректні значення поля (не додатне ціле) ігноруються, як і для `max_size`. `FileProfiles::get()` та phpstan-тип профілю отримують необов'язкові `max_width`, `max_height`.
+`UploadRules` receives `maxWidth` and `maxHeight` (`?int`). `narrowed()` takes two more parameters and for each limit does: if the profile sets a limit, then `min(profile, field)`; if not, the value of the field; if there is neither, then `null` (the side is not limited). The incorrect values of the field (not a positive integer) are ignored, as for `max_size`. `FileProfiles::get()` and the phpstan type of the profile receive the optional `max_width`, `max_height`.
 
-Профіль `richtext` і прямі виклики `UploadRules::forProfile('image')` отримують межі профілю.
+The profile `richtext` and the direct calls `UploadRules::forProfile('image')` receive the limits of the profile.
 
-### 3. Обчислення розміру
+### 3. The calculation of the size
 
-`scale = min(maxWidth / w, maxHeight / h, 1)`, де відсутня межа трактується як «без обмеження». Нові сторони — округлення до найближчого цілого, не менше 1; сторона, що визначила масштаб, дорівнює своїй межі точно (щоб, наприклад, 4000×3000 при 1000×1000 дало рівно 1000×750). Якщо `scale == 1`, обробка не потрібна й клас повертає `null`.
+`scale = min(maxWidth / w, maxHeight / h, 1)`, where an absent limit is treated as «no limit». The new sides are rounded to the nearest integer, not less than 1; the side that defined the scale equals its limit exactly (so that, for example, 4000×3000 with 1000×1000 gives exactly 1000×750). If `scale == 1`, the processing is not needed and the class returns `null`.
 
-### 4. Обробка через `intervention/image` з драйвером `imagick`
+### 4. Processing through `intervention/image` with the driver `imagick`
 
-Драйвер береться з `config('files.image.driver')` (за замовчуванням `imagick`), що дозволяє перемкнути на `gd` без зміни коду. Алгоритм у `ImageResizer`:
+The driver is taken from `config('files.image.driver')` (by default `imagick`), which allows switching to `gd` without changing the code. The algorithm in `ImageResizer`:
 
-1. Визначити анімацію до декодування пікселів. Для GIF і WebP це кількість кадрів через дешеве читання заголовка (`Imagick::pingImage`, без розпаковки пікселів) або відповідний метод Intervention, якщо він не декодує кадри; при більше ніж одному кадрі повернути `null`.
-2. Декодувати файл, застосувати EXIF-орієнтацію, зменшити, закодувати в той самий формат: JPEG і WebP з якістю з конфігурації, PNG без втрат.
-3. Метадані EXIF не зберігаються (побічно прибирає GPS).
+1. Determine the animation before decoding the pixels. For GIF and WebP it is the number of frames through a cheap reading of the header (`Imagick::pingImage`, without unpacking the pixels) or the corresponding method of Intervention, if it does not decode the frames; with more than one frame return `null`.
+2. Decode the file, apply the EXIF orientation, reduce, encode in the same format: JPEG and WebP with the quality from the configuration, PNG losslessly.
+3. The EXIF metadata is not saved (as a side effect it removes the GPS).
 
-Точні назви методів Intervention для орієнтації, зменшення й перевірки анімації звіряються під час реалізації (завдання 2.1); у документації 4.4.0 підтверджено лише `usingDriver`, `decodePath`, `scale`, `encodeUsingFormat`, `save`.
+The exact names of the Intervention methods for the orientation, the reduction and the check of the animation are verified during the implementation (task 2.1); in the documentation 4.4.0 only `usingDriver`, `decodePath`, `scale`, `encodeUsingFormat`, `save` are confirmed.
 
-Альтернативи:
-- Чистий `Imagick` без бібліотеки: менше залежностей, але усе вручну (орієнтація, профілі, перемикання драйвера). Відкинуто за раніше погодженим вибором `intervention/image`.
-- GD: гірша якість зменшення, пам'ять `w*h*4` у PHP і недоступний ліміт ресурсів ImageMagick. Лишається запасним драйвером у конфігурації.
+Alternatives:
+- Pure `Imagick` without the library: fewer dependencies, but everything by hand (the orientation, the profiles, the switching of the driver). Rejected in favour of the previously agreed `intervention/image`.
+- GD: a worse quality of the reduction, the memory `w*h*4` in PHP and the unavailable limit of the resources of ImageMagick. It remains a fallback driver in the configuration.
 
-### 5. Захист пам'яті: ліміт пікселів до декодування
+### 5. Protection of the memory: the limit of pixels before decoding
 
-`getimagesize` у `store()` уже читає лише заголовок. Після нього `w * h` порівнюється з `config('files.image.max_pixels')` (за замовчуванням 100 000 000, нижче політики ImageMagick 256MP по `area` і 32KP по сторонах); при перевищенні — `reject(...)` з перекладеним повідомленням. Перевірка стоїть **до** обробки й до запису, тож нічого не створюється. Вона застосовується до всіх зображень, не лише тих, що зменшуються, бо воно коштує майже нічого й дає однакову поведінку.
+`getimagesize` in `store()` already reads only the header. After it `w * h` is compared with `config('files.image.max_pixels')` (by default 100 000 000, below the policy of ImageMagick 256MP by `area` and 32KP by the sides); on exceeding — `reject(...)` with a translated message. The check stands **before** the processing and the writing, so nothing is created. It applies to all images, not only to those that are reduced, because it costs almost nothing and gives the same behaviour.
 
-### 6. Помилка обробки → валідаційна відмова
+### 6. A processing error → a validation rejection
 
-Будь-який виняток бібліотеки при декодуванні/кодуванні перетворюється на `ValidationException` під ключем `file` (повідомлення «Не вдалося обробити зображення»). Файл на диск не пишеться. Журнал отримує оригінальний виняток.
+Any exception of the library during decoding/encoding is converted into a `ValidationException` under the key `file` (the message «Не вдалося обробити зображення» — "Failed to process the image"). The file is not written to the disk. The log receives the original exception.
 
-### 7. Порядок перевірок у `store()`
+### 7. The order of the checks in `store()`
 
 ```
-isValid -> detectMime -> assertAllowed (тип, розмір ОРИГІНАЛУ)
-        -> getimagesize -> ліміт пікселів
-        -> ImageResizer (null | результат)
-        -> запис на диск (оригінал або результат)
-        -> File::create (метадані збереженого)
+isValid -> detectMime -> assertAllowed (type, size of the ORIGINAL)
+        -> getimagesize -> pixel limit
+        -> ImageResizer (null | result)
+        -> writing to the disk (the original or the result)
+        -> File::create (the metadata of the saved file)
 ```
 
-Розмір оригіналу перевіряється так само, як і зараз (рішення власника: варіант A), тож 8-МБ фото відхиляється, хоч після зменшення було б малим.
+The size of the original is checked in the same way as now (the decision of the owner: variant A), so an 8-MB photo is rejected, even though after the reduction it would be small.
 
-### 8. Налаштування поля: `max_width`, `max_height` для типів із зображеннями
+### 8. The settings of the field: `max_width`, `max_height` for types with images
 
-`StoreContentFieldRequest::settingsRules()` додає `settings.max_width` і `settings.max_height` (`nullable|integer|min:1`, `max` — межа профілю, якщо вона задана) лише коли профіль типу поля має хоча б один `image/*` у `mimes` (тобто для `image`, не для `file`); `array:` у `settings` розширюється відповідно. `ContentFieldController` зводить порожні значення до `null`, як для `max_size`. Форма `ContentFieldForm.tsx` показує два числові поля поруч із розміром, лише коли профіль типу має зображення; тип `FileSettings` і дані профілю, що передає контролер, отримують `max_width`/`max_height`.
+`StoreContentFieldRequest::settingsRules()` adds `settings.max_width` and `settings.max_height` (`nullable|integer|min:1`, `max` — the limit of the profile, if it is set) only when the profile of the type of the field has at least one `image/*` in `mimes` (that is, for `image`, not for `file`); `array:` in `settings` is extended accordingly. `ContentFieldController` reduces the empty values to `null`, as for `max_size`. The form `ContentFieldForm.tsx` shows two numeric fields next to the size, only when the profile of the type has images; the type `FileSettings` and the data of the profile that the controller passes receive `max_width`/`max_height`.
 
-Альтернатива — лише конфігурація профілю без налаштувань поля — відкинута: узгоджено, що поле звужує межі, як і `max_size`.
+The alternative — only the configuration of the profile without the settings of the field — was rejected: it was agreed that the field narrows the limits, as `max_size` does.
 
-### 9. Конфігурація (`config/files.php` + `.env`)
+### 9. The configuration (`config/files.php` + `.env`)
 
-Усі параметри обробки читаються зі змінних середовища з розумними значеннями за замовчуванням, щоб їх можна було міняти без правки коду:
+All processing parameters are read from environment variables with reasonable default values, so that they can be changed without editing the code:
 
 ```php
 'profiles' => [
@@ -111,25 +111,25 @@ isValid -> detectMime -> assertAllowed (тип, розмір ОРИГІНАЛУ)
 ],
 ```
 
-- Значення `null` у `.env` (`FILES_IMAGE_MAX_WIDTH=null`) знімає межу цієї сторони; порожнє чи нечислове значення трактується як «без межі» (та сама нормалізація, що й для налаштувань поля).
-- `env()` викликається лише в `config/files.php` (з кешем конфігурації в production інакше не працювало б). `.env.example` отримує ці змінні із значеннями за замовчуванням і коментарем.
-- `max_size` профілів теж береться з `.env` у кілобайтах: `FILES_IMAGE_MAX_SIZE` (5120) і `FILES_DOCUMENT_MAX_SIZE` (20480) у `profiles.image` та `profiles.document`. Значення має бути додатним цілим; менші за ліміти PHP (`docker/php/uploads.ini`) і nginx, інакше завантаження відсікається раніше за валідацію профілю.
-- Значення 1920 (достатньо для повноширинного банера на Full HD; 2560 дає зайві мегапікселі, поки немає мініатюр), 85 і 100 000 000 — розумні стартові значення, не вимоги користувача. Профіль `document` меж не має.
+- The value `null` in `.env` (`FILES_IMAGE_MAX_WIDTH=null`) removes the limit of this side; an empty or non-numeric value is treated as «no limit» (the same normalization as for the settings of the field).
+- `env()` is called only in `config/files.php` (otherwise the production with the configuration cache would not work). `.env.example` receives these variables with the default values and a comment.
+- The `max_size` of the profiles is also taken from `.env` in kilobytes: `FILES_IMAGE_MAX_SIZE` (5120) and `FILES_DOCUMENT_MAX_SIZE` (20480) in `profiles.image` and `profiles.document`. The value must be a positive integer; smaller than the limits of PHP (`docker/php/uploads.ini`) and nginx, otherwise the upload is cut off before the validation of the profile.
+- The value 1920 (enough for a full-width banner on Full HD; 2560 gives extra megapixels while there are no thumbnails), 85 and 100 000 000 are reasonable starting values, not requirements of the user. The profile `document` has no limits.
 
 ## Risks / Trade-offs
 
-- [Перекодування JPEG/WebP втрачає якість] → зображення в межах не чіпаються; якість винесена в конфіг; для зменшених великих фото різниця непомітна.
-- [Анімований WebP/GIF лишається великим] → прийнятний компроміс етапу 1, зафіксований у специфікації; зменшення кадрів може бути окремою зміною.
-- [Великі файли гальмують запит завантаження, бо обробка синхронна] → межа `max_size` 5 МБ і `max_pixels` обмежують час; черга свідомо не використовується (файл має бути остаточним у відповіді).
-- [Зміна зовнішнього вигляду PNG: зменшений PNG кодується заново] → PNG кодується без втрат; прозорість зберігається (є сценарій у специфікації).
-- [Метадані EXIF зникають, включно з авторськими] → для сайту це перевага (приватність); зафіксовано у `proposal.md`.
-- [`getimagesize` не розпізнає окремі вхідні дані, які розпізнає Imagick, або навпаки] → поведінка вже така (відмова «не є коректним зображенням»); нових розбіжностей не додаємо.
-- [Існуючі файли великі] → не торкаємось; за потреби окрема команда масового зменшення.
-- [Залежність від `imagick` у середовищі] → драйвер у конфігурації; у CI/на хості без `imagick` можна поставити `gd`. Тести зменшення пропускаються, якщо відповідного розширення немає.
+- [The recoding of JPEG/WebP loses quality] → the images within the limits are not touched; the quality is moved to the config; for the reduced large photos the difference is invisible.
+- [An animated WebP/GIF remains large] → an acceptable compromise of stage 1, recorded in the specification; the reduction of the frames can be a separate change.
+- [Large files slow down the upload request, because the processing is synchronous] → the limit `max_size` 5 MB and `max_pixels` limit the time; the queue is deliberately not used (the file must be final in the response).
+- [A change of the appearance of PNG: a reduced PNG is encoded again] → PNG is encoded losslessly; the transparency is kept (there is a scenario in the specification).
+- [The EXIF metadata disappears, including the author's] → for a site this is an advantage (privacy); recorded in `proposal.md`.
+- [`getimagesize` does not recognize some input data that Imagick recognizes, or vice versa] → the behaviour is already so (the refusal «не є коректним зображенням» — "is not a correct image"); we do not add new discrepancies.
+- [Existing files are large] → we do not touch them; if needed a separate command for the mass reduction.
+- [A dependency on `imagick` in the environment] → the driver is in the configuration; in CI/on the host without `imagick` one can install `gd`. The tests of the reduction are skipped if the corresponding extension is absent.
 
 ## Migration Plan
 
-1. `composer require intervention/image` у контейнері `app`; образ вже містить `imagick`.
-2. Додати конфігурацію, код, переклади; нових міграцій БД немає (`settings` — наявна JSON-колонка `content_fields`).
-3. Розгортання: переконатися, що образ `app` перебудовано з `imagick` (`docker compose build app`), інакше завантаження зображень без меж у межах `max_size` працюватимуть як раніше, а зменшення падатиме керованою помилкою.
-4. Відкат: прибрати `max_width`/`max_height` з профілю — зображення знову зберігаються як є. Уже збережені зменшені файли відновити неможливо (оригінали не зберігаються).
+1. `composer require intervention/image` in the container `app`; the image already contains `imagick`.
+2. Add the configuration, the code, the translations; there are no new DB migrations (`settings` — the existing JSON column `content_fields`).
+3. Deployment: make sure the image `app` is rebuilt with `imagick` (`docker compose build app`), otherwise the upload of images without limits within `max_size` will work as before, and the reduction will fail with a controlled error.
+4. Rollback: remove `max_width`/`max_height` from the profile — the images are saved again as they are. The already saved reduced files cannot be restored (the originals are not kept).

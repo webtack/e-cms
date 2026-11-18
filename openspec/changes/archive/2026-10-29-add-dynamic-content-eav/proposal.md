@@ -2,43 +2,43 @@
 
 ## Why
 
-CMS має давати адміністратору змогу без написання коду створювати типи контенту, додавати поля та налаштовувати списки вузлів контенту. Для цього потрібна основа динамічного контенту: модель даних, у якій структура контенту є даними (конфігураційними записами), а не міграціями. Без цієї основи не можна будувати ні адмін-UI, ні конструктор блоків, ні публічний вивід.
+The CMS must let the administrator create content types, add fields and configure lists of content nodes without writing code. This requires a foundation of dynamic content: a data model in which the structure of content is data (configuration records), not migrations. Without this foundation neither the admin UI, nor the block builder, nor the public output can be built.
 
 ## What Changes
 
-- Нові сутності: тип контенту (`content_types`), визначення поля (`content_fields`), вузол контенту (`content_nodes`).
-- Типізовані таблиці значень `content_values_{тип}` (EAV) зі спільним контрактом колонок: зв'язок із вузлом (`content_node_id` і `content_node_uuid`) і полем (пара `content_type` + `field_key`), мова `lang` (з переліку `app_languages`), вага `weight` (порядок значень множинних полів), `value` рідного типу БД, опціональний JSON `options`. Початкові типи: короткий текст, довгий текст, ціле число, десяткове число, логічне, дата, дата й час.
-- Переклади зберігаються окремими рядками значень з іншим `lang`, а не в JSON. Мова за замовчуванням — `default`.
-- Керування мовами контенту: загальна системна таблиця `app_languages` (доступні мови; нова мова неактивна за замовчуванням) і глобальний вмикач багатомовності, що зберігається в загальному сховищі `app_settings` (ключ `content.multilingual`). Вони впливають лише на контент і фронтенд-частину, не на мову інтерфейсу адмінки.
-- Загальне сховище налаштувань застосунку `app_settings` (ключ—значення з JSON-значеннями та просторами імен `модуль.назва`), яким користуються ядро контенту та будь-які майбутні модулі.
-- Для впорядкування замість `position` скрізь використовується колонка/атрибут `weight` (менша вага — раніше).
-- Вид типу контенту `kind` (`content`, `page`, `block`): сторінки й блоки використовують ті самі поля, значення, переклади та вибірку, що й звичайний контент, і відрізняються лише видом типу. Дерево сторінок, розміщення блоків та маршрутизація — окремі майбутні зміни.
-- Ієрархія типів контенту: `content_types.parent_type` (самопосилання на `key` типу) для групування типів у дерево.
-- Обов'язковий унікальний `slug` у `content_nodes` для всіх видів: публічний шлях (для `content` і `page`), що автоматично утворюється з `title`, якщо не вказаний явно; ідентифікатор для шаблонів із префіксом `block-` (для `block`), що задається вручну або генерується автоматично.
-- Стабільний ідентифікатор `uuid` (UUID v7, унікальний, незмінний) у `content_nodes` для майбутнього імпорту/експорту між середовищами; тип ідентифікується унікальним незмінним `key`, поле — парою (`content_type`, `key`), і зв'язки з типом (`parent_type`, `content_type`) посилаються на `content_types.key`, а зв'язки значень лишаються на `id`. Самі імпорт/експорт і зв'язки між вузлами — окремі майбутні зміни.
-- Кожен тип контенту при створенні автоматично отримує системне поле `title` (короткий текст), яке не можна видалити.
-- Реєстр типів полів: кожен тип описує свою таблицю значень, правила валідації, приведення типів, операції фільтрації та сортування. Додавання нового типу не змінює загальний механізм.
-- Єдиний механізм читання, запису й валідації значень вузла за конфігурацією його полів (одиночні, множинні, за мовою).
-- Індекси для вибірки значень вузла та для фільтрації за полем, мовою і значенням.
-- Механізм вибірки вузлів: налаштовувані видимі поля, пошук, фільтри та сортування за динамічними полями з урахуванням типу поля й мови; налаштування списку за замовчуванням зберігаються в JSON `settings` типу контенту.
-- Поза обсягом: UI адмінки, конструктор блоків, міграція даних старої системи.
+- New entities: a content type (`content_types`), a field definition (`content_fields`), a content node (`content_nodes`).
+- Typed value tables `content_values_{type}` (EAV) with a shared column contract: the link to the node (`content_node_id` and `content_node_uuid`) and to the field (the pair `content_type` + `field_key`), the language `lang` (from the list `app_languages`), the weight `weight` (the order of values of multiple fields), `value` of the native DB type, an optional JSON `options`. The initial types: short text, long text, integer, decimal number, boolean, date, date and time.
+- Translations are stored as separate value rows with a different `lang`, not in JSON. The default language is `default`.
+- Management of content languages: a common system table `app_languages` (the available languages; a new language is inactive by default) and a global multilingualism switch stored in the common storage `app_settings` (the key `content.multilingual`). They affect only the content and the frontend part, not the language of the admin interface.
+- A common application settings storage `app_settings` (key—value with JSON values and namespaces `module.name`), used by the content core and by any future modules.
+- For ordering, instead of `position` the column/attribute `weight` is used everywhere (a smaller weight — earlier).
+- The kind of a content type `kind` (`content`, `page`, `block`): pages and blocks use the same fields, values, translations and selection as ordinary content, and differ only in the kind of the type. A page tree, block placement and routing are separate future changes.
+- The hierarchy of content types: `content_types.parent_type` (a self-reference to the type `key`) for grouping types into a tree.
+- A mandatory unique `slug` in `content_nodes` for all kinds: a public path (for `content` and `page`) that is automatically formed from `title` if not given explicitly; an identifier for templates with the prefix `block-` (for `block`), which is set manually or generated automatically.
+- A stable identifier `uuid` (UUID v7, unique, immutable) in `content_nodes` for future import/export between environments; a type is identified by a unique immutable `key`, a field — by the pair (`content_type`, `key`), and the relations to the type (`parent_type`, `content_type`) refer to `content_types.key`, while the relations of values remain on `id`. The import/export itself and relations between nodes are separate future changes.
+- Each content type automatically receives on creation the system field `title` (short text), which cannot be deleted.
+- A registry of field types: each type describes its own value table, validation rules, type casting, filtering and sorting operations. Adding a new type does not change the common mechanism.
+- A single mechanism for reading, writing and validating the values of a node by the configuration of its fields (single, multiple, by language).
+- Indexes for selecting the values of a node and for filtering by field, language and value.
+- A node selection mechanism: configurable visible fields, search, filters and sorting by dynamic fields taking into account the field type and the language; the default list settings are stored in the JSON `settings` of the content type.
+- Out of scope: the admin UI, the block builder, the migration of data from the old system.
 
 ## Capabilities
 
 ### New Capabilities
-- `content-model`: типи контенту з видом `kind` та ієрархією `parent_type`, вузли з обов'язковим унікальним `slug` (з обов'язковим системним полем `title`), стабільний `uuid` вузлів, зв'язки з типом за `key`, визначення полів (ключ, тип, множинність, обов'язковість, перекладність, налаштування), вузли контенту, правила цілісності конфігурації.
-- `app-settings`: загальне сховище налаштувань застосунку для ядра та майбутніх модулів.
-- `content-languages`: перелік мов контенту, вимкнення/деактивація, вмикач багатомовності, незалежність від мови адмінки.
-- `content-values`: типізоване зберігання значень, переклади через `lang`, реєстр типів полів, читання/запис/валідація значень вузла, множинність.
-- `content-querying`: вибірка вузлів із видимими полями, пошуком, фільтрами, сортуванням і пагінацією за динамічними полями та мовою.
+- `content-model`: content types with the `kind` and the `parent_type` hierarchy, nodes with a mandatory unique `slug` (with the mandatory system field `title`), a stable `uuid` of nodes, relations to the type by `key`, field definitions (key, type, multiplicity, requiredness, translatability, settings), content nodes, configuration integrity rules.
+- `app-settings`: a common application settings storage for the core and for future modules.
+- `content-languages`: the list of content languages, disabling/deactivation, the multilingualism switch, independence from the admin language.
+- `content-values`: typed storage of values, translations through `lang`, the registry of field types, reading/writing/validation of node values, multiplicity.
+- `content-querying`: node selection with visible fields, search, filters, sorting and pagination by dynamic fields and language.
 
 ### Modified Capabilities
 
-Немає.
+None.
 
 ## Impact
 
-- Код: нові моделі, міграції (лише структурні таблиці, одноразово), реєстр типів полів і сервіси в `app/`; конфігурація реєстру в `config/`; тести в `tests/Feature` та `tests/Unit`.
-- БД: таблиці `content_types`, `content_fields`, `content_nodes`, `app_languages`, `app_settings` та 7 таблиць `content_values_*`. Нові типи контенту й полів далі створюються записами без міграцій.
-- Залежності: нових пакетів немає.
-- Документація (українською): створити `docs/app-settings.md`, `docs/content-model.md`, `docs/content-languages.md`, `docs/content-values.md`, `docs/content-querying.md`; оновити індекс `docs/README.md`.
+- Code: new models, migrations (only the structural tables, once), the registry of field types and services in `app/`; the registry configuration in `config/`; tests in `tests/Feature` and `tests/Unit`.
+- DB: the tables `content_types`, `content_fields`, `content_nodes`, `app_languages`, `app_settings` and 7 tables `content_values_*`. New content types and fields are subsequently created as records without migrations.
+- Dependencies: no new packages.
+- Documentation (in Ukrainian): create `docs/app-settings.md`, `docs/content-model.md`, `docs/content-languages.md`, `docs/content-values.md`, `docs/content-querying.md`; update the index `docs/README.md`.

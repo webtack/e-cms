@@ -3,12 +3,12 @@
 ## ADDED Requirements
 
 ### Requirement: Деактивований користувач
-Користувач із вимкненою активністю SHALL не мати змоги ввійти, а його вже відкрита сесія SHALL припинятися при наступному запиті.
+A user with the activity switched off SHALL not be able to log in, and his already open session SHALL be terminated on the next request.
 
-#### Scenario: Вхід деактивованого
-- **WHEN** деактивований користувач подає на `/login` правильні email і пароль
-- **THEN** вхід відхилено повідомленням про помилку, сесію не створено
+#### Scenario: Login of a deactivated user
+- **WHEN** a deactivated user submits the correct email and password to `/login`
+- **THEN** the login is rejected with an error message, and no session is created
 
-#### Scenario: Деактивація відкритої сесії
-- **WHEN** адміністратор деактивує користувача, у якого відкрита сесія, і той робить наступний запит
-- **THEN** сесію завершено, а користувача перенаправлено на `/login`
+#### Scenario: Deactivation of an open session
+- **WHEN** the administrator deactivates a user who has an open session, and that user makes the next request
+- **THEN** the session is terminated, and the user is redirected to `/login`

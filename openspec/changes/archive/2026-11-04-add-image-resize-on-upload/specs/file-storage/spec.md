@@ -3,153 +3,153 @@
 ## ADDED Requirements
 
 ### Requirement: Зменшення зображення до меж профілю
-Система SHALL при збереженні зображення зменшувати його, якщо ширина перевищує `max_width` або висота перевищує `max_height` діючих правил. Зменшення SHALL зберігати пропорції: зображення масштабується так, щоб сторона, яка перевищує межу найбільше, дорівнювала своїй межі, а друга сторона не перевищувала своєї. Межа, якої немає (профіль її не задає і поле не звужує), SHALL не обмежувати сторону. Система SHALL не збільшувати зображення, а зображення в межах обох сторін SHALL зберігатися без перекодування, з тим самим вмістом, що й завантажене. Формат зображення (JPEG, PNG, WebP) SHALL лишатися тим самим, прозорість PNG і WebP SHALL зберігатися, EXIF-орієнтація SHALL бути врахована так, щоб зображення не змінило вигляду. Анімовані GIF і WebP SHALL зберігатися без змін, незалежно від розміру. GIF без анімації SHALL зменшуватися за тими самими правилами, що й інші зображення.
+The system SHALL, when saving an image, reduce it if its width exceeds `max_width` or its height exceeds `max_height` of the applicable rules. The reduction SHALL keep the proportions: the image is scaled so that the side that exceeds its limit the most equals its limit, and the other side does not exceed its own. A limit that does not exist (the profile does not set it and the field does not narrow it) SHALL NOT limit the side. The system SHALL NOT enlarge images, and an image within both sides SHALL be saved without re-encoding, with the same contents as the uploaded one. The image format (JPEG, PNG, WebP) SHALL stay the same, the transparency of PNG and WebP SHALL be kept, the EXIF orientation SHALL be taken into account so that the image does not change its appearance. Animated GIF and WebP SHALL be saved without changes, regardless of the size. A GIF without animation SHALL be reduced by the same rules as the other images.
 
-#### Scenario: Ширина перевищує межу
-- **WHEN** за межі 1000×1000 завантажується зображення 4000×3000
-- **THEN** збережене зображення має розмір 1000×750
+#### Scenario: Width exceeds the limit
+- **WHEN** an image 4000×3000 is uploaded for the limits 1000×1000
+- **THEN** the saved image has the size 1000×750
 
-#### Scenario: Висота перевищує межу
-- **WHEN** за межі 1000×1000 завантажується зображення 3000×4000
-- **THEN** збережене зображення має розмір 750×1000
+#### Scenario: Height exceeds the limit
+- **WHEN** an image 3000×4000 is uploaded for the limits 1000×1000
+- **THEN** the saved image has the size 750×1000
 
-#### Scenario: Різні межі сторін
-- **WHEN** за межі `max_width` 800 і `max_height` 400 завантажується зображення 1600×1200
-- **THEN** збережене зображення має розмір 533×400, бо висота перевищує свою межу найбільше
+#### Scenario: Different limits of the sides
+- **WHEN** an image 1600×1200 is uploaded for the `max_width` 800 and `max_height` 400 limits
+- **THEN** the saved image has the size 533×400, because the height exceeds its limit the most
 
-#### Scenario: Лише одна межа
-- **WHEN** задано лише `max_width` 500 і завантажується зображення 2000×3000
-- **THEN** збережене зображення має розмір 500×750
+#### Scenario: Only one limit
+- **WHEN** only `max_width` 500 is set and an image 2000×3000 is uploaded
+- **THEN** the saved image has the size 500×750
 
-#### Scenario: Зображення в межах
-- **WHEN** за межі 1000×1000 завантажується зображення 640×480
-- **THEN** збережений файл має той самий вміст і той самий хеш, що й завантажений
+#### Scenario: Image within the limits
+- **WHEN** an image 640×480 is uploaded for the limits 1000×1000
+- **THEN** the saved file has the same contents and the same hash as the uploaded one
 
-#### Scenario: Збільшення немає
-- **WHEN** за межі 5000×5000 завантажується зображення 100×100
-- **THEN** збережене зображення має розмір 100×100
+#### Scenario: No enlargement
+- **WHEN** an image 100×100 is uploaded for the limits 5000×5000
+- **THEN** the saved image has the size 100×100
 
-#### Scenario: Прозорість
-- **WHEN** завантажується велике PNG із прозорим тлом
-- **THEN** збережене зменшене PNG лишається прозорим
+#### Scenario: Transparency
+- **WHEN** a large PNG with a transparent background is uploaded
+- **THEN** the saved reduced PNG remains transparent
 
-#### Scenario: Орієнтація
-- **WHEN** завантажується JPEG 4000×3000, що за EXIF-орієнтацією показується повернутим на 90°, а межі 1000×1000
-- **THEN** збережене зображення виглядає так само, як його показує переглядач, і має розмір 750×1000
+#### Scenario: Orientation
+- **WHEN** a JPEG 4000×3000 is uploaded which, by its EXIF orientation, is shown rotated by 90°, and the limits are 1000×1000
+- **THEN** the saved image looks the same as the viewer shows it, and has the size 750×1000
 
-#### Scenario: Анімований GIF
-- **WHEN** за межі 100×100 завантажується анімований GIF 400×400
-- **THEN** він зберігається без змін, з тими самим вмістом і розмірами
+#### Scenario: Animated GIF
+- **WHEN** an animated GIF 400×400 is uploaded for the limits 100×100
+- **THEN** it is saved without changes, with the same contents and sizes
 
-#### Scenario: Формат не змінюється
-- **WHEN** зменшується WebP-зображення
-- **THEN** збережений файл лишається `image/webp` з розширенням `webp`
+#### Scenario: Format does not change
+- **WHEN** a WebP image is reduced
+- **THEN** the saved file remains `image/webp` with the extension `webp`
 
 ### Requirement: Метадані зображення описують збережений файл
-Система SHALL записувати в обліковий запис файлу розмір у байтах, хеш вмісту, ширину й висоту збереженого (а не завантаженого) файлу. Ліміт максимального розміру SHALL і далі перевірятися за завантаженим файлом до зменшення. Відповідь на завантаження SHALL повертати ширину, висоту й розмір збереженого файлу.
+The system SHALL record in the account of the file the size in bytes, the content hash, the width and the height of the saved (and not of the uploaded) file. The limit of the maximum size SHALL still be checked against the uploaded file before the reduction. The response to the upload SHALL return the width, the height and the size of the saved file.
 
-#### Scenario: Метадані після зменшення
-- **WHEN** завантажується JPEG 4000×3000 розміром 4 МБ за межі 1000×1000
-- **THEN** запис містить ширину 1000, висоту 750, розмір і хеш збереженого файлу, а не завантаженого
+#### Scenario: Metadata after the reduction
+- **WHEN** a JPEG 4000×3000 of 4 MB is uploaded for the limits 1000×1000
+- **THEN** the record contains the width 1000, the height 750, the size and the hash of the saved file, and not of the uploaded one
 
-#### Scenario: Ліміт розміру за оригіналом
-- **WHEN** за профілем з лімітом 5 МБ завантажується зображення 8 МБ, яке після зменшення стало б меншим за 5 МБ
-- **THEN** завантаження відхилено з помилкою валідації, на диску нічого не створено
+#### Scenario: Size limit by the original
+- **WHEN** an image of 8 MB is uploaded under a profile with a 5 MB limit, which would become smaller than 5 MB after the reduction
+- **THEN** the upload is rejected with a validation error, nothing is created on the disk
 
 ### Requirement: Захист від надто великих зображень
-Система SHALL відхиляти зображення, кількість пікселів якого (ширина, помножена на висоту) перевищує ліміт, заданий у конфігурації розробника, з помилкою валідації під ключем `file`. Перевірка SHALL виконуватися до декодування зображення, а на диску нічого не створюватися. Ліміт SHALL діяти і для зображень у межах `max_size`, і не залежати від налаштувань поля.
+The system SHALL reject an image whose number of pixels (width multiplied by height) exceeds the limit set in the developer's configuration, with a validation error under the key `file`. The check SHALL be performed before decoding the image, and nothing SHALL be created on the disk. The limit SHALL apply both to the images within `max_size` and SHALL NOT depend on the settings of the field.
 
-#### Scenario: Забагато пікселів
-- **WHEN** завантажується стисле зображення в межах `max_size`, кількість пікселів якого перевищує ліміт
-- **THEN** завантаження відхилено з помилкою валідації, а не збоєм сервера, і нічого не збережено
+#### Scenario: Too many pixels
+- **WHEN** a compressed image within `max_size` is uploaded whose number of pixels exceeds the limit
+- **THEN** the upload is rejected with a validation error, and not with a server failure, and nothing is saved
 
-#### Scenario: Пікселів у межах ліміту
-- **WHEN** завантажується зображення, кількість пікселів якого не перевищує ліміт
-- **THEN** воно обробляється за звичайними правилами
+#### Scenario: Pixels within the limit
+- **WHEN** an image whose number of pixels does not exceed the limit is uploaded
+- **THEN** it is processed by the usual rules
 
 ### Requirement: Помилка обробки зображення
-Система SHALL відхиляти завантаження з помилкою валідації під ключем `file`, якщо зображення не вдалося зменшити (пошкоджений вміст, який пройшов перевірку типу). Файл у такому разі SHALL не зберігатися, обліковий запис не створюватися.
+The system SHALL reject an upload with a validation error under the key `file` if the image could not be reduced (corrupted contents which passed the type check). In such a case the file SHALL NOT be saved, and the account SHALL NOT be created.
 
-#### Scenario: Пошкоджене зображення
-- **WHEN** завантажується файл, що має сигнатуру JPEG, але його вміст неможливо декодувати для зменшення
-- **THEN** завантаження відхилено з помилкою валідації, на диску й у базі нічого не створено
+#### Scenario: Corrupted image
+- **WHEN** a file is uploaded that has the signature of a JPEG, but whose contents cannot be decoded for the reduction
+- **THEN** the upload is rejected with a validation error, nothing is created on the disk and in the database
 
 ## MODIFIED Requirements
 
 ### Requirement: Профілі завантаження
-Система SHALL описувати правила завантаження іменованими профілями в конфігурації розробника: кожен профіль визначає диск, дозволені типи та максимальний розмір, а профіль зображень додатково може визначати максимальні ширину й висоту в пікселях (кожну окремо; без значення сторона не обмежується). Профіль SHALL не визначати каталог: файл зберігається в корені диска, а розташування задає стандартне налаштування цього диска. Користувач SHALL не обирати диск і не задавати правила під час завантаження. На старті SHALL існувати профілі `image` (зображення JPEG, PNG, WebP, GIF, до 5 МБ, за замовчуванням зменшуються до 1920×1920 пікселів; межі й інші параметри обробки зображень, а також максимальні розміри профілів розробник задає змінними середовища `.env`) і `document` (PDF, DOCX, XLSX, до 20 МБ).
+The system SHALL describe the upload rules by named profiles in the developer's configuration: each profile defines the disk, the allowed types and the maximum size, and the profile of images may additionally define the maximum width and height in pixels (each separately; without a value the side is not limited). A profile SHALL NOT define a directory: the file is saved in the root of the disk, and the location is set by the standard setting of this disk. The user SHALL NOT choose the disk nor set the rules during the upload. At the start the profiles `image` (images JPEG, PNG, WebP, GIF, up to 5 MB, by default reduced to 1920×1920 pixels; the limits and other parameters of the image processing, as well as the maximum sizes of the profiles, the developer sets by the environment variables `.env`) and `document` (PDF, DOCX, XLSX, up to 20 MB) SHALL exist.
 
-#### Scenario: Диск із профілю
-- **WHEN** завантажується файл за профілем `image`
-- **THEN** файл зберігається в корені диска, вказаного в конфігурації цього профілю, а запис фіксує цей диск
+#### Scenario: Disk from the profile
+- **WHEN** a file is uploaded under the profile `image`
+- **THEN** the file is saved in the root of the disk specified in the configuration of this profile, and the record captures this disk
 
-#### Scenario: Невідомий профіль
-- **WHEN** запитано завантаження за профілем, якого немає в конфігурації
-- **THEN** завантаження відхилено з помилкою валідації, файл не зберігається
+#### Scenario: Unknown profile
+- **WHEN** an upload is requested under a profile that is absent from the configuration
+- **THEN** the upload is rejected with a validation error, the file is not saved
 
-#### Scenario: Новий профіль без змін коду
-- **WHEN** розробник додає профіль до конфігурації
-- **THEN** він доступний для завантаження без змін інших частин системи
+#### Scenario: New profile without code changes
+- **WHEN** the developer adds a profile to the configuration
+- **THEN** it is available for uploads without changes to the other parts of the system
 
-#### Scenario: Різні профілі на одному диску
-- **WHEN** файли профілів `image` і `document` зберігаються на одному диску
-- **THEN** обидва лежать у корені диска під іменами `{uuid}.{розширення}` і не конфліктують
+#### Scenario: Different profiles on one disk
+- **WHEN** the files of the profiles `image` and `document` are saved on one disk
+- **THEN** both lie in the root of the disk under the names `{uuid}.{extension}` and do not conflict
 
-#### Scenario: Межі розміру зображення в профілі
-- **WHEN** розробник задає профілю `image` `max_width` 1200 і `max_height` 800
-- **THEN** зображення, завантажені за цим профілем, зменшуються до цих меж без змін інших частин системи
+#### Scenario: Size limits of an image in the profile
+- **WHEN** the developer sets for the profile `image` `max_width` 1200 and `max_height` 800
+- **THEN** the images uploaded under this profile are reduced to these limits without changes to the other parts of the system
 
-#### Scenario: Межі зі змінних середовища
-- **WHEN** розробник задає в `.env` максимальні ширину й висоту зображення і перезавантажує конфігурацію
-- **THEN** профіль `image` зменшує зображення до цих меж без змін коду
+#### Scenario: Limits from the environment variables
+- **WHEN** the developer sets in `.env` the maximum width and height of an image and reloads the configuration
+- **THEN** the profile `image` reduces the images to these limits without changes to the code
 
-#### Scenario: Профіль без меж розміру
-- **WHEN** профіль не задає `max_width` і `max_height`
-- **THEN** зображення за цим профілем зберігаються без зменшення
+#### Scenario: Profile without size limits
+- **WHEN** the profile does not set `max_width` and `max_height`
+- **THEN** the images under this profile are saved without reduction
 
 ### Requirement: Завантаження файлу окремим запитом
-Система SHALL приймати файл окремим запитом адмінки (multipart) лише від автентифікованого користувача з підтвердженою поштою. Запит SHALL вказувати або профіль завантаження, або поле типу контенту (його тип і ключ), але не обидва одразу. За полем система SHALL брати профіль з типу поля та застосовувати налаштування поля, що звужують правила профілю (дозволені типи, максимальний розмір і для зображень максимальні ширину та висоту); правила SHALL бути не ширшими за профіль: для кожної межі діє менше значення з профілю й поля. У відповідь система SHALL повертати метадані створеного запису: `uuid`, профіль, оригінальне ім'я, тип, розмір, ширину та висоту (для зображень) і посилання на файл. Форми, що використовують файл, SHALL передавати надалі лише його `uuid`.
+The system SHALL accept a file in a separate request of the admin (multipart) only from an authenticated user with a confirmed mail. The request SHALL specify either the upload profile or the field of a content type (its type and key), but not both at once. By the field the system SHALL take the profile from the type of the field and apply the settings of the field that narrow the rules of the profile (the allowed types, the maximum size and, for images, the maximum width and height); the rules SHALL NOT be wider than the profile: for each limit the smaller value from the profile and the field applies. In the response the system SHALL return the metadata of the created record: `uuid`, the profile, the original name, the type, the size, the width and the height (for images) and the link to the file. The forms that use the file SHALL further pass only its `uuid`.
 
-#### Scenario: Успішне завантаження
-- **WHEN** авторизований адміністратор надсилає файл і профіль `image`
-- **THEN** відповідь містить `uuid` і метадані запису та посилання, за яким файл доступний
+#### Scenario: Successful upload
+- **WHEN** an authorized administrator sends a file and the profile `image`
+- **THEN** the response contains the `uuid` and the metadata of the record and the link by which the file is available
 
-#### Scenario: Завантаження за полем
-- **WHEN** адміністратор надсилає файл і поле `image`, що дозволяє лише `image/png`, та файл є PNG у межах розміру поля
-- **THEN** файл прийнято, профіль запису дорівнює профілю типу поля
+#### Scenario: Upload by the field
+- **WHEN** an administrator sends a file and the field `image` that allows only `image/png`, and the file is a PNG within the size of the field
+- **THEN** the file is accepted, the profile of the record equals the profile of the type of the field
 
-#### Scenario: Тип поза налаштуваннями поля
-- **WHEN** адміністратор надсилає JPEG у поле, що дозволяє лише `image/png`
-- **THEN** завантаження відхилено з помилкою валідації, на диску нічого не створено
+#### Scenario: Type outside the settings of the field
+- **WHEN** an administrator sends a JPEG to a field that allows only `image/png`
+- **THEN** the upload is rejected with a validation error, nothing is created on the disk
 
-#### Scenario: Розмір понад налаштування поля
-- **WHEN** адміністратор надсилає файл, більший за `max_size` поля, але в межах профілю
-- **THEN** завантаження відхилено з помилкою валідації
+#### Scenario: Size above the settings of the field
+- **WHEN** an administrator sends a file larger than the `max_size` of the field, but within the profile
+- **THEN** the upload is rejected with a validation error
 
-#### Scenario: Профіль і поле одночасно
-- **WHEN** запит містить і профіль, і поле
-- **THEN** відповідь містить помилку валідації, запис не створюється
+#### Scenario: Profile and field at once
+- **WHEN** a request contains both a profile and a field
+- **THEN** the response contains a validation error, the record is not created
 
-#### Scenario: Невідоме поле
-- **WHEN** запит указує поле, якого немає, або поле іншого типу (не `image`/`file`)
-- **THEN** відповідь містить помилку валідації, запис не створюється
+#### Scenario: Unknown field
+- **WHEN** a request specifies a field that does not exist, or a field of another type (not `image`/`file`)
+- **THEN** the response contains a validation error, the record is not created
 
-#### Scenario: Гість
-- **WHEN** запит завантаження надходить без автентифікації
-- **THEN** файл не приймається, запис не створюється
+#### Scenario: Guest
+- **WHEN** an upload request arrives without authentication
+- **THEN** the file is not accepted, the record is not created
 
-#### Scenario: Немає файлу
-- **WHEN** запит надіслано без файлу або без профілю чи поля
-- **THEN** відповідь містить помилки валідації, запис не створюється
+#### Scenario: No file
+- **WHEN** a request is sent without a file or without a profile or a field
+- **THEN** the response contains validation errors, the record is not created
 
-#### Scenario: Межі розміру поля
-- **WHEN** адміністратор надсилає зображення 2000×2000 у поле `image` з `max_width` 500 і `max_height` 500 за профілю з межами 1920×1920
-- **THEN** файл прийнято, збережене зображення має розмір 500×500, а відповідь містить ці ширину й висоту
+#### Scenario: Limits of the size of the field
+- **WHEN** an administrator sends an image 2000×2000 to the field `image` with `max_width` 500 and `max_height` 500 under a profile with the limits 1920×1920
+- **THEN** the file is accepted, the saved image has the size 500×500, and the response contains this width and height
 
-#### Scenario: Поле не розширює межі профілю
-- **WHEN** поле має `max_width` 4000, а профіль задає `max_width` 1920
-- **THEN** зображення зменшується до 1920 за шириною
+#### Scenario: The field does not widen the limits of the profile
+- **WHEN** the field has `max_width` 4000, and the profile sets `max_width` 1920
+- **THEN** the image is reduced to 1920 by width
 
-#### Scenario: Поле звужує профіль без меж
-- **WHEN** профіль не задає `max_width`, а поле має `max_width` 600
-- **THEN** зображення ширше за 600 зменшується до 600 за шириною
+#### Scenario: The field narrows a profile without limits
+- **WHEN** the profile does not set `max_width`, and the field has `max_width` 600
+- **THEN** an image wider than 600 is reduced to 600 by width

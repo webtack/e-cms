@@ -1,84 +1,84 @@
 # Spec Delta
 
 ## Purpose
-Визначає, як адмінка обирає, зберігає й перемикає мову інтерфейсу та як переклади потрапляють у серверні відповіді й React-сторінки.
+Defines how the admin panel chooses, stores and switches the interface language, and how translations reach server responses and React pages.
 
 ## ADDED Requirements
 
-### Requirement: Доступні мови
-Система SHALL підтримувати мови інтерфейсу українська (`uk`) і англійська (`en`); перелік доступних мов SHALL задаватися конфігурацією застосунку, а мова `en` SHALL бути резервною (fallback), коли переклад відсутній.
+### Requirement: Available languages
+The system SHALL support the interface languages Ukrainian (`uk`) and English (`en`); the list of available languages SHALL be set by the application configuration, and `en` SHALL be the fallback language when a translation is missing.
 
-#### Scenario: Список мов у клієнта
-- **WHEN** користувач відкриває будь-яку сторінку адмінки або входу
-- **THEN** клієнт отримує поточну мову та перелік доступних мов (`uk`, `en`) з їхніми власними назвами
+#### Scenario: Language list for the client
+- **WHEN** a user opens any admin or login page
+- **THEN** the client receives the current language and the list of available languages (`uk`, `en`) with their native names
 
-#### Scenario: Відсутній переклад
-- **WHEN** для ключа немає запису в перекладах поточної мови
-- **THEN** відображається англійський текст ключа, помилки не виникає
+#### Scenario: Missing translation
+- **WHEN** there is no entry for a key in the translations of the current language
+- **THEN** the English text of the key is displayed, and no error occurs
 
-### Requirement: Визначення мови запиту
-Система SHALL визначати мову кожного вебзапиту в порядку пріоритету: збережена мова авторизованого користувача; мова, обрана гостем (cookie); найкращий збіг із заголовком `Accept-Language`; значення `APP_LOCALE`. Значення, яких немає в переліку доступних мов, SHALL ігноруватися.
+### Requirement: Request language detection
+The system SHALL detect the language of every web request in this priority order: the saved language of the authenticated user; the language chosen by a guest (cookie); the best match with the `Accept-Language` header; the value of `APP_LOCALE`. Values that are not in the list of available languages SHALL be ignored.
 
-#### Scenario: Мова збереженого користувача
-- **WHEN** авторизований користувач із `locale = uk` відкриває сторінку адмінки з заголовком `Accept-Language: en`
-- **THEN** сторінка відображається українською, а атрибут `lang` кореневого елемента дорівнює `uk`
+#### Scenario: Saved language of a user
+- **WHEN** an authenticated user with `locale = uk` opens an admin page with the header `Accept-Language: en`
+- **THEN** the page is displayed in Ukrainian, and the `lang` attribute of the root element equals `uk`
 
-#### Scenario: Гість без вибору
-- **WHEN** гість без cookie мови відкриває `/login` із заголовком `Accept-Language: uk-UA,uk;q=0.9`
-- **THEN** сторінка входу відображається українською
+#### Scenario: Guest without a choice
+- **WHEN** a guest without a language cookie opens `/login` with the header `Accept-Language: uk-UA,uk;q=0.9`
+- **THEN** the login page is displayed in Ukrainian
 
-#### Scenario: Непідтримувана мова
-- **WHEN** гість без cookie мови надсилає `Accept-Language: de`
-- **THEN** застосовується мова за замовчуванням із `APP_LOCALE`
+#### Scenario: Unsupported language
+- **WHEN** a guest without a language cookie sends `Accept-Language: de`
+- **THEN** the default language from `APP_LOCALE` is applied
 
-### Requirement: Перемикання мови
-Система SHALL надавати `POST /locale` із полем `locale`, що приймає лише доступні мови. Для авторизованого користувача вибір SHALL зберігатися в його профілі (`users.locale`), для гостя — у cookie; у обох випадках вибір SHALL зберігатися між запитами та сесіями.
+### Requirement: Switching the language
+The system SHALL provide `POST /locale` with a field `locale` that accepts only available languages. For an authenticated user the choice SHALL be stored in their profile (`users.locale`), for a guest — in a cookie; in both cases the choice SHALL persist across requests and sessions.
 
-#### Scenario: Авторизований обирає мову
-- **WHEN** авторизований користувач надсилає `POST /locale` із `locale = uk`
-- **THEN** `users.locale` дорівнює `uk`, його перенаправлено назад, і наступні сторінки відображаються українською
+#### Scenario: Authenticated user chooses a language
+- **WHEN** an authenticated user sends `POST /locale` with `locale = uk`
+- **THEN** `users.locale` equals `uk`, the user is redirected back, and the following pages are displayed in Ukrainian
 
-#### Scenario: Гість обирає мову
-- **WHEN** гість надсилає `POST /locale` із `locale = uk`
-- **THEN** встановлено cookie мови, сторінка входу після перенаправлення відображається українською
+#### Scenario: Guest chooses a language
+- **WHEN** a guest sends `POST /locale` with `locale = uk`
+- **THEN** the language cookie is set, and the login page after the redirect is displayed in Ukrainian
 
-#### Scenario: Мова зберігається після виходу
-- **WHEN** користувач, що обрав `uk`, виходить із системи
-- **THEN** сторінка входу відображається українською
+#### Scenario: Language persists after logout
+- **WHEN** a user who chose `uk` logs out
+- **THEN** the login page is displayed in Ukrainian
 
-#### Scenario: Недопустима мова
-- **WHEN** надіслано `POST /locale` із `locale = xx`
-- **THEN** запит відхилено з помилкою валідації, збережена мова не змінюється
+#### Scenario: Invalid language
+- **WHEN** `POST /locale` is sent with `locale = xx`
+- **THEN** the request is rejected with a validation error, and the saved language does not change
 
-### Requirement: Перемикач мови в інтерфейсі
-Шапка адмінки та сторінка входу SHALL містити перемикач мови, що показує всі доступні мови їхніми власними назвами й позначає поточну.
+### Requirement: Language switcher in the interface
+The admin header and the login page SHALL contain a language switcher that shows all available languages by their native names and marks the current one.
 
-#### Scenario: Перемикання в адмінці
-- **WHEN** авторизований користувач обирає «Українська» в перемикачі шапки
-- **THEN** меню, хлібні крихти, підписи кнопок і заголовки сторінки відображаються українською без втрати стану sidebar
+#### Scenario: Switching in the admin
+- **WHEN** an authenticated user selects "Українська" in the header switcher
+- **THEN** the menu, breadcrumbs, button labels and page titles are displayed in Ukrainian without losing the sidebar state
 
-#### Scenario: Перемикання на сторінці входу
-- **WHEN** гість обирає «Українська» на `/login`
-- **THEN** підписи форми входу відображаються українською
+#### Scenario: Switching on the login page
+- **WHEN** a guest selects "Українська" on `/login`
+- **THEN** the labels of the login form are displayed in Ukrainian
 
-### Requirement: Переклади для React-інтерфейсу
-Усі видимі користувачеві рядки існуючих сторінок і компонентів адмінки (включно з `aria-label` та заголовками вкладки) SHALL відображатися через переклади поточної мови. Файли `lang/en.json` і `lang/uk.json` SHALL містити однаковий набір ключів, а плейсхолдери виду `:name` SHALL підставлятися значеннями.
+### Requirement: Translations for the React interface
+All user-visible strings of the existing admin pages and components (including `aria-label` and tab titles) SHALL be displayed through the translations of the current language. The files `lang/en.json` and `lang/uk.json` SHALL contain the same set of keys, and placeholders of the form `:name` SHALL be substituted with values.
 
-#### Scenario: Переклад сторінки входу
-- **WHEN** гість відкриває `/login` українською
-- **THEN** заголовок, підписи полів і кнопка відображаються українськими перекладами, а не англійськими
+#### Scenario: Translation of the login page
+- **WHEN** a guest opens `/login` in Ukrainian
+- **THEN** the title, field labels and the button are displayed with Ukrainian translations, not English ones
 
-#### Scenario: Підстановка плейсхолдера
-- **WHEN** рядок містить плейсхолдер `:seconds` і викликається з `{ seconds: 30 }`
-- **THEN** у результаті замість плейсхолдера стоїть `30`
+#### Scenario: Placeholder substitution
+- **WHEN** a string contains the placeholder `:seconds` and is called with `{ seconds: 30 }`
+- **THEN** the result contains `30` in place of the placeholder
 
-#### Scenario: Паритет ключів
-- **WHEN** виконуються автоматичні тести
-- **THEN** набори ключів `lang/en.json` і `lang/uk.json` збігаються, інакше тест падає
+#### Scenario: Key parity
+- **WHEN** the automated tests run
+- **THEN** the key sets of `lang/en.json` and `lang/uk.json` match, otherwise the test fails
 
-### Requirement: Локалізація серверних повідомлень
-Повідомлення, що формує сервер для адмінки (помилка входу, ліміт спроб, правила валідації форм), SHALL відображатися мовою запиту.
+### Requirement: Localization of server messages
+Messages that the server produces for the admin panel (a login error, the attempt limit, form validation rules) SHALL be displayed in the language of the request.
 
-#### Scenario: Помилка входу українською
-- **WHEN** користувач із мовою `uk` подає неправильний пароль
-- **THEN** повідомлення про помилку біля поля email українською
+#### Scenario: Login error in Ukrainian
+- **WHEN** a user with language `uk` submits a wrong password
+- **THEN** the error message next to the email field is in Ukrainian

@@ -2,48 +2,48 @@
 
 ## Why
 
-Бекенд вузлів контенту вже є (`ContentNodeCreator`, `ContentValueWriter`, `ContentValueReader`, `ContentNodeQuery`, 7 типів полів), але в адмінці немає жодної сторінки для роботи з ними: можна створювати типи й поля, а самі записи (`content_nodes`) — ні. Без цього типи `kind = content` не можна наповнити контентом.
+The backend of content nodes already exists (`ContentNodeCreator`, `ContentValueWriter`, `ContentValueReader`, `ContentNodeQuery`, 7 field types), but the admin has no page for working with them: types and fields can be created, but the records themselves (`content_nodes`) cannot. Without this, types of `kind = content` cannot be filled with content.
 
 ## What Changes
 
-Адмінка для вузлів типів із видом `content` лише в мові `default`. Вузли живуть під типом у межах розділу «Content Types» (рішення власника: варіант A).
+The admin for nodes of types with the kind `content` only in the language `default`. Nodes live under their type within the "Content Types" section (the owner's decision: option A).
 
-- Маршрути `/admin/content-types/{contentType}/nodes` (список), `/create`, `/{node}/edit`, `PUT`, `DELETE`. Вузол адресується за `uuid` (незмінний ідентифікатор); `slug` — публічний ідентифікатор для фронтенду сайту й в адресах адмінки не використовується; вузол іншого типу або іншого виду → 404 (як для `{field}`).
-- `ContentNodeController` + `StoreContentNodeRequest` / `UpdateContentNodeRequest`: правила значень будує `FieldTypeRegistry` за `content_fields`, запис — `ContentNodeCreator::create()` і `ContentValueWriter::write()`.
-- Список: DataTable у серверному режимі. Колонки — з `settings.list.visible` типу (за замовчуванням `title`), пошук і сортування через `ContentNodeQuery` / `NodeQueryParams`. Потрібен адаптер між `TableRequest` і `NodeQueryParams`, бо `TablePage::fromCollection` працює з колекцією в пам'яті.
-- Форма вузла: динамічні віджети за типом поля (`string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`), редактор списку для `is_multiple`, обов'язковість і `settings` (min/max) з поля; помилки валідації за ключами (`tags.2`).
-- Slug: необов'язковий при створенні (порожній → автогенерація з `title`, явний → перевірка формату й унікальності). Slug показується й редагується у формі редагування (рішення за замовчуванням; зміна slug не змінює `uuid`).
-- Видалення вузла з діалогом підтвердження.
-- Зв'язок із типами: дія «Вузли» в меню рядка типу, третій пункт «Вузли» у `ContentTypeNav` (тільки для `kind = content`), лічильник `nodes_count` стає посиланням на список; breadcrumbs і переклади uk.
-- Документація, Feature-тести, новий e2e-спек.
+- Routes `/admin/content-types/{contentType}/nodes` (the list), `/create`, `/{node}/edit`, `PUT`, `DELETE`. A node is addressed by `uuid` (an immutable identifier); `slug` is the public identifier for the frontend of the site and is not used in the admin addresses; a node of another type or of another kind → 404 (as for `{field}`).
+- `ContentNodeController` + `StoreContentNodeRequest` / `UpdateContentNodeRequest`: the rules of the values are built by `FieldTypeRegistry` from `content_fields`, writing — `ContentNodeCreator::create()` and `ContentValueWriter::write()`.
+- The list: a DataTable in server mode. The columns — from `settings.list.visible` of the type (by default `title`), search and sorting through `ContentNodeQuery` / `NodeQueryParams`. An adapter between `TableRequest` and `NodeQueryParams` is needed, because `TablePage::fromCollection` works with an in-memory collection.
+- The node form: dynamic widgets by field type (`string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`), a list editor for `is_multiple`, the requiredness and the `settings` (min/max) of the field; validation errors by keys (`tags.2`).
+- Slug: optional on creation (empty → automatic generation from `title`, explicit → checking the format and uniqueness). The slug is shown and edited in the edit form (the default decision; a change of slug does not change the `uuid`).
+- Deleting a node with a confirmation dialog.
+- The link with types: the action "Nodes" in the type row menu, the third item "Nodes" in `ContentTypeNav` (only for `kind = content`), the counter `nodes_count` becomes a link to the list; breadcrumbs and uk translations.
+- Documentation, Feature tests, a new e2e spec.
 
 ## Non-goals
 
-- **Переклади** (вкладки мов, перемикач `content.multilingual`, блокування неперекладних полів) — окрема наступна зміна. Тут лише `default`.
-- Вузли видів `page` і `block` (їхні розділи — окремо; контролер проєктувати так, щоб `kind` потім не заважав).
-- Фільтри за значеннями полів у таблиці (оператори `between`, `contains` тощо): бекенд їх вміє, UI — на потім.
-- Публічний сайт (`content_types.slug` як публічний шлях).
+- **Translations** (language tabs, the switch `content.multilingual`, blocking of non-translatable fields) — the next separate change. Here only `default`.
+- Nodes of the kinds `page` and `block` (their sections are separate; the controller is designed so that `kind` does not get in the way later).
+- Filters by field values in the table (the operators `between`, `contains`, etc.): the backend supports them, the UI — later.
+- The public site (`content_types.slug` as a public path).
 
 ## Capabilities
 
 ### New Capabilities
-- `admin-content-nodes`: список, створення, редагування й видалення вузлів типу `content` в адмінці (мова `default`).
+- `admin-content-nodes`: the list, creation, editing and deletion of nodes of the type `content` in the admin (language `default`).
 
 ### Modified Capabilities
-- `content-model`: фіксується призначення `slug` вузла (публічний/фронтенд-ідентифікатор) і що внутрішні та адмінські посилання на вузол йдуть через `uuid`; раніше це ніде не було записано.
-- `admin-content-types`: меню рядка й горизонтальне меню розділу типу отримують пункт «Вузли»; лічильник вузлів у таблиці стає посиланням.
+- `content-model`: the purpose of the node `slug` is recorded (the public/frontend identifier), and that internal and admin references to a node go through `uuid`; previously this was not recorded anywhere.
+- `admin-content-types`: the row menu and the horizontal section menu of a type get the item "Nodes"; the node counter in the table becomes a link.
 
 ## Impact
 
-- Код: `routes/web.php` (route bind `{node}` і маршрути вузлів), `app/Http/Controllers/Admin/ContentNodeController.php`, `app/Http/Requests/Admin/*ContentNodeRequest.php`, адаптер таблиці, `resources/js/Pages/Admin/ContentNodes/{Index,Create,Edit}.tsx`, `Components/Admin/ContentNodes/*` (форма, віджети полів, row actions), `ContentTypeNav.tsx`, `ContentTypeRowActions.tsx`, `navigation.ts`, переклади uk.
-- Docs: створити `docs/admin-content-nodes.md`; оновити `docs/README.md` (індекс), `docs/content-model.md` (призначення `slug` і `uuid`), `docs/admin-content-types.md` (пункт «Вузли»), `docs/e2e-testing.md` (спек у «Область → спек» і «Спільний код → спеки»).
-- e2e: новий `e2e/admin-content-nodes.spec.js`; зі спільного коду зачіпаються `ContentTypeNav` і row actions → ще `admin-content-types`.
+- Code: `routes/web.php` (the route bind `{node}` and the node routes), `app/Http/Controllers/Admin/ContentNodeController.php`, `app/Http/Requests/Admin/*ContentNodeRequest.php`, the table adapter, `resources/js/Pages/Admin/ContentNodes/{Index,Create,Edit}.tsx`, `Components/Admin/ContentNodes/*` (the form, the field widgets, row actions), `ContentTypeNav.tsx`, `ContentTypeRowActions.tsx`, `navigation.ts`, uk translations.
+- Docs: create `docs/admin-content-nodes.md`; update `docs/README.md` (the index), `docs/content-model.md` (the purpose of `slug` and `uuid`), `docs/admin-content-types.md` (the item "Nodes"), `docs/e2e-testing.md` (the spec in "Area → spec" and "Shared code → specs").
+- e2e: a new `e2e/admin-content-nodes.spec.js`; the shared code `ContentTypeNav` and row actions are touched → also `admin-content-types`.
 
-## Нотатки з дослідження (для design / tasks)
+## Research notes (for design / tasks)
 
-- Наявний бекенд: `ContentNodeCreator::create($type, $values, ?$slug, $lang, ?$uuid)`; `ContentValueWriter::write($node, $values, $lang)` замінює лише передані поля; `ContentNodeQuery::paginate()` бере видимі поля з `settings.list`; `ContentValueReader::load()` — один запит на таблицю значень.
-- Окремого шляху видалення вузла немає (лише каскад БД) — достатньо `$node->delete()` у контролері; вирішити, чи потрібен сервісний метод.
-- Зміна slug існуючого вузла модельно дозволена (`ContentNode::assertValidSlug`); унікальність при оновленні віддана індексу БД, тому FormRequest перевіряє її сам.
-- У `ContentTypeController::destroy` тип із вузлами не видаляється — після цієї зміни повідомлення «видаліть вузли спершу» стає виконуваним.
-- З'ясовано: серверний `DataTable` отримує колонки з пропсів сторінки, рядки — через `TablePage::make()`; див. design.md.
-- Наступна зміна (переклади): вкладки мов, перемикач `content.multilingual` у UI (зараз лише `AppSettings`), `ContentLanguages::isMultilingual()`.
+- The existing backend: `ContentNodeCreator::create($type, $values, ?$slug, $lang, ?$uuid)`; `ContentValueWriter::write($node, $values, $lang)` replaces only the passed fields; `ContentNodeQuery::paginate()` takes the visible fields from `settings.list`; `ContentValueReader::load()` — one query per value table.
+- There is no separate path for deleting a node (only the DB cascade) — `$node->delete()` in the controller is enough; decide whether a service method is needed.
+- Changing the slug of an existing node is allowed by the model (`ContentNode::assertValidSlug`); uniqueness on update is delegated to the DB index, so the FormRequest checks it itself.
+- In `ContentTypeController::destroy` a type with nodes is not deleted — after this change the message "delete the nodes first" becomes actionable.
+- Established: the server `DataTable` receives the columns from the props of the page, the rows — through `TablePage::make()`; see design.md.
+- The next change (translations): language tabs, the switch `content.multilingual` in the UI (now only `AppSettings`), `ContentLanguages::isMultilingual()`.

@@ -3,20 +3,20 @@
 ## ADDED Requirements
 
 ### Requirement: Вибірковий запуск PHP-тестів у правилах розробки
-Правила розробки SHALL вимагати запускати PHP-тести (PHPUnit `tests/Unit` і `tests/Feature`) лише для змінної області (за фільтром `--filter` або шляхом до файла чи каталогу тестів), а не весь набір, якщо в повному прогоні немає необхідності. Повний набір PHP-тестів SHALL вимагатися лише для змін, що зачіпають увесь застосунок: міграції та схема БД, спільна основа тестів (`tests/TestCase.php`, спільні тестові хелпери), `phpunit.xml`, залежності `composer`, глобальні middleware, провайдери, конфігурація, автентифікація. Правила SHALL NOT вимагати окремого повного прогону PHP-тестів наприкінці зміни. Вибір тестів SHALL NOT потребувати підтвердження перед запуском. Наприкінці завдання звіт SHALL називати запущені PHP-тести й причину, чому решту пропущено.
+The development rules SHALL require running PHP tests (PHPUnit `tests/Unit` and `tests/Feature`) only for the changed area (by the filter `--filter` or by the path to a file or a directory of tests), and not the whole set, if the full run is not necessary. The full set of PHP tests SHALL be required only for changes that touch the whole application: migrations and the DB schema, the shared test base (`tests/TestCase.php`, shared test helpers), `phpunit.xml`, `composer` dependencies, global middleware, providers, configuration, authentication. The rules SHALL NOT require a separate full run of PHP tests at the end of a change. The choice of tests SHALL NOT require confirmation before the run. At the end of a task the report SHALL name the PHP tests that were run and the reason why the rest were skipped.
 
-#### Scenario: Зміна одного контролера чи моделі
-- **WHEN** змінено код однієї області (наприклад, типи контенту), а відповідні Feature-тести відомі
-- **THEN** запускаються лише тести цієї області (`docker compose exec app php artisan test --filter=…` або шлях до файла), а решта набору пропускається
+#### Scenario: Change of one controller or model
+- **WHEN** the code of one area is changed (for example, content types), and the corresponding Feature tests are known
+- **THEN** only the tests of this area are run (`docker compose exec app php artisan test --filter=…` or the path to a file), and the rest of the set is skipped
 
-#### Scenario: Зміна спільної основи
-- **WHEN** змінено міграцію, `tests/TestCase.php`, `phpunit.xml` або глобальний middleware
-- **THEN** допускається повний `docker compose exec app php artisan test`
+#### Scenario: Change of the shared base
+- **WHEN** a migration, `tests/TestCase.php`, `phpunit.xml` or global middleware is changed
+- **THEN** a full `docker compose exec app php artisan test` is allowed
 
-#### Scenario: Звіт про запуск
-- **WHEN** завдання завершено
-- **THEN** у звіті названо запущені PHP-тести й причину пропуску решти (або сказано, що PHP-тести не запускались, і чому)
+#### Scenario: Report of the run
+- **WHEN** the task is finished
+- **THEN** the report names the PHP tests that were run and the reason for skipping the rest (or states that PHP tests were not run, and why)
 
-#### Scenario: Правило для e2e лишається чинним
-- **WHEN** правка не чіпає поведінку в браузері
-- **THEN** e2e так само пропускається або запускається лише спек змінної області, як вимагає вимога «Вибір e2e-спеків для змін спільного коду»
+#### Scenario: Rule for e2e remains in force
+- **WHEN** the edit does not touch the behaviour in the browser
+- **THEN** e2e is skipped in the same way or only the spec of the changed area is run, as the requirement «Вибір e2e-спеків для змін спільного коду» ("Choice of e2e specs for changes of shared code") requires

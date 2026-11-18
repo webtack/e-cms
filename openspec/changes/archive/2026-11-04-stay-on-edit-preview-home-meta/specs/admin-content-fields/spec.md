@@ -3,24 +3,24 @@
 ## MODIFIED Requirements
 
 ### Requirement: Збереження змін поля
-Надсилання форми редагування SHALL оновлювати назву, вагу й ознаки поля; ключ, тип-власник і тип значення SHALL НЕ змінюватися. Значення ключа й типу-власника із запиту ігноруються. Тип значення з іншим значенням, ніж у поля, SHALL відхилятися з помилкою біля поля типу незалежно від стану форми й від наявності збережених значень; запит із тим самим типом SHALL не вважатися помилкою. Сервер SHALL також відхиляти зміну множинності й обов'язковості системного поля. Валідація назви й ваги збігається з валідацією створення. Після успіху користувач SHALL лишитися на формі редагування поля з повідомленням про успіх.
+Submitting the edit form SHALL update the name, the weight and the flags of the field; the key, the owner type and the value type SHALL NOT change. The values of the key and of the owner type from the request are ignored. A value type different from the one of the field SHALL be rejected with an error next to the type field regardless of the state of the form and of the presence of saved values; a request with the same type SHALL not be considered an error. The server SHALL also reject a change of the multiplicity and the requiredness of a system field. The validation of the name and the weight matches the validation of the creation. After success the user SHALL stay on the edit form of the field with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву поля `views` та вагу й зберігає (форма надсилає той самий тип)
-- **THEN** зміни збережено, користувач лишився на формі редагування поля з повідомленням про успіх, а форма показує нові значення
+#### Scenario: Successful change
+- **WHEN** the user changes the name of the field `views` and the weight and saves (the form sends the same type)
+- **THEN** the changes are saved, the user stayed on the edit form of the field with a success message, and the form shows the new values
 
-#### Scenario: Тип поля зі значеннями
-- **WHEN** запит змінює тип значення поля, що має збережені значення
-- **THEN** зміни не збережено, біля поля типу показано помилку, значення не змінюються
+#### Scenario: Type of a field with values
+- **WHEN** the request changes the value type of a field that has saved values
+- **THEN** the changes are not saved, an error is shown next to the type field, the values do not change
 
-#### Scenario: Тип поля без значень
-- **WHEN** запит змінює тип значення поля без збережених значень
-- **THEN** зміни не збережено, біля поля типу показано помилку, тип лишається попереднім
+#### Scenario: Type of a field without values
+- **WHEN** the request changes the value type of a field without saved values
+- **THEN** the changes are not saved, an error is shown next to the type field, the type remains the previous one
 
-#### Scenario: Заборонені зміни title
-- **WHEN** запит змінює множинність або обов'язковість поля `title`
-- **THEN** зміни не збережено, показано помилку, поле лишається попереднім
+#### Scenario: Forbidden changes of title
+- **WHEN** the request changes the multiplicity or the requiredness of the field `title`
+- **THEN** the changes are not saved, an error is shown, the field remains the previous one
 
-#### Scenario: Ключ у запиті
-- **WHEN** запит редагування містить інший ключ поля
-- **THEN** ключ не змінюється
+#### Scenario: Key in the request
+- **WHEN** the edit request contains a different key of the field
+- **THEN** the key does not change

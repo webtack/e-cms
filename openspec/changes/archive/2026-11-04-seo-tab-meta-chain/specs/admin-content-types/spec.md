@@ -3,160 +3,160 @@
 ## MODIFIED Requirements
 
 ### Requirement: Вкладки «Відображення» і «SEO» типу
-Меню розділу типу SHALL містити вкладку «Відображення» (`/admin/{section}/{key}/display`, де `{section}` — `content-types`, `page-types` або `block-types`) для типів усіх видів, між «Налаштуваннями» та «Полями». Для типів `kind = content` і `kind = page` меню SHALL містити, крім «Налаштування», «Відображення», «Поля» і «Записи», вкладку «SEO» (`/admin/content-types/{key}/seo` і `/admin/page-types/{key}/seo`, поля `meta_title`, `meta_description`, `meta_image` самого типу), яка йде одразу після «Відображення»; типи `block` вкладки «SEO» не мають. Вкладка «Відображення» типу `content` SHALL мати два блоки: значення розділу (поля `section_title`, `section_description`, `section_cover`) і «Публічне відображення»; вкладка «Відображення» типів `page` і `block` SHALL мати лише блок «Публічне відображення» (власних значень розділу в них немає). Вкладка «SEO» SHALL бути окремою сторінкою з **однією** формою й однією липкою панеллю «Скасувати / Зберегти»: значення `meta_*` типу й блок «Мета-дані» (див. вимогу «Блок «Мета-дані» на вкладці «SEO»») зберігаються одним атомарним запитом. Сторінка налаштувань типу (`/admin/{section}/{key}/edit`) SHALL містити лише основну форму типу й секцію «Список записів», без панелей значень і без блоку «Публічне відображення». Підписи, підказки (опис поля) та обмеження довжини SHALL братися з визначень полів. Елемент введення SHALL відповідати типу поля (короткий текст, багаторядковий текст, форматований текст, вибір зображення з медіатеки). Усі значення необов'язкові; порожнє значення SHALL очищати збережене. Вкладки значень SHALL працювати лише з базовою мовою: перемикача мови немає, значення зберігаються як базові. Кожна вкладка SHALL мати ту саму липку панель дій унизу вікна з «Скасувати» й «Зберегти», що й решта форм адмінки; «Зберегти» відправляє форму вкладки. Вкладка «Відображення» SHALL мати **одну** спільну кнопку «Зберегти», що одним запитом зберігає і значення розділу (лише для `content`), і `settings.public`; збереження SHALL бути атомарним: якщо будь-яка частина не проходить валідацію, нічого не зберігається, а помилки показуються біля відповідних полів (значення розділу — біля полів, публічні налаштування — у блоку «Публічне відображення»). Збереження вкладки «Відображення» SHALL не змінювати значень вкладки «SEO», а збереження «SEO» — значень розділу та решти `settings.public` (блок «Мета-дані» змінює лише `settings.public.meta`). Адреса `/admin/content-types/{key}/section` SHALL відповідати 404. Адреса `/seo` для типів `block` SHALL відповідати 404.
+The section menu of a type SHALL contain the tab «Відображення» ("Display") (`/admin/{section}/{key}/display`, where `{section}` is `content-types`, `page-types` or `block-types`) for types of all kinds, between «Налаштування» ("Settings") and «Поля» ("Fields"). For types `kind = content` and `kind = page` the menu SHALL contain, in addition to «Налаштування», «Відображення», «Поля» and «Записи» ("Records"), the tab «SEO» (`/admin/content-types/{key}/seo` and `/admin/page-types/{key}/seo`, the fields `meta_title`, `meta_description`, `meta_image` of the type itself), which follows right after «Відображення»; types `block` have no tab «SEO». The tab «Відображення» of the type `content` SHALL have two blocks: the values of the section (the fields `section_title`, `section_description`, `section_cover`) and «Публічне відображення» ("Public display"); the tab «Відображення» of the types `page` and `block` SHALL have only the block «Публічне відображення» (they have no values of their own section). The tab «SEO» SHALL be a separate page with **one** form and one sticky panel «Скасувати / Зберегти» ("Cancel / Save"): the values `meta_*` of the type and the block «Мета-дані» (see the requirement «Блок «Мета-дані» на вкладці «SEO»» — "Block «Meta data» on the tab «SEO»") are saved in one atomic request. The settings page of the type (`/admin/{section}/{key}/edit`) SHALL contain only the main form of the type and the section «Список записів» ("List of records"), without value panels and without the block «Публічне відображення». Labels, hints (the description of the field) and length limits SHALL be taken from the definitions of the fields. The input element SHALL match the type of the field (short text, multiline text, formatted text, choice of an image from the media library). All values are optional; an empty value SHALL clear the saved one. The value tabs SHALL work only with the base language: there is no language switcher, the values are saved as base. Each tab SHALL have the same sticky action panel at the bottom of the window with «Скасувати» ("Cancel") and «Зберегти» ("Save"), as the rest of the admin forms; «Зберегти» submits the form of the tab. The tab «Відображення» SHALL have **one** shared button «Зберегти», which in one request saves both the values of the section (only for `content`) and `settings.public`; the saving SHALL be atomic: if any part fails validation, nothing is saved, and the errors are shown next to the corresponding fields (the values of the section — next to the fields, the public settings — in the block «Публічне відображення»). Saving the tab «Відображення» SHALL NOT change the values of the tab «SEO», and saving «SEO» SHALL NOT change the values of the section and the rest of `settings.public` (the block «Мета-дані» changes only `settings.public.meta`). The address `/admin/content-types/{key}/section` SHALL respond with 404. The address `/seo` for types `block` SHALL respond with 404.
 
-#### Scenario: Меню типу контенту
-- **WHEN** користувач відкриває будь-яку сторінку типу `news` виду `content`
-- **THEN** меню типу містить вкладки «Налаштування», «Відображення», «SEO», «Поля», «Записи», і активна поточна
+#### Scenario: Menu of a content type
+- **WHEN** the user opens any page of the type `news` of kind `content`
+- **THEN** the menu of the type contains the tabs «Налаштування», «Відображення», «SEO», «Поля», «Записи», and the current one is active
 
-#### Scenario: Меню типу сторінки або блоку
-- **WHEN** користувач відкриває будь-яку сторінку типу виду `page` або `block`
-- **THEN** тип `page` має вкладки «Налаштування», «Відображення», «SEO», «Поля», «Записи»; тип `block` — «Налаштування», «Відображення», «Поля», «Записи» без «SEO»
+#### Scenario: Menu of a page or block type
+- **WHEN** the user opens any page of a type of kind `page` or `block`
+- **THEN** the type `page` has the tabs «Налаштування», «Відображення», «SEO», «Поля», «Записи»; the type `block` — «Налаштування», «Відображення», «Поля», «Записи» without «SEO»
 
-#### Scenario: Відкриття сторінки налаштувань
-- **WHEN** користувач відкриває налаштування типу `news` виду `content`
-- **THEN** сторінка містить основну форму типу й секцію «Список записів»; панелей значень і блоку «Публічне відображення» на ній немає
+#### Scenario: Opening the settings page
+- **WHEN** the user opens the settings of the type `news` of kind `content`
+- **THEN** the page contains the main form of the type and the section «Список записів»; there are no value panels and no block «Публічне відображення» on it
 
-#### Scenario: Відкриття вкладки «Розділ»
-- **WHEN** користувач відкриває вкладку «Відображення» (колишню «Розділ») типу `news` виду `content`
-- **THEN** він бачить блок значень розділу з поточними значеннями базової мови, блок «Публічне відображення» і одну панель дій, а полів SEO немає
+#### Scenario: Opening the tab «Розділ» ("Section")
+- **WHEN** the user opens the tab «Відображення» (formerly «Розділ») of the type `news` of kind `content`
+- **THEN** they see the block of the section values with the current values of the base language, the block «Публічне відображення» and one action panel, and there are no SEO fields
 
-#### Scenario: Відкриття вкладки «Відображення» типу сторінки
-- **WHEN** користувач відкриває `/admin/page-types/home/display`
-- **THEN** він бачить лише блок «Публічне відображення» (вибір полів сторінки) і панель дій
+#### Scenario: Opening the tab «Відображення» of a page type
+- **WHEN** the user opens `/admin/page-types/home/display`
+- **THEN** they see only the block «Публічне відображення» (the choice of the fields of the page) and the action panel
 
-#### Scenario: Збереження значень розділу
-- **WHEN** користувач заповнює `section_title` «Новини», вибирає `section_cover` з медіатеки й зберігає на вкладці «Відображення»
-- **THEN** значення збережено для типу, після перезавантаження сторінки вони показані
+#### Scenario: Saving the values of the section
+- **WHEN** the user fills `section_title` «Новини» ("News"), chooses `section_cover` from the media library and saves on the tab «Відображення»
+- **THEN** the values are saved for the type, and after reloading the page they are shown
 
-#### Scenario: Спільне збереження значень розділу й публічних налаштувань
-- **WHEN** користувач змінює `section_title` і вибір полів сторінки та натискає єдину кнопку «Зберегти»
-- **THEN** збережено і значення розділу, і `settings.public`, після перезавантаження обидва показані
+#### Scenario: Shared saving of the values of the section and the public settings
+- **WHEN** the user changes `section_title` and the choice of the fields of the page and presses the single button «Зберегти»
+- **THEN** both the values of the section and `settings.public` are saved, and after reloading both are shown
 
-#### Scenario: Помилка в одній частині не зберігає іншу
-- **WHEN** користувач змінює `section_title` і вводить від'ємну кількість записів на сторінці
-- **THEN** збереження відхилено, біля поля кількості показано помилку, а `section_title` лишається попереднім
+#### Scenario: An error in one part does not save the other
+- **WHEN** the user changes `section_title` and enters a negative number of records per page
+- **THEN** the saving is rejected, an error is shown next to the field of the number, and `section_title` remains the previous one
 
-#### Scenario: Недопустиме значення розділу
-- **WHEN** значення `section_title` перевищує допустиму довжину
-- **THEN** збереження відхилено, біля поля показано помилку, значення й `settings.public` лишаються попередніми
+#### Scenario: Invalid value of the section
+- **WHEN** the value of `section_title` exceeds the permitted length
+- **THEN** the saving is rejected, an error is shown next to the field, the value and `settings.public` remain the previous ones
 
-#### Scenario: Липка панель дій на вкладках
-- **WHEN** користувач відкриває вкладку «Відображення» або «SEO» у вікні висотою 400 px (на 1280 і 390 px завширшки)
-- **THEN** панель з «Скасувати» й «Зберегти» повністю видно внизу вікна
+#### Scenario: Sticky action panel on the tabs
+- **WHEN** the user opens the tab «Відображення» or «SEO» in a window 400 px high (at 1280 and 390 px wide)
+- **THEN** the panel with «Скасувати» and «Зберегти» is fully visible at the bottom of the window
 
-#### Scenario: Збереження SEO не торкається розділу
-- **WHEN** користувач змінює `meta_title` на вкладці «SEO» і зберігає
-- **THEN** значення `section_*` і `settings.public` типу лишаються без змін
+#### Scenario: Saving SEO does not touch the section
+- **WHEN** the user changes `meta_title` on the tab «SEO» and saves
+- **THEN** the values `section_*` and `settings.public` of the type remain unchanged
 
-#### Scenario: Очищення значення
-- **WHEN** користувач очищає `meta_description` на вкладці «SEO» і зберігає
-- **THEN** збережене значення видалено
+#### Scenario: Clearing a value
+- **WHEN** the user clears `meta_description` on the tab «SEO» and saves
+- **THEN** the saved value is deleted
 
-#### Scenario: Недопустиме значення
-- **WHEN** значення `meta_title` перевищує допустиму довжину
-- **THEN** збереження відхилено, біля поля показано помилку, значення лишаються попередніми
+#### Scenario: Invalid value
+- **WHEN** the value of `meta_title` exceeds the permitted length
+- **THEN** the saving is rejected, an error is shown next to the field, the values remain the previous ones
 
-#### Scenario: Стара адреса вкладки
-- **WHEN** користувач відкриває `/admin/content-types/news/section`
-- **THEN** відповідь — «не знайдено»
+#### Scenario: Old address of the tab
+- **WHEN** the user opens `/admin/content-types/news/section`
+- **THEN** the response is «не знайдено» ("not found")
 
-#### Scenario: SEO типу сторінки
-- **WHEN** користувач відкриває `/admin/page-types/home/seo`
-- **THEN** він бачить форму значень `meta_title`, `meta_description`, `meta_image` типу з панеллю дій і блок «Мета-дані», а зберігання значень не змінює значень записів цього типу
+#### Scenario: SEO of a page type
+- **WHEN** the user opens `/admin/page-types/home/seo`
+- **THEN** they see the form of the values `meta_title`, `meta_description`, `meta_image` of the type with an action panel and the block «Мета-дані», and saving the values does not change the values of the records of this type
 
-#### Scenario: Тип сторінок або блоків
-- **WHEN** користувач відкриває налаштування типу виду `block`
-- **THEN** вкладки «SEO» у меню немає, а адреса `/admin/block-types/{key}/seo` відповідає 404; вкладка «Відображення» є (тип `page` має вкладку «SEO», див. «SEO типу сторінки»)
+#### Scenario: Page or block types
+- **WHEN** the user opens the settings of a type of kind `block`
+- **THEN** there is no tab «SEO» in the menu, and the address `/admin/block-types/{key}/seo` responds with 404; the tab «Відображення» is present (the type `page` has the tab «SEO», see «SEO типу сторінки» — "SEO of a page type")
 
 ### Requirement: Секція «Публічне відображення» на вкладці «Відображення»
-Вкладка «Відображення» типу SHALL містити блок «Публічне відображення» для всіх видів. Для `block` і `page` він містить лише вибір полів сторінки; для `content` — також поля картки, сортування (поле + напрямок), кількість записів на сторінці й перемикач пагінатора. Вибір мета-полів (`settings.public.meta`) на цій вкладці SHALL бути відсутній: він живе на вкладці «SEO». Для вибору пропонуються лише додані поля (`is_system = false`); `title`, мета-поля й службові атрибути не пропонуються, бо завжди доступні шаблону. Блок SHALL відображати збережений стан із значеннями за замовчуванням і зберігатись разом зі значеннями розділу єдиною кнопкою «Зберегти» вкладки, оновлюючи лише ключ `public` налаштувань і не змінюючи збереженого `settings.public.meta`. Форма налаштувань типу цього блоку НЕ містить.
+The tab «Відображення» of the type SHALL contain the block «Публічне відображення» for all kinds. For `block` and `page` it contains only the choice of the fields of the page; for `content` — also the fields of the card, the sorting (field + direction), the number of records per page and the switch of the paginator. The choice of meta fields (`settings.public.meta`) SHALL be absent on this tab: it lives on the tab «SEO». Only added fields (`is_system = false`) are offered for the choice; `title`, the meta fields and service attributes are not offered, because they are always available to the template. The block SHALL show the saved state with the default values and SHALL be saved together with the values of the section by the single button «Зберегти» of the tab, updating only the key `public` of the settings and not changing the saved `settings.public.meta`. The settings form of the type does NOT contain this block.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** відкрито вкладку «Відображення» типу `content` без публічних налаштувань
-- **THEN** перемикач «Усі додані поля» для сторінки ввімкнений, картка без доданих полів, сортування «Дата публікації» за спаданням, кількість «0» (усі)
+#### Scenario: Default values
+- **WHEN** the tab «Відображення» of the type `content` without public settings is opened
+- **THEN** the switch «Усі додані поля» ("All added fields") for the page is on, the card has no added fields, the sorting is «Дата публікації» ("Publication date") descending, the number is «0» (all)
 
-#### Scenario: Явний вибір полів сторінки
-- **WHEN** адміністратор вимикає «Усі додані поля», позначає `price` і зберігає
-- **THEN** після повторного відкриття позначено лише `price`, а нове поле типу не з'являється серед позначених
+#### Scenario: Explicit choice of the fields of the page
+- **WHEN** the administrator turns off «Усі додані поля», marks `price` and saves
+- **THEN** after reopening only `price` is marked, and a new field of the type does not appear among the marked ones
 
-#### Scenario: Повернення до «усіх»
-- **WHEN** адміністратор вмикає «Усі додані поля» і зберігає
-- **THEN** ключ `page_fields` не зберігається, нове поле автоматично входить до сторінки
+#### Scenario: Returning to «all»
+- **WHEN** the administrator turns on «Усі додані поля» and saves
+- **THEN** the key `page_fields` is not saved, and a new field automatically enters the page
 
-#### Scenario: Інші ключі не затираються
-- **WHEN** вкладка зберігається зі зміненими публічними налаштуваннями
-- **THEN** `settings.list` і інші ключі `settings` лишаються без змін
+#### Scenario: Other keys are not overwritten
+- **WHEN** the tab is saved with changed public settings
+- **THEN** `settings.list` and the other keys of `settings` remain unchanged
 
-#### Scenario: Збереження не стирає мета-налаштування
-- **WHEN** тип має `settings.public.meta`, а адміністратор змінює вибір полів сторінки й зберігає вкладку «Відображення»
-- **THEN** `settings.public.meta` лишається без змін
+#### Scenario: Saving does not wipe the meta settings
+- **WHEN** the type has `settings.public.meta`, and the administrator changes the choice of the fields of the page and saves the tab «Відображення»
+- **THEN** `settings.public.meta` remains unchanged
 
-#### Scenario: Вибір мета-полів
-- **WHEN** адміністратор відкриває вкладку «Відображення» типу `content` або `page`
-- **THEN** вибору мета-полів («Заголовок», «Опис», «Зображення») на ній немає: він на вкладці «SEO»
+#### Scenario: Choice of meta fields
+- **WHEN** the administrator opens the tab «Відображення» of the type `content` or `page`
+- **THEN** there is no choice of meta fields («Заголовок», «Опис», «Зображення») on it: it is on the tab «SEO»
 
-#### Scenario: Допустимі поля для кожного вибору
-- **WHEN** запит збереження вкладки «Відображення» містить `settings.public.meta`
-- **THEN** збереження відхилено помилкою валідації, нічого не змінено; допустимі поля для кожного вибору описано у вимозі «Блок «Мета-дані» на вкладці «SEO»»
+#### Scenario: Permitted fields for each choice
+- **WHEN** the save request of the tab «Відображення» contains `settings.public.meta`
+- **THEN** the saving is rejected with a validation error, nothing is changed; the permitted fields for each choice are described in the requirement «Блок «Мета-дані» на вкладці «SEO»»
 
-#### Scenario: Недопустиме поле
-- **WHEN** запит вкладки «Відображення» містить `settings.public.meta.image` з ключем поля типу «рядок» або неіснуючого поля
-- **THEN** збереження відхилено, нічого не змінено
+#### Scenario: Invalid field
+- **WHEN** the request of the tab «Відображення» contains `settings.public.meta.image` with the key of a field of the type «рядок» ("string") or of a non-existent field
+- **THEN** the saving is rejected, nothing is changed
 
-#### Scenario: Мета-дані без вибору
-- **WHEN** адміністратор зберігає вкладку «Відображення» типу, що не має `settings.public.meta`
-- **THEN** ключ `meta` у `settings.public` не з'являється
+#### Scenario: Meta data without a choice
+- **WHEN** the administrator saves the tab «Відображення» of a type that has no `settings.public.meta`
+- **THEN** the key `meta` does not appear in `settings.public`
 
-#### Scenario: Тип блоку
-- **WHEN** адміністратор відкриває вкладку «Відображення» типу виду `block`
-- **THEN** підблоку «Мета-дані» немає, а запит із `settings.public.meta` для такого типу відхиляється
+#### Scenario: Type of block
+- **WHEN** the administrator opens the tab «Відображення» of a type of kind `block`
+- **THEN** there is no sub-block «Мета-дані», and a request with `settings.public.meta` for such a type is rejected
 
-#### Scenario: Форма налаштувань без публічного блоку
-- **WHEN** користувач відкриває форму налаштувань типу будь-якого виду
-- **THEN** блоку «Публічне відображення» на ній немає
+#### Scenario: Settings form without the public block
+- **WHEN** the user opens the settings form of a type of any kind
+- **THEN** there is no block «Публічне відображення» on it
 
 ## ADDED Requirements
 
 ### Requirement: Блок «Мета-дані» на вкладці «SEO»
-Вкладка «SEO» типів `content` і `page` SHALL містити під формою значень `meta_*` типу блок «Мета-дані», виділений рамкою (бордером) як самостійна секція, але без власної кнопки: він входить до спільної форми вкладки й зберігається єдиною кнопкою «Зберегти» липкої панелі разом зі значеннями `meta_*`. Блок SHALL мати три необов'язкові вибори, кожен — з одного пункту або «Не вибрано»: «Заголовок» — доступні додані поля типу «рядок»; «Опис» — додані поля типів «текст» і «форматований текст»; «Зображення» — додані поля типів «зображення» і «відео YouTube». Вибраний ключ SHALL зберігатися в `settings.public.meta` (`title`, `description`, `image`); невибраний пункт не зберігається. Збереження вкладки (`PUT /admin/content-types/{key}/values` і `/admin/page-types/{key}/values`) SHALL в одній транзакції записувати значення `meta_*` й змінювати в налаштуваннях лише `settings.public.meta`, не змінюючи решти ключів `settings.public` і `settings`, лишати користувача на вкладці й показувати повідомлення про успіх; порожній вибір усіх трьох SHALL прибирати ключ `meta`, а порожній `public` — не зберігатися. Недопустиме поле (тип поза переліком, неіснуюче чи системне) SHALL відхилятися помилкою біля блоку без змін у типі й без збереження значень `meta_*`. Для типів `block` блоку немає, а адреси `…/seo` і `…/values` відповідають 404. Значення використовує публічний сайт як мета-дані сторінки (вимога публічного сайту «Мета-дані сторінки…»).
+The tab «SEO» of the types `content` and `page` SHALL contain, under the form of the values `meta_*` of the type, the block «Мета-дані», framed by a border as an independent section, but without a button of its own: it is part of the shared form of the tab and is saved by the single button «Зберегти» of the sticky panel together with the values `meta_*`. The block SHALL have three optional choices, each — with one item or «Не вибрано» ("Not selected"): «Заголовок» ("Heading") — the added fields of the type «рядок»; «Опис» ("Description") — the added fields of the types «текст» ("text") and «форматований текст» ("formatted text"); «Зображення» ("Image") — the added fields of the types «зображення» ("image") and «відео YouTube». The chosen key SHALL be saved in `settings.public.meta` (`title`, `description`, `image`); an unselected item is not saved. Saving the tab (`PUT /admin/content-types/{key}/values` and `/admin/page-types/{key}/values`) SHALL in one transaction write the values `meta_*` and change in the settings only `settings.public.meta`, without changing the other keys of `settings.public` and `settings`, keep the user on the tab and show a success message; an empty choice of all three SHALL remove the key `meta`, and an empty `public` — is not saved. An invalid field (a type outside the list, a non-existent or system one) SHALL be rejected with an error next to the block without changes to the type and without saving the values `meta_*`. For the types `block` there is no block, and the addresses `…/seo` and `…/values` respond with 404. The value is used by the public site as the metadata of the page (the requirement of the public site «Мета-дані сторінки…» — "Page metadata…").
 
-#### Scenario: Блок на вкладці «SEO»
-- **WHEN** користувач відкриває вкладку «SEO» типу `news` (`content`) або типу `home` (`page`)
-- **THEN** під формою значень `meta_*` він бачить окремий блок «Мета-дані» з рамкою й трьома виборами «Заголовок», «Опис», «Зображення», без власної кнопки, а внизу вікна — одна липка панель «Скасувати / Зберегти»
+#### Scenario: Block on the tab «SEO»
+- **WHEN** the user opens the tab «SEO» of the type `news` (`content`) or of the type `home` (`page`)
+- **THEN** under the form of the values `meta_*` they see a separate block «Мета-дані» with a frame and three choices «Заголовок», «Опис», «Зображення», without a button of its own, and at the bottom of the window one sticky panel «Скасувати / Зберегти»
 
-#### Scenario: Вибір мета-полів
-- **WHEN** адміністратор обирає для «Заголовок» поле `headline`, для «Опис» — `summary`, для «Зображення» — `cover` і зберігає вкладку
-- **THEN** після повторного відкриття вибрано ті самі поля, а `settings.public.meta` має ключі `title`, `description`, `image`
+#### Scenario: Choice of meta fields
+- **WHEN** the administrator chooses the field `headline` for «Заголовок», `summary` for «Опис», `cover` for «Зображення» and saves the tab
+- **THEN** after reopening the same fields are selected, and `settings.public.meta` has the keys `title`, `description`, `image`
 
-#### Scenario: Список вибору «Заголовок»
-- **WHEN** адміністратор відкриває вибір «Заголовок»
-- **THEN** він бачить «Не вибрано» і додані поля типу «рядок», без службового пункту `title`
+#### Scenario: List of the choice «Заголовок»
+- **WHEN** the administrator opens the choice «Заголовок»
+- **THEN** they see «Не вибрано» and the added fields of the type «рядок», without the service item `title`
 
-#### Scenario: Допустимі поля для кожного вибору
-- **WHEN** адміністратор відкриває вибір «Опис» чи «Зображення»
-- **THEN** в «Опис» є лише поля «текст» і «форматований текст», в «Зображення» — «зображення» і «відео YouTube»
+#### Scenario: Permitted fields for each choice
+- **WHEN** the administrator opens the choice «Опис» or «Зображення»
+- **THEN** «Опис» has only the fields «текст» and «форматований текст», «Зображення» — «зображення» and «відео YouTube»
 
-#### Scenario: Недопустиме поле
-- **WHEN** запит зберігає `settings.public.meta.image` з ключем поля типу «рядок», неіснуючого поля чи ключа `title`, або `settings.public.meta.title` зі значенням `title`
-- **THEN** збереження відхилено з помилкою біля блоку, нічого не змінено
+#### Scenario: Invalid field
+- **WHEN** the request saves `settings.public.meta.image` with the key of a field of the type «рядок», of a non-existent field, or the key `title`, or `settings.public.meta.title` with the value `title`
+- **THEN** the saving is rejected with an error next to the block, nothing is changed
 
-#### Scenario: Решта налаштувань не змінюється
-- **WHEN** тип має `settings.public.page_fields` і `settings.list`, а адміністратор зберігає вкладку
-- **THEN** `settings.public.page_fields` і `settings.list` лишаються без змін
+#### Scenario: The rest of the settings does not change
+- **WHEN** the type has `settings.public.page_fields` and `settings.list`, and the administrator saves the tab
+- **THEN** `settings.public.page_fields` and `settings.list` remain unchanged
 
-#### Scenario: Мета-дані без вибору
-- **WHEN** адміністратор лишає всі три вибори «Не вибрано» і зберігає
-- **THEN** ключ `meta` у `settings.public` не зберігається
+#### Scenario: Meta data without a choice
+- **WHEN** the administrator leaves all three choices «Не вибрано» and saves
+- **THEN** the key `meta` is not saved in `settings.public`
 
-#### Scenario: Спільне збереження значень і мета-даних
-- **WHEN** адміністратор змінює `meta_title` типу й вибір «Опис» у блоці та натискає єдину кнопку «Зберегти»
-- **THEN** збережено і значення `meta_title`, і `settings.public.meta`, після перезавантаження обидва показані
+#### Scenario: Shared saving of values and meta data
+- **WHEN** the administrator changes `meta_title` of the type and the choice «Опис» in the block and presses the single button «Зберегти»
+- **THEN** both `meta_title` and `settings.public.meta` are saved, and after reloading both are shown
 
-#### Scenario: Помилка в одній частині не зберігає іншу
-- **WHEN** запит містить коректне значення `meta_title` і недопустиме поле в `settings.public.meta.image`
-- **THEN** збереження відхилено, помилка показана біля блоку, значення `meta_title` і `settings.public.meta` лишаються попередніми
+#### Scenario: An error in one part does not save the other
+- **WHEN** the request contains a correct value of `meta_title` and an invalid field in `settings.public.meta.image`
+- **THEN** the saving is rejected, the error is shown next to the block, the value of `meta_title` and `settings.public.meta` remain the previous ones
 
-#### Scenario: Тип блоку
-- **WHEN** запит збереження `…/values` або відкриття `…/seo` надходить для типу виду `block`
-- **THEN** відповідь 404
+#### Scenario: Type of block
+- **WHEN** a save request `…/values` or opening `…/seo` arrives for a type of kind `block`
+- **THEN** the response is 404

@@ -1,59 +1,59 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню дій рядка
-Кожен рядок SHALL мати групу кнопок: основну кнопку «Налаштування» і поруч кнопку меню «⋮». «Налаштування» SHALL відкривати форму редагування цього типу. Меню «⋮» у розділі типів контенту SHALL мати пункти «Редагувати», «Поля», «Записи» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено від інших). «Редагувати» SHALL відкривати форму редагування цього типу, «Поля» — сторінку полів цього типу, «Записи» — список записів цього типу, «Видалити» — запускати видалення з підтвердженням. У розділах сторінок і блоків пункту «Записи» немає.
+Each row SHALL have a group of buttons: the main button «Налаштування» and next to it the menu button «⋮». «Налаштування» SHALL open the edit form of this type. The menu «⋮» in the section of content types SHALL have the items «Редагувати», «Поля», «Записи» and «Видалити» (in this order; «Видалити» is visually highlighted as a destructive action and separated from the others). «Редагувати» SHALL open the edit form of this type, «Поля» — the page of fields of this type, «Записи» — the list of records of this type, «Видалити» — start the deletion with confirmation. The sections of pages and blocks have no item «Записи».
 
-#### Scenario: Склад групи
-- **WHEN** користувач бачить рядок типу
-- **THEN** у ньому видно активну кнопку «Налаштування» та поруч кнопку меню «⋮» з доступною назвою
+#### Scenario: Composition of the group
+- **WHEN** the user sees a row of a type
+- **THEN** the active button «Налаштування» is visible in it, and next to it the menu button «⋮» with an accessible name
 
-#### Scenario: Налаштування
-- **WHEN** користувач натискає «Налаштування» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Settings
+- **WHEN** the user presses «Налаштування» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку типу в розділі типів контенту
-- **THEN** він бачить активні пункти «Редагувати», «Поля», «Записи», «Видалити» з перекладеними підписами
+#### Scenario: Composition of the menu
+- **WHEN** the user opens the menu «⋮» in the row of a type in the section of content types
+- **THEN** they see the active items «Редагувати», «Поля», «Записи», «Видалити» with translated labels
 
-#### Scenario: Редагувати
-- **WHEN** користувач обирає «Редагувати» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Edit
+- **WHEN** the user selects «Редагувати» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Пункти неактивні
-- **WHEN** користувач обирає «Поля» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/fields`
+#### Scenario: Items are inactive
+- **WHEN** the user selects «Поля» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/fields` opens
 
-#### Scenario: Вузли
-- **WHEN** користувач обирає «Записи» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/nodes`
+#### Scenario: Records
+- **WHEN** the user selects «Записи» in the row of a type with the key `news`
+- **THEN** `/admin/content-types/news/nodes` opens
 
 ### Requirement: Горизонтальне меню розділу типу
-Сторінки керування наявним типом контенту виду `content` — форма редагування типу (`/admin/content-types/{key}/edit`), список полів (`/admin/content-types/{key}/fields`), форми створення й редагування поля, список записів (`/admin/content-types/{key}/nodes`) і форми створення й редагування запису — SHALL показувати над вмістом горизонтальне меню розділу з пунктами «Налаштування» (веде на форму редагування типу), «Поля» (веде на список полів цього типу) та «Записи» (веде на список записів цього типу). Пункт поточного розділу SHALL бути візуально виділений і позначений як поточний для допоміжних технологій; на сторінках створення й редагування поля поточним SHALL бути «Поля», на сторінках списку, створення й редагування запису — «Записи». Меню SHALL бути однаковим на всіх цих сторінках, а над ним SHALL бути посилання назад до списку типів. Сторінка створення типу меню НЕ показує. Меню розділів сторінок і блоків пункту «Записи» НЕ має.
+The pages for managing an existing content type of the kind `content` — the edit form of the type (`/admin/content-types/{key}/edit`), the list of fields (`/admin/content-types/{key}/fields`), the create and edit forms of a field, the list of records (`/admin/content-types/{key}/nodes`) and the create and edit forms of a record — SHALL show above the content a horizontal section menu with the items «Налаштування» (leads to the edit form of the type), «Поля» (leads to the list of fields of this type) and «Записи» (leads to the list of records of this type). The item of the current section SHALL be visually highlighted and marked as current for assistive technologies; on the create and edit pages of a field the current one SHALL be «Поля», on the pages of the list, create and edit of a record — «Записи». The menu SHALL be the same on all these pages, and above it SHALL be a link back to the list of types. The creation page of a type does NOT show the menu. The section menus of pages and blocks have NO item «Записи».
 
-#### Scenario: Меню на формі редагування типу
-- **WHEN** користувач відкриває `/admin/content-types/news/edit`
-- **THEN** він бачить меню з пунктами «Налаштування», «Поля» та «Записи», де «Налаштування» виділено як поточний
+#### Scenario: Menu on the edit form of a type
+- **WHEN** the user opens `/admin/content-types/news/edit`
+- **THEN** they see the menu with the items «Налаштування», «Поля» and «Записи», where «Налаштування» is highlighted as current
 
-#### Scenario: Меню на списку полів
-- **WHEN** користувач відкриває `/admin/content-types/news/fields`
-- **THEN** меню показано, поточним є «Поля», а посилання назад до списку типів міститься над меню
+#### Scenario: Menu on the list of fields
+- **WHEN** the user opens `/admin/content-types/news/fields`
+- **THEN** the menu is shown, «Поля» is current, and the link back to the list of types is placed above the menu
 
-#### Scenario: Меню на формах поля
-- **WHEN** користувач відкриває форму створення чи редагування поля типу `news`
-- **THEN** меню показано, поточним є «Поля»
+#### Scenario: Menu on the forms of a field
+- **WHEN** the user opens the create or edit form of a field of the type `news`
+- **THEN** the menu is shown, «Поля» is current
 
-#### Scenario: Меню на сторінках вузлів
-- **WHEN** користувач відкриває список, форму створення чи форму редагування запису типу `news`
-- **THEN** меню показано, поточним є «Записи»
+#### Scenario: Menu on the pages of records
+- **WHEN** the user opens the list, the create form or the edit form of a record of the type `news`
+- **THEN** the menu is shown, «Записи» is current
 
-#### Scenario: Перемикання між сторінками
-- **WHEN** користувач натискає «Поля» на формі редагування типу `news`, потім «Записи», потім «Налаштування»
-- **THEN** він потрапляє на `/admin/content-types/news/fields`, потім на `/admin/content-types/news/nodes`, потім на `/admin/content-types/news/edit`
+#### Scenario: Switching between pages
+- **WHEN** the user presses «Поля» on the edit form of the type `news`, then «Записи», then «Налаштування»
+- **THEN** they land on `/admin/content-types/news/fields`, then on `/admin/content-types/news/nodes`, then on `/admin/content-types/news/edit`
 
-#### Scenario: Створення типу
-- **WHEN** користувач відкриває `/admin/content-types/create`
-- **THEN** меню розділу не показується
+#### Scenario: Creating a type
+- **WHEN** the user opens `/admin/content-types/create`
+- **THEN** the section menu is not shown
 
-#### Scenario: Тип сторінки
-- **WHEN** користувач відкриває `/admin/page-types/home/edit`
-- **THEN** у меню розділу пункту «Записи» немає
+#### Scenario: Page type
+- **WHEN** the user opens `/admin/page-types/home/edit`
+- **THEN** the item «Записи» is not in the section menu

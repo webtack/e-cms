@@ -2,208 +2,208 @@
 
 ## Purpose
 
-Дає адмінці керування вузлами типів контенту виду `content`: список у таблиці даних, створення, редагування й видалення вузла з динамічною формою за полями типу. Працює лише з базовою мовою (`default`).
+Gives the admin the management of nodes of content types of the kind `content`: a list in a data table, creation, editing and deletion of a node with a dynamic form by the fields of the type. Works only with the base language (`default`).
 
 ## ADDED Requirements
 
-### Requirement: Сторінка списку вузлів
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/nodes`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує вузли типу контенту виду `content` із цим ключем у таблиці даних у серверному режимі: пошук, сортування, пагінацію й розмір сторінки виконує сервер, а стан таблиці зберігається в адресі. Таблиця SHALL НЕ мати фільтрів. Заголовок сторінки SHALL називати тип, а над таблицею SHALL бути горизонтальне меню розділу типу з поточним пунктом «Вузли». Для ключа, якого немає серед типів виду `content` (зокрема ключа типу `page` чи `block`), сторінка SHALL відповідати 404. Сторінка SHALL відкриватися й для типу без вузлів.
+### Requirement: Node list page
+The admin SHALL have a page `/admin/content-types/{key}/nodes`, available only to authenticated users with a confirmed email, which shows the nodes of the content type of the kind `content` with this key in the data table in server mode: search, sorting, pagination and page size are performed by the server, and the table state is kept in the address. The table SHALL NOT have filters. The page title SHALL name the type, and above the table there SHALL be the horizontal section menu of the type with the current item "Nodes". For a key that is not among the types of the kind `content` (including the key of a type `page` or `block`), the page SHALL respond 404. The page SHALL open also for a type without nodes.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/news/nodes`
-- **THEN** він бачить таблицю вузлів типу `news`, заголовок із назвою типу та меню розділу, де поточним є «Вузли»; кнопки фільтрів у панелі таблиці немає
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types/news/nodes`
+- **THEN** they see the table of nodes of the type `news`, a title with the name of the type and the section menu where "Nodes" is current; there is no filter button in the table toolbar
 
-#### Scenario: Вузли лише цього типу
-- **WHEN** існують вузли типів `news` і `product`, а користувач відкриває список типу `news`
-- **THEN** у таблиці лише вузли типу `news`
+#### Scenario: Only nodes of this type
+- **WHEN** nodes of the types `news` and `product` exist, and the user opens the list of the type `news`
+- **THEN** the table contains only nodes of the type `news`
 
-#### Scenario: Порожній стан
-- **WHEN** тип не має вузлів
-- **THEN** сторінка відкривається зі стандартним повідомленням таблиці про відсутність даних, кнопка «Створити» видима
+#### Scenario: Empty state
+- **WHEN** the type has no nodes
+- **THEN** the page opens with the standard message of the table about the absence of data, and the "Create" button is visible
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває `/admin/content-types/home/nodes` для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens `/admin/content-types/home/nodes` for the key of a type of the kind `page`
+- **THEN** the server responds 404
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/news/nodes`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/news/nodes`
+- **THEN** they are redirected to the login page
 
-### Requirement: Колонки таблиці вузлів
-Таблиця SHALL завжди показувати колонку `title` першою і неприховуваною та колонку slug вузла. Окрім них SHALL показувати видимі поля з налаштувань списку типу (`settings.list.visible`) у вказаному там порядку; без таких налаштувань — лише `title`. Посилання налаштувань на поле, якого в типу вже немає, SHALL ігноруватися без помилки. Значення множинного поля SHALL виводитися через кому, булеве — як «Так»/«Ні» мовою інтерфейсу, відсутнє значення — порожньою коміркою. Значення береться з мови `default`.
+### Requirement: Columns of the node table
+The table SHALL always show the column `title` first and non-hideable, and the column of the node slug. Besides them, it SHALL show the visible fields from the list settings of the type (`settings.list.visible`) in the order specified there; without such settings — only `title`. A reference in the settings to a field that the type no longer has SHALL be ignored without an error. The value of a multiple field SHALL be output separated by commas, a boolean — as "Yes"/"No" in the interface language, a missing value — as an empty cell. The value is taken from the language `default`.
 
-#### Scenario: Налаштування за замовчуванням
-- **WHEN** тип не має налаштувань списку
-- **THEN** таблиця показує колонки `title` і slug
+#### Scenario: Default settings
+- **WHEN** the type has no list settings
+- **THEN** the table shows the columns `title` and slug
 
-#### Scenario: Видимі поля з налаштувань
-- **WHEN** `settings.list.visible` типу — `title`, `price`, `tags`, а вузол має `price` = 12.5 і `tags` = `["a", "b"]`
-- **THEN** у його рядку видно колонки `title`, `price` зі значенням 12.5, `tags` зі значенням «a, b» і slug
+#### Scenario: Visible fields from the settings
+- **WHEN** the `settings.list.visible` of the type is `title`, `price`, `tags`, and the node has `price` = 12.5 and `tags` = `["a", "b"]`
+- **THEN** its row shows the columns `title`, `price` with the value 12.5, `tags` with the value "a, b" and the slug
 
-#### Scenario: Видалене поле в налаштуваннях
-- **WHEN** `settings.list.visible` містить ключ поля, яке вже видалено з типу
-- **THEN** сторінка відкривається без помилки, а колонки цього поля немає
+#### Scenario: Deleted field in the settings
+- **WHEN** `settings.list.visible` contains the key of a field that has already been deleted from the type
+- **THEN** the page opens without an error, and the column of this field is absent
 
-#### Scenario: Булеве значення
-- **WHEN** вузол має поле типу «булеве» зі значенням «істина»
-- **THEN** у комірці показано «Так»
+#### Scenario: Boolean value
+- **WHEN** a node has a field of the type "boolean" with the value "true"
+- **THEN** the cell shows "Yes"
 
-### Requirement: Пошук і сортування вузлів
-Пошук таблиці SHALL шукати за полями пошуку з налаштувань типу, а без них — за всіма текстовими полями типу, без урахування регістру. Сортувати SHALL бути можливо за колонками немножинних полів; колонки slug і множинних полів не сортуються. Без явного сортування порядок SHALL братися з налаштувань списку типу, а без них — за порядком створення. Вузли без значення в колонці сортування SHALL йти останніми за обох напрямків. Номер сторінки за межами діапазону SHALL повертати останню сторінку. Некоректні параметри адреси SHALL ігноруватися без помилки сторінки.
+### Requirement: Search and sorting of nodes
+The table search SHALL search by the search fields from the settings of the type, and without them — by all text fields of the type, case-insensitively. It SHALL be possible to sort by the columns of single-valued fields; the slug column and multiple fields are not sortable. Without an explicit sorting the order SHALL be taken from the list settings of the type, and without them — by the creation order. Nodes without a value in the sorting column SHALL go last in both directions. A page number out of range SHALL return the last page. Invalid address parameters SHALL be ignored without a page error.
 
-#### Scenario: Пошук
-- **WHEN** користувач вводить «lamp» у пошук таблиці вузлів типу `product`
-- **THEN** у таблиці лишаються вузли, у текстових полях яких трапляється «lamp», а адреса містить `q=lamp`
+#### Scenario: Search
+- **WHEN** the user types "lamp" in the search of the node table of the type `product`
+- **THEN** the table keeps the nodes whose text fields contain "lamp", and the address contains `q=lamp`
 
-#### Scenario: Сортування за полем
-- **WHEN** користувач сортує за колонкою `price` за спаданням
-- **THEN** вузли йдуть від найбільшої ціни, вузли без ціни — останніми
+#### Scenario: Sorting by a field
+- **WHEN** the user sorts by the column `price` in descending order
+- **THEN** the nodes go from the highest price, nodes without a price go last
 
-#### Scenario: Сортування за множинним полем
-- **WHEN** адреса містить `sort=tags`, а `tags` — множинне поле
-- **THEN** сортування ігнорується, сторінка відкривається
+#### Scenario: Sorting by a multiple field
+- **WHEN** the address contains `sort=tags`, and `tags` is a multiple field
+- **THEN** the sorting is ignored, and the page opens
 
-#### Scenario: Сторінка за межами діапазону
-- **WHEN** адреса містить `page=999`, а сторінок усього три
-- **THEN** показано третю сторінку
+#### Scenario: Page beyond the range
+- **WHEN** the address contains `page=999`, and there are only three pages
+- **THEN** the third page is shown
 
-#### Scenario: Порядок за замовчуванням
-- **WHEN** тип має в налаштуваннях сортування за `title` за зростанням, а в адресі `sort` немає
-- **THEN** вузли йдуть за `title` за зростанням
+#### Scenario: Default order
+- **WHEN** the type has in its settings a sorting by `title` in ascending order, and the address has no `sort`
+- **THEN** the nodes go by `title` in ascending order
 
-### Requirement: Створення вузла з таблиці
-Над таблицею вузлів SHALL бути активна кнопка «Створити» в панелі інструментів, що відкриває форму створення вузла цього типу. Кожен рядок SHALL мати групу кнопок: основну кнопку «Редагувати» і поруч кнопку меню «⋮» з пунктами «Редагувати» та «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено). Обидва «Редагувати» SHALL відкривати форму редагування цього вузла.
+### Requirement: Creating a node from the table
+Above the node table there SHALL be an active "Create" button in the toolbar, which opens the form for creating a node of this type. Each row SHALL have a group of buttons: the main button "Edit" and next to it a "⋮" menu button with the items "Edit" and "Delete" (in this order; "Delete" is visually highlighted as a destructive action and separated). Both "Edit" controls SHALL open the edit form of this node.
 
-#### Scenario: Перехід до форми створення
-- **WHEN** користувач натискає «Створити» на сторінці вузлів типу `news`
-- **THEN** відкривається `/admin/content-types/news/nodes/create`
+#### Scenario: Going to the creation form
+- **WHEN** the user clicks "Create" on the nodes page of the type `news`
+- **THEN** `/admin/content-types/news/nodes/create` opens
 
-#### Scenario: Редагувати з рядка
-- **WHEN** користувач натискає «Редагувати» у рядку вузла з `uuid` `0190a1b2-…` типу `news`
-- **THEN** відкривається `/admin/content-types/news/nodes/0190a1b2-…/edit`
+#### Scenario: Edit from a row
+- **WHEN** the user clicks "Edit" in the row of a node with the `uuid` `0190a1b2-…` of the type `news`
+- **THEN** `/admin/content-types/news/nodes/0190a1b2-…/edit` opens
 
-#### Scenario: Склад меню рядка
-- **WHEN** користувач відкриває меню «⋮» у рядку вузла
-- **THEN** він бачить пункти «Редагувати» та «Видалити» з перекладеними підписами
+#### Scenario: Composition of the row menu
+- **WHEN** the user opens the "⋮" menu in a node row
+- **THEN** they see the items "Edit" and "Delete" with translated labels
 
-### Requirement: Форма вузла
-Форма створення (`/admin/content-types/{key}/nodes/create`) і редагування (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL показувати над формою меню розділу типу й містити поле slug та по одному елементу введення на кожне поле типу в порядку ваги (`weight`), з назвою поля як підписом; обов'язкові поля SHALL бути позначені. Елемент введення SHALL відповідати типу значення: «короткий текст» — однорядкове поле, «текст» — багаторядкове, «ціле число» і «десяткове число» — числове поле, «булеве» — прапорець, «дата» — вибір дати, «дата й час» — вибір дати й часу. Множинне поле SHALL редагуватися списком елементів, до якого можна додавати елементи, з якого можна їх видаляти та в якому можна змінювати їхній порядок (перетягуванням і з клавіатури). Форма не показує вибору мови. Форма редагування SHALL бути заповнена поточними значеннями вузла в мові `default`, а slug у ній — поточним slug.
+### Requirement: Node form
+The creation form (`/admin/content-types/{key}/nodes/create`) and the edit form (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL show above the form the section menu of the type and SHALL contain a slug field and one input element for each field of the type in the order of weight (`weight`), with the field name as the label; required fields SHALL be marked. An input element SHALL correspond to the value type: "short text" — a single-line field, "text" — a multi-line one, "integer" and "decimal number" — a numeric field, "boolean" — a checkbox, "date" — a date picker, "date and time" — a date and time picker. A multiple field SHALL be edited as a list of items, to which items can be added, from which they can be removed, and in which their order can be changed (by dragging and from the keyboard). The form does not show a language choice. The edit form SHALL be filled with the current values of the node in the language `default`, and its slug SHALL be the current slug.
 
-#### Scenario: Форма створення
-- **WHEN** користувач відкриває форму створення вузла типу з полями `title` (вага 0), `price` (ціле число, вага 10) і `body` (текст, вага 20)
-- **THEN** він бачить порожні поля slug, `title`, `price` і `body` у цьому порядку, `title` позначене як обов'язкове
+#### Scenario: Creation form
+- **WHEN** the user opens the creation form of a node of a type with the fields `title` (weight 0), `price` (integer, weight 10) and `body` (text, weight 20)
+- **THEN** they see the empty fields slug, `title`, `price` and `body` in this order, `title` marked as required
 
-#### Scenario: Елементи за типом
-- **WHEN** тип має поля типів «булеве», «дата» і «дата й час»
-- **THEN** вони показані як прапорець, вибір дати й вибір дати й часу відповідно
+#### Scenario: Elements by type
+- **WHEN** the type has fields of the types "boolean", "date" and "date and time"
+- **THEN** they are shown as a checkbox, a date picker and a date and time picker respectively
 
-#### Scenario: Множинне поле
-- **WHEN** тип має множинне поле `tags`, а користувач додає два елементи й видаляє перший
-- **THEN** у списку лишається один елемент, а додавання нового елемента додає порожній рядок введення
+#### Scenario: Multiple field
+- **WHEN** the type has the multiple field `tags`, and the user adds two items and removes the first
+- **THEN** one item remains in the list, and adding a new item adds an empty input row
 
-#### Scenario: Зміна порядку елементів
-- **WHEN** користувач переставляє елементи множинного поля `tags` зі `a, b, c` на `c, a, b` і зберігає
-- **THEN** після повторного відкриття форми редагування елементи йдуть у порядку `c, a, b`, а в списку вузлів значення показано як «c, a, b»
+#### Scenario: Changing the order of items
+- **WHEN** the user rearranges the items of the multiple field `tags` from `a, b, c` to `c, a, b` and saves
+- **THEN** after reopening the edit form the items go in the order `c, a, b`, and in the node list the value is shown as "c, a, b"
 
-#### Scenario: Форма редагування
-- **WHEN** користувач відкриває форму редагування вузла зі slug `pro-nas`, `title` «Про нас» і `tags` `["a", "b"]`
-- **THEN** поле slug містить `pro-nas`, `title` — «Про нас», а список `tags` — два елементи «a» і «b»
+#### Scenario: Edit form
+- **WHEN** the user opens the edit form of a node with the slug `pro-nas`, the `title` "Про нас" and `tags` `["a", "b"]`
+- **THEN** the slug field contains `pro-nas`, `title` — "Про нас", and the list `tags` — two items "a" and "b"
 
-#### Scenario: Вузол іншого типу
-- **WHEN** користувач відкриває форму редагування для `uuid` вузла, що належить іншому типу
-- **THEN** сервер відповідає 404
+#### Scenario: Node of another type
+- **WHEN** the user opens the edit form for the `uuid` of a node that belongs to another type
+- **THEN** the server responds 404
 
-### Requirement: Збереження нового вузла
-Відправлення форми створення SHALL створювати вузол типу з введеними значеннями в мові `default`. Порожній slug SHALL призводити до автоматичного slug із `title`; явно введений slug SHALL перевірятися на формат і унікальність серед усіх вузлів і не змінюватися. Після успіху користувача SHALL бути перенаправлено до списку вузлів цього типу з повідомленням про успіх, а вузол SHALL з'явитися в таблиці. Помилки валідації SHALL повертатися до форми й показуватися біля відповідних полів, зокрема біля окремих елементів множинного поля; введені дані при цьому SHALL зберігатися у формі.
+### Requirement: Saving a new node
+Submitting the creation form SHALL create a node of the type with the entered values in the language `default`. An empty slug SHALL lead to an automatic slug from `title`; an explicitly entered slug SHALL be checked for format and uniqueness among all nodes and SHALL not be changed. After success the user SHALL be redirected to the list of nodes of this type with a success message, and the node SHALL appear in the table. Validation errors SHALL return to the form and be shown next to the corresponding fields, in particular next to individual items of a multiple field; the entered data SHALL be kept in the form in this case.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач вводить `title` «Про нас» і відправляє форму
-- **THEN** вузол збережено зі slug `pro-nas`, користувач бачить список вузлів, тост про успіх і новий рядок у таблиці
+#### Scenario: Successful creation
+- **WHEN** the user enters the `title` "Про нас" and submits the form
+- **THEN** the node is saved with the slug `pro-nas`, the user sees the list of nodes, a success toast and a new row in the table
 
-#### Scenario: Явний slug
-- **WHEN** користувач вводить slug `about` і `title` «Про нас»
-- **THEN** збережено вузол зі slug `about`
+#### Scenario: Explicit slug
+- **WHEN** the user enters the slug `about` and the `title` "Про нас"
+- **THEN** a node with the slug `about` is saved
 
-#### Scenario: Зайнятий slug
-- **WHEN** користувач вводить slug, який уже має вузол будь-якого типу чи виду
-- **THEN** вузол не створено, біля поля slug показано помилку, решта введеного лишається у формі
+#### Scenario: Taken slug
+- **WHEN** the user enters a slug that a node of any type or kind already has
+- **THEN** the node is not created, an error is shown next to the slug field, and the rest of the entered data remains in the form
 
-#### Scenario: Недопустимий формат slug
-- **WHEN** користувач вводить slug `Про нас`
-- **THEN** вузол не створено, біля поля slug показано помилку
+#### Scenario: Invalid slug format
+- **WHEN** the user enters the slug `Про нас`
+- **THEN** the node is not created, and an error is shown next to the slug field
 
-#### Scenario: Обов'язкове поле
-- **WHEN** користувач відправляє форму з порожнім `title`
-- **THEN** вузол не створено, біля поля `title` показано помилку
+#### Scenario: Required field
+- **WHEN** the user submits the form with an empty `title`
+- **THEN** the node is not created, and an error is shown next to the `title` field
 
-#### Scenario: Помилка елемента множинного поля
-- **WHEN** множинне числове поле `scores` отримує другим елементом нечислове значення
-- **THEN** вузол не створено, помилка показана біля другого елемента списку
+#### Scenario: Error of an item of a multiple field
+- **WHEN** the multiple numeric field `scores` gets a non-numeric value as its second item
+- **THEN** the node is not created, and the error is shown next to the second item of the list
 
-#### Scenario: Значення за налаштуваннями поля
-- **WHEN** поле має в налаштуваннях максимум 5, а введено 7
-- **THEN** вузол не створено, біля поля показано помилку
+#### Scenario: Value according to the field settings
+- **WHEN** the field has a maximum of 5 in its settings, and 7 is entered
+- **THEN** the node is not created, and an error is shown next to the field
 
-### Requirement: Збереження змін вузла
-Відправлення форми редагування SHALL замінювати значення всіх полів типу в мові `default` введеними (порядок елементів множинного поля зберігається таким, як у формі) (очищене поле SHALL втрачати значення) і SHALL дозволяти змінити slug вузла на вільне допустиме значення; `uuid` і тип вузла SHALL лишатися без змін. Незмінений slug SHALL не вважатися дублікатом самого себе. Після успіху користувача SHALL бути перенаправлено до списку вузлів з повідомленням про успіх. Помилки SHALL показуватися так само, як при створенні. Значення інших мов SHALL лишатися без змін.
+### Requirement: Saving changes to a node
+Submitting the edit form SHALL replace the values of all fields of the type in the language `default` with the entered ones (the order of the items of a multiple field is kept as in the form) (a cleared field SHALL lose its value), and SHALL allow changing the slug of the node to a free valid value; the `uuid` and the type of the node SHALL remain unchanged. An unchanged slug SHALL NOT be considered a duplicate of itself. After success the user SHALL be redirected to the list of nodes with a success message. Errors SHALL be shown in the same way as on creation. The values of other languages SHALL remain unchanged.
 
-#### Scenario: Зміна значення
-- **WHEN** користувач змінює `title` вузла і зберігає
-- **THEN** новий `title` показано у списку, slug лишився тим самим
+#### Scenario: Changing a value
+- **WHEN** the user changes the `title` of a node and saves
+- **THEN** the new `title` is shown in the list, the slug remained the same
 
-#### Scenario: Очищення необов'язкового поля
-- **WHEN** користувач очищає необов'язкове поле `summary` і зберігає
-- **THEN** значення `summary` у вузла відсутнє
+#### Scenario: Clearing an optional field
+- **WHEN** the user clears the optional field `summary` and saves
+- **THEN** the value of `summary` of the node is absent
 
-#### Scenario: Зміна slug
-- **WHEN** користувач змінює slug вузла на вільне `about-us`
-- **THEN** вузол і далі відкривається за тією самою адресою редагування (за `uuid`), його `uuid` не змінився, а відкрита в іншій вкладці форма цього вузла зберігається без помилки 404
+#### Scenario: Changing the slug
+- **WHEN** the user changes the slug of a node to the free `about-us`
+- **THEN** the node still opens at the same edit address (by `uuid`), its `uuid` has not changed, and the form of this node open in another tab is saved without a 404 error
 
-#### Scenario: Збереження без зміни slug
-- **WHEN** користувач зберігає форму, не змінюючи slug
-- **THEN** збереження успішне, помилки унікальності немає
+#### Scenario: Saving without changing the slug
+- **WHEN** the user saves the form without changing the slug
+- **THEN** the save succeeds, and there is no uniqueness error
 
-#### Scenario: Slug іншого вузла
-- **WHEN** користувач вводить slug, який має інший вузол
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another node
+- **WHEN** the user enters a slug that another node has
+- **THEN** the changes are not saved, and an error is shown next to the slug field
 
-#### Scenario: Переклади
-- **WHEN** вузол має переклад `title` мовою `en`, а користувач змінює `title` у формі
-- **THEN** змінюється лише значення `default`, переклад `en` лишається
+#### Scenario: Translations
+- **WHEN** the node has a translation of `title` in the language `en`, and the user changes `title` in the form
+- **THEN** only the value `default` changes, the translation `en` remains
 
-### Requirement: Видалення вузла
-Пункт «Видалити» у меню рядка SHALL відкривати діалог підтвердження, що називає вузол (за `title`, а за його відсутності — за slug), із кнопками «Скасувати» та «Видалити». Підтвердження SHALL видаляти вузол разом з усіма його значеннями у всіх мовах, лишати користувача на списку вузлів цього типу й показувати повідомлення про успіх. Скасування SHALL нічого не змінювати. Вузол іншого типу SHALL не видалятися через адресу цього типу.
+### Requirement: Deleting a node
+The "Delete" item in the row menu SHALL open a confirmation dialog that names the node (by `title`, and if it is absent — by the slug), with the buttons "Cancel" and "Delete". The confirmation SHALL delete the node together with all its values in all languages, keep the user on the list of nodes of this type and show a success message. Cancellation SHALL change nothing. A node of another type SHALL NOT be deleted through the address of this type.
 
-#### Scenario: Підтвердження
-- **WHEN** користувач обирає «Видалити» у рядку вузла «Про нас» і підтверджує
-- **THEN** вузол зникає з таблиці, показано повідомлення про успіх, значення вузла видалено
+#### Scenario: Confirmation
+- **WHEN** the user chooses "Delete" in the row of the node "Про нас" and confirms
+- **THEN** the node disappears from the table, a success message is shown, and the values of the node are deleted
 
-#### Scenario: Скасування
-- **WHEN** користувач обирає «Видалити», а потім «Скасувати»
-- **THEN** діалог закрито, вузол лишається
+#### Scenario: Cancellation
+- **WHEN** the user chooses "Delete", and then "Cancel"
+- **THEN** the dialog closes, the node remains
 
-#### Scenario: Вузол іншого типу
-- **WHEN** надіслано запит на видалення за адресою типу `news` з `uuid` вузла типу `product`
-- **THEN** сервер відповідає 404, вузол лишається
+#### Scenario: Node of another type
+- **WHEN** a deletion request is sent to the address of the type `news` with the `uuid` of a node of the type `product`
+- **THEN** the server responds 404, the node remains
 
-### Requirement: Адресація вузла в адмінці
-Усі адреси адмінки, що стосуються наявного вузла (форма редагування, оновлення, видалення), SHALL ідентифікувати вузол за його `uuid`, а не за slug. Slug вузла SHALL бути лише даними вузла для публічного сайту: адмінка показує його в таблиці й дозволяє змінювати у формі, але не використовує для адресації. Невідомий `uuid` або `uuid` вузла іншого типу SHALL давати 404.
+### Requirement: Addressing a node in the admin
+All admin addresses that concern an existing node (the edit form, update, deletion) SHALL identify the node by its `uuid`, not by the slug. The slug of a node SHALL be only data of the node for the public site: the admin shows it in the table and allows changing it in the form, but does not use it for addressing. An unknown `uuid` or the `uuid` of a node of another type SHALL give 404.
 
-#### Scenario: Адреса за uuid
-- **WHEN** вузол має `uuid` `0190a1b2-…` і slug `pro-nas`
-- **THEN** його форма редагування відкривається за `/admin/content-types/news/nodes/0190a1b2-…/edit`, а адреса зі slug `pro-nas` замість `uuid` відповідає 404
+#### Scenario: Address by uuid
+- **WHEN** a node has the `uuid` `0190a1b2-…` and the slug `pro-nas`
+- **THEN** its edit form opens at `/admin/content-types/news/nodes/0190a1b2-…/edit`, and the address with the slug `pro-nas` instead of the `uuid` responds 404
 
-#### Scenario: Стійкість до зміни slug
-- **WHEN** slug вузла змінюється
-- **THEN** адреси адмінки цього вузла лишаються тими самими
+#### Scenario: Stability when the slug changes
+- **WHEN** the slug of a node changes
+- **THEN** the admin addresses of this node remain the same
 
-### Requirement: Розділ вузлів лише для виду content
-Маршрути вузлів SHALL існувати лише в розділі `/admin/content-types/**`. Розділи `/admin/page-types/**` і `/admin/block-types/**` SHALL НЕ мати маршрутів вузлів: запит до них відповідає 404. Хлібні крихти сторінок вузлів SHALL вести через пункт «Content Types».
+### Requirement: Node section only for the content kind
+The node routes SHALL exist only in the section `/admin/content-types/**`. The sections `/admin/page-types/**` and `/admin/block-types/**` SHALL NOT have node routes: a request to them responds 404. The breadcrumbs of the node pages SHALL lead through the item "Content Types".
 
-#### Scenario: Розділ сторінок
-- **WHEN** користувач відкриває `/admin/page-types/home/nodes`
-- **THEN** сервер відповідає 404
+#### Scenario: Page section
+- **WHEN** the user opens `/admin/page-types/home/nodes`
+- **THEN** the server responds 404
 
-#### Scenario: Хлібні крихти
-- **WHEN** користувач відкриває форму створення вузла
-- **THEN** хлібні крихти: «Admin» → «Content Types» (посилання) → «Create node»
+#### Scenario: Breadcrumbs
+- **WHEN** the user opens the node creation form
+- **THEN** the breadcrumbs are: "Admin" → "Content Types" (a link) → "Create node"

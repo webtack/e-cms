@@ -2,89 +2,89 @@
 
 ## Purpose
 
-Система тем публічного сайту: каталог теми, вибір активної теми, каскад кандидатів шаблонів від конкретного до загального, хуки зміни даних і кандидатів, перевірка повноти теми.
+The system of themes of the public site: the directory of the theme, the choice of the active theme, the cascade of candidates of templates from specific to general, the hooks for changing the data and the candidates, the check of the completeness of a theme.
 
 ## ADDED Requirements
 
 ### Requirement: Структура теми й активна тема
-Тема SHALL бути каталогом `themes/<name>/` з файлами `theme.json`, `hooks.php` (необов'язковий), каталогами `views/` і `assets/`. Активна тема SHALL визначатися налаштуванням середовища `APP_THEME` (за замовчуванням `default`). Тема `default` SHALL бути обов'язковою й SHALL завжди бути останнім джерелом шаблонів, тож інша тема містить лише перевизначені шаблони. Якщо активна тема не існує або в ній немає `theme.json`, система SHALL відмовляти в публічній відповіді винятком теми, а не мовчки підміняти `default`.
+A theme SHALL be a directory `themes/<name>/` with the files `theme.json`, `hooks.php` (optional), the directories `views/` and `assets/`. The active theme SHALL be defined by the environment setting `APP_THEME` (by default `default`). The theme `default` SHALL be mandatory and SHALL always be the last source of templates, so another theme contains only the overridden templates. If the active theme does not exist or has no `theme.json`, the system SHALL refuse the public response with an exception of the theme, and not silently substitute `default`.
 
-#### Scenario: Тема за замовчуванням
-- **WHEN** `APP_THEME` не задано
-- **THEN** активна тема — `default`
+#### Scenario: Default theme
+- **WHEN** `APP_THEME` is not set
+- **THEN** the active theme is `default`
 
-#### Scenario: Інша тема перевизначає частину шаблонів
-- **WHEN** активна тема `custom` має лише `views/layout.blade.php`
-- **THEN** шаблон `layout` береться з `custom`, а решта шаблонів з `default`
+#### Scenario: Another theme overrides part of the templates
+- **WHEN** the active theme `custom` has only `views/layout.blade.php`
+- **THEN** the template `layout` is taken from `custom`, and the other templates from `default`
 
-#### Scenario: Активної теми немає
-- **WHEN** `APP_THEME=missing`, а каталогу `themes/missing` не існує
-- **THEN** публічний запит завершується винятком теми з повідомленням про відсутню тему, а адмінка працює як раніше
+#### Scenario: No active theme
+- **WHEN** `APP_THEME=missing`, and the directory `themes/missing` does not exist
+- **THEN** the public request ends with an exception of the theme with a message about the missing theme, and the admin works as before
 
 ### Requirement: Вибір шаблона зі списку кандидатів
-Система SHALL вибирати шаблон за впорядкованим списком кандидатів: для кожного кандидата (від конкретного до загального) спершу шукається файл в активній темі, потім у `default`, і береться перший знайдений. Якщо жоден кандидат не існує в жодній темі, система SHALL кидати виняток теми зі списком усіх спробуваних імен у порядку перебору. Коли `app.debug` увімкнено, відрендерений HTML SHALL містити коментар зі списком кандидатів і вибраним шаблоном; коли вимкнено, SHALL НЕ містити.
+The system SHALL choose a template by an ordered list of candidates: for each candidate (from specific to general) a file is first searched in the active theme, then in `default`, and the first found is taken. If no candidate exists in any theme, the system SHALL throw a theme exception with the list of all attempted names in the order of enumeration. When `app.debug` is enabled, the rendered HTML SHALL contain a comment with the list of candidates and the chosen template; when disabled, it SHALL NOT contain it.
 
-#### Scenario: Конкретний кандидат перемагає загальний
-- **WHEN** кандидати `pages/page-landing--5`, `pages/page-landing`, `pages/page`, і файли існують для `pages/page-landing` та `pages/page`
-- **THEN** використано `pages/page-landing`
+#### Scenario: Specific candidate beats the general one
+- **WHEN** the candidates are `pages/page-landing--5`, `pages/page-landing`, `pages/page`, and files exist for `pages/page-landing` and `pages/page`
+- **THEN** `pages/page-landing` is used
 
-#### Scenario: Порядок кандидатів важливіший за порядок тем
-- **WHEN** активна тема має `pages/page-landing`, а `default` має `pages/page-landing--5`
-- **THEN** використано `pages/page-landing--5` із `default`, бо порядок визначає кандидат, а потім тема
+#### Scenario: Order of candidates matters more than the order of themes
+- **WHEN** the active theme has `pages/page-landing`, and `default` has `pages/page-landing--5`
+- **THEN** `pages/page-landing--5` from `default` is used, because the candidate defines the order, and then the theme
 
-#### Scenario: Немає жодного кандидата
-- **WHEN** жоден кандидат не існує ні в активній темі, ні в `default`
-- **THEN** кидається виняток теми, його повідомлення містить усі спробувані імена
+#### Scenario: No candidate at all
+- **WHEN** no candidate exists in either the active theme or `default`
+- **THEN** a theme exception is thrown, its message contains all the attempted names
 
-#### Scenario: Коментар кандидатів у debug
-- **WHEN** `app.debug` увімкнено й відрендерено будь-яку публічну сторінку
-- **THEN** у HTML є коментар зі списком кандидатів і вибраним шаблоном
+#### Scenario: Candidate comment in debug
+- **WHEN** `app.debug` is enabled and any public page is rendered
+- **THEN** the HTML contains a comment with the list of candidates and the chosen template
 
-#### Scenario: Без debug коментаря немає
-- **WHEN** `app.debug` вимкнено
-- **THEN** у HTML немає коментарів зі списком кандидатів
+#### Scenario: No debug comment without debug
+- **WHEN** `app.debug` is disabled
+- **THEN** the HTML contains no comments with the list of candidates
 
 ### Requirement: Хуки теми
-Тема МОЖЕ мати `hooks.php`, що повертає функцію з реєстром: `preprocess(name, callback)` змінює змінні шаблона перед рендером, `suggest(name, callback)` змінює список кандидатів. Ім'я хука SHALL бути крапковим від загального до конкретного (`field`, `field.youtube`); при виклику виконуються спершу загальні, потім конкретні хуки. Хуки `themes/default/hooks.php` SHALL вантажитися завжди, потім хуки активної теми. Якщо `hooks.php` існує, але не повертає функцію, система SHALL кидати виняток теми.
+A theme MAY have a `hooks.php` that returns a function with a registry: `preprocess(name, callback)` changes the template variables before rendering, `suggest(name, callback)` changes the list of candidates. The name of a hook SHALL be dotted from general to specific (`field`, `field.youtube`); on a call the general hooks run first, then the specific ones. The hooks of `themes/default/hooks.php` SHALL always be loaded, then the hooks of the active theme. If `hooks.php` exists but does not return a function, the system SHALL throw a theme exception.
 
-#### Scenario: Порядок preprocess
-- **WHEN** зареєстровано `preprocess('field')` і `preprocess('field.youtube')`, рендериться поле типу `youtube`
-- **THEN** спершу виконується хук `field`, потім `field.youtube`, і змінні шаблона містять зміни обох
+#### Scenario: Order of preprocess
+- **WHEN** `preprocess('field')` and `preprocess('field.youtube')` are registered, and a field of the type `youtube` is rendered
+- **THEN** the hook `field` runs first, then `field.youtube`, and the template variables contain the changes of both
 
-#### Scenario: Хуки default і активної теми
-- **WHEN** `default` і активна тема реєструють `preprocess('field')`
-- **THEN** спершу виконується хук `default`, потім хук активної теми
+#### Scenario: Hooks of default and of the active theme
+- **WHEN** `default` and the active theme register `preprocess('field')`
+- **THEN** the hook of `default` runs first, then the hook of the active theme
 
-#### Scenario: Suggest змінює кандидатів
-- **WHEN** хук `suggest('page', fn)` додає кандидата `pages/page-special` на початок списку, і такий файл існує
-- **THEN** використано `pages/page-special`
+#### Scenario: Suggest changes the candidates
+- **WHEN** the hook `suggest('page', fn)` adds the candidate `pages/page-special` at the beginning of the list, and such a file exists
+- **THEN** `pages/page-special` is used
 
-#### Scenario: Некоректний hooks.php
-- **WHEN** `hooks.php` повертає не функцію
-- **THEN** кидається виняток теми з вказівкою файла
+#### Scenario: Invalid hooks.php
+- **WHEN** `hooks.php` returns not a function
+- **THEN** a theme exception is thrown with an indication of the file
 
 ### Requirement: Ресурси теми
-Ресурси теми (`assets/`) SHALL збиратися Vite разом з рештою застосунку, а шаблони активної теми SHALL підключати власні ресурси за каталогом теми. Відсутність ресурсів у активної теми SHALL НЕ ламати рендер.
+The resources of a theme (`assets/`) SHALL be built by Vite together with the rest of the application, and the templates of the active theme SHALL connect their own resources by the directory of the theme. The absence of resources in the active theme SHALL NOT break the rendering.
 
-#### Scenario: Збірка ресурсів теми
-- **WHEN** виконано збірку фронтенду
-- **THEN** ресурси `themes/*/assets` потрапили до маніфеста збірки
+#### Scenario: Building the resources of a theme
+- **WHEN** the build of the frontend is performed
+- **THEN** the resources `themes/*/assets` have got into the manifest of the build
 
-#### Scenario: Тема без ресурсів
-- **WHEN** в активній темі немає каталогу `assets`
-- **THEN** сторінка відображається без помилки, без підключення ресурсів цієї теми
+#### Scenario: Theme without resources
+- **WHEN** the active theme has no `assets` directory
+- **THEN** the page is displayed without an error, without connecting the resources of this theme
 
 ### Requirement: Перевірка теми командою
-Система SHALL мати команду `theme:check`, що перевіряє активну тему: наявність `theme.json` і теми `default`, наявність обов'язкових шаблонів (`html`, `layout`, `home`, `errors/404`, `pages/page`, `content/list`, `content/details`) у темі або в `default`, коректність `hooks.php`. Команда SHALL виводити кожну проблему окремим рядком і завершуватися ненульовим кодом за наявності проблем, нульовим без них.
+The system SHALL have the command `theme:check`, which checks the active theme: the presence of `theme.json` and of the theme `default`, the presence of the required templates (`html`, `layout`, `home`, `errors/404`, `pages/page`, `content/list`, `content/details`) in the theme or in `default`, the correctness of `hooks.php`. The command SHALL output each problem on a separate line and finish with a non-zero code if there are problems, and zero without them.
 
-#### Scenario: Повна тема
-- **WHEN** запущено `theme:check` для коректної теми
-- **THEN** повідомлено про успіх, код завершення 0
+#### Scenario: Complete theme
+- **WHEN** `theme:check` is run for a correct theme
+- **THEN** the success is reported, the exit code is 0
 
-#### Scenario: Бракує обов'язкового шаблона
-- **WHEN** в `default` видалено `views/layout.blade.php`, а активна тема його не перевизначає
-- **THEN** команда виводить рядок про відсутній `layout`, код завершення ненульовий
+#### Scenario: A required template is missing
+- **WHEN** `views/layout.blade.php` is removed from `default`, and the active theme does not override it
+- **THEN** the command outputs a line about the missing `layout`, the exit code is non-zero
 
-#### Scenario: Некоректний hooks.php
-- **WHEN** `hooks.php` активної теми повертає не функцію
-- **THEN** команда виводить відповідну помилку, код завершення ненульовий
+#### Scenario: Invalid hooks.php
+- **WHEN** `hooks.php` of the active theme returns not a function
+- **THEN** the command outputs the corresponding error, the exit code is non-zero

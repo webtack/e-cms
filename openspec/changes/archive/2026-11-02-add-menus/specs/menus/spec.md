@@ -2,198 +2,198 @@
 
 ## Purpose
 
-Визначає меню сайту й їхні пункти: дерево з одним батьком, адресу пункту, переклади, зображення, видимість за розкладом і читання дерева видимих пунктів для фронтенду. Меню існує окремо від типів і записів контенту.
+Defines the site menus and their items: the tree with one parent, the address of an item, translations, images, visibility by schedule and reading of the tree of visible items for the front-end. A menu exists separately from the types and records of the content.
 
 ## ADDED Requirements
 
 ### Requirement: Меню
-Система SHALL зберігати меню, кожне з незмінним унікальним ключем (формат `^[a-z][a-z0-9_]*$`, до 64 символів), що є його ідентифікатором, назвою, необов'язковим описом і налаштуваннями. Налаштування SHALL містити необов'язкову максимальну глибину дерева (ціле число від 1); без неї глибина не обмежується. Спроба змінити ключ існуючого меню SHALL бути відхилена з помилкою валідації.
+The system SHALL store menus, each with an immutable unique key (format `^[a-z][a-z0-9_]*$`, up to 64 characters), which is its identifier, a name, an optional description and settings. The settings SHALL contain an optional maximum depth of the tree (an integer from 1); without it the depth is not limited. An attempt to change the key of an existing menu SHALL be rejected with a validation error.
 
-#### Scenario: Створення меню
-- **WHEN** створюється меню з ключем `main` і назвою «Головне меню»
-- **THEN** меню збережено, а його ключ далі незмінний
+#### Scenario: Creating a menu
+- **WHEN** a menu with the key `main` and the name «Головне меню» is created
+- **THEN** the menu is saved, and its key remains immutable
 
-#### Scenario: Недопустимий ключ
-- **WHEN** ключ меню не відповідає формату або вже зайнятий
-- **THEN** збереження відхилено з помилкою валідації за полем `key`
+#### Scenario: Invalid key
+- **WHEN** the key of a menu does not match the format or is already taken
+- **THEN** the saving is rejected with a validation error for the field `key`
 
-#### Scenario: Зміна ключа
-- **WHEN** змінюється ключ існуючого меню
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the key
+- **WHEN** the key of an existing menu is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Недопустима глибина
-- **WHEN** максимальна глибина меню задана як `0`, від'ємне або не ціле число
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Invalid depth
+- **WHEN** the maximum depth of a menu is set as `0`, a negative or a non-integer number
+- **THEN** the saving is rejected with a validation error
 
 ### Requirement: Пункти меню та дерево з одним батьком
-Система SHALL зберігати пункти меню, кожен із незмінним унікальним `uuid` (UUID v7: заданий явно або згенерований), вагою, необов'язковим батьківським пунктом і перекладами; зв'язок пункту з меню SHALL визначатися за ключем меню, а з батьком — за `uuid` батька. Батько SHALL належати тому самому меню; пункт SHALL мати не більше одного батька. Дерево SHALL не містити циклів. Меню пункту SHALL бути незмінним після створення. Брати пункти одного батька SHALL бути впорядковані за вагою, а за рівної ваги — за внутрішнім числовим ідентифікатором. Глибина пункту (корінь має глибину 1) SHALL не перевищувати максимальну глибину меню; перенесення пункту під нового батька SHALL враховувати глибину всього його піддерева; зменшення максимальної глибини нижче фактичної глибини дерева SHALL бути відхилене.
+The system SHALL store menu items, each with an immutable unique `uuid` (UUID v7: set explicitly or generated), a weight, an optional parent item and translations; the link of an item to a menu SHALL be defined by the menu key, and to the parent — by the `uuid` of the parent. The parent SHALL belong to the same menu; an item SHALL have at most one parent. The tree SHALL NOT contain cycles. The menu of an item SHALL be immutable after creation. The siblings of one parent SHALL be ordered by weight, and with equal weight — by the internal numeric identifier. The depth of an item (the root has depth 1) SHALL NOT exceed the maximum depth of the menu; moving an item under a new parent SHALL take into account the depth of its whole subtree; a reduction of the maximum depth below the actual depth of the tree SHALL be rejected.
 
-#### Scenario: Корінь і підпункт
-- **WHEN** створюється пункт «Каталог» без батька і пункт «Куртки» з батьком «Каталог»
-- **THEN** «Каталог» є коренем, «Куртки» його дитиною
+#### Scenario: Root and child
+- **WHEN** the item «Каталог» without a parent and the item «Куртки» with the parent «Каталог» are created
+- **THEN** «Каталог» is a root, «Куртки» its child
 
-#### Scenario: Батько з іншого меню
-- **WHEN** батьком пункту обрано пункт іншого меню
-- **THEN** збереження відхилено з помилкою валідації за полем `parent_uuid`
+#### Scenario: Parent from another menu
+- **WHEN** an item of another menu is chosen as the parent of an item
+- **THEN** the saving is rejected with a validation error for the field `parent_uuid`
 
-#### Scenario: Цикл
-- **WHEN** батьком пункту «Каталог» обирається його нащадок «Куртки»
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Cycle
+- **WHEN** the descendant «Куртки» of «Каталог» is chosen as the parent of «Каталог»
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Пункт як власний батько
-- **WHEN** батьком пункту обрано його самого
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Item as its own parent
+- **WHEN** the item itself is chosen as its parent
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Зміна меню пункту
-- **WHEN** змінюється меню існуючого пункту
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the menu of an item
+- **WHEN** the menu of an existing item is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Порядок братніх пунктів
-- **WHEN** діти одного батька мають ваги 2, 0 і 1
-- **THEN** вони повертаються в порядку ваг 0, 1, 2, а за рівної ваги — за внутрішнім ідентифікатором
+#### Scenario: Order of siblings
+- **WHEN** the children of one parent have weights 2, 0 and 1
+- **THEN** they are returned in the order of weights 0, 1, 2, and with equal weight — by the internal identifier
 
-#### Scenario: Створення на межі глибини
-- **WHEN** максимальна глибина меню 2, і створюється пункт під пункт другого рівня
-- **THEN** збереження відхилено з помилкою валідації за полем `parent_uuid`
+#### Scenario: Creation on the depth boundary
+- **WHEN** the maximum depth of the menu is 2, and an item is created under an item of the second level
+- **THEN** the saving is rejected with a validation error for the field `parent_uuid`
 
-#### Scenario: Перенесення піддерева
-- **WHEN** максимальна глибина 3, і пункт із двома рівнями нащадків переноситься під пункт другого рівня
-- **THEN** перенесення відхилено, бо глибина піддерева перевищила б межу
+#### Scenario: Moving a subtree
+- **WHEN** the maximum depth is 3, and an item with two levels of descendants is moved under an item of the second level
+- **THEN** the move is rejected, because the depth of the subtree would exceed the limit
 
-#### Scenario: Глибина нижче фактичної
-- **WHEN** дерево меню має глибину 3, і максимальну глибину задано як 2
-- **THEN** зміну відхилено з помилкою валідації за полем максимальної глибини
+#### Scenario: Depth below the actual one
+- **WHEN** the tree of the menu has depth 3, and the maximum depth is set to 2
+- **THEN** the change is rejected with a validation error for the field of the maximum depth
 
 ### Requirement: Адреса пункту
-Пункт SHALL мати необов'язкову адресу `url` — рядок до 2048 символів. Допустимі форми: відносна, що починається з `/` (але не з `//`), `#` або `?`; абсолютна зі схемою `http`, `https`, `mailto` або `tel`. Інші схеми (зокрема `javascript:` і `data:`), адреси з пробілами чи керівними символами та адреси, що починаються з `//`, SHALL бути відхилені з помилкою валідації за полем `url`. Порожня адреса (`''` або `null`) SHALL зберігатися як відсутня і означати пункт-заголовок групи без посилання. Система не звіряє адресу з існуючими сторінками й записами.
+An item SHALL have an optional address `url` — a string of up to 2048 characters. The allowed forms: relative, starting with `/` (but not with `//`), `#` or `?`; absolute with the scheme `http`, `https`, `mailto` or `tel`. Other schemes (in particular `javascript:` and `data:`), addresses with spaces or control characters, and addresses starting with `//` SHALL be rejected with a validation error for the field `url`. An empty address (`''` or `null`) SHALL be stored as absent and mean a heading item of a group without a link. The system does not check the address against existing pages and records.
 
-#### Scenario: Відносна адреса
-- **WHEN** пункту задано адресу `/about`
-- **THEN** адресу збережено
+#### Scenario: Relative address
+- **WHEN** the address `/about` is set for an item
+- **THEN** the address is saved
 
-#### Scenario: Абсолютна адреса
-- **WHEN** пункту задано адресу `https://example.com/page` або `mailto:info@example.com`
-- **THEN** адресу збережено
+#### Scenario: Absolute address
+- **WHEN** the address `https://example.com/page` or `mailto:info@example.com` is set for an item
+- **THEN** the address is saved
 
-#### Scenario: Небезпечна схема
-- **WHEN** пункту задано адресу `javascript:alert(1)`
-- **THEN** збереження відхилено з помилкою валідації за полем `url`
+#### Scenario: Unsafe scheme
+- **WHEN** the address `javascript:alert(1)` is set for an item
+- **THEN** the saving is rejected with a validation error for the field `url`
 
-#### Scenario: Адреса без схеми й без слеша
-- **WHEN** пункту задано адресу `about` або `//example.com`
-- **THEN** збереження відхилено з помилкою валідації за полем `url`
+#### Scenario: Address without a scheme and without a slash
+- **WHEN** the address `about` or `//example.com` is set for an item
+- **THEN** the saving is rejected with a validation error for the field `url`
 
-#### Scenario: Пункт-заголовок групи
-- **WHEN** адресу пункту залишено порожньою
-- **THEN** пункт збережено без адреси
+#### Scenario: Heading item of a group
+- **WHEN** the address of an item is left empty
+- **THEN** the item is saved without an address
 
 ### Requirement: Подання пункту
-Пункт SHALL мати `target` зі значенням `_self` (за замовчуванням) або `_blank`, необов'язковий `css_class` (одне чи кілька імен класів з латинських літер, цифр, `-` і `_`, розділених пробілами, до 255 символів; порожній зберігається як відсутній) і одне необов'язкове зображення — файл медіатеки з профілем `image`, збережений як `{uuid}.{розширення}`. Зображення не перекладається. Зв'язок пункту з файлом SHALL бути врахований у медіатеці як використання файлу власником `menu_item`; файл, що використовується пунктом, SHALL бути недоступний для видалення з медіатеки. Заміна й очищення зображення, а також видалення пункту SHALL знімати зв'язок (сам файл лишається в медіатеці).
+An item SHALL have `target` with the value `_self` (by default) or `_blank`, an optional `css_class` (one or several class names of Latin letters, digits, `-` and `_`, separated by spaces, up to 255 characters; an empty one is stored as absent) and one optional image — a file of the media library with the profile `image`, stored as `{uuid}.{extension}`. The image is not translated. The link of an item with a file SHALL be counted in the media library as a usage of the file by the owner `menu_item`; a file used by an item SHALL be unavailable for deletion from the media library. Replacing and clearing the image, as well as deleting the item, SHALL remove the link (the file itself remains in the media library).
 
-#### Scenario: Недопустимий target
-- **WHEN** `target` пункту задано як `_top`
-- **THEN** збереження відхилено з помилкою валідації за полем `target`
+#### Scenario: Invalid target
+- **WHEN** the `target` of an item is set as `_top`
+- **THEN** the saving is rejected with a validation error for the field `target`
 
-#### Scenario: Недопустимий CSS-клас
-- **WHEN** `css_class` містить символи поза дозволеним набором
-- **THEN** збереження відхилено з помилкою валідації за полем `css_class`
+#### Scenario: Invalid CSS class
+- **WHEN** `css_class` contains characters outside the allowed set
+- **THEN** the saving is rejected with a validation error for the field `css_class`
 
-#### Scenario: Зображення пункту
-- **WHEN** пункту призначено файл профілю `image`
-- **THEN** файл показано в медіатеці як використаний пунктом і недоступний для видалення
+#### Scenario: Image of an item
+- **WHEN** a file of the profile `image` is assigned to an item
+- **THEN** the file is shown in the media library as used by the item and unavailable for deletion
 
-#### Scenario: Файл іншого профілю
-- **WHEN** як зображення вказано файл, що не належить профілю `image`
-- **THEN** збереження відхилено з помилкою валідації за полем `image`
+#### Scenario: File of another profile
+- **WHEN** a file that does not belong to the profile `image` is specified as the image
+- **THEN** the saving is rejected with a validation error for the field `image`
 
-#### Scenario: Заміна й очищення зображення
-- **WHEN** зображення пункту замінюють або очищають
-- **THEN** зв'язок зі старим файлом знято, а файл лишається в медіатеці
+#### Scenario: Replacing and clearing the image
+- **WHEN** the image of an item is replaced or cleared
+- **THEN** the link with the old file is removed, and the file remains in the media library
 
 ### Requirement: Переклади пунктів
-Пункт SHALL мати переклади `title` (назва, до 255 символів) і `description` (публічний опис, необов'язковий) для мови `default` та для мов контенту, дозволених для запису правилами мов контенту. Назва в `default` SHALL бути обов'язковою. Fallback на `default` SHALL не застосовуватися: відсутній переклад повертається як `null`. Порожній переклад неосновної мови SHALL не зберігатися, а очищення наявного — видаляти його. Видалення пункту SHALL видаляти його переклади.
+An item SHALL have translations of `title` (name, up to 255 characters) and `description` (the public description, optional) for the language `default` and for the content languages allowed for writing by the rules of the content languages. The name in `default` SHALL be required. The fallback to `default` SHALL NOT apply: a missing translation is returned as `null`. An empty translation of a non-main language SHALL not be stored, and clearing an existing one SHALL delete it. Deleting an item SHALL delete its translations.
 
-#### Scenario: Назва в default
-- **WHEN** пункт зберігається без назви в `default`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Name in default
+- **WHEN** an item is saved without a name in `default`
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Переклад активною мовою
-- **WHEN** багатомовність увімкнена, мова `en` активна, і пункту задано назву й опис мовою `en`
-- **THEN** переклад збережено
+#### Scenario: Translation in an active language
+- **WHEN** multilingual support is enabled, the language `en` is active, and the item has a name and a description in `en`
+- **THEN** the translation is saved
 
-#### Scenario: Неактивна мова
-- **WHEN** пункту задано переклад мовою, що не дозволена для запису
-- **THEN** збереження відхилено з помилкою валідації за ключем `lang`
+#### Scenario: Inactive language
+- **WHEN** a translation in a language that is not allowed for writing is set for an item
+- **THEN** the saving is rejected with a validation error for the key `lang`
 
-#### Scenario: Відсутній переклад
-- **WHEN** запитується назва пункту мовою `en`, а перекладу немає
-- **THEN** повертається `null`, а не назва `default`
+#### Scenario: Missing translation
+- **WHEN** the name of an item in the language `en` is requested, and there is no translation
+- **THEN** `null` is returned, not the name of `default`
 
 ### Requirement: Видимість пункту за розкладом
-Пункт SHALL мати прапорець `is_active` (за замовчуванням увімкнений) та необов'язкові `published_at` і `unpublished_at` (UTC, до хвилини). Порожня дата означає відсутність відповідної межі. Пункт SHALL бути видимим для сайту, коли `is_active = true`, а `published_at` порожня або не пізніша за поточний момент, а `unpublished_at` порожня або пізніша за поточний момент. Якщо задано обидві дати, `unpublished_at` SHALL бути пізнішою за `published_at`, інакше збереження відхиляється з помилкою валідації за полем `unpublished_at`. Статус SHALL бути похідним і не зберігатися: «Вимкнено» (`is_active = false`, має пріоритет над датами), «Заплановано» (`published_at` у майбутньому), «Завершено» (`unpublished_at` у минулому або дорівнює поточному моменту), інакше «Опубліковано». Вимкнення пункту не змінює його дат. Пункт, який невидимий, SHALL приховувати всю свою гілку: його нащадки невидимі незалежно від власних прапорців і дат.
+An item SHALL have the flag `is_active` (enabled by default) and optional `published_at` and `unpublished_at` (UTC, to the minute). An empty date means the absence of the corresponding limit. An item SHALL be visible for the site when `is_active = true`, `published_at` is empty or not later than the current moment, and `unpublished_at` is empty or later than the current moment. If both dates are set, `unpublished_at` SHALL be later than `published_at`, otherwise the saving is rejected with a validation error for the field `unpublished_at`. The status SHALL be derived and not stored: «Вимкнено» (`is_active = false`, takes priority over the dates), «Заплановано» (`published_at` in the future), «Завершено» (`unpublished_at` in the past or equal to the current moment), otherwise «Опубліковано». Disabling an item does not change its dates. An item that is invisible SHALL hide its whole branch: its descendants are invisible regardless of their own flags and dates.
 
-#### Scenario: Опублікований пункт
-- **WHEN** `is_active = true`, обидві дати порожні
-- **THEN** пункт видимий
+#### Scenario: Published item
+- **WHEN** `is_active = true`, both dates are empty
+- **THEN** the item is visible
 
-#### Scenario: Запланований пункт
-- **WHEN** `published_at` пізніша за поточний момент
-- **THEN** статус «Заплановано», пункт невидимий, і стає видимим після настання `published_at` без жодних дій
+#### Scenario: Scheduled item
+- **WHEN** `published_at` is later than the current moment
+- **THEN** the status is «Заплановано», the item is invisible, and it becomes visible when `published_at` arrives without any action
 
-#### Scenario: Заплановане зняття
-- **WHEN** `unpublished_at` настала
-- **THEN** статус «Завершено», пункт невидимий
+#### Scenario: Scheduled unpublishing
+- **WHEN** `unpublished_at` arrives
+- **THEN** the status is «Завершено», the item is invisible
 
-#### Scenario: Вимкнений пункт
-- **WHEN** `is_active = false`, а дати відповідають діапазону видимості
-- **THEN** статус «Вимкнено», пункт невидимий, дати не змінено
+#### Scenario: Disabled item
+- **WHEN** `is_active = false`, and the dates correspond to the visibility range
+- **THEN** the status is «Вимкнено», the item is invisible, the dates are not changed
 
-#### Scenario: Суперечливий інтервал
-- **WHEN** `unpublished_at` не пізніша за `published_at`
-- **THEN** збереження відхилено з помилкою валідації за полем `unpublished_at`
+#### Scenario: Contradictory interval
+- **WHEN** `unpublished_at` is not later than `published_at`
+- **THEN** the saving is rejected with a validation error for the field `unpublished_at`
 
-#### Scenario: Прихована гілка
-- **WHEN** батьківський пункт невидимий, а його дитина власне видима
-- **THEN** дитина невидима для сайту
+#### Scenario: Hidden branch
+- **WHEN** a parent item is invisible, and its child is itself visible
+- **THEN** the child is invisible for the site
 
 ### Requirement: Дерево видимих пунктів для сайту
-Система SHALL надавати за ключем меню й мовою вкладене дерево лише видимих пунктів, впорядковане за вагою. Кожен вузол SHALL містити `uuid`, назву й опис вказаною мовою (без fallback: відсутній переклад дає `null`), `url`, `target`, `css_class`, зображення, ознаку `is_external` і дітей. `is_external` SHALL бути `true` для адрес `http`, `https`, `mailto` та `tel`, `false` для відносних адрес і `null` для пункту без адреси. Невидимі пункти разом із гілками SHALL не потрапляти в дерево. Невідомий ключ меню SHALL давати помилку, а не порожнє дерево. Мова SHALL відповідати правилам читання мов контенту.
+The system SHALL provide, by a menu key and a language, a nested tree of visible items only, ordered by weight. Each node SHALL contain `uuid`, the name and the description in the given language (without fallback: a missing translation gives `null`), `url`, `target`, `css_class`, the image, the flag `is_external` and the children. `is_external` SHALL be `true` for the addresses `http`, `https`, `mailto` and `tel`, `false` for relative addresses, and `null` for an item without an address. Invisible items together with their branches SHALL NOT get into the tree. An unknown menu key SHALL give an error, not an empty tree. The language SHALL correspond to the rules of reading the content languages.
 
-#### Scenario: Лише видимі пункти
-- **WHEN** у меню є опублікований пункт, запланований пункт і вимкнений пункт
-- **THEN** дерево містить лише опублікований
+#### Scenario: Only visible items
+- **WHEN** the menu has a published item, a scheduled item and a disabled item
+- **THEN** the tree contains only the published one
 
-#### Scenario: Гілка прихованого батька
-- **WHEN** прихований пункт має видимих нащадків
-- **THEN** ні він, ні його нащадки в дерево не потрапляють
+#### Scenario: Branch of a hidden parent
+- **WHEN** a hidden item has visible descendants
+- **THEN** neither it nor its descendants get into the tree
 
-#### Scenario: Порядок і вкладеність
-- **WHEN** у меню є корені з вагами 1 і 0, і під першим коренем дитина
-- **THEN** дерево повертає корені в порядку ваг, а дитину всередині свого батька
+#### Scenario: Order and nesting
+- **WHEN** the menu has roots with weights 1 and 0, and under the first root a child
+- **THEN** the tree returns the roots in the order of weights, and the child inside its parent
 
-#### Scenario: Ознака зовнішнього посилання
-- **WHEN** у дереві пункти з адресами `/about`, `https://example.com` і без адреси
-- **THEN** `is_external` дорівнює `false`, `true` і `null` відповідно
+#### Scenario: Flag of an external link
+- **WHEN** the tree has items with the addresses `/about`, `https://example.com` and without an address
+- **THEN** `is_external` equals `false`, `true` and `null` respectively
 
-#### Scenario: Невідоме меню
-- **WHEN** запитується дерево меню з ключем, якого немає
-- **THEN** результатом є помилка
+#### Scenario: Unknown menu
+- **WHEN** the tree of a menu with a key that does not exist is requested
+- **THEN** the result is an error
 
 ### Requirement: Видалення пункту та меню
-Пункт, що має дітей, SHALL не видалятися. Меню, що має пункти, SHALL не видалятися. Спроба видалення SHALL бути відхилена з помилкою валідації; база даних SHALL бути останнім бар'єром, що не дозволяє видалити батька з дітьми. Видалення пункту без дітей SHALL видаляти його переклади й знімати зв'язок із зображенням. Видалення SHALL відбуватися через моделі, щоб перевірки й зняття зв'язків спрацювали.
+An item that has children SHALL not be deleted. A menu that has items SHALL not be deleted. An attempt of deletion SHALL be rejected with a validation error; the database SHALL be the last barrier that does not allow deleting a parent with children. Deleting an item without children SHALL delete its translations and remove the link with the image. The deletion SHALL happen through the models, so that the checks and the removal of the links work.
 
-#### Scenario: Пункт із дітьми
-- **WHEN** видаляється пункт, що має дітей
-- **THEN** видалення відхилено, пункт і діти збережено
+#### Scenario: Item with children
+- **WHEN** an item that has children is being deleted
+- **THEN** the deletion is rejected, the item and its children are kept
 
-#### Scenario: Листок
-- **WHEN** видаляється пункт без дітей
-- **THEN** пункт, його переклади й зв'язок зображення видалено
+#### Scenario: Leaf
+- **WHEN** an item without children is being deleted
+- **THEN** the item, its translations and the link of the image are deleted
 
-#### Scenario: Меню з пунктами
-- **WHEN** видаляється меню, що має пункти
-- **THEN** видалення відхилено
+#### Scenario: Menu with items
+- **WHEN** a menu that has items is being deleted
+- **THEN** the deletion is rejected
 
-#### Scenario: Порожнє меню
-- **WHEN** видаляється меню без пунктів
-- **THEN** меню видалено
+#### Scenario: Empty menu
+- **WHEN** a menu without items is being deleted
+- **THEN** the menu is deleted

@@ -3,32 +3,32 @@
 ## ADDED Requirements
 
 ### Requirement: Фільтр за полем «термін» охоплює нащадків
-Система SHALL підтримувати для поля типу «термін» оператори `eq` та `in`, і SHALL трактувати кожен вказаний термін як цей термін разом з усіма його нащадками на будь-якій глибині. Запис відповідає фільтру, якщо його значення поля (для множинного поля — хоча б одне) дорівнює будь-якому терміну з розгорнутого набору. Вказаний термін SHALL бути `uuid` існуючого терміна; інше — помилка валідації `filters.N.value`. Інші оператори для цього типу SHALL бути відхилені як непідтримувані.
+The system SHALL support for a field of the type «термін» the operators `eq` and `in`, and SHALL treat each given term as this term together with all its descendants at any depth. A record matches the filter if its value of the field (for a multiple field — at least one) equals any term from the expanded set. The given term SHALL be the `uuid` of an existing term; anything else is a validation error `filters.N.value`. Other operators for this type SHALL be rejected as unsupported.
 
-#### Scenario: Запис у підкатегорії
-- **WHEN** фільтр `category` дорівнює «Одяг», а запис має `category` = «Зимові», нащадок «Одяг» через «Куртки»
-- **THEN** цей запис входить до результату
+#### Scenario: Record in a subcategory
+- **WHEN** the filter `category` equals «Одяг», and the record has `category` = «Зимові», a descendant of «Одяг» through «Куртки»
+- **THEN** this record is included in the result
 
-#### Scenario: Запис безпосередньо в термін
-- **WHEN** фільтр `category` дорівнює «Одяг», а запис має `category` = «Одяг»
-- **THEN** цей запис входить до результату
+#### Scenario: Record directly in the term
+- **WHEN** the filter `category` equals «Одяг», and the record has `category` = «Одяг»
+- **THEN** this record is included in the result
 
-#### Scenario: Запис в іншій гілці
-- **WHEN** фільтр `category` дорівнює «Одяг», а запис має `category` = «Електроніка»
-- **THEN** цей запис до результату не входить
+#### Scenario: Record in another branch
+- **WHEN** the filter `category` equals «Одяг», and the record has `category` = «Електроніка»
+- **THEN** this record is not included in the result
 
-#### Scenario: Перелік термінів
-- **WHEN** фільтр `category` з оператором `in` і значенням «Одяг» та «Електроніка»
-- **THEN** повертаються записи з будь-яким із цих термінів або їхніх нащадків, кожен запис один раз
+#### Scenario: List of terms
+- **WHEN** the filter `category` with the operator `in` and the values «Одяг» and «Електроніка»
+- **THEN** records with any of these terms or their descendants are returned, each record once
 
-#### Scenario: Множинне поле
-- **WHEN** фільтр `tags` дорівнює «Новини», а запис має `tags` зі значеннями «Спорт» і «Футбол», де «Футбол» нащадок «Новини»
-- **THEN** запис входить до результату
+#### Scenario: Multiple field
+- **WHEN** the filter `tags` equals «Новини», and the record has `tags` with the values «Спорт» and «Футбол», where «Футбол» is a descendant of «Новини»
+- **THEN** the record is included in the result
 
-#### Scenario: Неіснуючий термін у фільтрі
-- **WHEN** у фільтрі вказано `uuid`, якого немає
-- **THEN** запит відхилено з помилкою валідації `filters.N.value`
+#### Scenario: Non-existent term in the filter
+- **WHEN** the filter contains a `uuid` that does not exist
+- **THEN** the request is rejected with a validation error `filters.N.value`
 
-#### Scenario: Непідтримуваний оператор
-- **WHEN** для поля типу «термін» вказано оператор `gt`
-- **THEN** запит відхилено з помилкою валідації `filters.N.operator`
+#### Scenario: Unsupported operator
+- **WHEN** the operator `gt` is specified for a field of the type «термін»
+- **THEN** the request is rejected with a validation error `filters.N.operator`

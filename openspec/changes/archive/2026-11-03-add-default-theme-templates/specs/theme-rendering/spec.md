@@ -2,90 +2,90 @@
 
 ## Purpose
 
-Перетворення значень полів на готові до виводу дані та рендер полів, блоків і меню шаблонами теми з каскадом кандидатів і хуками.
+The conversion of field values into data ready for output, and the rendering of fields, blocks and menus by the templates of the theme with a cascade of candidates and hooks.
 
 ## ADDED Requirements
 
 ### Requirement: Готові значення полів
-Кожен тип поля SHALL надавати публічне подання значення (`present`): дані, готові до виводу без додаткових запитів у шаблоні. Файли й зображення SHALL подаватися публічним URL разом з іменем файла та його описом (опис порожній, якщо не заданий), значення типу `term` — назвою терма мовою читання (без підміни іншою мовою), `node_ref` — заголовком і адресою цільового запису (запис невидимий чи видалений SHALL давати відсутність значення), `type_ref` — ключем, назвою й адресою типу (для виду `content`), `youtube` — ідентифікатором, адресою перегляду й embed-адресою, `url` — адресою й заголовком, `richtext` — очищеним HTML. Решта типів SHALL подаватися значенням свого PHP-типу.
+Each field type SHALL provide a public representation of the value (`present`): data ready for output without additional requests in the template. Files and images SHALL be presented by a public URL together with the file name and its description (the description is empty if it is not set); the value of the type `term` — by the name of the term in the reading language (without substitution by another language); `node_ref` — by the heading and the address of the target record (a record that is invisible or deleted SHALL give the absence of a value); `type_ref` — by the key, the name and the address of the type (for the kind `content`); `youtube` — by the identifier, the viewing address and the embed address; `url` — by the address and the heading; `richtext` — by the cleaned HTML. The other types SHALL be presented by the value of their PHP type.
 
-#### Scenario: Зображення як URL
-- **WHEN** поле типу `image` має значення `{uuid}.png`
-- **THEN** шаблон поля отримує публічний URL цього файла, а не `{uuid}.png`
+#### Scenario: Image as a URL
+- **WHEN** a field of the type `image` has the value `{uuid}.png`
+- **THEN** the template of the field receives the public URL of this file, and not `{uuid}.png`
 
-#### Scenario: Ім'я й опис файла
-- **WHEN** поле типу `file` посилається на файл з іменем `price.pdf` і описом `Price list`
-- **THEN** шаблон поля отримує URL, ім'я `price.pdf` і опис `Price list`, а для файла без опису — порожній опис
+#### Scenario: Name and description of a file
+- **WHEN** a field of the type `file` refers to a file with the name `price.pdf` and the description `Price list`
+- **THEN** the template of the field receives the URL, the name `price.pdf` and the description `Price list`, and for a file without a description — an empty description
 
-#### Scenario: Терм як назва
-- **WHEN** поле типу `term` посилається на терм, що має переклад мовою читання
-- **THEN** шаблон поля отримує назву терма цією мовою
+#### Scenario: Term as a name
+- **WHEN** a field of the type `term` refers to a term that has a translation in the reading language
+- **THEN** the template of the field receives the name of the term in this language
 
-#### Scenario: Невидимий цільовий запис
-- **WHEN** поле `node_ref` посилається на запис, що неактивний або неопублікований
-- **THEN** шаблон не отримує цього значення й нічого про нього не виводить
+#### Scenario: Invisible target record
+- **WHEN** a field `node_ref` refers to a record that is inactive or unpublished
+- **THEN** the template does not receive this value and outputs nothing about it
 
 #### Scenario: YouTube
-- **WHEN** поле `youtube` має значення з ідентифікатором відео
-- **THEN** шаблон отримує ідентифікатор і embed-адресу `youtube-nocookie.com`
+- **WHEN** a field `youtube` has a value with the identifier of the video
+- **THEN** the template receives the identifier and the embed address `youtube-nocookie.com`
 
 ### Requirement: Рендер поля
-Система SHALL рендерити поле шаблоном, вибраним зі списку з восьми кандидатів від конкретного до загального: `{t}/field-{ftype}--{key}`, `{t}/field-{ftype}`, `{t}/field--{key}`, `{t}/field`, `fields/field-{ftype}--{key}`, `fields/field-{ftype}`, `fields/field--{key}`, `fields/field`, де `{t}` — ключ типу запису, `{ftype}` — тип поля, `{key}` — ключ поля. Шаблон SHALL завжди отримувати `$items` — масив готових значень, також для немножинного поля. Поле без значення SHALL НЕ виводити нічого. Перед рендером SHALL виконуватися хуки `preprocess('field')` і `preprocess('field.{ftype}')`, а `suggest('field')` SHALL мати змогу змінити список кандидатів. Тема `default` SHALL мати шаблон для кожного з 15 типів полів і загальний `fields/field`; кожен із них SHALL виводити лейбл поля (його назву), а шаблон файла — ім'я файла посиланням і його опис.
+The system SHALL render a field by a template chosen from the list of eight candidates from the specific to the general: `{t}/field-{ftype}--{key}`, `{t}/field-{ftype}`, `{t}/field--{key}`, `{t}/field`, `fields/field-{ftype}--{key}`, `fields/field-{ftype}`, `fields/field--{key}`, `fields/field`, where `{t}` is the key of the type of the record, `{ftype}` is the type of the field, `{key}` is the key of the field. The template SHALL always receive `$items` — an array of ready values, also for a non-multiple field. A field without a value SHALL output nothing. Before rendering the hooks `preprocess('field')` and `preprocess('field.{ftype}')` SHALL be run, and `suggest('field')` SHALL be able to change the list of candidates. The theme `default` SHALL have a template for each of the 15 field types and the general `fields/field`; each of them SHALL output the label of the field (its name), and the template of a file — the file name as a link text and its description under it.
 
-#### Scenario: Каскад від ключа поля
-- **WHEN** тема має `fields/field--cover` і `fields/field-image`, рендериться поле `cover` типу `image`
-- **THEN** використано `fields/field-image--cover`, якщо він є, інакше `fields/field-image`, а `fields/field--cover` лише коли немає `fields/field-image`
+#### Scenario: Cascade from the key of the field
+- **WHEN** the theme has `fields/field--cover` and `fields/field-image`, and the field `cover` of the type `image` is rendered
+- **THEN** `fields/field-image--cover` is used if it exists, otherwise `fields/field-image`, and `fields/field--cover` only when there is no `fields/field-image`
 
-#### Scenario: Шаблон типу запису перемагає глобальний
-- **WHEN** тип запису `news` має `news/field-string`, а `default` має `fields/field-string`
-- **THEN** поле типу `string` запису `news` рендериться шаблоном `news/field-string`
+#### Scenario: The template of the type of the record beats the global one
+- **WHEN** the type of the record `news` has `news/field-string`, and `default` has `fields/field-string`
+- **THEN** the field of the type `string` of the record `news` is rendered by the template `news/field-string`
 
-#### Scenario: Немножинне поле як список
-- **WHEN** рендериться немножинне поле зі значенням
-- **THEN** шаблон отримує `$items` з одним елементом
+#### Scenario: Non-multiple field as a list
+- **WHEN** a non-multiple field with a value is rendered
+- **THEN** the template receives `$items` with one element
 
-#### Scenario: Порожнє поле
-- **WHEN** поле не має значення (або множинне поле має порожній список)
-- **THEN** HTML поля порожній
+#### Scenario: Empty field
+- **WHEN** the field has no value (or a multiple field has an empty list)
+- **THEN** the HTML of the field is empty
 
-#### Scenario: Лейбл і опис файла в темі default
-- **WHEN** рендериться непорожнє поле будь-якого типу, а для `file` — з іменем і описом файла
-- **THEN** HTML містить назву поля як лейбл; для `file` — ім'я файла як текст посилання й опис під ним
+#### Scenario: Label and description of a file in the theme default
+- **WHEN** a non-empty field of any type is rendered, and for `file` — with the name and the description of the file
+- **THEN** the HTML contains the name of the field as a label; for `file` — the name of the file as the text of the link and the description under it
 
-#### Scenario: Хук preprocess поля
-- **WHEN** тема реєструє `preprocess('field.youtube')`, що змінює змінні
-- **THEN** шаблон поля `youtube` отримує змінені змінні, а хук `field` виконано раніше
+#### Scenario: Preprocess hook of the field
+- **WHEN** the theme registers `preprocess('field.youtube')`, which changes the variables
+- **THEN** the template of the field `youtube` receives the changed variables, and the hook `field` has been run before
 
 ### Requirement: Блоки в шаблонах
-Шаблон SHALL мати змогу розмістити блок за slug явним викликом. Блок SHALL вибирати шаблон зі списку `blocks/block-{t}--{slug}`, `blocks/block-{t}`, `blocks/block`, де `{t}` — ключ типу блока, а `{slug}` — slug запису без префікса `block-`. Шаблон блока SHALL отримувати запис, тип і значення, а його поля SHALL виводитися тим самим механізмом, що й поля сторінки. Блок, що не існує, неактивний або неопублікований, SHALL НЕ виводити нічого й НЕ ламати сторінку.
+A template SHALL be able to place a block by its slug with an explicit call. A block SHALL choose a template from the list `blocks/block-{t}--{slug}`, `blocks/block-{t}`, `blocks/block`, where `{t}` is the key of the type of the block, and `{slug}` is the slug of the record without the prefix `block-`. The template of a block SHALL receive the record, the type and the values, and its fields SHALL be output by the same mechanism as the fields of a page. A block that does not exist, is inactive or unpublished SHALL NOT output anything and SHALL NOT break the page.
 
-#### Scenario: Розміщення блока
-- **WHEN** існує видимий блок зі slug `block-footer`, а шаблон викликає його розміщення
-- **THEN** у HTML є вміст блока, зібраний шаблоном `blocks/block-{t}--footer`, а за його відсутності `blocks/block-{t}` або `blocks/block`
+#### Scenario: Placing a block
+- **WHEN** a visible block with the slug `block-footer` exists, and the template calls its placement
+- **THEN** the HTML contains the content of the block, assembled by the template `blocks/block-{t}--footer`, and in its absence `blocks/block-{t}` or `blocks/block`
 
-#### Scenario: Невидимий блок
-- **WHEN** блок неактивний, незапланований або не існує
-- **THEN** розміщення нічого не виводить, відповідь сторінки успішна
+#### Scenario: Invisible block
+- **WHEN** the block is inactive, not scheduled or does not exist
+- **THEN** the placement outputs nothing, the response of the page is successful
 
-#### Scenario: Блок не маршрутизується
-- **WHEN** блок розміщено у шаблоні
-- **THEN** це не створює публічної адреси цього блока
+#### Scenario: Block is not routed
+- **WHEN** the block is placed in a template
+- **THEN** this does not create a public address of this block
 
 ### Requirement: Меню в шаблонах
-Шаблон SHALL мати змогу розмістити меню за ключем явним викликом. Меню SHALL вибирати шаблон зі списку `menus/menu--{key}`, `menus/menu` і отримувати дерево видимих пунктів мовою читання (зовнішні посилання позначені, вкладені пункти зберігають ієрархію). Меню, якого немає, SHALL НЕ виводити нічого й НЕ ламати сторінку.
+A template SHALL be able to place a menu by its key with an explicit call. The menu SHALL choose a template from the list `menus/menu--{key}`, `menus/menu` and receive the tree of visible items in the reading language (external links are marked, nested items keep the hierarchy). A menu that does not exist SHALL NOT output anything and SHALL NOT break the page.
 
-#### Scenario: Вкладене меню
-- **WHEN** меню `main` має пункт із дочірнім пунктом
-- **THEN** HTML містить обидва пункти, дочірній вкладений у батьківський
+#### Scenario: Nested menu
+- **WHEN** the menu `main` has an item with a child item
+- **THEN** the HTML contains both items, the child nested in the parent
 
-#### Scenario: Прихований пункт
-- **WHEN** пункт меню неактивний або поза періодом публікації
-- **THEN** він і його гілка не виводяться
+#### Scenario: Hidden item
+- **WHEN** a menu item is inactive or outside the publication period
+- **THEN** it and its branch are not output
 
-#### Scenario: Меню без запису
-- **WHEN** шаблон викликає меню з ключем, якого не існує
-- **THEN** розміщення нічого не виводить, відповідь сторінки успішна
+#### Scenario: Menu without a record
+- **WHEN** a template calls a menu with a key that does not exist
+- **THEN** the placement outputs nothing, the response of the page is successful
 
-#### Scenario: Окремий шаблон меню
-- **WHEN** тема має `menus/menu--footer`
-- **THEN** меню `footer` рендериться ним, а решта меню — шаблоном `menus/menu`
+#### Scenario: Separate template of the menu
+- **WHEN** the theme has `menus/menu--footer`
+- **THEN** the menu `footer` is rendered by it, and the other menus — by the template `menus/menu`

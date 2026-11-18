@@ -2,115 +2,115 @@
 
 ## Purpose
 
-Медіатека показує всі файли сховища, і використовувані, і ні, фіксує зв'язки «файл використовується власником у ролі» і дає змогу вручну видаляти файли, які ніде не використовуються.
+The media library shows all files of the storage, both used and unused, records the relations "a file is used by an owner in a role", and allows manual deletion of files that are used nowhere.
 
 ## ADDED Requirements
 
-### Requirement: Облік зв'язків файлів
-Система SHALL зберігати зв'язок між файлом і місцем його використання окремим записом: файл (за `uuid`), власник (тип і ідентифікатор), роль (наприклад, ключ поля) і мова. Комбінація (файл, власник, роль, мова) SHALL бути унікальною. Система SHALL не допускати видалення запису файлу, на який є зв'язок, на рівні БД.
+### Requirement: Recording file relations
+The system SHALL store the relation between a file and the place of its use as a separate record: the file (by `uuid`), the owner (type and identifier), the role (for example, the key of a field) and the language. The combination (file, owner, role, language) SHALL be unique. The system SHALL NOT allow the deletion of a file record that has a relation, at the DB level.
 
-#### Scenario: Один зв'язок
-- **WHEN** файл прив'язують до одного власника в одній ролі й мові двічі
-- **THEN** існує один зв'язок, а не два
+#### Scenario: One relation
+- **WHEN** a file is attached to one owner in one role and language twice
+- **THEN** there is one relation, not two
 
-#### Scenario: Один файл у кількох місцях
-- **WHEN** один файл використано в двох різних записах
-- **THEN** існують два зв'язки з різними власниками, а кількість використань файлу дорівнює двом
+#### Scenario: One file in several places
+- **WHEN** one file is used in two different records
+- **THEN** there are two relations with different owners, and the number of uses of the file equals two
 
-#### Scenario: Захист на рівні БД
-- **WHEN** запис файлу, на який є зв'язок, видаляється напряму
-- **THEN** видалення відхилено, запис і файл на диску лишаються
+#### Scenario: Protection at the DB level
+- **WHEN** the record of a file that has a relation is deleted directly
+- **THEN** the deletion is rejected, the record and the file on the disk remain
 
-### Requirement: Синхронізація зв'язків із записом значення
-Система SHALL оновлювати зв'язки власника в тій самій транзакції, що й запис значення поля типу `image` або `file`: після запису набір зв'язків власника для цієї ролі й мови SHALL збігатися з набором файлів у збереженому значенні. Помилка запису SHALL не залишати частково оновлених зв'язків.
+### Requirement: Synchronizing relations with the record of a value
+The system SHALL update the relations of the owner in the same transaction as the writing of the value of a field of the type `image` or `file`: after writing, the set of relations of the owner for this role and language SHALL match the set of files in the stored value. A write error SHALL NOT leave partially updated relations.
 
-#### Scenario: Прив'язка файлу
-- **WHEN** у полі `file` запису зберігається файл
-- **THEN** з'являється зв'язок цього файлу з цим записом, роль якого дорівнює ключу поля
+#### Scenario: Attaching a file
+- **WHEN** a file is stored in the field `file` of a record
+- **THEN** a relation of this file with this record appears, whose role equals the key of the field
 
-#### Scenario: Заміна файлу
-- **WHEN** у полі `file` запису файл A замінюють файлом B
-- **THEN** зв'язок із A видалено, зв'язок із B створено, а запис файлу A і сам файл лишаються
+#### Scenario: Replacing a file
+- **WHEN** in the field `file` of a record file A is replaced by file B
+- **THEN** the relation with A is deleted, the relation with B is created, and the record of file A and the file itself remain
 
-#### Scenario: Очищення поля
-- **WHEN** значення поля `file` очищають
-- **THEN** зв'язок видалено, файл лишається у сховищі
+#### Scenario: Clearing a field
+- **WHEN** the value of the field `file` is cleared
+- **THEN** the relation is deleted, and the file remains in the storage
 
-#### Scenario: Множинне поле
-- **WHEN** у множинному полі `file` зберігається три файли
-- **THEN** існує по зв'язку на кожен із трьох файлів
+#### Scenario: Multiple field
+- **WHEN** three files are stored in the multiple field `file`
+- **THEN** there is one relation for each of the three files
 
-#### Scenario: Помилка запису
-- **WHEN** запис значень падає на валідації
-- **THEN** зв'язки запису не змінюються
+#### Scenario: Write error
+- **WHEN** the writing of values fails on validation
+- **THEN** the relations of the record do not change
 
-### Requirement: Прибирання зв'язків при видаленні власника
-Система SHALL видаляти зв'язки запису контенту при видаленні цього запису та зв'язки поля, значення якого зникають, при видаленні цього поля. Сам файл при цьому SHALL лишатися.
+### Requirement: Cleaning up relations when the owner is deleted
+The system SHALL delete the relations of a content record when this record is deleted, and the relations of a field whose values disappear when this field is deleted. The file itself SHALL remain in this case.
 
-#### Scenario: Видалення запису
-- **WHEN** видаляється запис контенту, що використовує файл
-- **THEN** зв'язки цього запису видалено, лічильник використань файлу зменшився, файл лишився у сховищі
+#### Scenario: Deleting a record
+- **WHEN** a content record that uses a file is deleted
+- **THEN** the relations of this record are deleted, the number of uses of the file decreases, the file remains in the storage
 
-#### Scenario: Видалення поля
-- **WHEN** видаляється поле типу `image` або `file` разом з його значеннями
-- **THEN** зв'язки цього поля видалено, файли лишилися у сховищі
+#### Scenario: Deleting a field
+- **WHEN** a field of the type `image` or `file` is deleted together with its values
+- **THEN** the relations of this field are deleted, the files remain in the storage
 
-### Requirement: Сторінка медіатеки
-Адмінка SHALL надавати сторінку медіатеки лише для автентифікованих користувачів з підтвердженою поштою, що показує всі файли сховища таблицею з пагінацією, пошуком і сортуванням. Для кожного файлу SHALL відображатися: перегляд (для зображень), оригінальне ім'я, тип, розмір, користувач, що завантажив, дата завантаження й кількість використань. Файл без зв'язків SHALL мати кількість використань 0. Сторінка SHALL показувати файли незалежно від того, хто їх завантажив.
+### Requirement: Media library page
+The admin SHALL provide the media library page only for authenticated users with a confirmed email, which shows all files of the storage in a table with pagination, search and sorting. For each file SHALL be displayed: a preview (for images), the original name, the type, the size, the user who uploaded it, the upload date and the number of uses. A file without relations SHALL have 0 uses. The page SHALL show files regardless of who uploaded them.
 
-#### Scenario: Усі файли
-- **WHEN** у сховищі є файли, завантажені різними користувачами, і використовувані, і ні
-- **THEN** сторінка показує їх усі, а кількість використань збігається з кількістю зв'язків кожного файлу
+#### Scenario: All files
+- **WHEN** the storage has files uploaded by different users, both used and unused
+- **THEN** the page shows all of them, and the number of uses matches the number of relations of each file
 
-#### Scenario: Невикористаний файл
-- **WHEN** файл завантажено, але ніде не використано
-- **THEN** у таблиці він має кількість використань 0
+#### Scenario: Unused file
+- **WHEN** a file is uploaded but used nowhere
+- **THEN** in the table it has 0 uses
 
-#### Scenario: Файл без власника
-- **WHEN** користувача, що завантажив файл, видалено
-- **THEN** файл лишається в таблиці, а в колонці користувача — порожнє значення
+#### Scenario: File without an owner
+- **WHEN** the user who uploaded a file is deleted
+- **THEN** the file remains in the table, and in the user column there is an empty value
 
-#### Scenario: Гість
-- **WHEN** гість відкриває сторінку медіатеки
-- **THEN** його перенаправлено на вхід
+#### Scenario: Guest
+- **WHEN** a guest opens the media library page
+- **THEN** they are redirected to the login
 
-#### Scenario: Порожня медіатека
-- **WHEN** у сховищі немає файлів
-- **THEN** сторінка показує повідомлення про відсутність файлів
+#### Scenario: Empty media library
+- **WHEN** the storage has no files
+- **THEN** the page shows a message that there are no files
 
-### Requirement: Де використовується файл
-Сторінка медіатеки SHALL для вибраного файлу показувати перелік місць його використання: власника (з посиланням на його сторінку редагування, якщо воно є), роль і мову.
+### Requirement: Where a file is used
+The media library page SHALL show, for the selected file, the list of places of its use: the owner (with a link to its edit page, if there is one), the role and the language.
 
-#### Scenario: Використовуваний файл
-- **WHEN** користувач відкриває деталі файлу, що використаний у полі `cover` запису «Привіт»
-- **THEN** деталі показують цей запис (з посиланням на його редагування), поле `cover` і мову
+#### Scenario: Used file
+- **WHEN** the user opens the details of a file that is used in the field `cover` of the record "Hello"
+- **THEN** the details show this record (with a link to its edit page), the field `cover` and the language
 
-#### Scenario: Невикористаний файл
-- **WHEN** користувач відкриває деталі файлу без зв'язків
-- **THEN** деталі повідомляють, що файл не використовується
+#### Scenario: Unused file
+- **WHEN** the user opens the details of a file without relations
+- **THEN** the details report that the file is not used
 
-### Requirement: Ручне видалення невикористаних файлів
-Система SHALL дозволяти авторизованому адміністратору видалити файл (запис і файл на диску) з медіатеки лише тоді, коли на нього немає жодного зв'язку, після підтвердження. Перевірку SHALL виконувати сервер, незалежно від стану інтерфейсу. Видалення файлу, що використовується, SHALL бути відхилене з повідомленням, а запис і файл на диску лишатися.
+### Requirement: Manual deletion of unused files
+The system SHALL allow an authorized administrator to delete a file (the record and the file on the disk) from the media library only when there is no relation to it, after confirmation. The check SHALL be performed by the server, regardless of the state of the interface. Deleting a file that is in use SHALL be rejected with a message, and the record and the file on the disk remain.
 
-#### Scenario: Видалення невикористаного
-- **WHEN** адміністратор підтверджує видалення файлу без зв'язків
-- **THEN** запис файлу і файл на диску видалено, а файл зник із таблиці
+#### Scenario: Deleting an unused file
+- **WHEN** the administrator confirms the deletion of a file without relations
+- **THEN** the file record and the file on the disk are deleted, and the file disappears from the table
 
-#### Scenario: Спроба видалити використовуваний
-- **WHEN** запит на видалення стосується файлу, що має зв'язки (зокрема надісланий напряму, поза інтерфейсом)
-- **THEN** видалення відхилено з повідомленням, запис і файл на диску лишаються
+#### Scenario: Attempt to delete a used file
+- **WHEN** a deletion request concerns a file that has relations (in particular sent directly, outside the interface)
+- **THEN** the deletion is rejected with a message, the record and the file on the disk remain
 
-#### Scenario: Файл відсутній на диску
-- **WHEN** адміністратор видаляє невикористаний файл, якого вже немає на диску
-- **THEN** запис видалено без помилки
+#### Scenario: File missing on the disk
+- **WHEN** the administrator deletes an unused file that is already missing on the disk
+- **THEN** the record is deleted without an error
 
-#### Scenario: Скасування
-- **WHEN** адміністратор скасовує підтвердження видалення
-- **THEN** файл лишається без змін
+#### Scenario: Cancellation
+- **WHEN** the administrator cancels the deletion confirmation
+- **THEN** the file remains unchanged
 
-### Requirement: Доступ до медіатеки без ролей
-Поки в системі немає ролей і прав, медіатека SHALL бути доступна кожному автентифікованому користувачу з підтвердженою поштою, що має доступ до адмінки.
+### Requirement: Access to the media library without roles
+While the system has no roles and permissions, the media library SHALL be available to every authenticated user with a confirmed email who has access to the admin.
 
-#### Scenario: Звичайний адміністратор
-- **WHEN** автентифікований користувач із підтвердженою поштою відкриває медіатеку
-- **THEN** сторінка відкривається, без додаткових перевірок ролі
+#### Scenario: Regular administrator
+- **WHEN** an authenticated user with a confirmed email opens the media library
+- **THEN** the page opens, without additional role checks

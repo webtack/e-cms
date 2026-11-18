@@ -2,24 +2,24 @@
 
 ## Why
 
-Набір e2e-тестів зростає з кожною зміною (зараз 7 спеків, `workers: 1`), а завдання в OpenSpec-змінах вимагають «`npm run test:e2e` зелений» після кожної правки. Повний прогін щоразу довший, тож розробка гальмується. Потрібне правило: під час роботи запускаються лише ті спеки, яких торкнулась зміна, а повний набір — тільки після правок спільного коду.
+The set of e2e tests grows with every change (now 7 specs, `workers: 1`), and the tasks in OpenSpec changes require "`npm run test:e2e` is green" after every edit. A full run each time is longer, so development slows down. A rule is needed: during work only the specs that the change touches are run, and the full set only after changes of shared code.
 
 ## What Changes
 
-- Нова політика запуску: **у процесі роботи** (кожне завдання/правка) запускається тільки e2e-спек, що покриває змінену область (`npm run test:e2e -- e2e/<файл>.spec.js`), або жоден, якщо правка не чіпає поведінку в браузері (лише PHP-логіка з Feature-тестами, документація, переклади без зміни UI).
-- **Повний прогін** `npm run test:e2e` виконується лише після правок спільного коду, від якого залежать усі спеки (оболонка/sidebar, `DataTable`, автентифікація, i18n, `playwright.config.js`, `e2e/global-setup.js`). Окремого повного прогону наприкінці OpenSpec-зміни немає: потрібні спеки вже запускались вибірково.
-- Правила закріплюються в `CLAUDE.md` (розділ Playwright), у `openspec/config.yaml` (правило для `tasks`: не вимагати повного прогону в завданнях, окрім тих, що чіпають спільний код) і в `docs/e2e-testing.md` (розділ «Коли запускати» з відповідністю «область → спек»).
-- Вибірковий запуск спека залишається працюючим: `globalSetup` (скидання мови) виконується і для одного файла.
+- A new run policy: **during work** (each task/edit) only the e2e spec that covers the changed area is run (`npm run test:e2e -- e2e/<файл>.spec.js`), or none, if the change does not touch the behaviour in the browser (only PHP logic with Feature tests, documentation, translations without a UI change).
+- **The full run** `npm run test:e2e` is performed only after changes of shared code on which all specs depend (the shell/sidebar, `DataTable`, authentication, i18n, `playwright.config.js`, `e2e/global-setup.js`). There is no separate full run at the end of an OpenSpec change: the needed specs have already been run selectively.
+- The rules are fixed in `CLAUDE.md` (the Playwright section), in `openspec/config.yaml` (the rule for `tasks`: do not require a full run in the tasks, except those that touch shared code) and in `docs/e2e-testing.md` (the section "When to run" with the correspondence "area → spec").
+- The selective run of a spec keeps working: `globalSetup` (the language reset) runs also for a single file.
 
 ## Capabilities
 
 ### New Capabilities
 
 ### Modified Capabilities
-- `e2e-testing`: додається вимога про вибірковий запуск окремих спеків тією ж командою.
+- `e2e-testing`: a requirement about the selective run of individual specs with the same command is added.
 
 ## Impact
 
-- Конфігурація/правила: `CLAUDE.md`, `openspec/config.yaml`. Коду застосунку й тестів це не змінює.
-- Docs: оновити `docs/e2e-testing.md` (розділ «Коли запускати e2e», команди вибіркового запуску, таблиця «область → спек»); `docs/README.md` — без змін, якщо назва файла не змінюється.
-- Не входить: паралелізація (`workers`), CI, `--only-changed` (він бачить лише змінені файли тестів, а не код застосунку, тож хибно пропускав би спеки).
+- Configuration/rules: `CLAUDE.md`, `openspec/config.yaml`. This does not change the application code or the tests.
+- Docs: update `docs/e2e-testing.md` (the section "When to run e2e", the commands of the selective run, the table "area → spec"); `docs/README.md` — unchanged, if the file name does not change.
+- Not included: parallelization (`workers`), CI, `--only-changed` (it sees only the changed test files, not the application code, so it would wrongly skip specs).

@@ -2,36 +2,36 @@
 
 ## ADDED Requirements
 
-### Requirement: Коротке позначення типу файлу
-Адмінка SHALL показувати тип файлу коротким позначенням розширення (`pdf`, `docx`, `xlsx`, `jpg`, `png`) замість повного MIME-типу в усіх місцях, де тип виводиться. Позначення SHALL збігатися з розширенням, яке профілі завантаження задають для цього типу. Для типу, якого немає в жодному профілі, SHALL показуватися частина MIME після `/`. Збережене значення типу файлу (повний MIME) і правила перевірки файлів SHALL лишатися без змін.
+### Requirement: Short label of a file type
+The admin SHALL show the file type by a short extension label (`pdf`, `docx`, `xlsx`, `jpg`, `png`) instead of the full MIME type in all places where the type is output. The label SHALL match the extension that the upload profiles set for this type. For a type that is not in any profile, the part of the MIME after `/` SHALL be shown. The stored value of the file type (the full MIME) and the file validation rules SHALL remain unchanged.
 
-#### Scenario: Тип з профілю
-- **WHEN** адмінка виводить тип файлу `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
-- **THEN** показується `docx`
+#### Scenario: Type from a profile
+- **WHEN** the admin outputs the file type `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+- **THEN** `docx` is shown
 
-#### Scenario: Розширення збережених файлів
-- **WHEN** адмінка виводить тип `image/jpeg`
-- **THEN** показується `jpg`, як і в розширенні збереженого файлу
+#### Scenario: Extension of stored files
+- **WHEN** the admin outputs the type `image/jpeg`
+- **THEN** `jpg` is shown, as in the extension of the stored file
 
-#### Scenario: Тип поза профілями
-- **WHEN** файл має тип `text/plain`, якого вже немає в жодному профілі
-- **THEN** показується `plain`, а сторінка не падає
+#### Scenario: Type outside the profiles
+- **WHEN** a file has the type `text/plain`, which is no longer in any profile
+- **THEN** `plain` is shown, and the page does not fail
 
-### Requirement: Завантаження кількох файлів віджетом
-Віджет завантаження SHALL мати режим множинного вибору: користувач вибирає або перетягує кілька файлів за раз. Кожен файл SHALL завантажуватися окремим запитом до тієї самої точки завантаження, що й одиночний файл, один за одним, а не одним спільним запитом. Кожен файл SHALL проходити швидку перевірку типу й розміру до запиту. Віджет SHALL повідомляти форму про кожен успішно завантажений файл; помилка одного файлу (швидка відмова, відповідь сервера, збій мережі) SHALL показуватися з іменем цього файлу й не скасовувати завантаження решти. Під час завантаження віджет SHALL показувати перебіг (скільки файлів із скількох оброблено) і не приймати нового вибору, доки черга не завершилась.
+### Requirement: Uploading several files with the widget
+The upload widget SHALL have a multiple selection mode: the user selects or drags several files at once. Each file SHALL be uploaded by a separate request to the same upload endpoint as a single file, one after another, not by one shared request. Each file SHALL pass a quick check of type and size before the request. The widget SHALL notify the form about each successfully uploaded file; an error of one file (a quick rejection, a server response, a network failure) SHALL be shown with the name of this file and SHALL NOT cancel the upload of the rest. During the upload the widget SHALL show the progress (how many files out of how many are processed) and SHALL NOT accept a new selection until the queue is finished.
 
-#### Scenario: Кілька допустимих файлів
-- **WHEN** користувач вибирає три допустимі файли
-- **THEN** сервер отримує три окремі запити завантаження, а форма отримує три файли в порядку вибору
+#### Scenario: Several allowed files
+- **WHEN** the user selects three allowed files
+- **THEN** the server receives three separate upload requests, and the form receives three files in the order of selection
 
-#### Scenario: Один файл відхилено
-- **WHEN** користувач вибирає три файли, і один має недозволений тип
-- **THEN** два допустимі файли завантажено й передано формі, а віджет показує помилку з іменем третього файлу
+#### Scenario: One file rejected
+- **WHEN** the user selects three files, and one has a disallowed type
+- **THEN** the two allowed files are uploaded and passed to the form, and the widget shows an error with the name of the third file
 
-#### Scenario: Збій під час черги
-- **WHEN** запит завантаження другого з трьох файлів завершується помилкою мережі
-- **THEN** перший і третій файли завантажено, а помилка названа за іменем другого
+#### Scenario: Failure during the queue
+- **WHEN** the upload request of the second of three files ends with a network error
+- **THEN** the first and the third files are uploaded, and the error is named by the name of the second
 
-#### Scenario: Перебіг
-- **WHEN** триває завантаження черги з трьох файлів
-- **THEN** віджет показує, скільки файлів оброблено, і не дозволяє почати новий вибір
+#### Scenario: Progress
+- **WHEN** the upload of a queue of three files is in progress
+- **THEN** the widget shows how many files are processed, and does not allow starting a new selection

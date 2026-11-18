@@ -2,34 +2,34 @@
 
 ## Why
 
-Тип значення поля зараз можна змінити, поки в поля немає збережених значень, а після першого запису він блокується. Така умовна незмінність залежить від стану даних: той самий запит успішний сьогодні й відхиляється завтра, а рішення «змінюється тип чи ні» доводиться перевіряти запитом до таблиці значень. Власник проєкту вирішив зробити тип поля незмінним після створення завжди, як `key` поля та `key`/`kind` типу контенту. Разом із цим поле можна видаляти лише без збережених значень: зараз цю заборону перевіряє лише адмінка, а модель каскадно видаляє значення, тож код, tinker чи імпорт можуть мовчки знищити дані.
+The value type of a field can currently be changed while the field has no stored values, and after the first record it is locked. Such conditional immutability depends on the state of the data: the same request succeeds today and is rejected tomorrow, and the decision "is the type changed or not" has to be checked with a query to the value table. The project owner decided to make the type of a field immutable after creation always, like the `key` of a field and the `key`/`kind` of a content type. Together with this, a field can be deleted only without stored values: at the moment only the admin checks this prohibition, while the model cascades the deletion of values, so code, tinker or an import can silently destroy data.
 
 ## What Changes
 
-- Тип значення поля **не змінюється після створення** незалежно від наявності значень. Зміна типу поля відхиляється помилкою біля поля `type`.
-- Форма редагування поля завжди показує тип значення заблокованим (разом з підказкою), а не лише для системних полів і полів зі значеннями.
-- Надсилання форми з тим самим типом проходить без помилки; з іншим — відхиляється сервером незалежно від стану форми.
-- Видалення поля, що має збережені значення, відхиляється **в моделі** `ContentField` для будь-якого шляху (адмінка, tinker, імпорт, код): поле й значення лишаються, кидається `ValidationException`. Поле без значень видаляється як і раніше. Каскад БД при видаленні **типу контенту** (його поля, записи та значення) не змінюється.
-- Допоміжна перевірка `hasStoredValues` у `ContentField` більше не пов'язана з типом: її використовує лише перевірка видалення.
-- **BREAKING** (поведінка): поле без значень більше не можна переключити на інший тип; для іншого типу поле створюється заново (видалення порожнього поля не обмежене).
+- The value type of a field **does not change after creation**, regardless of whether values exist. A change of the field type is rejected with an error next to the field `type`.
+- The edit form of a field always shows the value type as locked (together with a hint), not only for system fields and fields with values.
+- Submitting the form with the same type passes without an error; with a different one, it is rejected by the server regardless of the state of the form.
+- Deleting a field that has stored values is rejected **in the model** `ContentField` for any path (admin, tinker, import, code): the field and the values remain, and a `ValidationException` is thrown. A field without values is deleted as before. The DB cascade when a **content type** is deleted (its fields, records and values) does not change.
+- The helper check `hasStoredValues` in `ContentField` is no longer related to the type: only the deletion check uses it.
+- **BREAKING** (behaviour): a field without values can no longer be switched to another type; for another type the field is created again (deleting an empty field is not restricted).
 
-Не входить: зміна адмінки видалення поля (діалог і перевірка контролера лишаються), конвертація типів, підказка про незмінність типу у формі створення, міграція даних (даних, яких це торкається, немає: значення зберігаються як є).
+Not included: a change of the admin deletion of a field (the dialog and the controller check remain), type conversion, a hint about the immutability of the type in the creation form, data migration (there is no data affected by it: values are stored as they are).
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `content-model`: вимога «Незмінність типу значення поля» — тип незмінний завжди, а не лише для поля зі значеннями; вимога «Каскадне видалення конфігурації» — поле зі значеннями не видаляється, каскад при видаленні поля стосується лише порожнього поля, каскад типу лишається.
-- `admin-content-fields`: форма редагування поля (тип заблокований завжди) і збереження змін поля (зміна типу відхиляється завжди; той самий тип у запиті не є помилкою).
+- `content-model`: the requirement "Immutability of the value type of a field" — the type is always immutable, not only for a field with values; the requirement "Cascade deletion of configuration" — a field with values is not deleted, the cascade on deleting a field concerns only an empty field, the cascade of the type remains.
+- `admin-content-fields`: the edit form of a field (the type is always locked) and saving the changes of a field (a change of type is always rejected; the same type in the request is not an error).
 
 ## Impact
 
-- Код (PHP): `app/Models/ContentField.php` (`assertValid`, подія `deleting`, `hasStoredValues`), коментарі в `UpdateContentFieldRequest` і `ContentFieldController`.
-- Код (фронтенд): `Components/Admin/ContentFields/ContentFieldForm.tsx` (`lockType`), `lang/en.json` і `lang/uk.json` (підказка про незмінність типу).
-- Тести: `tests/Feature/Content/ContentFieldTest.php`, `tests/Feature/Content/CascadeTest.php`, `tests/Feature/Content/FileFieldTypesTest.php`, `tests/Feature/Admin/ContentFieldEditTest.php`; e2e `admin-content-fields`.
-- Документація, що оновлюється: `docs/content-model.md` (поля, незмінність типу, каскади видалення), `docs/content-values.md` (згадка про тип поля зі значеннями в розділі про `image`/`file`), `docs/admin-content-fields.md` (блокування в режимі `edit`, захист через модель, тести й e2e), `docs/e2e-testing.md` (опис сценарію полів); `docs/README.md` без змін.
-- Зміна незалежна від `add-richtext-field-type`; після неї правило «text ↔ richtext» перестає бути окремим випадком.
+- Code (PHP): `app/Models/ContentField.php` (`assertValid`, the `deleting` event, `hasStoredValues`), comments in `UpdateContentFieldRequest` and `ContentFieldController`.
+- Code (frontend): `Components/Admin/ContentFields/ContentFieldForm.tsx` (`lockType`), `lang/en.json` and `lang/uk.json` (the hint about the immutability of the type).
+- Tests: `tests/Feature/Content/ContentFieldTest.php`, `tests/Feature/Content/CascadeTest.php`, `tests/Feature/Content/FileFieldTypesTest.php`, `tests/Feature/Admin/ContentFieldEditTest.php`; e2e `admin-content-fields`.
+- Documentation to update: `docs/content-model.md` (fields, immutability of the type, cascades of deletion), `docs/content-values.md` (the mention of the type of a field with values in the section on `image`/`file`), `docs/admin-content-fields.md` (locking in the `edit` mode, protection through the model, tests and e2e), `docs/e2e-testing.md` (the description of the scenario of the fields); `docs/README.md` unchanged.
+- The change is independent of `add-richtext-field-type`; after it, the rule "text ↔ richtext" is no longer a special case.

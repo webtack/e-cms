@@ -2,115 +2,115 @@
 
 ## Purpose
 
-Визначає набір загальних налаштувань сайту (назва, логотипи, контакти, соцмережі, графік роботи, індексація), формат їхнього зберігання з готовністю до мов і спосіб читання шаблонами. Описує дані, а не сторінку адмінки.
+Defines the set of general settings of the site (the name, logos, contacts, social networks, working hours, indexing), the format of their storage with readiness for languages, and the way the templates read them. It describes the data, not the page of the admin.
 
 ## ADDED Requirements
 
 ### Requirement: Набір налаштувань сайту
-Система SHALL зберігати загальні налаштування сайту в сховищі налаштувань застосунку під ключами з префіксом `site.`: `site.name`, `site.short_name`, `site.description`, `site.logo_large`, `site.logo_small`, `site.emails`, `site.phones`, `site.socials`, `site.schedule` і `site.indexable`. Усі налаштування, окрім `site.indexable`, SHALL бути необов'язковими.
+The system SHALL store the general settings of the site in the storage of the application settings under keys with the prefix `site.`: `site.name`, `site.short_name`, `site.description`, `site.logo_large`, `site.logo_small`, `site.emails`, `site.phones`, `site.socials`, `site.schedule` and `site.indexable`. All settings except `site.indexable` SHALL be optional.
 
-#### Scenario: Свіжа установка
-- **WHEN** жодне налаштування сайту ще не зберігалося
-- **THEN** читання повертає порожні значення для всіх налаштувань, а індексація вимкнена
+#### Scenario: Fresh setup
+- **WHEN** no setting of the site has been saved yet
+- **THEN** reading returns empty values for all settings, and indexing is disabled
 
-#### Scenario: Часткове заповнення
-- **WHEN** збережено лише назву сайту
-- **THEN** решта налаштувань читається як порожня, без помилок
+#### Scenario: Partial filling
+- **WHEN** only the name of the site is saved
+- **THEN** the other settings are read as empty, without errors
 
 ### Requirement: Перекладні значення з ключем default
-Система SHALL зберігати перекладні налаштування (`site.name`, `site.short_name`, `site.description`, `site.schedule`, `site.logo_large`, `site.logo_small`, а також підписи `label` у `site.emails`, `site.phones` і `site.socials`) як об'єкт, де ключем є код мови, а базова мова має ключ `default`. Спільні для всіх мов значення (`value` email і телефонів, `network` і `url` соцмереж, `site.indexable`) SHALL зберігатися без мовного ключа. Порожній підпис SHALL зберігатися як відсутній ключ `label`, а не як порожній рядок.
+The system SHALL store the translatable settings (`site.name`, `site.short_name`, `site.description`, `site.schedule`, `site.logo_large`, `site.logo_small`, and also the captions `label` in `site.emails`, `site.phones` and `site.socials`) as an object, where the key is the language code, and the base language has the key `default`. The values shared by all languages (`value` of emails and phones, `network` and `url` of social networks, `site.indexable`) SHALL be stored without a language key. An empty caption SHALL be stored as an absent key `label`, not as an empty string.
 
-#### Scenario: Збереження назви
-- **WHEN** зберігається назва сайту «Мій сайт»
-- **THEN** `site.name` містить `{ "default": "Мій сайт" }`
+#### Scenario: Saving the name
+- **WHEN** the name of the site «Мій сайт» («My site») is saved
+- **THEN** `site.name` contains `{ "default": "Мій сайт" }`
 
-#### Scenario: Порожня назва
-- **WHEN** назву сайту очищено
-- **THEN** налаштування `site.name` не містить значення мови `default` і читається як порожнє
+#### Scenario: Empty name
+- **WHEN** the name of the site is cleared
+- **THEN** the setting `site.name` does not contain the value of the language `default` and is read as empty
 
-#### Scenario: Порожній підпис
-- **WHEN** email зберігається із порожнім підписом
-- **THEN** запис email містить лише `value`, без ключа `label`
+#### Scenario: Empty caption
+- **WHEN** an email is saved with an empty caption
+- **THEN** the record of the email contains only `value`, without the key `label`
 
-#### Scenario: Спільні значення
-- **WHEN** зберігається соцмережа з мережею `facebook` і посиланням
-- **THEN** `network` і `url` зберігаються як звичайні рядки без мовного ключа
+#### Scenario: Shared values
+- **WHEN** a social network with the network `facebook` and a link is saved
+- **THEN** `network` and `url` are stored as ordinary strings without a language key
 
 ### Requirement: Читання з фолбеком на default
-Система SHALL надавати шаблонам читач налаштувань сайту, який повертає перекладні значення для запитаної мови, а за відсутності значення цієї мови повертає значення мови `default`. Читач SHALL повертати списки (`emails`, `phones`, `socials`, `schedule`) у збереженому порядку, а підпис елемента — мовою запиту з фолбеком на `default`.
+The system SHALL provide the templates with a reader of the site settings, which returns the translatable values for the requested language, and if there is no value of this language, returns the value of the language `default`. The reader SHALL return the lists (`emails`, `phones`, `socials`, `schedule`) in the saved order, and the caption of an element — in the language of the request with a fallback to `default`.
 
-#### Scenario: Значення запитаної мови
-- **WHEN** збережено `site.name` зі значеннями `default` і `en`, а читач запитано з мовою `en`
-- **THEN** повертається значення `en`
+#### Scenario: Value of the requested language
+- **WHEN** `site.name` is saved with the values `default` and `en`, and the reader is asked with the language `en`
+- **THEN** the value `en` is returned
 
-#### Scenario: Фолбек на default
-- **WHEN** збережено лише значення `default`, а читач запитано з мовою `en`
-- **THEN** повертається значення `default`
+#### Scenario: Fallback to default
+- **WHEN** only the value `default` is saved, and the reader is asked with the language `en`
+- **THEN** the value `default` is returned
 
-#### Scenario: Порядок списку
-- **WHEN** збережено три телефони в певному порядку
-- **THEN** читач повертає їх у тому самому порядку
+#### Scenario: Order of a list
+- **WHEN** three phones are saved in a certain order
+- **THEN** the reader returns them in the same order
 
 ### Requirement: Індексація за замовчуванням вимкнена
-Налаштування `site.indexable` SHALL бути логічним, а за відсутності збереженого значення SHALL читатися як `false` (сайт не індексується). Налаштування SHALL бути доступним шаблонам через читач; саме виведення атрибутів індексації не входить до цієї можливості.
+The setting `site.indexable` SHALL be a boolean, and in the absence of a saved value it SHALL be read as `false` (the site is not indexed). The setting SHALL be available to the templates through the reader; the output of the indexing attributes itself is not part of this capability.
 
-#### Scenario: Значення не задано
-- **WHEN** `site.indexable` ніколи не зберігався
-- **THEN** читач повертає `false`
+#### Scenario: Value not set
+- **WHEN** `site.indexable` has never been saved
+- **THEN** the reader returns `false`
 
-#### Scenario: Увімкнена індексація
-- **WHEN** збережено `site.indexable` зі значенням `true`
-- **THEN** читач повертає `true`
+#### Scenario: Indexing enabled
+- **WHEN** `site.indexable` is saved with the value `true`
+- **THEN** the reader returns `true`
 
 ### Requirement: Довідник соцмереж
-Система SHALL мати фіксований довідник відомих соцмереж, що задається в конфігурації і не змінюється з адмінки. Збережена соцмережа SHALL посилатися на мережу довідника за ключем; ключ, якого немає в довіднику, SHALL відхилятися. Та сама мережа SHALL допускатися кілька разів.
+The system SHALL have a fixed directory of known social networks, which is set in the configuration and is not changed from the admin. A saved social network SHALL refer to a network of the directory by its key; a key that is absent from the directory SHALL be rejected. The same network SHALL be allowed several times.
 
-#### Scenario: Відома мережа
-- **WHEN** зберігається соцмережа з ключем мережі, що є в довіднику
-- **THEN** запис приймається
+#### Scenario: Known network
+- **WHEN** a social network with a network key that is in the directory is saved
+- **THEN** the record is accepted
 
-#### Scenario: Невідома мережа
-- **WHEN** зберігається соцмережа з ключем, якого немає в довіднику
-- **THEN** запис відхилено з помилкою валідації поля мережі
+#### Scenario: Unknown network
+- **WHEN** a social network with a key that is absent from the directory is saved
+- **THEN** the record is rejected with a validation error of the field of the network
 
-#### Scenario: Дві сторінки однієї мережі
-- **WHEN** зберігаються два записи з мережею `instagram` і різними посиланнями
-- **THEN** обидва записи збережено в заданому порядку
+#### Scenario: Two pages of the same network
+- **WHEN** two records with the network `instagram` and different links are saved
+- **THEN** both records are saved in the set order
 
 ### Requirement: Логотипи як файли профілю image
-Система SHALL зберігати велике й мале лого як посилання на файл профілю `image` (значення `{uuid}.{ext}` під ключем мови) і SHALL відхиляти файл іншого профілю або неіснуючий файл. Кожне лого SHALL бути необов'язковим і незалежним від іншого.
+The system SHALL store the large and the small logo as links to a file of the profile `image` (the value `{uuid}.{ext}` under the language key), and SHALL reject a file of another profile or a non-existent file. Each logo SHALL be optional and independent of the other.
 
-#### Scenario: Збереження лого
-- **WHEN** як велике лого обрано завантажене зображення
-- **THEN** `site.logo_large` містить `{ "default": "{uuid}.{ext}" }`
+#### Scenario: Saving a logo
+- **WHEN** an uploaded image is chosen as the large logo
+- **THEN** `site.logo_large` contains `{ "default": "{uuid}.{ext}" }`
 
-#### Scenario: Лише мале лого
-- **WHEN** задано мале лого, а велике порожнє
-- **THEN** мале лого читається, а велике — порожнє
+#### Scenario: Only the small logo
+- **WHEN** the small logo is set, and the large one is empty
+- **THEN** the small logo is read, and the large one is empty
 
-#### Scenario: Файл не є зображенням
-- **WHEN** як лого обрано файл профілю `document`
-- **THEN** запис відхилено з помилкою валідації поля лого
+#### Scenario: File is not an image
+- **WHEN** a file of the profile `document` is chosen as a logo
+- **THEN** the record is rejected with a validation error of the logo field
 
-#### Scenario: Очищення лого
-- **WHEN** збережене лого очищається
-- **THEN** налаштування читається як порожнє, а файл лишається в сховищі
+#### Scenario: Clearing a logo
+- **WHEN** a saved logo is cleared
+- **THEN** the setting is read as empty, and the file remains in the storage
 
 ### Requirement: Облік використання логотипів
-Система SHALL фіксувати використання файлів логотипів у зв'язках медіатеки: власником є налаштування сайту, роллю — ключ логотипа, мовою — мова значення. Зв'язки SHALL оновлюватися в тій самій транзакції, що й запис налаштувань, так щоб після запису набір зв'язків відповідав збереженим логотипам. Файл, що використовується як лого, SHALL не вдаватися видалити з медіатеки.
+The system SHALL record the use of the logo files in the links of the media library: the owner is the site settings, the role is the key of the logo, the language is the language of the value. The links SHALL be updated in the same transaction as the record of the settings, so that after the record the set of links matches the saved logos. A file used as a logo SHALL NOT be allowed to be deleted from the media library.
 
-#### Scenario: Лого стає використаним
-- **WHEN** файл обрано як велике лого і налаштування збережено
-- **THEN** існує зв'язок цього файлу з налаштуваннями сайту, а видалення файлу з медіатеки відхиляється
+#### Scenario: Logo becomes used
+- **WHEN** a file is chosen as the large logo and the settings are saved
+- **THEN** a link of this file to the site settings exists, and deleting the file from the media library is rejected
 
-#### Scenario: Заміна лого
-- **WHEN** велике лого замінюється іншим файлом
-- **THEN** зв'язок із попереднім файлом знято, зв'язок із новим створено, і попередній файл можна видалити
+#### Scenario: Replacing a logo
+- **WHEN** the large logo is replaced by another file
+- **THEN** the link to the previous file is removed, a link to the new one is created, and the previous file can be deleted
 
-#### Scenario: Очищення лого
-- **WHEN** лого очищається і налаштування збережено
-- **THEN** зв'язок знято, а файл лишається у сховищі
+#### Scenario: Clearing a logo
+- **WHEN** a logo is cleared and the settings are saved
+- **THEN** the link is removed, and the file remains in the storage
 
-#### Scenario: Помилка запису
-- **WHEN** запис налаштувань завершується помилкою
-- **THEN** ні значення, ні зв'язки логотипів не змінено
+#### Scenario: Write error
+- **WHEN** the writing of the settings ends with an error
+- **THEN** neither the values nor the links of the logos are changed

@@ -2,32 +2,32 @@
 
 ## Context
 
-Vite збирає дві незалежні таблиці стилів: `resources/css/app.css` для адмінки (підключає `app.blade.php`) і `themes/default/assets/css/app.css` для теми (підключає `theme::html`). Обидві збираються одним Tailwind 4 через `@tailwindcss/vite`. Тема вже використовує `source(none)` і сканує лише `themes/*/views`. Адмінка використовує `@import 'tailwindcss'` без `source(none)`, тому автоматичне сканування охоплює весь проєкт, зокрема `themes/`. Див. proposal.md, розділ «Why».
+Vite builds two independent stylesheets: `resources/css/app.css` for the admin (connected by `app.blade.php`) and `themes/default/assets/css/app.css` for the theme (connected by `theme::html`). Both are built by one Tailwind 4 through `@tailwindcss/vite`. The theme already uses `source(none)` and scans only `themes/*/views`. The admin uses `@import 'tailwindcss'` without `source(none)`, so the automatic scanning covers the whole project, including `themes/`. See proposal.md, section «Why».
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Адмінська збірка не містить утиліт, які є лише в шаблонах теми.
-- Тема не змінюється: її токени, шаблони й сканування лишаються як є.
+- The admin build contains no utilities that exist only in the templates of the theme.
+- The theme does not change: its tokens, templates and scanning remain as they are.
 
 **Non-Goals:**
-- Перейменування токенів теми або адмінки. Токени живуть в окремих збірках і не конфліктують.
-- Зміна темного режиму (адмінка — клас `.dark`, тема — стандартний `dark:` Tailwind). Це окреме рішення.
+- Renaming the tokens of the theme or of the admin. The tokens live in separate builds and do not conflict.
+- A change of the dark mode (the admin — the class `.dark`, the theme — the standard `dark:` of Tailwind). This is a separate decision.
 
 ## Decisions
 
-**Вимкнути автоматичне сканування адмінки і вказати джерела явно.** У `resources/css/app.css` `@import 'tailwindcss' source(none);`, далі `@source '../../resources';`. Збереження вендорного `@source` для шаблонів пагінації.
-- Альтернатива: `@source not '../../themes';`. Відхилено: з автоматичним скануванням лишаються `docs/` і `openspec/`, які також потрапляють в збірку; явний список охоплює все потрібне без винятків.
-- `@source` на `storage/framework/views` не додається. Причина: Blade компілює шаблони теми в `storage/framework/views`, і кеш містив класи теми (`max-w-prose`, `gap-x-6`), які потрапляли в адмінку. Адмінські шаблони є в `resources/views`, тож їхні утиліти покриває `@source '../../resources'`. Перевірено збіркою: після прибирання цього рядка всі класи адмінського CSS знаходяться в `resources/` або в шаблонах пагінації (виняток: `shimmer`, ім'я `@keyframes`).
-- Клас `aspect-video` лишається в адмінському CSS як частина правила `.rich-text-content iframe` (`@apply` у `resources/css/app.css`), а не як окремий клас.
+**Turn off the automatic scanning of the admin and specify the sources explicitly.** In `resources/css/app.css` `@import 'tailwindcss' source(none);`, then `@source '../../resources';`. The vendor `@source` for the pagination templates is kept.
+- Alternative: `@source not '../../themes';`. Rejected: with the automatic scanning `docs/` and `openspec/` remain, which also get into the build; the explicit list covers everything needed without exceptions.
+- `@source` on `storage/framework/views` is not added. Reason: Blade compiles the templates of the theme into `storage/framework/views`, and the cache contained the classes of the theme (`max-w-prose`, `gap-x-6`), which got into the admin. The admin templates are in `resources/views`, so their utilities are covered by `@source '../../resources'`. Verified by the build: after removing this line all the classes of the admin CSS are found in `resources/` or in the pagination templates (the exception: `shimmer`, the name of a `@keyframes`).
+- The class `aspect-video` remains in the admin CSS as part of the rule `.rich-text-content iframe` (`@apply` in `resources/css/app.css`), not as a separate class.
 
-**Перевірка через збірку.** Після `npm run build` (на хості) перевіряється відсутність `.max-w-prose` і `.gap-x-6` у `public/build/assets/app-*.css` адмінки і наявність їх у css теми. Відсутність окремого класу `.aspect-video` не є критерієм: правило iframe в адмінці використовує цю утиліту через `@apply`. Це проста перевірка через grep, без нових тестів.
+**Check through the build.** After `npm run build` (on the host) the absence of `.max-w-prose` and `.gap-x-6` in `public/build/assets/app-*.css` of the admin and their presence in the css of the theme are checked. The absence of a separate class `.aspect-video` is not a criterion: the iframe rule of the admin uses this utility through `@apply`. This is a simple check by grep, without new tests.
 
 ## Risks / Trade-offs
 
-- **[Адмінський клас не знайдено]** → Якщо адмінка використовує утиліту з `docs/` або `openspec/` (ніколи не було в коді), вона пропаде. Мітигація: після збірки перевірити вигляд ключових адмінських сторінок вручну або через наявні e2e-спеки, які не чіпають стилі теми.
-- **[Регресія адмінки]** → Мітигація: порівняти кількість правил адмінського CSS до і після зміни. Розбіжність має бути лише в класах, які є в `themes/`.
+- **[An admin class is not found]** → If the admin uses a utility from `docs/` or `openspec/` (it never was in the code), it will disappear. Mitigation: after the build check the look of the key admin pages manually or through the existing e2e specs, which do not touch the styles of the theme.
+- **[Regression of the admin]** → Mitigation: compare the number of rules of the admin CSS before and after the change. The difference must concern only the classes that are in `themes/`.
 
 ## Migration Plan
 
-Зміна в `resources/css/app.css`: `source(none)` і явний `@source '../../resources'`, прибрано `@source` на `storage/framework/views`. Відкат — повернути `@import 'tailwindcss';` без `source(none)` і рядок `@source '../../storage/framework/views/*.php';`. Міграції даних немає.
+A change in `resources/css/app.css`: `source(none)` and the explicit `@source '../../resources'`, the `@source` on `storage/framework/views` removed. Rollback — return `@import 'tailwindcss';` without `source(none)` and the line `@source '../../storage/framework/views/*.php';`. There is no data migration.

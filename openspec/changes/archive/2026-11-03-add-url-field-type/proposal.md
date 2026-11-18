@@ -2,29 +2,29 @@
 
 ## Why
 
-Редакторам потрібне поле для посилання з необов'язковим підписом (кнопка «Детальніше», посилання на документ, внутрішня сторінка сайту). Зараз для цього лишається звичайний `string`, який нічого не знає про адресу й не перевіряє її, або два окремих поля.
+Editors need a field for a link with an optional caption (a «Read more» button, a link to a document, an internal page of the site). Now for this a plain `string` remains, which knows nothing about the address and does not check it, or two separate fields.
 
 ## What Changes
 
-- Новий тип поля `url`: посилання (скалярне значення в `content_values_string`, колонка `value`) і необов'язковий заголовок (`title` у JSON `options` того самого рядка) — через наявний механізм складених значень.
-- Приймаються абсолютні посилання (`http`/`https`) і відносні (шлях `/…`, `./…`, `../…`, фрагмент `#…`, запит `?…`). Інші схеми (`javascript:`, `data:`, `mailto:` тощо) відхиляються.
-- У формі запису поле виглядає як два однорядкові текстові поля поруч: «Link» і «Title» (необов'язкове). Без модальних вікон і запитів до зовнішніх сервісів.
-- У таблиці записів комірка показує заголовок, а без нього — посилання.
-- Тип не має налаштувань поля (`settings` заборонено, як у `youtube`). Нових таблиць і міграцій немає.
+- A new field type `url`: the link (a scalar value in `content_values_string`, the column `value`) and an optional title (`title` in the JSON `options` of the same row) — through the existing mechanism of composite values.
+- Absolute links (`http`/`https`) and relative ones (a path `/…`, `./…`, `../…`, a fragment `#…`, a query `?…`) are accepted. Other schemes (`javascript:`, `data:`, `mailto:` etc.) are rejected.
+- In the form of writing the field looks like two single-line text fields side by side: «Link» and «Title» (optional). Without modal windows and requests to external services.
+- In the table of records the cell shows the title, and without it — the link.
+- The type has no settings of the field (`settings` is forbidden, as for `youtube`). There are no new tables and no migrations.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `content-values`: новий тип поля `url` (значення, валідація, фільтри, читання/запис складеного значення).
-- `admin-content-nodes`: елемент введення поля `url` у формі запису та відображення значення в таблиці записів.
+- `content-values`: the new field type `url` (the value, validation, filters, reading/writing of the composite value).
+- `admin-content-nodes`: the input element of the field `url` in the form of writing and the display of the value in the table of records.
 
 ## Impact
 
-- Код: новий `App\Content\FieldTypes\UrlType`, рядок у `config/content.php` (`field_types`), `ContentNodeController` (текст комірки таблиці), `resources/js/Components/Admin/ContentNodes/` (`NodeFieldInput`, `ContentNodeForm`, `NodeFieldList`, `types.ts`), переклади `lang/uk.json` і `lang/en.json`.
-- Тести: Feature-тест типу (за зразком `YoutubeFieldTypeTest`), e2e-спек форми запису.
-- Документація: `docs/content-values.md` (таблиця типів і розділ «Посилання»), `docs/admin-content-fields.md` (перелік типів, `settings` заборонено), `docs/admin-content-nodes.md` (віджет і комірка таблиці), `docs/e2e-testing.md` (таблиця «Область → спек»).
+- Code: the new `App\Content\FieldTypes\UrlType`, a row in `config/content.php` (`field_types`), `ContentNodeController` (the text of the table cell), `resources/js/Components/Admin/ContentNodes/` (`NodeFieldInput`, `ContentNodeForm`, `NodeFieldList`, `types.ts`), translations `lang/uk.json` and `lang/en.json`.
+- Tests: a Feature test of the type (by the pattern of `YoutubeFieldTypeTest`), an e2e spec of the form of writing.
+- Documentation: `docs/content-values.md` (the table of types and the section «Посилання» — "Link"), `docs/admin-content-fields.md` (the list of types, `settings` forbidden), `docs/admin-content-nodes.md` (the widget and the table cell), `docs/e2e-testing.md` (the table «Область → спек» — "Area → spec").

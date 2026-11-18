@@ -1,28 +1,28 @@
 ## ADDED Requirements
 
-### Requirement: Поле «форматований текст» у формі та списку записів
-Для поля типу `richtext` форма запису SHALL показувати редактор форматованого тексту замість звичайного текстового поля: панель інструментів із заголовками, жирним, курсивом, маркованим і нумерованим списком та посиланням, а область редагування SHALL показувати форматування під час введення. Зображення й файли в редакторі SHALL бути недоступні. Форма редагування SHALL бути заповнена збереженим значенням з форматуванням. Редактор SHALL мати доступну назву з підписом поля, позначку помилки з сервера біля поля, а в множинному полі — окремий редактор у кожному рядку. Збереження запису SHALL надсилати HTML значення; порожній редактор SHALL надсилати порожнє значення. У таблиці записів значення `richtext` SHALL виводитися звичайним текстом без тегів, скороченим до розумної довжини, а не сирим HTML.
+### Requirement: Field "rich text" in the form and the list of records
+For a field of the type `richtext` the record form SHALL show a formatted text editor instead of a plain text field: a toolbar with headings, bold, italic, bulleted and numbered lists and a link, and the editing area SHALL show the formatting while typing. Images and files in the editor SHALL be unavailable. The edit form SHALL be filled with the stored value with its formatting. The editor SHALL have an accessible name with the label of the field, an error mark from the server next to the field, and in a multiple field — a separate editor in each row. Saving the record SHALL send the HTML of the value; an empty editor SHALL send an empty value. In the table of records the value of `richtext` SHALL be output as plain text without tags, shortened to a reasonable length, and not as raw HTML.
 
-#### Scenario: Форматування у формі
-- **WHEN** користувач у редакторі поля `richtext` вводить текст, робить його жирним і додає маркований список та зберігає запис
-- **THEN** запис збережено, а після повторного відкриття форми редагування в редакторі видно жирний текст і список
+#### Scenario: Formatting in the form
+- **WHEN** the user in the editor of the field `richtext` types text, makes it bold, adds a bulleted list and saves the record
+- **THEN** the record is saved, and after reopening the edit form the bold text and the list are visible in the editor
 
-#### Scenario: Посилання
-- **WHEN** користувач виділяє текст, додає посилання `https://example.com` і зберігає запис
-- **THEN** після повторного відкриття форми текст є посиланням на цю адресу
+#### Scenario: Link
+- **WHEN** the user selects text, adds the link `https://example.com` and saves the record
+- **THEN** after reopening the form the text is a link to this address
 
-#### Scenario: Без зображень
-- **WHEN** користувач відкриває панель інструментів редактора
-- **THEN** у ній немає дій для вставки зображення чи файлу
+#### Scenario: No images
+- **WHEN** the user opens the toolbar of the editor
+- **THEN** it has no actions for inserting an image or a file
 
-#### Scenario: Порожнє значення
-- **WHEN** користувач залишає редактор необов'язкового поля `richtext` порожнім і зберігає запис
-- **THEN** запис збережено без значення в цьому полі
+#### Scenario: Empty value
+- **WHEN** the user leaves the editor of an optional field `richtext` empty and saves the record
+- **THEN** the record is saved without a value in this field
 
-#### Scenario: Помилка поля
-- **WHEN** сервер відхиляє значення `richtext`
-- **THEN** помилка показана біля редактора, введений вміст збережено у формі
+#### Scenario: Error of the field
+- **WHEN** the server rejects the value of `richtext`
+- **THEN** the error is shown next to the editor, and the entered content is kept in the form
 
-#### Scenario: Значення в таблиці записів
-- **WHEN** у списку видиме поле `richtext` зі значенням `<p>Привіт, <strong>світе</strong></p>`
-- **THEN** у комірці показано «Привіт, світе» без тегів
+#### Scenario: Value in the table of records
+- **WHEN** the field `richtext` with the value `<p>Привіт, <strong>світе</strong></p>` is visible in the list
+- **THEN** the cell shows "Привіт, світе" without tags

@@ -1,16 +1,16 @@
 ## ADDED Requirements
 
-### Requirement: Обмеження ширини колонки назви
-Колонка назви таблиці типів SHALL мати обмежену ширину: довга назва й опис під нею SHALL обрізатися кожен в один рядок із трикрапкою, не розтягуючи таблицю й не виштовхуючи решту колонок. Повний текст опису SHALL бути доступним у підказці.
+### Requirement: Limiting the width of the name column
+The name column of the types table SHALL have a limited width: a long name and the description under it SHALL each be truncated to one line with an ellipsis, without stretching the table or pushing the remaining columns out. The full text of the description SHALL be available in the hint.
 
-#### Scenario: Довгий опис
-- **WHEN** тип має опис довший за ширину колонки назви
-- **THEN** опис займає один рядок і закінчується трикрапкою, а решта колонок лишається на місці
+#### Scenario: Long description
+- **WHEN** a type has a description longer than the width of the name column
+- **THEN** the description takes one line and ends with an ellipsis, and the remaining columns stay in place
 
-#### Scenario: Довга назва
-- **WHEN** назва типу довша за ширину колонки
-- **THEN** назва займає один рядок і закінчується трикрапкою
+#### Scenario: Long name
+- **WHEN** the name of a type is longer than the width of the column
+- **THEN** the name takes one line and ends with an ellipsis
 
-#### Scenario: Повний опис у підказці
-- **WHEN** користувач наводить курсор на обрізаний опис
-- **THEN** він бачить повний текст опису
+#### Scenario: Full description in the hint
+- **WHEN** the user hovers over the truncated description
+- **THEN** they see the full text of the description

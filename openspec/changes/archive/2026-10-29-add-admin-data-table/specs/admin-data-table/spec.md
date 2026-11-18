@@ -2,182 +2,182 @@
 
 ## Purpose
 
-Надає адмінці єдину таблицю даних із пошуком, фільтрами, сортуванням, пагінацією та вибором видимих колонок, стан якої зберігається в адресі сторінки.
+Provides the admin with a single data table with search, filters, sorting, pagination and a choice of visible columns, whose state is stored in the page address.
 
 ## ADDED Requirements
 
-### Requirement: Стан таблиці в адресі
-У серверному режимі таблиця SHALL відображати дані, відібрані сервером за параметрами адреси (пошук, фільтри, сортування, сторінка, розмір сторінки), і SHALL оновлювати адресу при кожній зміні цих параметрів без повного перезавантаження сторінки. Перезавантаження сторінки або відкриття адреси в новій вкладці SHALL відновлювати той самий стан.
+### Requirement: Table state in the address
+In server mode the table SHALL display the data selected by the server according to the address parameters (search, filters, sorting, page, page size), and SHALL update the address on every change of these parameters without a full page reload. Reloading the page or opening the address in a new tab SHALL restore the same state.
 
-#### Scenario: Відновлення стану
-- **WHEN** користувач застосував пошук, сортування та перейшов на другу сторінку, а потім перезавантажив сторінку
-- **THEN** таблиця показує ті самі дані, а поле пошуку, індикатор сортування й номер сторінки відповідають адресі
+#### Scenario: State restoration
+- **WHEN** the user applied a search, sorting and moved to the second page, and then reloaded the page
+- **THEN** the table shows the same data, and the search field, the sorting indicator and the page number match the address
 
-#### Scenario: Без повного перезавантаження
-- **WHEN** користувач змінює сортування
-- **THEN** оновлюються лише дані таблиці й адреса, оболонка адмінки лишається змонтованою
+#### Scenario: Without a full reload
+- **WHEN** the user changes the sorting
+- **THEN** only the table data and the address are updated, and the admin shell remains mounted
 
-### Requirement: Клієнтський режим
-Таблиця SHALL підтримувати клієнтський режим для невеликих наборів: усі рядки передаються на сторінку одразу, а пошук, фільтри, сортування й пагінацію виконує браузер без запитів до сервера. Видимі можливості, елементи керування, набір операторів за типом колонки та правила порівняння SHALL збігатися з серверним режимом: пошук і оператор «містить» нечутливі до регістру, числа порівнюються числово, дати хронологічно, порожні значення завжди в кінці незалежно від напрямку сортування. Стан клієнтської таблиці SHALL жити в пам'яті сторінки й SHALL NOT змінювати адресу.
+### Requirement: Client mode
+The table SHALL support a client mode for small sets: all rows are passed to the page at once, and search, filters, sorting and pagination are performed by the browser without requests to the server. The available features, controls, the set of operators by column type and the comparison rules SHALL match the server mode: search and the "contains" operator are case-insensitive, numbers are compared numerically, dates chronologically, and empty values are always at the end regardless of the sort direction. The client table state SHALL live in the page memory and SHALL NOT change the address.
 
-#### Scenario: Без запитів до сервера
-- **WHEN** користувач змінює пошук, фільтр, сортування або сторінку клієнтської таблиці
-- **THEN** дані оновлюються без жодного запиту до сервера, адреса не змінюється
+#### Scenario: No requests to the server
+- **WHEN** the user changes the search, a filter, the sorting or the page of a client table
+- **THEN** the data is updated without any request to the server, and the address does not change
 
-#### Scenario: Однакова поведінка з серверним режимом
-- **WHEN** ті самі дані, пошук, фільтр і сортування застосовано в клієнтській і серверній таблиці
-- **THEN** обидві показують однаковий набір рядків в однаковому порядку
+#### Scenario: Behaviour identical to the server mode
+- **WHEN** the same data, search, filter and sorting are applied in a client and a server table
+- **THEN** both show the same set of rows in the same order
 
-#### Scenario: Порожні значення
-- **WHEN** клієнтська таблиця відсортована за колонкою, де деякі рядки не мають значення
-- **THEN** такі рядки в кінці як за зростанням, так і за спаданням
+#### Scenario: Empty values
+- **WHEN** a client table is sorted by a column where some rows have no value
+- **THEN** such rows are at the end both for ascending and for descending order
 
-#### Scenario: Видимість колонок
-- **WHEN** користувач приховує колонку клієнтської таблиці
-- **THEN** вибір зберігається так само, як і в серверній таблиці
+#### Scenario: Column visibility
+- **WHEN** the user hides a column of a client table
+- **THEN** the choice is stored in the same way as in a server table
 
-### Requirement: Пошук
-Таблиця SHALL мати поле пошуку, що застосовується з невеликою затримкою після припинення введення і скидає пагінацію на першу сторінку.
+### Requirement: Search
+The table SHALL have a search field that is applied with a short delay after the input stops, and resets pagination to the first page.
 
-#### Scenario: Застосування пошуку
-- **WHEN** користувач вводить рядок у поле пошуку й призупиняє введення
-- **THEN** у адресі з'являється параметр пошуку, показуються лише відповідні рядки, активна перша сторінка
+#### Scenario: Applying a search
+- **WHEN** the user types a string into the search field and pauses the input
+- **THEN** a search parameter appears in the address, only the matching rows are shown, and the first page is active
 
-#### Scenario: Очищення пошуку
-- **WHEN** користувач очищає поле пошуку
-- **THEN** параметр пошуку прибирається з адреси й показуються всі рядки
+#### Scenario: Clearing the search
+- **WHEN** the user clears the search field
+- **THEN** the search parameter is removed from the address and all rows are shown
 
-### Requirement: Фільтри
-Таблиця SHALL давати додавати кілька фільтрів, кожен з яких складається з колонки, оператора й значення. Доступні оператори й тип елемента введення SHALL залежати від типу колонки (текст, число, дата, логічне, вибір зі списку). Фільтри SHALL поєднуватися умовою «І», застосування фільтра SHALL скидати сторінку на першу, а активні фільтри SHALL бути видимі й видалятися поодинці.
+### Requirement: Filters
+The table SHALL let the user add several filters, each consisting of a column, an operator and a value. The available operators and the input element type SHALL depend on the column type (text, number, date, boolean, select from a list). The filters SHALL be combined with an "AND" condition, applying a filter SHALL reset the page to the first one, and active filters SHALL be visible and removable one by one.
 
-#### Scenario: Додавання числового фільтра
-- **WHEN** користувач додає фільтр за числовою колонкою з оператором «не менше» і значенням 100
-- **THEN** адреса містить цей фільтр, а таблиця показує лише відповідні рядки
+#### Scenario: Adding a numeric filter
+- **WHEN** the user adds a filter on a numeric column with the operator "greater than or equal" and the value 100
+- **THEN** the address contains this filter, and the table shows only the matching rows
 
-#### Scenario: Оператори за типом
-- **WHEN** користувач обирає логічну колонку для фільтра
-- **THEN** доступний лише оператор рівності зі значеннями «так/ні»
+#### Scenario: Operators by type
+- **WHEN** the user selects a boolean column for a filter
+- **THEN** only the equality operator with the values "yes/no" is available
 
-#### Scenario: Діапазон
-- **WHEN** користувач обирає оператор діапазону для числової або датової колонки
-- **THEN** форма просить дві межі, а фільтр без обох меж не застосовується
+#### Scenario: Range
+- **WHEN** the user selects the range operator for a numeric or date column
+- **THEN** the form asks for two bounds, and a filter without both bounds is not applied
 
-#### Scenario: Видалення фільтра
-- **WHEN** користувач видаляє один з двох активних фільтрів
-- **THEN** лишається другий, адреса й дані оновлюються
+#### Scenario: Removing a filter
+- **WHEN** the user removes one of two active filters
+- **THEN** the second one remains, and the address and the data are updated
 
-#### Scenario: Скидання
-- **WHEN** користувач натискає «Скинути»
-- **THEN** пошук, фільтри та сортування очищено, відкрита перша сторінка
+#### Scenario: Reset
+- **WHEN** the user clicks "Reset"
+- **THEN** the search, the filters and the sorting are cleared, and the first page is open
 
-### Requirement: Сортування
-Заголовок колонки, позначеної як сортована, SHALL перемикати сортування циклом: за зростанням → за спаданням → без сортування. Одночасно SHALL діяти сортування за однією колонкою; поточну колонку й напрямок SHALL бути видно в заголовку. Несортовані колонки SHALL NOT реагувати на клацання.
+### Requirement: Sorting
+The header of a column marked as sortable SHALL toggle the sorting in a cycle: ascending → descending → no sorting. Only one column's sorting SHALL apply at a time; the current column and direction SHALL be visible in the header. Unsorted columns SHALL NOT react to clicks.
 
-#### Scenario: Цикл сортування
-- **WHEN** користувач тричі клацає заголовок сортованої колонки
-- **THEN** послідовно застосовуються сортування за зростанням, за спаданням і без сортування, а індикатор і адреса відповідають кожному кроку
+#### Scenario: Sorting cycle
+- **WHEN** the user clicks the header of a sorted column three times
+- **THEN** the ascending, descending and no-sorting states are applied in turn, and the indicator and the address match each step
 
-#### Scenario: Зміна колонки
-- **WHEN** сортування активне за колонкою A, і користувач клацає заголовок колонки B
-- **THEN** сортування діє лише за B за зростанням
+#### Scenario: Changing the column
+- **WHEN** the sorting is active on column A, and the user clicks the header of column B
+- **THEN** the sorting applies only to B in ascending order
 
-#### Scenario: Несортована колонка
-- **WHEN** користувач клацає заголовок несортованої колонки
-- **THEN** сортування й адреса не змінюються
+#### Scenario: Unsorted column
+- **WHEN** the user clicks the header of an unsorted column
+- **THEN** the sorting and the address do not change
 
-### Requirement: Пагінація
-Таблиця SHALL показувати навігацію по сторінках, підсумок діапазону рядків і загальної кількості та вибір розміру сторінки з обмеженого набору. Зміна розміру сторінки SHALL повертати на першу сторінку. Недоступні дії (назад на першій, вперед на останній сторінці) SHALL бути вимкнені.
+### Requirement: Pagination
+The table SHALL show page navigation, a summary of the row range and the total count, and a choice of page size from a limited set. Changing the page size SHALL return to the first page. Unavailable actions (back on the first page, forward on the last page) SHALL be disabled.
 
-#### Scenario: Перехід на наступну сторінку
-- **WHEN** користувач переходить на наступну сторінку
-- **THEN** показуються наступні рядки, підсумок оновлюється (наприклад «16–30 з 42»), адреса містить номер сторінки
+#### Scenario: Moving to the next page
+- **WHEN** the user moves to the next page
+- **THEN** the next rows are shown, the summary is updated (for example "16–30 of 42"), and the address contains the page number
 
-#### Scenario: Межі
-- **WHEN** користувач на першій сторінці
-- **THEN** дії «на початок» і «назад» вимкнені
+#### Scenario: Boundaries
+- **WHEN** the user is on the first page
+- **THEN** the "to the start" and "back" actions are disabled
 
-#### Scenario: Розмір сторінки
-- **WHEN** користувач змінює розмір сторінки
-- **THEN** відкривається перша сторінка з новою кількістю рядків
+#### Scenario: Page size
+- **WHEN** the user changes the page size
+- **THEN** the first page opens with the new number of rows
 
-#### Scenario: Сторінка за межами діапазону
-- **WHEN** адреса містить номер сторінки, більший за кількість сторінок
-- **THEN** показується остання наявна сторінка без помилки
+#### Scenario: Page beyond the range
+- **WHEN** the address contains a page number greater than the number of pages
+- **THEN** the last available page is shown without an error
 
-### Requirement: Видимість колонок
-Таблиця SHALL мати меню вибору видимих колонок. Колонка, позначена як така, що не ховається, SHALL завжди бути видимою. Вибір SHALL зберігатися в браузері користувача окремо для кожної таблиці й відновлюватися при наступному відкритті; за відсутності збереженого вибору SHALL застосовуватися видимість за замовчуванням. Приховування колонки SHALL NOT змінювати пошук, фільтри, сортування чи сторінку.
+### Requirement: Column visibility
+The table SHALL have a menu for choosing the visible columns. A column marked as not hideable SHALL always be visible. The choice SHALL be stored in the user's browser separately for each table and restored on the next opening; without a saved choice the default visibility SHALL apply. Hiding a column SHALL NOT change the search, filters, sorting or page.
 
-#### Scenario: Приховування колонки
-- **WHEN** користувач знімає позначку колонки в меню
-- **THEN** колонка зникає з таблиці, а решта стану таблиці не змінюється
+#### Scenario: Hiding a column
+- **WHEN** the user unchecks a column in the menu
+- **THEN** the column disappears from the table, and the rest of the table state does not change
 
-#### Scenario: Збереження вибору
-- **WHEN** користувач приховав колонку й перезавантажив сторінку
-- **THEN** колонка лишається прихованою
+#### Scenario: Saving the choice
+- **WHEN** the user has hidden a column and reloaded the page
+- **THEN** the column remains hidden
 
-#### Scenario: Незалежність таблиць
-- **WHEN** користувач приховав колонку в одній таблиці
-- **THEN** видимість колонок іншої таблиці не змінилась
+#### Scenario: Independence of tables
+- **WHEN** the user has hidden a column in one table
+- **THEN** the column visibility of another table has not changed
 
-#### Scenario: Колонка, що не ховається
-- **WHEN** колонка позначена як така, що не ховається
-- **THEN** у меню вона відображається вимкненою для зміни й залишається в таблиці
+#### Scenario: A column that cannot be hidden
+- **WHEN** a column is marked as not hideable
+- **THEN** in the menu it is displayed as disabled for changes and remains in the table
 
-#### Scenario: Недоступне сховище
-- **WHEN** браузер не дозволяє зберігати дані
-- **THEN** меню працює в межах поточної сторінки, а помилки користувачу не показуються
+#### Scenario: Unavailable storage
+- **WHEN** the browser does not allow storing data
+- **THEN** the menu works within the current page, and no errors are shown to the user
 
-#### Scenario: Прихована колонка у фільтрі
-- **WHEN** активний фільтр або сортування посилається на колонку, яку приховано
-- **THEN** фільтр і сортування лишаються чинними й видимими в списку активних фільтрів
+#### Scenario: Hidden column in a filter
+- **WHEN** an active filter or sorting refers to a column that is hidden
+- **THEN** the filter and the sorting remain in effect and visible in the list of active filters
 
-### Requirement: Порожній стан і завантаження
-Коли за поточними параметрами рядків немає, таблиця SHALL показувати порожній стан (з окремим текстом, якщо діють пошук чи фільтри, і діє дія скидання). Поки виконується запит, таблиця SHALL показувати індикатор завантаження і зберігати попередні дані, не блокуючи решту сторінки.
+### Requirement: Empty state and loading
+When there are no rows for the current parameters, the table SHALL show an empty state (with a separate text if a search or filters are active, together with a reset action). While a request is in progress, the table SHALL show a loading indicator and keep the previous data, without blocking the rest of the page.
 
-#### Scenario: Нічого не знайдено
-- **WHEN** пошук не знаходить жодного рядка
-- **THEN** показано повідомлення, що нічого не знайдено, і дію скидання параметрів
+#### Scenario: Nothing found
+- **WHEN** the search finds no rows
+- **THEN** a message that nothing was found is shown, together with the parameter reset action
 
-#### Scenario: Даних немає зовсім
-- **WHEN** у джерелі немає жодного рядка і параметрів не задано
-- **THEN** показано порожній стан без дії скидання
+#### Scenario: No data at all
+- **WHEN** the source has no rows and no parameters are set
+- **THEN** the empty state is shown without a reset action
 
-### Requirement: Некоректні параметри адреси
-Некоректні або невідомі параметри адреси (колонка, оператор, напрямок, розмір сторінки, номер сторінки) SHALL NOT призводити до помилки сервера: вони ігноруються, таблиця показується за допустимими значеннями, а користувач бачить повідомлення про проігноровані параметри.
+### Requirement: Invalid address parameters
+Invalid or unknown address parameters (column, operator, direction, page size, page number) SHALL NOT cause a server error: they are ignored, the table is shown with the valid values, and the user sees a message about the ignored parameters.
 
-#### Scenario: Невідома колонка сортування
-- **WHEN** адреса вказує сортування за неіснуючою колонкою
-- **THEN** сторінка відкривається без сортування, показано повідомлення про некоректний параметр
+#### Scenario: Unknown sorting column
+- **WHEN** the address specifies sorting by a non-existent column
+- **THEN** the page opens without sorting, and a message about the invalid parameter is shown
 
-#### Scenario: Завеликий розмір сторінки
-- **WHEN** адреса вказує розмір сторінки понад максимальний
-- **THEN** застосовується максимально допустимий розмір
+#### Scenario: Page size too large
+- **WHEN** the address specifies a page size above the maximum
+- **THEN** the maximum allowed size is applied
 
-### Requirement: Доступність і адаптивність
-Таблиця SHALL бути керованою з клавіатури (елементи керування фокусуються, заголовок сортованої колонки є кнопкою зі станом `aria-sort`), мати текстові підписи для піктограм і на вузьких екранах SHALL прокручуватися по горизонталі всередині свого контейнера, не розширюючи сторінку.
+### Requirement: Accessibility and responsiveness
+The table SHALL be keyboard-operable (controls are focusable, the header of a sorted column is a button with the `aria-sort` state), have text labels for icons, and on narrow screens SHALL scroll horizontally within its container without widening the page.
 
 #### Scenario: aria-sort
-- **WHEN** таблиця відсортована за колонкою за зростанням
-- **THEN** заголовок цієї колонки має `aria-sort="ascending"`, а інші сортовані колонки — `aria-sort="none"`
+- **WHEN** the table is sorted by a column in ascending order
+- **THEN** the header of this column has `aria-sort="ascending"`, and the other sortable columns have `aria-sort="none"`
 
-#### Scenario: Вузький екран
-- **WHEN** ширина вікна 375 px
-- **THEN** сторінка не має горизонтальної прокрутки, а таблиця прокручується всередині контейнера
+#### Scenario: Narrow screen
+- **WHEN** the window width is 375 px
+- **THEN** the page has no horizontal scrolling, and the table scrolls within its container
 
-### Requirement: Локалізація
-Усі тексти компонента (підписи, оператори, повідомлення, підсумок пагінації) SHALL відображатися мовою інтерфейсу користувача (uk/en).
+### Requirement: Localization
+All texts of the component (labels, operators, messages, the pagination summary) SHALL be displayed in the interface language of the user (uk/en).
 
-#### Scenario: Українська
-- **WHEN** мова інтерфейсу `uk`
-- **THEN** підписи кнопок, оператори фільтрів і підсумок пагінації українською
+#### Scenario: Ukrainian
+- **WHEN** the interface language is `uk`
+- **THEN** the button labels, the filter operators and the pagination summary are in Ukrainian
 
-### Requirement: Демонстраційна сторінка лише поза production
-Для перевірки компонента SHALL існувати сторінка в адмінці, доступна лише автентифікованим користувачам і лише в середовищах, відмінних від production; у production сторінка SHALL відповідати «не знайдено».
+### Requirement: Demo page only outside production
+To verify the component there SHALL be a page in the admin, available only to authenticated users and only in environments other than production; in production the page SHALL respond "not found".
 
-#### Scenario: Локальне середовище
-- **WHEN** автентифікований користувач відкриває демонстраційну сторінку у non-production середовищі
-- **THEN** показуються серверна й клієнтська таблиці з тестовими даними усіх підтримуваних типів колонок, і вони не впливають одна на одну
+#### Scenario: Local environment
+- **WHEN** an authenticated user opens the demo page in a non-production environment
+- **THEN** the server and client tables are shown with test data of all supported column types, and they do not affect each other
 
 #### Scenario: Production
-- **WHEN** застосунок працює в production
-- **THEN** адреса демонстраційної сторінки повертає «не знайдено»
+- **WHEN** the application runs in production
+- **THEN** the address of the demo page returns "not found"

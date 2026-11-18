@@ -2,123 +2,123 @@
 
 ## Purpose
 
-Надає адмінці сторінки керування типами контенту виду `page` та їхніми полями: список, створення, редагування, видалення типу, а також керування його полями. Поведінка збігається з типами виду `content`, крім відсутності slug і власної адреси розділу.
+Gives the admin the pages for managing content types of the kind `page` and their fields: the list, creation, editing, deletion of a type, and management of its fields. The behaviour matches types of the kind `content`, except for the absence of a slug and its own section address.
 
 ## ADDED Requirements
 
-### Requirement: Сторінка таблиці типів сторінок
-Адмінка SHALL мати сторінку `/admin/page-types`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує всі типи контенту виду `page` у таблиці даних у серверному режимі: пошук, сортування, пагінацію й розмір сторінки виконує сервер, а стан живе в адресі. Типи видів `content` і `block` на цій сторінці SHALL НЕ показуватися. Таблиця SHALL показувати для кожного типу назву з описом, ключ, ключ батьківського типу, кількість полів і кількість вузлів; колонок `slug` і виду (`kind`) та фільтрів таблиця SHALL НЕ мати. Без явного сортування рядки SHALL йти за назвою.
+### Requirement: Page types table page
+The admin SHALL have a page `/admin/page-types`, available only to authenticated users with a confirmed email, which shows all content types of the kind `page` in the data table in server mode: search, sorting, pagination and page size are performed by the server, and the state lives in the address. Types of the kinds `content` and `block` SHALL NOT be shown on this page. The table SHALL show for each type the name with the description, the key, the parent type key, the number of fields and the number of nodes; the table SHALL NOT have a `slug` column, a kind column (`kind`) or filters. Without an explicit sorting the rows SHALL follow the name.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/page-types`
-- **THEN** він бачить таблицю типів сторінок, а заголовок відповідає мові інтерфейсу
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/page-types`
+- **THEN** they see the table of page types, and the title matches the interface language
 
-#### Scenario: Лише вид page
-- **WHEN** у системі є типи видів `content`, `page` і `block`
-- **THEN** таблиця показує лише типи виду `page`
+#### Scenario: Only the page kind
+- **WHEN** the system has types of the kinds `content`, `page` and `block`
+- **THEN** the table shows only the types of the kind `page`
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/page-types`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/page-types`
+- **THEN** they are redirected to the login page
 
-#### Scenario: Без slug
-- **WHEN** користувач дивиться на колонки таблиці
-- **THEN** колонки slug немає
+#### Scenario: Without slug
+- **WHEN** the user looks at the table columns
+- **THEN** there is no slug column
 
-### Requirement: Меню дій рядка типу сторінки
-Кожен рядок таблиці типів сторінок SHALL мати групу кнопок дій: кнопку «Налаштування» (форма редагування) і меню з пунктами «Редагувати», «Поля» й «Видалити», де «Видалити» відокремлено як руйнівну дію. Кнопка «Створити» над таблицею SHALL вести до форми створення типу сторінки.
+### Requirement: Row action menu of a page type
+Each row of the page types table SHALL have a group of action buttons: a "Settings" button (the edit form) and a menu with the items "Edit", "Fields" and "Delete", where "Delete" is separated as a destructive action. The "Create" button above the table SHALL lead to the creation form of a page type.
 
-#### Scenario: Перехід до полів
-- **WHEN** користувач обирає в меню рядка пункт «Поля»
-- **THEN** відкривається `/admin/page-types/{key}/fields`
+#### Scenario: Going to the fields
+- **WHEN** the user chooses the "Fields" item in the row menu
+- **THEN** `/admin/page-types/{key}/fields` opens
 
-#### Scenario: Кнопка створення
-- **WHEN** користувач натискає «Створити» над таблицею
-- **THEN** відкривається `/admin/page-types/create`
+#### Scenario: Create button
+- **WHEN** the user clicks "Create" above the table
+- **THEN** `/admin/page-types/create` opens
 
-### Requirement: Створення типу сторінки
-Адмінка SHALL мати форму `/admin/page-types/create` з полями: назва, ключ, батьківський тип і опис; поля slug у формі немає. Збереження SHALL створювати тип виду `page` незалежно від значень у запиті (вид не передається з форми), разом із системним полем `title`. Батьківським типом SHALL можна обрати лише тип виду `page`. Помилки валідації SHALL показуватися біля полів із збереженням введеного. Після успіху користувач SHALL потрапляти на список типів сторінок із повідомленням про успіх.
+### Requirement: Creating a page type
+The admin SHALL have a form `/admin/page-types/create` with the fields: name, key, parent type and description; there is no slug field in the form. Saving SHALL create a type of the kind `page` regardless of the values in the request (the kind is not passed from the form), together with the system field `title`. Only a type of the kind `page` can be chosen as the parent type. Validation errors SHALL be shown next to the fields with the entered values kept. After success the user SHALL land on the list of page types with a success message.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач заповнює назву й унікальний ключ і зберігає форму
-- **THEN** створено тип виду `page` із системним полем `title`, а користувача перенаправлено на `/admin/page-types` з повідомленням
+#### Scenario: Successful creation
+- **WHEN** the user fills in the name and a unique key and saves the form
+- **THEN** a type of the kind `page` with the system field `title` is created, and the user is redirected to `/admin/page-types` with a message
 
-#### Scenario: Вид у запиті ігнорується
-- **WHEN** запит створення містить `kind=content` або `slug`
-- **THEN** тип створюється з видом `page` і без slug
+#### Scenario: Kind in the request is ignored
+- **WHEN** the create request contains `kind=content` or a `slug`
+- **THEN** the type is created with the kind `page` and without a slug
 
-#### Scenario: Батько іншого виду
-- **WHEN** запит створення вказує як батьківський тип ключ типу виду `content`
-- **THEN** збереження відхилено з помилкою біля поля батьківського типу
+#### Scenario: Parent of another kind
+- **WHEN** the create request specifies as the parent type the key of a type of the kind `content`
+- **THEN** the save is rejected with an error next to the parent type field
 
-#### Scenario: Дубль ключа
-- **WHEN** ключ уже зайнятий будь-яким типом
-- **THEN** збереження відхилено з помилкою біля поля ключа
+#### Scenario: Duplicate key
+- **WHEN** the key is already taken by any type
+- **THEN** the save is rejected with an error next to the key field
 
-### Requirement: Редагування типу сторінки
-Адмінка SHALL мати форму `/admin/page-types/{key}/edit` з полями назви, батьківського типу й опису та ключем лише для читання. Збереження SHALL змінювати лише назву, батьківський тип і опис; `key` і `kind` не змінюються. Батьківським не можна обрати сам тип чи його нащадка. Для ключа, якого немає серед типів виду `page` (зокрема ключа типу `content` чи `block`), усі маршрути розділу SHALL відповідати 404, а `/admin/content-types/{key}/**` для типу `page` — також 404.
+### Requirement: Editing a page type
+The admin SHALL have a form `/admin/page-types/{key}/edit` with the fields name, parent type and description, and the key read-only. Saving SHALL change only the name, the parent type and the description; `key` and `kind` do not change. The type itself or its descendant cannot be chosen as the parent. For a key that is not among the types of the kind `page` (including the key of a type `content` or `block`), all routes of the section SHALL respond 404, and `/admin/content-types/{key}/**` for a type `page` — also 404.
 
-#### Scenario: Успішне збереження
-- **WHEN** користувач змінює назву типу сторінки й зберігає
-- **THEN** назву оновлено, а користувача перенаправлено на `/admin/page-types` з повідомленням
+#### Scenario: Successful save
+- **WHEN** the user changes the name of a page type and saves
+- **THEN** the name is updated, and the user is redirected to `/admin/page-types` with a message
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває `/admin/page-types/{key}/edit` для ключа типу виду `content`
-- **THEN** відповідь 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens `/admin/page-types/{key}/edit` for the key of a type of the kind `content`
+- **THEN** the response is 404
 
-#### Scenario: Розділ контенту не відкриває сторінки
-- **WHEN** користувач відкриває `/admin/content-types/{key}/edit` для ключа типу виду `page`
-- **THEN** відповідь 404
+#### Scenario: Content section does not open a page type
+- **WHEN** the user opens `/admin/content-types/{key}/edit` for the key of a type of the kind `page`
+- **THEN** the response is 404
 
-#### Scenario: Нащадок як батько
-- **WHEN** запит редагування вказує як батька нащадка типу
-- **THEN** збереження відхилено з помилкою біля поля батьківського типу
+#### Scenario: Descendant as the parent
+- **WHEN** the edit request specifies a descendant of the type as its parent
+- **THEN** the save is rejected with an error next to the parent type field
 
-### Requirement: Видалення типу сторінки
-Меню рядка SHALL відкривати діалог підтвердження видалення з назвою типу. Тип, що має вузли або дочірні типи, SHALL НЕ видалятися: діалог пояснює причину без кнопки підтвердження, а сервер відмовляє з повідомленням про помилку. Інакше тип видаляється разом із полями, а користувач потрапляє на список із повідомленням про успіх.
+### Requirement: Deleting a page type
+The row menu SHALL open a deletion confirmation dialog with the name of the type. A type that has nodes or child types SHALL NOT be deleted: the dialog explains the reason without a confirmation button, and the server refuses with an error message. Otherwise the type is deleted together with its fields, and the user lands on the list with a success message.
 
-#### Scenario: Видалення порожнього типу
-- **WHEN** користувач підтверджує видалення типу без вузлів і дочірніх типів
-- **THEN** тип і його поля видалено, а користувач на `/admin/page-types` бачить повідомлення про успіх
+#### Scenario: Deleting an empty type
+- **WHEN** the user confirms the deletion of a type without nodes and child types
+- **THEN** the type and its fields are deleted, and the user sees a success message on `/admin/page-types`
 
-#### Scenario: Тип із вузлами
-- **WHEN** тип має вузли
-- **THEN** діалог не має кнопки підтвердження, а запит видалення відхиляється повідомленням про помилку
+#### Scenario: Type with nodes
+- **WHEN** the type has nodes
+- **THEN** the dialog has no confirmation button, and the deletion request is rejected with an error message
 
-#### Scenario: Тип із дочірніми типами
-- **WHEN** тип має дочірні типи
-- **THEN** видалення відхилено повідомленням про помилку
+#### Scenario: Type with child types
+- **WHEN** the type has child types
+- **THEN** the deletion is rejected with an error message
 
-### Requirement: Меню розділу типу сторінки
-Сторінки редагування типу сторінки, списку полів, створення й редагування поля SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/page-types/{key}/edit`) і «Поля» (`/admin/page-types/{key}/fields`) та посилання назад до списку типів сторінок. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля». На сторінці створення типу меню немає.
+### Requirement: Section menu of a page type
+The pages of editing a page type, the list of fields, creation and editing of a field SHALL have a horizontal section menu with the items "Settings" (`/admin/page-types/{key}/edit`) and "Fields" (`/admin/page-types/{key}/fields`) and a link back to the list of page types. The active item SHALL be highlighted; on the creation and editing pages of a field the active item is "Fields". On the page of creating a type there is no menu.
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching sections
+- **WHEN** the user on the edit page of a page type chooses "Fields"
+- **THEN** the list of fields of the type opens, and the item "Fields" is active
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу сторінки
-- **THEN** відкривається `/admin/page-types`
+#### Scenario: Link back
+- **WHEN** the user clicks the link back on the fields page of a page type
+- **THEN** `/admin/page-types` opens
 
-### Requirement: Поля типу сторінки
-Адмінка SHALL надавати для типів виду `page` ті самі сторінки й дії над полями, що й для типів контенту, за адресами `/admin/page-types/{key}/fields`, `/fields/create`, `/fields/{field}/edit`: список (клієнтська таблиця, порядок за вагою), створення, редагування, видалення та впорядкування перетягуванням, з тими самими правилами валідації й заборонами (системне поле `title` та поле зі значеннями не видаляються, ключ поля незмінний). Після дій користувач SHALL повертатися на список полів типу сторінки.
+### Requirement: Fields of a page type
+The admin SHALL provide for types of the kind `page` the same pages and field actions as for content types, at the addresses `/admin/page-types/{key}/fields`, `/fields/create`, `/fields/{field}/edit`: the list (a client table, ordered by weight), creation, editing, deletion and ordering by dragging, with the same validation rules and bans (the system field `title` and a field with values are not deleted, the field key is immutable). After the actions the user SHALL return to the list of fields of the page type.
 
-#### Scenario: Список полів
-- **WHEN** користувач відкриває `/admin/page-types/{key}/fields`
-- **THEN** бачить усі поля типу сторінки, зокрема системне `title`, у порядку ваги
+#### Scenario: List of fields
+- **WHEN** the user opens `/admin/page-types/{key}/fields`
+- **THEN** they see all fields of the page type, including the system `title`, in the order of weight
 
-#### Scenario: Створення поля
-- **WHEN** користувач створює поле з унікальним ключем у типі сторінки
-- **THEN** поле додано, а користувача перенаправлено на `/admin/page-types/{key}/fields` з повідомленням
+#### Scenario: Creating a field
+- **WHEN** the user creates a field with a unique key in a page type
+- **THEN** the field is added, and the user is redirected to `/admin/page-types/{key}/fields` with a message
 
-#### Scenario: Видалення системного поля
-- **WHEN** надходить запит видалення поля `title`
-- **THEN** поле лишається, а користувач бачить повідомлення про помилку
+#### Scenario: Deleting the system field
+- **WHEN** a deletion request for the field `title` arrives
+- **THEN** the field remains, and the user sees an error message
 
-#### Scenario: Зміна порядку
-- **WHEN** користувач перетягує поле на нове місце
-- **THEN** нова послідовність зберігається в `weight` і зберігається після перезавантаження
+#### Scenario: Changing the order
+- **WHEN** the user drags a field to a new place
+- **THEN** the new sequence is saved in `weight` and persists after a reload
 
-#### Scenario: Поле чужого типу
-- **WHEN** адреса вказує ключ поля, якого немає в цьому типі сторінки
-- **THEN** відповідь 404
+#### Scenario: Field of another type
+- **WHEN** the address specifies a field key that does not exist in this page type
+- **THEN** the response is 404

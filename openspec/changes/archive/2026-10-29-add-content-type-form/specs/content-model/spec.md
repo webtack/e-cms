@@ -1,32 +1,32 @@
 ## ADDED Requirements
 
-### Requirement: Публічний slug типу контенту
-Тип контенту виду `content` SHALL мати необов'язковий `slug` — публічний шлях сайту, що відкриває список вузлів цього типу. Slug SHALL складатися з малих латинських літер, цифр і дефісів без початкового, кінцевого та повторних дефісів, довжиною до 190 символів. Slug SHALL бути унікальним серед усіх типів (без урахування регістру); тип без slug не має публічного списку. Для типів видів `page` і `block` slug SHALL бути порожнім, і будь-яка спроба його вказати SHALL відхилятися. Slug типу SHALL допускати зміну після створення (на відміну від `key` і `kind`) зі збереженням усіх перевірок, зокрема очищення. Slug типу не залежить від slug вузлів і не перевіряється на збіг із ними.
+### Requirement: Public slug of a content type
+A content type of the `content` kind SHALL have an optional `slug` — the public path of the site that opens the list of nodes of this type. The slug SHALL consist of lowercase Latin letters, digits and hyphens without leading, trailing and repeated hyphens, up to 190 characters long. The slug SHALL be unique among all types (case-insensitive); a type without a slug has no public list. For types of the `page` and `block` kinds the slug SHALL be empty, and any attempt to specify it SHALL be rejected. The slug of a type SHALL be changeable after creation (unlike `key` and `kind`), keeping all checks, including clearing. The slug of a type does not depend on node slugs and is not checked for a match with them.
 
-#### Scenario: Тип зі slug
-- **WHEN** створюється тип виду `content` зі slug `news`
-- **THEN** тип збережено, а slug `news` належить саме цьому типу
+#### Scenario: Type with a slug
+- **WHEN** a type of the `content` kind is created with the slug `news`
+- **THEN** the type is saved, and the slug `news` belongs to this very type
 
-#### Scenario: Тип без slug
-- **WHEN** створюється тип виду `content` без slug
-- **THEN** тип збережено, а його slug порожній (публічного списку немає)
+#### Scenario: Type without a slug
+- **WHEN** a type of the `content` kind is created without a slug
+- **THEN** the type is saved, and its slug is empty (there is no public list)
 
-#### Scenario: Дублікат slug
-- **WHEN** створюється тип зі slug `News`, а інший тип уже має slug `news`
-- **THEN** збереження відхилено з помилкою валідації поля `slug`
+#### Scenario: Duplicate slug
+- **WHEN** a type with the slug `News` is created, and another type already has the slug `news`
+- **THEN** the save is rejected with a validation error of the `slug` field
 
-#### Scenario: Недопустимий формат
-- **WHEN** тип зберігається зі slug `Про нас`, `news_1`, `-news` або `a--b`
-- **THEN** збереження відхилено з помилкою валідації поля `slug`
+#### Scenario: Invalid format
+- **WHEN** a type is saved with the slug `About us`, `news_1`, `-news` or `a--b`
+- **THEN** the save is rejected with a validation error of the `slug` field
 
-#### Scenario: Slug для не-content типу
-- **WHEN** створюється або змінюється тип виду `page` чи `block` зі slug
-- **THEN** збереження відхилено з помилкою валідації поля `slug`
+#### Scenario: Slug for a non-content type
+- **WHEN** a type of the `page` or `block` kind is created or changed with a slug
+- **THEN** the save is rejected with a validation error of the `slug` field
 
-#### Scenario: Зміна slug
-- **WHEN** наявному типу виду `content` змінюють slug на вільне допустиме значення
-- **THEN** зміну збережено, а `key` і `kind` типу лишилися без змін
+#### Scenario: Changing the slug
+- **WHEN** the slug of an existing type of the `content` kind is changed to a free valid value
+- **THEN** the change is saved, and the `key` and `kind` of the type remain unchanged
 
-#### Scenario: Очищення slug
-- **WHEN** наявному типу виду `content` очищають slug
-- **THEN** slug стає порожнім, тип збережено
+#### Scenario: Clearing the slug
+- **WHEN** the slug of an existing type of the `content` kind is cleared
+- **THEN** the slug becomes empty, and the type is saved

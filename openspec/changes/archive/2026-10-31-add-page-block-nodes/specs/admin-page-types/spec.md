@@ -3,31 +3,31 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню розділу типу сторінки
-Сторінки редагування типу сторінки, списку полів, створення й редагування поля, а також записів типу SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/page-types/{key}/edit`), «Поля» (`/admin/page-types/{key}/fields`) і «Записи» (`/admin/page-types/{key}/nodes`) та посилання назад до списку типів сторінок. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля», на сторінках записів — «Записи». На сторінці створення типу меню немає.
+The pages for editing a page type, the list of fields, the create and edit of a field, and the records of the type SHALL have a horizontal section menu with the items «Налаштування» (`/admin/page-types/{key}/edit`), «Поля» (`/admin/page-types/{key}/fields`) and «Записи» (`/admin/page-types/{key}/nodes`), and a link back to the list of page types. The active item SHALL be highlighted; on the create and edit pages of a field the active one is «Поля», on the pages of records — «Записи». The creation page of a type has no menu.
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching sections
+- **WHEN** the user on the edit page of a page type selects «Поля»
+- **THEN** the list of fields of the type opens, and the item «Поля» is active
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Записи»
-- **THEN** відкривається `/admin/page-types/{key}/nodes`, а пункт «Записи» активний
+#### Scenario: Transition to records
+- **WHEN** the user on the edit page of a page type selects «Записи»
+- **THEN** `/admin/page-types/{key}/nodes` opens, and the item «Записи» is active
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу сторінки
-- **THEN** відкривається `/admin/page-types`
+#### Scenario: Link back
+- **WHEN** the user presses the link back on the page of fields of a page type
+- **THEN** `/admin/page-types` opens
 
 ### Requirement: Меню дій рядка типу сторінки
-Кожен рядок таблиці типів сторінок SHALL мати групу кнопок дій: кнопку «Налаштування» (форма редагування) і меню з пунктами «Редагувати», «Поля», «Записи» й «Видалити», де «Видалити» відокремлено як руйнівну дію. Кількість записів у рядку таблиці SHALL бути посиланням на список записів цього типу. Кнопка «Створити» над таблицею SHALL вести до форми створення типу сторінки.
+Each row of the table of page types SHALL have a group of action buttons: the button «Налаштування» (the edit form) and a menu with the items «Редагувати», «Поля», «Записи» and «Видалити», where «Видалити» is separated as a destructive action. The number of records in the table row SHALL be a link to the list of records of this type. The button «Створити» above the table SHALL lead to the creation form of a page type.
 
-#### Scenario: Перехід до полів
-- **WHEN** користувач обирає в меню рядка пункт «Поля»
-- **THEN** відкривається `/admin/page-types/{key}/fields`
+#### Scenario: Transition to fields
+- **WHEN** the user selects the item «Поля» in the row menu
+- **THEN** `/admin/page-types/{key}/fields` opens
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач обирає в меню рядка пункт «Записи» або натискає кількість записів
-- **THEN** відкривається `/admin/page-types/{key}/nodes`
+#### Scenario: Transition to records
+- **WHEN** the user selects the item «Записи» in the row menu or presses the number of records
+- **THEN** `/admin/page-types/{key}/nodes` opens
 
-#### Scenario: Кнопка створення
-- **WHEN** користувач натискає «Створити» над таблицею
-- **THEN** відкривається `/admin/page-types/create`
+#### Scenario: Create button
+- **WHEN** the user presses «Створити» above the table
+- **THEN** `/admin/page-types/create` opens

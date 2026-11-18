@@ -2,32 +2,32 @@
 
 ## Context
 
-Застосунок працює в Docker: `ecms_nginx` публікує порт 8080, `ecms_app` містить PHP. На хості PHP немає, а Node/npm працюють лише на хості (див. `CLAUDE.md`, розділ Docker). Тести PHPUnit лежать у `tests/`. Playwright відсутній. Мотивація: див. proposal.md.
+The application runs in Docker: `ecms_nginx` publishes port 8080, `ecms_app` contains PHP. There is no PHP on the host, and Node/npm run only on the host (see `CLAUDE.md`, the Docker section). The PHPUnit tests are in `tests/`. Playwright is absent. The motivation is in proposal.md.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Мінімальне e2e-оточення, що використовує вже запущений Docker-стек.
-- Чіткі правила в `CLAUDE.md` і `openspec/config.yaml`, щоб агент не запускав PHP/npm не там.
+- A minimal e2e environment that uses the already running Docker stack.
+- Clear rules in `CLAUDE.md` and `openspec/config.yaml`, so that the agent does not run PHP/npm in the wrong place.
 
 **Non-Goals:**
-- Playwright у Docker-контейнері та зміни `docker-compose.yml`.
-- Firefox/WebKit, CI-конфігурація, наповнення сценаріями поза smoke-тестом.
-- Автоматичне підготування БД (seed/міграції) для e2e.
+- Playwright in a Docker container and changes to `docker-compose.yml`.
+- Firefox/WebKit, CI configuration, scenarios beyond the smoke test.
+- Automatic preparation of the DB (seed/migrations) for e2e.
 
 ## Decisions
 
-- **Playwright на хості, не в контейнері.** Узгоджується з правилом «npm тільки на хості»; браузер бачить `localhost:8080` напряму. Альтернатива: окремий сервіс Playwright у compose, але це ускладнює стек без потреби.
-- **Без `webServer` у конфігу.** Застосунок уже піднято в Docker, тож Playwright лише підключається за `baseURL`. Альтернатива: `webServer` з `docker compose up`, але це дублює керування контейнерами.
-- **Один проєкт Chromium** у `playwright.config.js` та `npx playwright install chromium`. Менше місця і швидше; рішення підтверджено власником.
-- **Тести в `e2e/`**, `testDir: './e2e'`. Це відокремлює їх від PHPUnit (`tests/`), якому вони не потрібні.
-- **Конфіг у JS** (`playwright.config.js`), бо `package.json` має `"type": "module"` і проєкт не використовує TypeScript; JSDoc англійською згідно з правилами проєкту.
-- **Правила та контекст** додаються до `CLAUDE.md` та `openspec/config.yaml` (поле `context` і правило `tasks`), щоб майбутні зміни автоматично враховували Docker і URL.
-- **`.env.example`**: `APP_URL=http://localhost:8080`, узгоджено з `.env` та портом nginx.
-- **Документація**: `docs/e2e-testing.md` українською та `docs/README.md` як індекс (каталогу `docs/` ще немає).
+- **Playwright on the host, not in the container.** It is consistent with the rule "npm only on the host"; the browser sees `localhost:8080` directly. Alternative: a separate Playwright service in compose, but that complicates the stack without need.
+- **No `webServer` in the config.** The application is already started in Docker, so Playwright only connects via `baseURL`. Alternative: `webServer` with `docker compose up`, but that duplicates the management of containers.
+- **One Chromium project** in `playwright.config.js` and `npx playwright install chromium`. Less space and faster; the decision was confirmed by the owner.
+- **Tests in `e2e/`**, `testDir: './e2e'`. This separates them from PHPUnit (`tests/`), which does not need them.
+- **Config in JS** (`playwright.config.js`), because `package.json` has `"type": "module"` and the project does not use TypeScript; JSDoc in English according to the project rules.
+- **Rules and context** are added to `CLAUDE.md` and `openspec/config.yaml` (the `context` field and a rule for `tasks`), so that future changes automatically take Docker and the URL into account.
+- **`.env.example`**: `APP_URL=http://localhost:8080`, consistent with `.env` and the nginx port.
+- **Documentation**: `docs/e2e-testing.md` in Ukrainian and `docs/README.md` as the index (there is no `docs/` directory yet).
 
 ## Risks / Trade-offs
 
-- [Тести падають, якщо контейнери не запущені] → у документації вказати передумову `docker compose up -d` і очікувану помилку підключення.
-- [Chromium завантажується на хост і займає місце] → встановлювати лише Chromium; артефакти (`test-results/`, `playwright-report/`) додати в `.gitignore`.
-- [Стан БД впливає на e2e] → поки обмежуємось smoke-тестом без залежності від даних.
+- [Tests fail if the containers are not running] → state the precondition `docker compose up -d` and the expected connection error in the documentation.
+- [Chromium is downloaded to the host and takes space] → install only Chromium; add the artifacts (`test-results/`, `playwright-report/`) to `.gitignore`.
+- [The DB state affects e2e] → for now we limit ourselves to a smoke test without a dependency on data.

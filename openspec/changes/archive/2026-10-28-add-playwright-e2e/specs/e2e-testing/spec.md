@@ -2,45 +2,45 @@
 
 ## Purpose
 
-Дає розробнику змогу запускати браузерні e2e-тести проти застосунку, що працює в Docker, не змінюючи Docker-оточення і зберігаючи розділення PHP (контейнер) та Node (хост).
+Lets a developer run browser e2e tests against the application running in Docker without changing the Docker environment, and keeps the separation of PHP (container) and Node (host).
 
 ## ADDED Requirements
 
-### Requirement: E2E-тести запускаються з хоста
-Система SHALL дозволяти запускати e2e-тести однією командою `npm run test:e2e` на хості, без `docker compose exec`.
+### Requirement: E2E tests run from the host
+The system SHALL let e2e tests be run with a single command `npm run test:e2e` on the host, without `docker compose exec`.
 
-#### Scenario: Запуск на хості
-- **WHEN** розробник виконує `npm run test:e2e` на хості при запущених контейнерах
-- **THEN** тести виконуються в Chromium і команда завершується з кодом результату тестів
+#### Scenario: Running on the host
+- **WHEN** the developer runs `npm run test:e2e` on the host while the containers are running
+- **THEN** the tests run in Chromium and the command finishes with the exit code of the test results
 
-### Requirement: Тести працюють проти Docker-застосунку
-E2E-тести SHALL звертатися до застосунку за адресою `http://localhost:8080` і SHALL NOT запускати власний сервер.
+### Requirement: Tests work against the Docker application
+E2E tests SHALL address the application at `http://localhost:8080` and SHALL NOT start their own server.
 
-#### Scenario: Застосунок доступний
-- **WHEN** контейнери запущені і відповідають на `http://localhost:8080`
-- **THEN** відносні переходи в тестах (наприклад, `/`) відкривають цей застосунок
+#### Scenario: The application is available
+- **WHEN** the containers are running and respond on `http://localhost:8080`
+- **THEN** relative navigations in the tests (for example, `/`) open this application
 
-#### Scenario: Застосунок недоступний
-- **WHEN** контейнери зупинено
-- **THEN** тести завершуються помилкою підключення, а не запускають окремий сервер
+#### Scenario: The application is unavailable
+- **WHEN** the containers are stopped
+- **THEN** the tests fail with a connection error, instead of starting a separate server
 
-### Requirement: Лише Chromium
-Система SHALL виконувати e2e-тести тільки в Chromium.
+### Requirement: Chromium only
+The system SHALL run e2e tests only in Chromium.
 
-#### Scenario: Єдиний браузер
-- **WHEN** виконується `npm run test:e2e`
-- **THEN** тести запускаються в одному проєкті Chromium, без Firefox і WebKit
+#### Scenario: A single browser
+- **WHEN** `npm run test:e2e` is run
+- **THEN** the tests run in a single Chromium project, without Firefox and WebKit
 
-### Requirement: Розділення e2e та PHPUnit
-E2E-тести SHALL зберігатися в `e2e/` і SHALL NOT потрапляти до запуску PHPUnit.
+### Requirement: Separation of e2e and PHPUnit
+E2E tests SHALL be stored in `e2e/` and SHALL NOT be picked up by the PHPUnit run.
 
-#### Scenario: PHPUnit не бачить e2e
-- **WHEN** виконується `docker compose exec app php artisan test`
-- **THEN** файли з `e2e/` не запускаються
+#### Scenario: PHPUnit does not see e2e
+- **WHEN** `docker compose exec app php artisan test` is run
+- **THEN** the files from `e2e/` are not run
 
-### Requirement: Smoke-перевірка
-Система SHALL містити принаймні один e2e-тест, що підтверджує доступність головної сторінки.
+### Requirement: Smoke check
+The system SHALL contain at least one e2e test that confirms the home page is available.
 
-#### Scenario: Головна сторінка відповідає
-- **WHEN** smoke-тест відкриває `/`
-- **THEN** відповідь успішна (статус нижче 400)
+#### Scenario: The home page responds
+- **WHEN** the smoke test opens `/`
+- **THEN** the response is successful (status below 400)

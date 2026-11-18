@@ -1,73 +1,73 @@
 ## MODIFIED Requirements
 
 ### Requirement: Поле визначається рядком у БД
-Система SHALL дозволяти додати до типу контенту поле із ключем (унікальним у межах типу), назвою, типом значення із реєстру, ознаками множинності, обов'язковості та перекладності, вагою (`weight`) й опціональними налаштуваннями (JSON). Ключ поля SHALL відповідати формату `^[a-z][a-z0-9_]*$` (до 64 символів), SHALL НЕ збігатися із зарезервованим ключем (`uuid`, `slug`, `status`, `published_at` — ключі службових колонок таблиці записів) і SHALL НЕ змінюватися після створення; назву, вагу й налаштування змінювати дозволено. Заборона зарезервованих ключів SHALL діяти лише при створенні поля: поля, що вже мають такий ключ, лишаються чинними й редагуються як раніше, але в таблиці записів не пропонуються як колонки.
+The system SHALL allow adding to a content type a field with a key (unique within the type), a name, a value type from the registry, flags of multiplicity, required status and translatability, a weight (`weight`) and optional settings (JSON). The key of the field SHALL match the format `^[a-z][a-z0-9_]*$` (up to 64 characters), SHALL NOT coincide with a reserved key (`uuid`, `slug`, `status`, `published_at` — the keys of the service columns of the table of records) and SHALL NOT change after creation; the name, the weight and the settings may be changed. The prohibition of reserved keys SHALL apply only when a field is created: fields that already have such a key remain valid and are edited as before, but are not offered as columns in the table of records.
 
-#### Scenario: Додавання поля
-- **WHEN** до типу `article` додається поле `views` типу «ціле число»
-- **THEN** поле збережено, і записи цього типу можуть мати для нього значення
+#### Scenario: Adding a field
+- **WHEN** the field `views` of the type «ціле число» is added to the type `article`
+- **THEN** the field is saved, and the records of this type can have values for it
 
-#### Scenario: Невідомий тип значення
-- **WHEN** додається поле з типом, якого немає в реєстрі типів полів
-- **THEN** система відхиляє збереження поля з помилкою валідації
+#### Scenario: Unknown value type
+- **WHEN** a field with a type that is not in the registry of field types is added
+- **THEN** the system rejects saving the field with a validation error
 
-#### Scenario: Дублікат ключа в межах типу
-- **WHEN** до того ж типу додається друге поле з наявним ключем
-- **THEN** збереження відхилено; той самий ключ в іншому типі контенту допустимий
+#### Scenario: Duplicate key within the type
+- **WHEN** a second field with an existing key is added to the same type
+- **THEN** the saving is rejected; the same key in another content type is allowed
 
-#### Scenario: Недопустимий формат ключа поля
-- **WHEN** до типу додається поле з ключем `My Field` або `1price`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Invalid format of a field key
+- **WHEN** a field with the key `My Field` or `1price` is added to a type
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Зарезервований ключ поля
-- **WHEN** до типу додається поле з ключем `slug`, `uuid`, `status` або `published_at`
-- **THEN** збереження відхилено з помилкою валідації біля ключа, а поле не створено
+#### Scenario: Reserved field key
+- **WHEN** a field with the key `slug`, `uuid`, `status` or `published_at` is added to a type
+- **THEN** the saving is rejected with a validation error next to the key, and the field is not created
 
-#### Scenario: Наявне поле із зарезервованим ключем
-- **WHEN** оновлюється назва чи вага поля, ключ якого був створений до введення резервування (наприклад, `status`)
-- **THEN** зміну збережено без помилки
+#### Scenario: Existing field with a reserved key
+- **WHEN** the name or the weight of a field is updated, whose key was created before the reservation was introduced (for example, `status`)
+- **THEN** the change is saved without an error
 
-#### Scenario: Спроба змінити ключ поля
-- **WHEN** змінюється `key` наявного поля
-- **THEN** зміну відхилено, ключ лишається попереднім; зміна назви допустима
+#### Scenario: Attempt to change the key of a field
+- **WHEN** the `key` of an existing field is changed
+- **THEN** the change is rejected, the key remains the previous one; changing the name is allowed
 
 ## ADDED Requirements
 
 ### Requirement: Службові атрибути запису
-Кожен запис контенту SHALL мати службові атрибути: `published_at` (дата й час публікації, обов'язковий), `is_active` (булевий, за замовчуванням `true`) і `user_id` (автор, обов'язковий, посилання на користувача). `published_at` і `is_active` SHALL бути редагованими. Автор SHALL виставлятися системою з користувача, що створює запис, SHALL НЕ приймати значення із запиту й SHALL НЕ змінюватися після створення. Користувач, що є автором запису, SHALL НЕ видалятися. Якщо `published_at` не вказано при створенні, система SHALL підставити поточний момент; очистити `published_at` наявного запису SHALL бути неможливо. Минулі й майбутні значення `published_at` SHALL бути допустимими. Вимкнення запису (`is_active = false`) SHALL НЕ змінювати `published_at`. Для записів, що існували до появи цих атрибутів, `published_at` SHALL дорівнювати даті їх створення, а автором SHALL бути адміністратор із `ADMIN_EMAIL`.
+Each content record SHALL have service attributes: `published_at` (the date and time of publication, required), `is_active` (boolean, by default `true`) and `user_id` (the author, required, a reference to a user). `published_at` and `is_active` SHALL be editable. The author SHALL be set by the system from the user who creates the record, SHALL NOT accept a value from the request and SHALL NOT change after creation. A user who is the author of a record SHALL NOT be deleted. If `published_at` is not specified on creation, the system SHALL substitute the current moment; clearing `published_at` of an existing record SHALL be impossible. Past and future values of `published_at` SHALL be valid. Disabling a record (`is_active = false`) SHALL NOT change `published_at`. For records that existed before these attributes appeared, `published_at` SHALL equal the date of their creation, and the author SHALL be the administrator from `ADMIN_EMAIL`.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** запис створюється без `published_at` та `is_active`
-- **THEN** `is_active` дорівнює `true`, а `published_at` — моменту створення
+#### Scenario: Default values
+- **WHEN** a record is created without `published_at` and `is_active`
+- **THEN** `is_active` equals `true`, and `published_at` — the moment of creation
 
-#### Scenario: Автор з поточного користувача
-- **WHEN** авторизований користувач створює запис
-- **THEN** автором запису стає цей користувач
+#### Scenario: Author from the current user
+- **WHEN** an authenticated user creates a record
+- **THEN** this user becomes the author of the record
 
-#### Scenario: Автор не змінюється
-- **WHEN** запит оновлення запису містить інший `user_id`
-- **THEN** автор запису лишається попереднім, помилки немає
+#### Scenario: Author does not change
+- **WHEN** the update request of a record contains a different `user_id`
+- **THEN** the author of the record remains the previous one, there is no error
 
-#### Scenario: Автор не приймається при створенні
-- **WHEN** запит створення містить `user_id` іншого користувача
-- **THEN** автором стає поточний користувач
+#### Scenario: Author is not accepted on creation
+- **WHEN** the creation request contains the `user_id` of another user
+- **THEN** the current user becomes the author
 
-#### Scenario: Запис без автора неможливий
-- **WHEN** запис створюється без користувача (ні автора явно, ні поточного користувача)
-- **THEN** створення відхилено, запис не збережено
+#### Scenario: Record without an author is impossible
+- **WHEN** a record is created without a user (neither an explicit author, nor the current user)
+- **THEN** the creation is rejected, the record is not saved
 
-#### Scenario: Видалення автора
-- **WHEN** виконано спробу видалити користувача, що є автором хоч одного запису
-- **THEN** користувача не видалено
+#### Scenario: Deleting the author
+- **WHEN** an attempt is made to delete a user who is the author of at least one record
+- **THEN** the user is not deleted
 
-#### Scenario: Вимкнення зберігає дату
-- **WHEN** запис із `published_at` у майбутньому вимикається (`is_active = false`)
-- **THEN** `published_at` не змінюється
+#### Scenario: Disabling keeps the date
+- **WHEN** a record with `published_at` in the future is disabled (`is_active = false`)
+- **THEN** `published_at` does not change
 
-#### Scenario: Перенесення наявних записів
-- **WHEN** виконується міграція над таблицею з наявними записами
-- **THEN** кожен запис має `published_at` = дата створення, `is_active = true` і автора — адміністратора з `ADMIN_EMAIL`
+#### Scenario: Migration of existing records
+- **WHEN** the migration runs over a table with existing records
+- **THEN** each record has `published_at` = the creation date, `is_active = true`, and the author — the administrator from `ADMIN_EMAIL`
 
-#### Scenario: Немає адміністратора для наявних записів
-- **WHEN** виконується міграція над непорожньою таблицею записів, а користувача з `ADMIN_EMAIL` немає
-- **THEN** міграція завершується явною помилкою і нічого не змінює
+#### Scenario: No administrator for existing records
+- **WHEN** the migration runs over a non-empty table of records, and there is no user with `ADMIN_EMAIL`
+- **THEN** the migration ends with an explicit error and changes nothing

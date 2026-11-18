@@ -1,12 +1,12 @@
 ## ADDED Requirements
 
 ### Requirement: Посилання на сайт у шапці
-Шапка адмін-оболонки SHALL містити кнопку-іконку «Відкрити сайт» з підписом для скринрідерів і підказкою, яка веде на головну сторінку публічного сайту (`/`) і відкривається в новій вкладці браузера. Кнопка SHALL бути доступна кожному користувачеві адмінки на всіх її сторінках і SHALL НЕ перезавантажувати та не закривати поточну сторінку адмінки.
+The header of the admin shell SHALL contain an icon button «Відкрити сайт» ("Open site") with a label for screen readers and a hint, which leads to the home page of the public site (`/`) and opens in a new browser tab. The button SHALL be available to every user of the admin on all its pages and SHALL NOT reload or close the current page of the admin.
 
-#### Scenario: Кнопка в шапці
-- **WHEN** автентифікований користувач відкриває будь-яку сторінку адмінки
-- **THEN** у шапці є кнопка-іконка «Відкрити сайт» з посиланням `/`
+#### Scenario: Button in the header
+- **WHEN** an authenticated user opens any page of the admin
+- **THEN** the header has the icon button «Відкрити сайт» ("Open site") with the link `/`
 
-#### Scenario: Відкриття в новій вкладці
-- **WHEN** користувач натискає кнопку «Відкрити сайт»
-- **THEN** головна сторінка сайту відкривається в новій вкладці, а адмінка лишається відкритою в поточній
+#### Scenario: Opening in a new tab
+- **WHEN** the user clicks the button «Відкрити сайт» ("Open site")
+- **THEN** the home page of the site opens in a new tab, and the admin remains open in the current one

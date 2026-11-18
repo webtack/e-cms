@@ -2,26 +2,26 @@
 
 ## Context
 
-Див. proposal.md — Why. Зараз `playwright.config.js` має `workers: 1` (спеки діляють seeded-користувача й `users.locale`), тому повний прогін послідовний і росте лінійно з кількістю спеків (`smoke`, `admin-shell`, `admin-i18n`, `admin-data-table`, `admin-content-types`, `admin-content-fields`, `admin-page-types`). Завдання в змінах OpenSpec містять перевірку «`npm run test:e2e` зелений». Команди запуску описано в `docs/e2e-testing.md` і `CLAUDE.md`; `e2e/global-setup.js` скидає мову незалежно від набору спеків.
+See proposal.md — Why. Right now `playwright.config.js` has `workers: 1` (the specs share the seeded user and `users.locale`), so a full run is sequential and grows linearly with the number of specs (`smoke`, `admin-shell`, `admin-i18n`, `admin-data-table`, `admin-content-types`, `admin-content-fields`, `admin-page-types`). The tasks in OpenSpec changes contain the check "`npm run test:e2e` is green". The commands for running are described in `docs/e2e-testing.md` and `CLAUDE.md`; `e2e/global-setup.js` resets the language regardless of the set of specs.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Скоротити час циклу «правка → перевірка», не втрачаючи страховки від регресій: повний набір проганяється там, де регресія найімовірніша — після правок спільного коду.
-- Зробити правило явним для людини й для агента (CLAUDE.md, `openspec/config.yaml`), щоб завдання більше не вимагали повного прогону щоразу.
+- Shorten the cycle "edit → check" without losing the safety net against regressions: the full set is run where a regression is most likely — after changes of shared code.
+- Make the rule explicit for a person and for an agent (CLAUDE.md, `openspec/config.yaml`), so that tasks no longer require a full run every time.
 
 **Non-Goals:**
-- Прискорення самих тестів (паралелізація, шардування, CI) — окремі зміни.
-- Автоматичний вибір спеків за змінами в застосунку: Playwright `--only-changed` аналізує лише змінені файли тестів та їхні імпорти, тож правка `ContentTypeForm.tsx` не запустила б жодного спека.
+- Speeding up the tests themselves (parallelization, sharding, CI) — separate changes.
+- Automatic selection of specs by changes in the application: Playwright `--only-changed` analyses only the changed test files and their imports, so an edit of `ContentTypeForm.tsx` would not run a single spec.
 
 ## Decisions
 
-- **Два рівні запуску.** (1) Під час роботи — вибірковий: `npm run test:e2e -- e2e/<спек>`; обирається спек за таблицею «область → спек» у `docs/e2e-testing.md`; якщо правка не чіпає браузерну поведінку — e2e пропускається. (2) Повний `npm run test:e2e` — лише після правок спільного коду (оболонка/sidebar, `DataTable`, автентифікація, i18n, `playwright.config.js`, `e2e/global-setup.js`). Повний прогін наприкінці кожної OpenSpec-зміни відкинуто: до того часу змінені спеки вже проходили вибірково, а решта не залежить від зміненого коду, тож прогін лише повторював би перевірки. Прогін за розкладом відкинуто: у проєкті немає CI.
-- **Нова команда не потрібна.** `npm run test:e2e -- <шлях>` уже передає аргументи Playwright, `globalSetup` виконується завжди. Окремий npm-скрипт на кожен спек дублював би список файлів і розходився б із ним, тож лише документуємо; у spec фіксується вимога, щоб це продовжувало працювати.
-- **Де живе правило.** `CLAUDE.md` (Playwright) — для щоденної роботи; `openspec/config.yaml` → `rules.tasks` — щоб згенеровані завдання містили вибіркову перевірку, а повний прогін лише там, де чіпається спільний код; `docs/e2e-testing.md` — розділ «Коли запускати e2e» з таблицею відповідності.
-- **Таблиця відповідності** (початкова, у docs): оболонка/навігація → `admin-shell`; мова → `admin-i18n`; таблиці й колонки → `admin-data-table`; розділ типів контенту → `admin-content-types`; поля типу → `admin-content-fields`; типи сторінок → `admin-page-types`; будь-що спільне → повний прогін.
+- **Two levels of running.** (1) During work — selective: `npm run test:e2e -- e2e/<спек>`; the spec is chosen by the table "area → spec" in `docs/e2e-testing.md`; if the change does not touch the browser behaviour, e2e is skipped. (2) The full `npm run test:e2e` — only after changes of shared code (the shell/sidebar, `DataTable`, authentication, i18n, `playwright.config.js`, `e2e/global-setup.js`). A full run at the end of each OpenSpec change is rejected: by then the changed specs have already passed selectively, and the rest does not depend on the changed code, so a run would only repeat the checks. A scheduled run is rejected: the project has no CI.
+- **No new command is needed.** `npm run test:e2e -- <путь>` already passes arguments to Playwright, and `globalSetup` always runs. A separate npm script for each spec would duplicate the list of files and would diverge from it, so we only document it; the spec records the requirement that this continues to work.
+- **Where the rule lives.** `CLAUDE.md` (Playwright) — for everyday work; `openspec/config.yaml` → `rules.tasks` — so that the generated tasks contain the selective check, and the full run only where shared code is touched; `docs/e2e-testing.md` — the section "When to run e2e" with a correspondence table.
+- **The correspondence table** (the initial one, in the docs): the shell/navigation → `admin-shell`; the language → `admin-i18n`; the tables and columns → `admin-data-table`; the section of content types → `admin-content-types`; the fields of a type → `admin-content-fields`; the page types → `admin-page-types`; anything shared → the full run.
 
 ## Risks / Trade-offs
 
-- [Регресія в «чужому» спеку не помічається, якщо правка вважалась несуттєвою] → список спільного коду явний у CLAUDE.md; у сумнівних випадках обирається повний прогін.
-- [Таблиця «область → спек» застаріє] → її оновлення входить у завдання кожної зміни, що додає новий спек (рядок у правилі `tasks`).
+- [A regression in an "other" spec is not noticed if the change was considered insignificant] → the list of shared code is explicit in CLAUDE.md; in doubtful cases the full run is chosen.
+- [The table "area → spec" becomes outdated] → its update is part of the task of each change that adds a new spec (a row in the rule `tasks`).

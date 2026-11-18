@@ -3,27 +3,27 @@
 ## ADDED Requirements
 
 ### Requirement: Мініатюра в таблиці медіатеки
-Колонка попереднього перегляду таблиці медіатеки SHALL показувати для зображення стиль `thumb` замість повнорозмірного оригіналу. Файл, що не є зображенням, SHALL не мати попереднього перегляду. Панель деталей і поле URL SHALL й надалі показувати адресу оригіналу.
+The preview column of the table of the media library SHALL show for an image the style `thumb` instead of the full-size original. A file that is not an image SHALL have no preview. The details panel and the URL field SHALL continue to show the address of the original.
 
-#### Scenario: Мініатюра зображення
-- **WHEN** відкрито медіатеку з файлом-зображенням
-- **THEN** адреса попереднього перегляду рядка — адреса стилю `thumb` цього файла
+#### Scenario: Thumbnail of an image
+- **WHEN** the media library with an image file is opened
+- **THEN** the preview address of the row is the address of the style `thumb` of this file
 
-#### Scenario: Деталі показують оригінал
-- **WHEN** відкрито деталі файла-зображення
-- **THEN** URL у деталях — адреса оригіналу, а не стилю
+#### Scenario: Details show the original
+- **WHEN** the details of an image file are opened
+- **THEN** the URL in the details is the address of the original, not of the style
 
-#### Scenario: Документ
-- **WHEN** у таблиці є файл PDF
-- **THEN** попереднього перегляду немає
+#### Scenario: Document
+- **WHEN** the table has a PDF file
+- **THEN** there is no preview
 
 ### Requirement: Превʼю в таблиці медіатеки відкриває оригінал
-Мініатюра зображення в колонці попереднього перегляду SHALL бути посиланням на оригінал зображення, що відкривається в новій вкладці (`target="_blank"`, `rel="noopener noreferrer"`), і SHALL мати курсор-вказівник (`cursor-pointer`). Файл, що не є зображенням, SHALL лишатися іконкою без посилання.
+The thumbnail of an image in the preview column SHALL be a link to the original image that opens in a new tab (`target="_blank"`, `rel="noopener noreferrer"`), and SHALL have the pointer cursor (`cursor-pointer`). A file that is not an image SHALL remain an icon without a link.
 
-#### Scenario: Клік по мініатюрі
-- **WHEN** у таблиці є файл-зображення
-- **THEN** мініатюра обгорнута посиланням, `href` якого — адреса оригіналу, `src` — адреса стилю `thumb`
+#### Scenario: Click on a thumbnail
+- **WHEN** the table has an image file
+- **THEN** the thumbnail is wrapped in a link whose `href` is the address of the original, and whose `src` is the address of the style `thumb`
 
-#### Scenario: Документ без посилання
-- **WHEN** у таблиці є файл PDF
-- **THEN** замість мініатюри іконка, посилання немає
+#### Scenario: Document without a link
+- **WHEN** the table has a PDF file
+- **THEN** instead of a thumbnail there is an icon, with no link

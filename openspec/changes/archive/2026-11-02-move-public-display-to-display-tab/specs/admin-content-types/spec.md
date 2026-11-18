@@ -9,142 +9,142 @@
 ## MODIFIED Requirements
 
 ### Requirement: Вкладки «Відображення» і «SEO» типу
-Меню розділу типу SHALL містити вкладку «Відображення» (`/admin/{section}/{key}/display`, де `{section}` — `content-types`, `page-types` або `block-types`) для типів усіх видів, між «Налаштуваннями» та «Полями». Для типу `kind = content` меню SHALL містити, крім «Налаштування», «Відображення», «Поля» і «Записи», вкладку «SEO» (`/admin/content-types/{key}/seo`, поля `meta_title`, `meta_description`, `meta_image`), яка йде одразу після «Відображення». Вкладка «Відображення» типу `content` SHALL мати два блоки: значення розділу (поля `section_title`, `section_description`, `section_cover`) і «Публічне відображення»; вкладка «Відображення» типів `page` і `block` SHALL мати лише блок «Публічне відображення» (власних значень розділу в них немає). Вкладка «SEO» SHALL бути окремою сторінкою зі своєю формою й кнопкою збереження, що зберігає лише поля SEO. Сторінка налаштувань типу (`/admin/{section}/{key}/edit`) SHALL містити лише основну форму типу й секцію «Список записів», без панелей значень і без блоку «Публічне відображення». Підписи, підказки (опис поля) та обмеження довжини SHALL братися з визначень полів. Елемент введення SHALL відповідати типу поля (короткий текст, багаторядковий текст, форматований текст, вибір зображення з медіатеки). Усі значення необов'язкові; порожнє значення SHALL очищати збережене. Вкладки значень SHALL працювати лише з базовою мовою: перемикача мови немає, значення зберігаються як базові. Кожна вкладка SHALL мати ту саму липку панель дій унизу вікна з «Скасувати» й «Зберегти», що й решта форм адмінки; «Зберегти» відправляє форму вкладки. Вкладка «Відображення» SHALL мати **одну** спільну кнопку «Зберегти», що одним запитом зберігає і значення розділу (лише для `content`), і `settings.public`; збереження SHALL бути атомарним: якщо будь-яка частина не проходить валідацію, нічого не зберігається, а помилки показуються біля відповідних полів (значення розділу — біля полів, публічні налаштування — у блоку «Публічне відображення»). Збереження вкладки «Відображення» SHALL не змінювати значень вкладки «SEO», а збереження «SEO» — значень розділу та `settings.public`. Адреса `/admin/content-types/{key}/section` SHALL відповідати 404. Адреса `/seo` для типів `page` і `block` SHALL відповідати 404.
+The menu of the section of a type SHALL contain the tab «Відображення» ("Display", `/admin/{section}/{key}/display`, where `{section}` is `content-types`, `page-types` or `block-types`) for the types of all kinds, between «Налаштування» ("Settings") and «Поля» ("Fields"). For a type `kind = content` the menu SHALL contain, besides «Налаштування», «Відображення», «Поля» and «Записи» ("Records"), the tab «SEO» (`/admin/content-types/{key}/seo`, the fields `meta_title`, `meta_description`, `meta_image`), which follows immediately after «Відображення». The tab «Відображення» of a type `content` SHALL have two blocks: the values of the section (the fields `section_title`, `section_description`, `section_cover`) and «Публічне відображення»; the tab «Відображення» of the types `page` and `block` SHALL have only the block «Публічне відображення» (they have no own values of the section). The tab «SEO» SHALL be a separate page with its own form and save button, which saves only the SEO fields. The settings page of a type (`/admin/{section}/{key}/edit`) SHALL contain only the main form of the type and the section «Список записів» ("List of records"), without panels of values and without the block «Публічне відображення». The labels, the hints (the description of the field) and the length limits SHALL be taken from the definitions of the fields. The input element SHALL correspond to the type of the field (short text, multi-line text, formatted text, a choice of an image from the media library). All values are optional; an empty value SHALL clear the saved one. The tabs of values SHALL work only with the base language: there is no language switch, the values are saved as base ones. Each tab SHALL have the same sticky action bar at the bottom of the window with «Скасувати» ("Cancel") and «Зберегти» ("Save") as the other forms of the admin; «Зберегти» submits the form of the tab. The tab «Відображення» SHALL have **one** shared button «Зберегти», which in one request saves both the values of the section (only for `content`) and `settings.public`; the saving SHALL be atomic: if any part fails validation, nothing is saved, and the errors are shown next to the corresponding fields (the values of the section — next to the fields, the public settings — in the block «Публічне відображення»). Saving the tab «Відображення» SHALL not change the values of the tab «SEO», and saving «SEO» — the values of the section and `settings.public`. The address `/admin/content-types/{key}/section` SHALL respond with 404. The address `/seo` for the types `page` and `block` SHALL respond with 404.
 
-#### Scenario: Меню типу контенту
-- **WHEN** користувач відкриває будь-яку сторінку типу `news` виду `content`
-- **THEN** меню типу містить вкладки «Налаштування», «Відображення», «SEO», «Поля», «Записи», і активна поточна
+#### Scenario: Menu of a content type
+- **WHEN** the user opens any page of the type `news` of the kind `content`
+- **THEN** the menu of the type contains the tabs «Налаштування», «Відображення», «SEO», «Поля», «Записи», and the current one is active
 
-#### Scenario: Меню типу сторінки або блоку
-- **WHEN** користувач відкриває будь-яку сторінку типу виду `page` або `block`
-- **THEN** меню містить «Налаштування», «Відображення», «Поля», «Записи», вкладки «SEO» немає
+#### Scenario: Menu of a page or block type
+- **WHEN** the user opens any page of a type of the kind `page` or `block`
+- **THEN** the menu contains «Налаштування», «Відображення», «Поля», «Записи», there is no tab «SEO»
 
-#### Scenario: Відкриття сторінки налаштувань
-- **WHEN** користувач відкриває налаштування типу `news` виду `content`
-- **THEN** сторінка містить основну форму типу й секцію «Список записів»; панелей значень і блоку «Публічне відображення» на ній немає
+#### Scenario: Opening the settings page
+- **WHEN** the user opens the settings of the type `news` of the kind `content`
+- **THEN** the page contains the main form of the type and the section «Список записів»; there are no panels of values and no block «Публічне відображення» on it
 
-#### Scenario: Відкриття вкладки «Розділ»
-- **WHEN** користувач відкриває вкладку «Відображення» (колишню «Розділ») типу `news` виду `content`
-- **THEN** він бачить блок значень розділу з поточними значеннями базової мови, блок «Публічне відображення» і одну панель дій, а полів SEO немає
+#### Scenario: Opening the tab «Розділ» (now «Відображення»)
+- **WHEN** the user opens the tab «Відображення» (formerly «Розділ») of the type `news` of the kind `content`
+- **THEN** they see the block of values of the section with the current values of the base language, the block «Публічне відображення» and one action bar, and there are no SEO fields
 
-#### Scenario: Відкриття вкладки «Відображення» типу сторінки
-- **WHEN** користувач відкриває `/admin/page-types/home/display`
-- **THEN** він бачить лише блок «Публічне відображення» (вибір полів сторінки) і панель дій
+#### Scenario: Opening the tab «Відображення» of a page type
+- **WHEN** the user opens `/admin/page-types/home/display`
+- **THEN** they see only the block «Публічне відображення» (the choice of the fields of the page) and the action bar
 
-#### Scenario: Збереження значень розділу
-- **WHEN** користувач заповнює `section_title` «Новини», вибирає `section_cover` з медіатеки й зберігає на вкладці «Відображення»
-- **THEN** значення збережено для типу, після перезавантаження сторінки вони показані
+#### Scenario: Saving values of the section
+- **WHEN** the user fills in `section_title` «Новини», chooses `section_cover` from the media library and saves on the tab «Відображення»
+- **THEN** the values are saved for the type, after reloading the page they are shown
 
-#### Scenario: Спільне збереження значень розділу й публічних налаштувань
-- **WHEN** користувач змінює `section_title` і вибір полів сторінки та натискає єдину кнопку «Зберегти»
-- **THEN** збережено і значення розділу, і `settings.public`, після перезавантаження обидва показані
+#### Scenario: Shared saving of the values of the section and the public settings
+- **WHEN** the user changes `section_title` and the choice of the fields of the page and presses the single button «Зберегти»
+- **THEN** both the values of the section and `settings.public` are saved, after reloading both are shown
 
-#### Scenario: Помилка в одній частині не зберігає іншу
-- **WHEN** користувач змінює `section_title` і вводить від'ємну кількість записів на сторінці
-- **THEN** збереження відхилено, біля поля кількості показано помилку, а `section_title` лишається попереднім
+#### Scenario: An error in one part does not save the other
+- **WHEN** the user changes `section_title` and enters a negative number of records per page
+- **THEN** the saving is rejected, an error is shown next to the quantity field, and `section_title` remains the previous one
 
-#### Scenario: Недопустиме значення розділу
-- **WHEN** значення `section_title` перевищує допустиму довжину
-- **THEN** збереження відхилено, біля поля показано помилку, значення й `settings.public` лишаються попередніми
+#### Scenario: Invalid value of the section
+- **WHEN** the value of `section_title` exceeds the permitted length
+- **THEN** the saving is rejected, an error is shown next to the field, the value and `settings.public` remain the previous ones
 
-#### Scenario: Липка панель дій на вкладках
-- **WHEN** користувач відкриває вкладку «Відображення» або «SEO» у вікні висотою 400 px (на 1280 і 390 px завширшки)
-- **THEN** панель з «Скасувати» й «Зберегти» повністю видно внизу вікна
+#### Scenario: Sticky action bar on the tabs
+- **WHEN** the user opens the tab «Відображення» or «SEO» in a window 400 px high (at 1280 and 390 px wide)
+- **THEN** the panel with «Скасувати» and «Зберегти» is fully visible at the bottom of the window
 
-#### Scenario: Збереження SEO не торкається розділу
-- **WHEN** користувач змінює `meta_title` на вкладці «SEO» і зберігає
-- **THEN** значення `section_*` і `settings.public` типу лишаються без змін
+#### Scenario: Saving SEO does not touch the section
+- **WHEN** the user changes `meta_title` on the tab «SEO» and saves
+- **THEN** the values `section_*` and `settings.public` of the type remain unchanged
 
-#### Scenario: Очищення значення
-- **WHEN** користувач очищає `meta_description` на вкладці «SEO» і зберігає
-- **THEN** збережене значення видалено
+#### Scenario: Clearing a value
+- **WHEN** the user clears `meta_description` on the tab «SEO» and saves
+- **THEN** the saved value is deleted
 
-#### Scenario: Недопустиме значення
-- **WHEN** значення `meta_title` перевищує допустиму довжину
-- **THEN** збереження відхилено, біля поля показано помилку, значення лишаються попередніми
+#### Scenario: Invalid value
+- **WHEN** the value of `meta_title` exceeds the permitted length
+- **THEN** the saving is rejected, an error is shown next to the field, the values remain the previous ones
 
-#### Scenario: Стара адреса вкладки
-- **WHEN** користувач відкриває `/admin/content-types/news/section`
-- **THEN** відповідь — «не знайдено»
+#### Scenario: Old address of the tab
+- **WHEN** the user opens `/admin/content-types/news/section`
+- **THEN** the response is «не знайдено» ("not found")
 
-#### Scenario: Тип сторінок або блоків
-- **WHEN** користувач відкриває налаштування типу виду `page` або `block`
-- **THEN** вкладки «SEO» у меню немає, а адреса `/seo` цих видів відповідає 404; вкладка «Відображення» є
+#### Scenario: Tab of a page or block type
+- **WHEN** the user opens the settings of a type of the kind `page` or `block`
+- **THEN** there is no tab «SEO» in the menu, and the address `/seo` of these kinds responds with 404; the tab «Відображення» is present
 
 ### Requirement: Секція «Публічне відображення» на вкладці «Відображення»
-Вкладка «Відображення» типу SHALL містити блок «Публічне відображення» для всіх видів. Для `page` і `block` він містить лише вибір полів сторінки; для `content` — також поля картки, сортування (поле + напрямок), кількість записів на сторінці й перемикач пагінатора. Для вибору пропонуються лише додані поля (`is_system = false`); `title`, мета-поля й службові атрибути не пропонуються, бо завжди доступні шаблону. Блок SHALL відображати збережений стан із значеннями за замовчуванням і зберігатись разом зі значеннями розділу єдиною кнопкою «Зберегти» вкладки, оновлюючи лише ключ `public` налаштувань. Форма налаштувань типу цього блоку НЕ містить.
+The tab «Відображення» of a type SHALL contain the block «Публічне відображення» for all kinds. For `page` and `block` it contains only the choice of the fields of the page; for `content` — also the fields of the card, sorting (the field + the direction), the number of records per page and the switch of the paginator. For the choice only the added fields are offered (`is_system = false`); `title`, the metafields and the service attributes are not offered, because they are always available to the template. The block SHALL display the saved state with the default values and SHALL be saved together with the values of the section by the single button «Зберегти» of the tab, updating only the key `public` of the settings. The settings form of the type does NOT contain this block.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** відкрито вкладку «Відображення» типу `content` без публічних налаштувань
-- **THEN** перемикач «Усі додані поля» для сторінки ввімкнений, картка без доданих полів, сортування «Дата публікації» за спаданням, кількість «0» (усі)
+#### Scenario: Default values
+- **WHEN** the tab «Відображення» of a type `content` without public settings is opened
+- **THEN** the switch «Усі додані поля» («All added fields») for the page is enabled, the card has no added fields, the sorting is «Дата публікації» («Publication date») in descending order, the quantity is «0» (all)
 
-#### Scenario: Явний вибір полів сторінки
-- **WHEN** адміністратор вимикає «Усі додані поля», позначає `price` і зберігає
-- **THEN** після повторного відкриття позначено лише `price`, а нове поле типу не з'являється серед позначених
+#### Scenario: Explicit choice of the fields of the page
+- **WHEN** the administrator turns off «Усі додані поля», marks `price` and saves
+- **THEN** after reopening only `price` is marked, and a new field of the type does not appear among the marked ones
 
-#### Scenario: Повернення до «усіх»
-- **WHEN** адміністратор вмикає «Усі додані поля» і зберігає
-- **THEN** ключ `page_fields` не зберігається, нове поле автоматично входить до сторінки
+#### Scenario: Return to «all»
+- **WHEN** the administrator turns on «Усі додані поля» and saves
+- **THEN** the key `page_fields` is not saved, and a new field automatically enters the page
 
-#### Scenario: Інші ключі не затираються
-- **WHEN** вкладка зберігається зі зміненими публічними налаштуваннями
-- **THEN** `settings.list` і інші ключі `settings` лишаються без змін
+#### Scenario: Other keys are not overwritten
+- **WHEN** the tab is saved with changed public settings
+- **THEN** `settings.list` and the other keys of `settings` remain unchanged
 
-#### Scenario: Форма налаштувань без публічного блоку
-- **WHEN** користувач відкриває форму налаштувань типу будь-якого виду
-- **THEN** блоку «Публічне відображення» на ній немає
+#### Scenario: Settings form without the public block
+- **WHEN** the user opens the settings form of a type of any kind
+- **THEN** there is no block «Публічне відображення» on it
 
 ### Requirement: Збереження змін типу
-Надсилання форми редагування SHALL оновлювати назву, slug, батьківський тип, опис і налаштування списку записів типу за тими самими правилами, що й створення; унікальність slug SHALL перевірятися з виключенням самого типу. Ключ і вид SHALL НЕ змінюватися, навіть якщо їх передано в запиті. Порожній slug очищає значення. Батьківським SHALL не можна обрати сам тип чи його нащадка. Налаштування списку записів SHALL зберігатися в `settings.list` (`visible`, `search`, `sort`) і оновлювати лише цей ключ, не змінюючи решти ключів `settings`. Ключі в `visible` і `search` SHALL належати полям типу або (лише в `visible`) ключу `title` чи службовим ключам `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; поле сортування — полю типу або службовому ключу з цього переліку, крім `slug`; напрямок — `asc` або `desc`; невідомі ключі SHALL відхилятися помилкою біля секції. Вибір сортування «Дата створення» за зростанням SHALL не зберігати `sort`, а порожній вибір колонок і пошуку — не зберігати відповідних ключів. Форма редагування SHALL НЕ змінювати `settings.public`: цей ключ зберігається лише вкладкою «Відображення», а запит редагування з `settings.public` SHALL відхилятися помилкою валідації. Після успіху користувач SHALL потрапити на `/admin/content-types` з повідомленням про успіх.
+Submitting the form of editing SHALL update the name, the slug, the parent type, the description and the settings of the list of records of the type by the same rules as the creation; the uniqueness of the slug SHALL be checked excluding the type itself. The key and the kind SHALL NOT change, even if they are passed in the request. An empty slug clears the value. The type itself or its descendant SHALL NOT be selectable as the parent. The settings of the list of records SHALL be saved in `settings.list` (`visible`, `search`, `sort`) and update only this key, without changing the other keys of `settings`. The keys in `visible` and `search` SHALL belong to the fields of the type or (only in `visible`) to the key `title` or to the service keys `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; the sorting field — to a field of the type or a service key from this list, except `slug`; the direction — `asc` or `desc`; unknown keys SHALL be rejected with an error next to the section. The choice of the sorting «Дата створення» («Creation date») in ascending order SHALL not save `sort`, and an empty choice of columns and search — shall not save the corresponding keys. The edit form SHALL NOT change `settings.public`: this key is saved only by the tab «Відображення», and an edit request with `settings.public` SHALL be rejected with a validation error. After success the user SHALL land on `/admin/content-types` with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву й slug наявного типу на вільні допустимі значення та зберігає
-- **THEN** зміни збережено, ключ і вид не змінились, користувача перенаправлено до списку з повідомленням про успіх
+#### Scenario: Successful change
+- **WHEN** the user changes the name and the slug of an existing type to free valid values and saves
+- **THEN** the changes are saved, the key and the kind did not change, the user is redirected to the list with a success message
 
-#### Scenario: Збереження власного slug
-- **WHEN** користувач зберігає форму, не змінюючи slug типу
-- **THEN** помилки унікальності немає
+#### Scenario: Saving one's own slug
+- **WHEN** the user saves the form without changing the slug of the type
+- **THEN** there is no uniqueness error
 
-#### Scenario: Slug іншого типу
-- **WHEN** користувач вводить slug, який уже має інший тип
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another type
+- **WHEN** the user enters a slug that another type already has
+- **THEN** the changes are not saved, an error is shown next to the slug field
 
-#### Scenario: Очищення slug
-- **WHEN** користувач стирає slug і зберігає
-- **THEN** slug типу порожній
+#### Scenario: Clearing the slug
+- **WHEN** the user erases the slug and saves
+- **THEN** the slug of the type is empty
 
-#### Scenario: Ключ у запиті ігнорується
-- **WHEN** у запиті редагування передано інший `key` або `kind`
-- **THEN** ключ і вид типу лишаються без змін
+#### Scenario: Key in the request is ignored
+- **WHEN** another `key` or `kind` is passed in the edit request
+- **THEN** the key and the kind of the type remain unchanged
 
-#### Scenario: Цикл у ієрархії
-- **WHEN** батьківським типом обрано сам тип або його нащадка
-- **THEN** зміни не збережено, біля поля батьківського типу показано помилку
+#### Scenario: Cycle in the hierarchy
+- **WHEN** the type itself or its descendant is chosen as the parent
+- **THEN** the changes are not saved, an error is shown next to the field of the parent type
 
-#### Scenario: Збереження колонок, пошуку й сортування
-- **WHEN** користувач залишає `title` першою й вибирає колонки `price`, стан, `is_active`, `created_at`, `unpublished_at` у цьому порядку, пошук за `title`, сортування «Дата оновлення» за спаданням і зберігає
-- **THEN** `settings.list` типу — `visible: ["title", "price", "status", "is_active", "created_at", "unpublished_at"]`, `search: ["title"]`, `sort: {field: "updated_at", direction: "desc"}`, а список записів показує ці колонки й порядок
+#### Scenario: Saving columns, search and sorting
+- **WHEN** the user leaves `title` first and chooses the columns `price`, state, `is_active`, `created_at`, `unpublished_at` in this order, the search by `title`, the sorting «Дата оновлення» («Update date») in descending order and saves
+- **THEN** `settings.list` of the type is `visible: ["title", "price", "status", "is_active", "created_at", "unpublished_at"]`, `search: ["title"]`, `sort: {field: "updated_at", direction: "desc"}`, and the list of records shows these columns and this order
 
-#### Scenario: Позиція title зберігається
-- **WHEN** користувач ставить `title` на другу позицію після `price` і зберігає
-- **THEN** `settings.list.visible` починається з `["price", "title"]`
+#### Scenario: Position of title is kept
+- **WHEN** the user puts `title` on the second position after `price` and saves
+- **THEN** `settings.list.visible` begins with `["price", "title"]`
 
-#### Scenario: Сортування за замовчуванням не зберігається
-- **WHEN** користувач лишає сортування «Дата створення» за зростанням і зберігає
-- **THEN** у `settings.list` ключа `sort` немає
+#### Scenario: Default sorting is not saved
+- **WHEN** the user leaves the sorting «Дата створення» in ascending order and saves
+- **THEN** there is no key `sort` in `settings.list`
 
-#### Scenario: Невідоме поле в налаштуваннях списку
-- **WHEN** запит містить у `visible` ключ, якого немає серед полів типу й службових ключів, або в `sort.field` — `slug`
-- **THEN** зміни не збережено, біля секції «Список записів» показано помилку
+#### Scenario: Unknown field in the settings of the list
+- **WHEN** the request contains in `visible` a key that is not among the fields of the type and the service keys, or in `sort.field` — `slug`
+- **THEN** the changes are not saved, an error is shown next to the section «Список записів»
 
-#### Scenario: Інші ключі settings збережено
-- **WHEN** тип має в `settings` інший ключ (зокрема `public`), а користувач зберігає форму зі зміненим списком
-- **THEN** інший ключ `settings` лишається без змін
+#### Scenario: Other keys of settings are kept
+- **WHEN** the type has another key in `settings` (in particular `public`), and the user saves the form with the changed list
+- **THEN** the other key of `settings` remains unchanged
 
-#### Scenario: Публічні налаштування у формі редагування
-- **WHEN** запит редагування типу містить `settings.public`
-- **THEN** зміни не збережено, відповідь містить помилку валідації, `settings.public` типу не змінено
+#### Scenario: Public settings in the edit form
+- **WHEN** the edit request of the type contains `settings.public`
+- **THEN** the changes are not saved, the response contains a validation error, `settings.public` of the type is not changed
 
-#### Scenario: Типи сторінок і блоків
-- **WHEN** користувач зберігає налаштування списку записів у типі виду `page` або `block`
-- **THEN** вони зберігаються й діють у списку записів того самого розділу за тими самими правилами
+#### Scenario: Types of pages and blocks
+- **WHEN** the user saves the settings of the list of records in a type of the kind `page` or `block`
+- **THEN** they are saved and take effect in the list of records of the same section by the same rules

@@ -1,262 +1,262 @@
 ## MODIFIED Requirements
 
-### Requirement: Сторінка таблиці типів
-Адмінка SHALL мати сторінку `/admin/content-types`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує всі типи контенту виду `content` у таблиці даних у серверному режимі: пошук, фільтри, сортування, пагінацію й розмір сторінки виконує сервер, а стан живе в адресі. Типи видів `page` і `block` на цій сторінці SHALL НЕ показуватися (вони матимуть власні сторінки).
+### Requirement: Content types table page
+The admin SHALL have a page `/admin/content-types`, available only to authenticated users with a confirmed email, which shows all content types of the `content` kind in the data table in server mode: search, filters, sorting, pagination and page size are performed by the server, and the state lives in the address. Types of the `page` and `block` kinds SHALL NOT be shown on this page (they will have their own pages).
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types`
-- **THEN** він бачить таблицю типів контенту, а заголовок відповідає мові інтерфейсу
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types`
+- **THEN** they see the table of content types, and the title matches the interface language
 
-#### Scenario: Лише вид content
-- **WHEN** у системі є типи видів `content`, `page` і `block`
-- **THEN** таблиця показує лише типи виду `content`
+#### Scenario: Only the content kind
+- **WHEN** the system has types of the kinds `content`, `page` and `block`
+- **THEN** the table shows only the types of the `content` kind
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types`
+- **THEN** they are redirected to the login page
 
-#### Scenario: Відновлення стану
-- **WHEN** користувач застосував пошук, сортування й другу сторінку та перезавантажив сторінку
-- **THEN** таблиця показує той самий набір рядків
+#### Scenario: State restoration
+- **WHEN** the user applied a search, a sorting and a second page, and then reloaded the page
+- **THEN** the table shows the same set of rows
 
-### Requirement: Колонки таблиці
-Таблиця SHALL показувати для кожного типу: назву з описом, ключ, slug, ключ батьківського типу, кількість полів і кількість вузлів. Опис SHALL виводитися в колонці назви окремим рядком під назвою (меншим приглушеним шрифтом) і не мати власної колонки; порожній опис не додає рядка. Колонки виду (`kind`) таблиця SHALL НЕ мати. Відсутні slug чи батьківський тип — порожнє значення. Колонки назви й ключа SHALL бути не приховуваними.
+### Requirement: Table columns
+The table SHALL show for each type: the name with the description, the key, the slug, the parent type key, the number of fields and the number of nodes. The description SHALL be shown in the name column as a separate line under the name (in a smaller muted font) and SHALL NOT have its own column; an empty description does not add a line. The table SHALL NOT have the kind column (`kind`). A missing slug or parent type is shown as an empty value. The name and key columns SHALL be non-hideable.
 
-#### Scenario: Лічильники
-- **WHEN** тип має 3 поля (разом із системним `title`) і 5 вузлів
-- **THEN** у його рядку показано 3 поля і 5 вузлів
+#### Scenario: Counters
+- **WHEN** a type has 3 fields (including the system `title`) and 5 nodes
+- **THEN** its row shows 3 fields and 5 nodes
 
-#### Scenario: Тип без батька
-- **WHEN** тип не має `parent_type`
-- **THEN** у колонці батьківського типу порожнє значення
+#### Scenario: Type without a parent
+- **WHEN** a type has no `parent_type`
+- **THEN** the parent type column shows an empty value
 
-#### Scenario: Slug у таблиці
-- **WHEN** тип має slug `news`, а інший — не має
-- **THEN** у першого в колонці slug показано `news`, у другого — порожнє значення
+#### Scenario: Slug in the table
+- **WHEN** one type has the slug `news`, and another has none
+- **THEN** the first shows `news` in the slug column, the second shows an empty value
 
-#### Scenario: Опис під назвою
-- **WHEN** тип має назву «Новини» й опис «Стрічка новин сайту»
-- **THEN** у колонці назви видно «Новини», а під нею меншим приглушеним шрифтом — «Стрічка новин сайту»
+#### Scenario: Description under the name
+- **WHEN** a type has the name "News" and the description "Site news feed"
+- **THEN** the name column shows "News", and under it, in a smaller muted font, "Site news feed"
 
-#### Scenario: Тип без опису
-- **WHEN** тип не має опису
-- **THEN** у колонці назви лише назва, без порожнього рядка під нею
+#### Scenario: Type without a description
+- **WHEN** a type has no description
+- **THEN** the name column shows only the name, with no empty line under it
 
-#### Scenario: Немає колонок виду й опису
-- **WHEN** користувач відкриває меню вибору колонок
-- **THEN** серед колонок немає «Вид» і «Опис»
+#### Scenario: No kind and description columns
+- **WHEN** the user opens the column selection menu
+- **THEN** there are no "Kind" and "Description" columns among them
 
-### Requirement: Кнопка створення
-Над таблицею SHALL бути активна кнопка «Створити» в панелі інструментів, що відкриває форму створення типу контенту.
+### Requirement: Create button
+Above the table there SHALL be an active "Create" button in the toolbar, which opens the form for creating a content type.
 
-#### Scenario: Кнопка видима
-- **WHEN** користувач відкриває сторінку
-- **THEN** у панелі інструментів видно активну кнопку «Створити» з перекладеним підписом
+#### Scenario: Button is visible
+- **WHEN** the user opens the page
+- **THEN** an active "Create" button with a translated label is visible in the toolbar
 
-#### Scenario: Перехід до форми
-- **WHEN** користувач натискає «Створити»
-- **THEN** відкривається `/admin/content-types/create`
+#### Scenario: Going to the form
+- **WHEN** the user clicks "Create"
+- **THEN** `/admin/content-types/create` opens
 
-#### Scenario: Кнопка у порожньому стані
-- **WHEN** у системі немає жодного типу контенту
-- **THEN** кнопка «Створити» видима й активна
+#### Scenario: Button in the empty state
+- **WHEN** the system has no content types at all
+- **THEN** the "Create" button is visible and active
 
-### Requirement: Меню дій рядка
-Кожен рядок SHALL мати меню «⋮» з пунктами «Редагувати», «Поля» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено від інших). «Редагувати» SHALL відкривати форму редагування цього типу, «Видалити» — запускати видалення з підтвердженням. Пункт «Поля» SHALL лишатися каркасом: відображається, але неактивний, доки не з'явиться сторінка полів.
+### Requirement: Row action menu
+Each row SHALL have a "⋮" menu with the items "Edit", "Fields" and "Delete" (in this order; "Delete" is visually highlighted as a destructive action and separated from the others). "Edit" SHALL open the edit form of this type, "Delete" — start the deletion with confirmation. The "Fields" item SHALL remain a skeleton: it is displayed but inactive until the fields page appears.
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку типу
-- **THEN** він бачить пункти «Редагувати», «Поля», «Видалити» з перекладеними підписами
+#### Scenario: Menu content
+- **WHEN** the user opens the "⋮" menu in a type row
+- **THEN** they see the items "Edit", "Fields", "Delete" with translated labels
 
-#### Scenario: Редагувати
-- **WHEN** користувач обирає «Редагувати» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Edit
+- **WHEN** the user chooses "Edit" in the row of the type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Пункти неактивні
-- **WHEN** користувач обирає пункт «Поля»
-- **THEN** нічого не відбувається: перехід не виконується, дані типу не змінюються
+#### Scenario: Items are inactive
+- **WHEN** the user chooses the "Fields" item
+- **THEN** nothing happens: no navigation is performed, the data of the type does not change
 
 ## ADDED Requirements
 
-### Requirement: Пошук і сортування
-Таблиця SHALL підтримувати пошук за назвою, описом, slug і ключем та сортування за назвою, ключем, slug, батьківським типом і лічильниками полів та вузлів. Таблиця SHALL НЕ мати фільтрів: елементів керування фільтрами в панелі інструментів немає, а фільтри в адресі ігноруються. Без явного сортування типи SHALL бути впорядковані за назвою за зростанням.
+### Requirement: Search and sorting
+The table SHALL support search by name, description, slug and key, and sorting by name, key, slug, parent type and the counters of fields and nodes. The table SHALL NOT have filters: there are no filter controls in the toolbar, and filters in the address are ignored. Without an explicit sorting the types SHALL be ordered by name in ascending order.
 
-#### Scenario: Пошук за назвою
-- **WHEN** користувач вводить частину назви типу
-- **THEN** лишаються лише типи, у назві, описі, slug або ключі яких є цей рядок без урахування регістру
+#### Scenario: Search by name
+- **WHEN** the user types part of a type name
+- **THEN** only the types whose name, description, slug or key contains this string remain, case-insensitively
 
-#### Scenario: Пошук за ключем
-- **WHEN** користувач вводить частину ключа типу
-- **THEN** лишаються лише типи, ключ яких містить цей рядок без урахування регістру
+#### Scenario: Search by key
+- **WHEN** the user types part of a type key
+- **THEN** only the types whose key contains this string remain, case-insensitively
 
-#### Scenario: Пошук за описом
-- **WHEN** користувач вводить слово, яке є лише в описі типу
-- **THEN** цей тип лишається в таблиці
+#### Scenario: Search by description
+- **WHEN** the user types a word that is only in the description of a type
+- **THEN** this type remains in the table
 
-#### Scenario: Пошук за slug
-- **WHEN** користувач вводить частину slug типу
-- **THEN** цей тип лишається в таблиці
+#### Scenario: Search by slug
+- **WHEN** the user types part of a type slug
+- **THEN** this type remains in the table
 
-#### Scenario: Немає фільтрів
-- **WHEN** користувач дивиться на панель інструментів таблиці
-- **THEN** кнопки фільтрів там немає, лишаються пошук, вибір колонок, кнопка «Створити» і (за наявності змін) «Скинути»
+#### Scenario: No filters
+- **WHEN** the user looks at the table toolbar
+- **THEN** there is no filter button there; the search, the column selection, the "Create" button and (if there are changes) "Reset" remain
 
-#### Scenario: Фільтри в адресі ігноруються
-- **WHEN** в адресі є фільтр за будь-якою колонкою (зокрема `kind` або `nodes_count`)
-- **THEN** фільтр ігнорується, а таблиця показує всі типи виду `content`
+#### Scenario: Filters in the address are ignored
+- **WHEN** the address contains a filter on any column (including `kind` or `nodes_count`)
+- **THEN** the filter is ignored, and the table shows all types of the `content` kind
 
-#### Scenario: Типове сортування
-- **WHEN** користувач відкриває сторінку без параметрів сортування
-- **THEN** типи впорядковані за назвою за зростанням
+#### Scenario: Default sorting
+- **WHEN** the user opens the page without sorting parameters
+- **THEN** the types are ordered by name in ascending order
 
-### Requirement: Форма створення типу
-Адмінка SHALL мати сторінку `/admin/content-types/create`, доступну лише автентифікованим користувачам з підтвердженою поштою, з формою полів: назва (обов'язкове), ключ (обов'язкове), slug (необов'язкове), батьківський тип (необов'язковий вибір) і опис (необов'язкове). Поля виду форма SHALL НЕ мати: створений тип завжди має вид `content`. Підписи полів, підказки й повідомлення про помилки SHALL відображатися мовою інтерфейсу. Форма SHALL мати кнопку збереження й посилання «Скасувати», що повертає до списку без змін.
+### Requirement: Create type form
+The admin SHALL have a page `/admin/content-types/create`, available only to authenticated users with a confirmed email, with a form of fields: name (required), key (required), slug (optional), parent type (an optional choice) and description (optional). The form SHALL NOT have a kind field: the created type always has the kind `content`. Field labels, hints and error messages SHALL be displayed in the interface language. The form SHALL have a save button and a "Cancel" link, which returns to the list without changes.
 
-#### Scenario: Відкриття форми
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/create`
-- **THEN** він бачить форму з полями назви, ключа, slug, батьківського типу й опису та без поля виду
+#### Scenario: Opening the form
+- **WHEN** an authenticated user opens `/admin/content-types/create`
+- **THEN** they see a form with the name, key, slug, parent type and description fields, and without a kind field
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/create` або надсилає форму
-- **THEN** його перенаправлено на сторінку входу, тип не створено
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/create` or submits the form
+- **THEN** they are redirected to the login page, and no type is created
 
-#### Scenario: Скасування
-- **WHEN** користувач натискає «Скасувати»
-- **THEN** він повертається до `/admin/content-types`, нового типу не створено
+#### Scenario: Cancel
+- **WHEN** the user clicks "Cancel"
+- **THEN** they return to `/admin/content-types`, and no new type is created
 
-### Requirement: Збереження нового типу
-Надсилання форми створення SHALL створювати тип виду `content` з наданими назвою, ключем, slug, батьківським типом і описом (порожні необов'язкові поля зберігаються як відсутні значення; зайві пробіли по краях обрізаються). Ключ SHALL мати формат ключів типів (малі латинські літери, цифри й `_`, починається з літери, до 64 символів) і бути унікальним; назва — до 255 символів; slug SHALL відповідати вимогам до slug типу. Батьківським типом SHALL бути лише наявний тип виду `content`. При створенні типу система SHALL автоматично додати його системне поле `title`. Після успіху користувач SHALL потрапити на `/admin/content-types` з повідомленням про успіх, а новий тип SHALL бути в списку.
+### Requirement: Saving a new type
+Submitting the create form SHALL create a type of the `content` kind with the given name, key, slug, parent type and description (empty optional fields are stored as missing values; extra spaces at the edges are trimmed). The key SHALL match the format of type keys (lowercase Latin letters, digits and `_`, starts with a letter, up to 64 characters) and be unique; the name — up to 255 characters; the slug SHALL meet the requirements for a type slug. The parent type SHALL be only an existing type of the `content` kind. When a type is created, the system SHALL automatically add its system field `title`. After success the user SHALL land on `/admin/content-types` with a success message, and the new type SHALL be in the list.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач вводить назву «Новини», ключ `news`, slug `news` і надсилає форму
-- **THEN** створено тип виду `content` з цим ключем і slug та системним полем `title`, користувача перенаправлено до списку, де показано повідомлення про успіх і новий тип
+#### Scenario: Successful creation
+- **WHEN** the user enters the name "News", the key `news`, the slug `news` and submits the form
+- **THEN** a type of the `content` kind with this key and slug and the system field `title` is created, the user is redirected to the list, where a success message and the new type are shown
 
-#### Scenario: Мінімальне заповнення
-- **WHEN** користувач заповнює лише назву й ключ
-- **THEN** тип створено без slug, батьківського типу й опису
+#### Scenario: Minimal filling
+- **WHEN** the user fills in only the name and the key
+- **THEN** the type is created without a slug, a parent type and a description
 
-#### Scenario: Обов'язкові поля
-- **WHEN** користувач надсилає форму без назви або без ключа
-- **THEN** тип не створено, форма лишається відкритою, біля порожніх полів показано помилки, а решта введених значень збережена
+#### Scenario: Required fields
+- **WHEN** the user submits the form without a name or without a key
+- **THEN** the type is not created, the form stays open, errors are shown next to the empty fields, and the other entered values are kept
 
-#### Scenario: Недопустимий або зайнятий ключ
-- **WHEN** користувач вводить ключ `News 1` або ключ, який уже має інший тип
-- **THEN** тип не створено, біля поля ключа показано помилку
+#### Scenario: Invalid or taken key
+- **WHEN** the user enters the key `News 1` or a key that another type already has
+- **THEN** the type is not created, and an error is shown next to the key field
 
-#### Scenario: Недопустимий або зайнятий slug
-- **WHEN** користувач вводить slug у недопустимому форматі або такий, який уже має інший тип (у будь-якому регістрі)
-- **THEN** тип не створено, біля поля slug показано помилку
+#### Scenario: Invalid or taken slug
+- **WHEN** the user enters a slug in an invalid format or one that another type already has (in any case)
+- **THEN** the type is not created, and an error is shown next to the slug field
 
-#### Scenario: Батьківський тип
-- **WHEN** користувач обирає наявний тип виду `content` батьківським
-- **THEN** новий тип створено з цим `parent_type`
+#### Scenario: Parent type
+- **WHEN** the user chooses an existing type of the `content` kind as the parent
+- **THEN** the new type is created with this `parent_type`
 
-#### Scenario: Батьківський тип іншого виду
-- **WHEN** надіслано `parent_type` типу виду `page`, `block` або неіснуючого типу
-- **THEN** тип не створено, біля поля батьківського типу показано помилку
+#### Scenario: Parent type of another kind
+- **WHEN** a `parent_type` of a type of the `page` or `block` kind, or of a non-existent type, is submitted
+- **THEN** the type is not created, and an error is shown next to the parent type field
 
-#### Scenario: Вид у запиті ігнорується
-- **WHEN** у запиті створення передано `kind = page`
-- **THEN** створено тип виду `content`
+#### Scenario: Kind in the request is ignored
+- **WHEN** the create request passes `kind = page`
+- **THEN** a type of the `content` kind is created
 
-### Requirement: Вибір батьківського типу у формах
-Список батьківських типів у формах створення й редагування SHALL містити лише типи виду `content`, відсортовані за назвою, і варіант «без батьківського типу». У формі створення за замовчуванням обрано «без батьківського типу». У формі редагування список SHALL НЕ містити сам тип і всіх його нащадків (щоб не утворити цикл).
+### Requirement: Parent type choice in the forms
+The list of parent types in the create and edit forms SHALL contain only types of the `content` kind, sorted by name, and the option "no parent type". In the create form "no parent type" is selected by default. In the edit form the list SHALL NOT contain the type itself and all of its descendants (so as not to create a cycle).
 
-#### Scenario: Склад списку
-- **WHEN** у системі є типи видів `content`, `page` і `block`
-- **THEN** у списку батьківських типів лише типи виду `content`
+#### Scenario: List content
+- **WHEN** the system has types of the kinds `content`, `page` and `block`
+- **THEN** the list of parent types contains only types of the `content` kind
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** користувач відкриває форму створення
-- **THEN** батьківський тип не обрано
+#### Scenario: Default value
+- **WHEN** the user opens the create form
+- **THEN** no parent type is selected
 
-#### Scenario: Виключення себе й нащадків
-- **WHEN** користувач відкриває форму редагування типу, що має дочірній тип
-- **THEN** у списку батьківських типів немає ні цього типу, ні його дочірніх (на будь-якій глибині)
+#### Scenario: Excluding itself and its descendants
+- **WHEN** the user opens the edit form of a type that has a child type
+- **THEN** the list of parent types contains neither this type nor its child types (at any depth)
 
-### Requirement: Форма редагування типу
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/edit`, доступну лише автентифікованим користувачам з підтвердженою поштою, з формою, попередньо заповненою поточними значеннями типу виду `content`: назва, slug, батьківський тип, опис. Ключ SHALL показуватися лише для читання з поясненням, що він незмінний. Вид у формі відсутній. Для неіснуючого ключа й для типу виду `page` чи `block` сторінка SHALL відповідати «не знайдено». Форма SHALL мати кнопку збереження й посилання «Скасувати».
+### Requirement: Edit type form
+The admin SHALL have a page `/admin/content-types/{key}/edit`, available only to authenticated users with a confirmed email, with a form pre-filled with the current values of a type of the `content` kind: name, slug, parent type, description. The key SHALL be shown read-only with an explanation that it is immutable. The kind is absent from the form. For a non-existent key, and for a type of the `page` or `block` kind, the page SHALL respond "not found". The form SHALL have a save button and a "Cancel" link.
 
-#### Scenario: Відкриття форми
-- **WHEN** користувач відкриває `/admin/content-types/news/edit` для наявного типу `content`
-- **THEN** він бачить форму з поточними назвою, slug, батьківським типом і описом, а ключ `news` — лише для читання
+#### Scenario: Opening the form
+- **WHEN** the user opens `/admin/content-types/news/edit` for an existing type `content`
+- **THEN** they see a form with the current name, slug, parent type and description, and the key `news` is read-only
 
-#### Scenario: Неіснуючий тип
-- **WHEN** користувач відкриває форму редагування для неіснуючого ключа
-- **THEN** відповідь — «не знайдено»
+#### Scenario: Non-existent type
+- **WHEN** the user opens the edit form for a non-existent key
+- **THEN** the response is "not found"
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває форму редагування для ключа типу виду `page` або `block`
-- **THEN** відповідь — «не знайдено»
+#### Scenario: Type of another kind
+- **WHEN** the user opens the edit form for the key of a type of the `page` or `block` kind
+- **THEN** the response is "not found"
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває форму редагування або надсилає її
-- **THEN** його перенаправлено на сторінку входу, тип не змінено
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens the edit form or submits it
+- **THEN** they are redirected to the login page, and the type is not changed
 
-### Requirement: Збереження змін типу
-Надсилання форми редагування SHALL оновлювати назву, slug, батьківський тип і опис типу за тими самими правилами, що й створення; унікальність slug SHALL перевірятися з виключенням самого типу. Ключ і вид SHALL НЕ змінюватися, навіть якщо їх передано в запиті. Порожній slug очищає значення. Батьківським SHALL не можна обрати сам тип чи його нащадка. Після успіху користувач SHALL потрапити на `/admin/content-types` з повідомленням про успіх.
+### Requirement: Saving type changes
+Submitting the edit form SHALL update the name, slug, parent type and description of the type by the same rules as creation; the uniqueness of the slug SHALL be checked excluding the type itself. The key and the kind SHALL NOT change, even if they are passed in the request. An empty slug clears the value. The type itself or its descendant SHALL NOT be selectable as the parent. After success the user SHALL land on `/admin/content-types` with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву й slug наявного типу на вільні допустимі значення та зберігає
-- **THEN** зміни збережено, ключ і вид не змінились, користувача перенаправлено до списку з повідомленням про успіх
+#### Scenario: Successful change
+- **WHEN** the user changes the name and slug of an existing type to free valid values and saves
+- **THEN** the changes are saved, the key and the kind have not changed, and the user is redirected to the list with a success message
 
-#### Scenario: Збереження власного slug
-- **WHEN** користувач зберігає форму, не змінюючи slug типу
-- **THEN** помилки унікальності немає
+#### Scenario: Saving one's own slug
+- **WHEN** the user saves the form without changing the slug of the type
+- **THEN** there is no uniqueness error
 
-#### Scenario: Slug іншого типу
-- **WHEN** користувач вводить slug, який уже має інший тип
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another type
+- **WHEN** the user enters a slug that another type already has
+- **THEN** the changes are not saved, and an error is shown next to the slug field
 
-#### Scenario: Очищення slug
-- **WHEN** користувач стирає slug і зберігає
-- **THEN** slug типу порожній
+#### Scenario: Clearing the slug
+- **WHEN** the user erases the slug and saves
+- **THEN** the slug of the type is empty
 
-#### Scenario: Ключ у запиті ігнорується
-- **WHEN** у запиті редагування передано інший `key` або `kind`
-- **THEN** ключ і вид типу лишаються без змін
+#### Scenario: Key in the request is ignored
+- **WHEN** a different `key` or `kind` is passed in the edit request
+- **THEN** the key and the kind of the type remain unchanged
 
-#### Scenario: Цикл у ієрархії
-- **WHEN** батьківським типом обрано сам тип або його нащадка
-- **THEN** зміни не збережено, біля поля батьківського типу показано помилку
+#### Scenario: Cycle in the hierarchy
+- **WHEN** the type itself or its descendant is chosen as the parent
+- **THEN** the changes are not saved, and an error is shown next to the parent type field
 
-### Requirement: Видалення типу
-Користувач SHALL мати змогу видалити тип виду `content` через пункт «Видалити» меню рядка після підтвердження в діалозі, що називає тип. Видалення SHALL бути заборонене, якщо в типу є вузли або дочірні типи: тип лишається незмінним, а користувач бачить повідомлення про причину. Діалог SHALL показувати причину заборони й не давати підтвердити видалення, якщо вона відома з даних рядка. Сервер SHALL перевіряти заборону самостійно, незалежно від діалогу. Тип без вузлів і дочірніх типів SHALL видалятися разом зі своїми полями; після успіху користувач SHALL потрапити на `/admin/content-types` з повідомленням про успіх. Видалення типів видів `page` і `block` через цей маршрут SHALL бути неможливим.
+### Requirement: Deleting a type
+The user SHALL be able to delete a type of the `content` kind via the "Delete" item of the row menu after confirmation in a dialog that names the type. Deletion SHALL be forbidden if the type has nodes or child types: the type remains unchanged, and the user sees a message with the reason. The dialog SHALL show the reason for the ban and SHALL NOT allow confirming the deletion if the reason is known from the row data. The server SHALL check the ban itself, regardless of the dialog. A type without nodes and child types SHALL be deleted together with its fields; after success the user SHALL land on `/admin/content-types` with a success message. Deleting types of the `page` and `block` kinds through this route SHALL be impossible.
 
-#### Scenario: Діалог підтвердження
-- **WHEN** користувач обирає «Видалити» у рядку типу без вузлів і дочірніх типів
-- **THEN** відкривається діалог із назвою типу, кнопкою підтвердження й кнопкою скасування, а тип ще не видалено
+#### Scenario: Confirmation dialog
+- **WHEN** the user chooses "Delete" in the row of a type without nodes and child types
+- **THEN** a dialog opens with the name of the type, a confirm button and a cancel button, and the type is not yet deleted
 
-#### Scenario: Скасування видалення
-- **WHEN** користувач закриває діалог кнопкою скасування
-- **THEN** тип залишається в списку
+#### Scenario: Cancel deletion
+- **WHEN** the user closes the dialog with the cancel button
+- **THEN** the type remains in the list
 
-#### Scenario: Успішне видалення
-- **WHEN** користувач підтверджує видалення типу без вузлів і дочірніх типів
-- **THEN** тип і його поля видалено, користувача повернено до списку з повідомленням про успіх, типу в списку немає
+#### Scenario: Successful deletion
+- **WHEN** the user confirms the deletion of a type without nodes and child types
+- **THEN** the type and its fields are deleted, the user is returned to the list with a success message, and the type is not in the list
 
-#### Scenario: Тип із вузлами
-- **WHEN** користувач обирає «Видалити» для типу, що має вузли
-- **THEN** діалог пояснює, що спершу треба видалити вузли, і підтвердити видалення не дозволяє
+#### Scenario: Type with nodes
+- **WHEN** the user chooses "Delete" for a type that has nodes
+- **THEN** the dialog explains that the nodes must be deleted first, and does not allow confirming the deletion
 
-#### Scenario: Тип із дочірніми типами
-- **WHEN** користувач обирає «Видалити» для типу, що має дочірні типи
-- **THEN** діалог пояснює, що спершу треба видалити або перемістити дочірні типи, і підтвердити видалення не дозволяє
+#### Scenario: Type with child types
+- **WHEN** the user chooses "Delete" for a type that has child types
+- **THEN** the dialog explains that the child types must be deleted or moved first, and does not allow confirming the deletion
 
-#### Scenario: Заборона на сервері
-- **WHEN** на маршрут видалення надіслано запит для типу з вузлами або дочірніми типами
-- **THEN** тип і його дані не змінено, користувач бачить повідомлення про помилку
+#### Scenario: Ban on the server
+- **WHEN** a deletion request for a type with nodes or child types is sent to the route
+- **THEN** the type and its data are not changed, and the user sees an error message
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач надсилає запит видалення
-- **THEN** його перенаправлено на сторінку входу, тип не видалено
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor sends a deletion request
+- **THEN** they are redirected to the login page, and the type is not deleted
 
-#### Scenario: Тип іншого виду
-- **WHEN** на маршрут видалення надіслано ключ типу виду `page` або `block`
-- **THEN** відповідь — «не знайдено», тип не видалено
+#### Scenario: Type of another kind
+- **WHEN** the key of a type of the `page` or `block` kind is sent to the deletion route
+- **THEN** the response is "not found", and the type is not deleted
 
 ## REMOVED Requirements
 
-### Requirement: Пошук, фільтри й сортування
-**Reason**: Фільтри на цій сторінці не потрібні; пошук і сортування виділено в окрему вимогу «Пошук і сортування», а склад шуканих полів змінено (назва, опис, slug, ключ).
-**Migration**: Користуйтеся пошуком і сортуванням; фільтри за видом, лічильниками, назвою, ключем, батьківським типом чи описом більше не доступні, а фільтри в адресі ігноруються.
+### Requirement: Search, filters and sorting
+**Reason**: Filters are not needed on this page; search and sorting are separated into their own requirement "Search and sorting", and the set of searched fields has changed (name, description, slug, key).
+**Migration**: Use search and sorting; filters by kind, counters, name, key, parent type or description are no longer available, and filters in the address are ignored.

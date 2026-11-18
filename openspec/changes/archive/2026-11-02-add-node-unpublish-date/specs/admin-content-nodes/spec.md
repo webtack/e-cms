@@ -3,205 +3,205 @@
 ## MODIFIED Requirements
 
 ### Requirement: Колонки таблиці записів
-Таблиця SHALL завжди показувати колонку `title` першою і неприховуваною та колонку slug запису. Одразу після slug SHALL бути колонка стану запису (бейдж «Опубліковано», «Заплановано», «Завершено» або «Вимкнено», несортована) і колонка дати публікації (`published_at`), за якою можна сортувати. Колонки дати зняття (`unpublished_at`) SHALL НЕ бути. Окрім них SHALL показувати видимі поля з налаштувань списку типу (`settings.list.visible`) у вказаному там порядку; без таких налаштувань — лише `title`. Посилання налаштувань на поле, якого в типу вже немає, SHALL ігноруватися без помилки. Значення множинного поля SHALL виводитися через кому, булеве — як «Так»/«Ні» мовою інтерфейсу, відсутнє значення — порожньою коміркою. Значення береться з мови `default`. Стан SHALL визначатися так: «Вимкнено», якщо `is_active = false` (незалежно від дат); інакше «Заплановано», якщо `published_at` пізніше за поточний момент; інакше «Завершено», якщо `unpublished_at` задано й він не пізніше за поточний момент; інакше «Опубліковано».
+The table SHALL always show the column `title` first and not hideable, and the column of the slug of the record. Right after the slug there SHALL be the column of the state of the record (the badge «Опубліковано», «Заплановано», «Завершено» or «Вимкнено», not sortable) and the publication date column (`published_at`), by which one can sort. The columns of the unpublish date (`unpublished_at`) SHALL NOT be there. Besides them, it SHALL show the visible fields from the list settings of the type (`settings.list.visible`) in the order specified there; without such settings — only `title`. A setting that refers to a field the type no longer has SHALL be ignored without an error. The value of a multiple field SHALL be shown separated by commas, a boolean — as «Так»/«Ні» in the language of the interface, a missing value — as an empty cell. The value is taken from the language `default`. The status SHALL be determined as follows: «Вимкнено» if `is_active = false` (regardless of the dates); otherwise «Заплановано» if `published_at` is later than the current moment; otherwise «Завершено» if `unpublished_at` is set and is not later than the current moment; otherwise «Опубліковано».
 
-#### Scenario: Налаштування за замовчуванням
-- **WHEN** тип не має налаштувань списку
-- **THEN** таблиця показує колонки `title`, slug, стан і дату публікації
+#### Scenario: Default settings
+- **WHEN** the type has no list settings
+- **THEN** the table shows the columns `title`, slug, the state and the publication date
 
-#### Scenario: Видимі поля з налаштувань
-- **WHEN** `settings.list.visible` типу — `title`, `price`, `tags`, а запис має `price` = 12.5 і `tags` = `["a", "b"]`
-- **THEN** у його рядку видно колонки `title`, `price` зі значенням 12.5, `tags` зі значенням «a, b», slug, стан і дату публікації
+#### Scenario: Visible fields from the settings
+- **WHEN** `settings.list.visible` of the type is `title`, `price`, `tags`, and the record has `price` = 12.5 and `tags` = `["a", "b"]`
+- **THEN** its row shows the columns `title`, `price` with the value 12.5, `tags` with the value «a, b», slug, the state and the publication date
 
-#### Scenario: Видалене поле в налаштуваннях
-- **WHEN** `settings.list.visible` містить ключ поля, яке вже видалено з типу
-- **THEN** сторінка відкривається без помилки, а колонки цього поля немає
+#### Scenario: Deleted field in the settings
+- **WHEN** `settings.list.visible` contains the key of a field that has already been deleted from the type
+- **THEN** the page opens without an error, and there is no column of this field
 
-#### Scenario: Булеве значення
-- **WHEN** запис має поле типу «булеве» зі значенням «істина»
-- **THEN** у комірці показано «Так»
+#### Scenario: Boolean value
+- **WHEN** the record has a field of the type «булеве» with the value «істина»
+- **THEN** the cell shows «Так»
 
-#### Scenario: Стан «Опубліковано»
-- **WHEN** запис активний, його `published_at` не пізніше за поточний момент, а `unpublished_at` порожній або пізніше за поточний момент
-- **THEN** у колонці стану показано «Опубліковано»
+#### Scenario: Status «Опубліковано»
+- **WHEN** the record is active, its `published_at` is not later than the current moment, and its `unpublished_at` is empty or later than the current moment
+- **THEN** the status column shows «Опубліковано»
 
-#### Scenario: Стан «Заплановано»
-- **WHEN** запис активний, а його `published_at` у майбутньому
-- **THEN** у колонці стану показано «Заплановано»
+#### Scenario: Status «Заплановано»
+- **WHEN** the record is active, and its `published_at` is in the future
+- **THEN** the status column shows «Заплановано»
 
-#### Scenario: Стан «Завершено»
-- **WHEN** запис активний, його `published_at` у минулому, а `unpublished_at` не пізніше за поточний момент
-- **THEN** у колонці стану показано «Завершено»
+#### Scenario: Status «Завершено»
+- **WHEN** the record is active, its `published_at` is in the past, and its `unpublished_at` is not later than the current moment
+- **THEN** the status column shows «Завершено»
 
-#### Scenario: Стан «Вимкнено»
-- **WHEN** запис вимкнено, а його `published_at` у майбутньому
-- **THEN** у колонці стану показано «Вимкнено»
+#### Scenario: Status «Вимкнено»
+- **WHEN** the record is disabled, and its `published_at` is in the future
+- **THEN** the status column shows «Вимкнено»
 
-#### Scenario: Вимкнено має пріоритет над «Завершено»
-- **WHEN** запис вимкнено, а його `unpublished_at` у минулому
-- **THEN** у колонці стану показано «Вимкнено»
+#### Scenario: «Вимкнено» takes priority over «Завершено»
+- **WHEN** the record is disabled, and its `unpublished_at` is in the past
+- **THEN** the status column shows «Вимкнено»
 
-#### Scenario: Сортування за датою публікації
-- **WHEN** користувач сортує таблицю за колонкою дати публікації за спаданням
-- **THEN** записи йдуть від найпізнішої дати публікації до найранішої
+#### Scenario: Sorting by publication date
+- **WHEN** the user sorts the table by the column of the publication date in descending order
+- **THEN** the records go from the latest publication date to the earliest
 
 ### Requirement: Збереження нового запису
-Відправлення форми створення SHALL створювати запис типу з введеними значеннями в мові `default`. Порожній slug SHALL призводити до автоматичного slug із `title`; явно введений slug SHALL перевірятися на формат і унікальність серед усіх записів і не змінюватися. Форма SHALL також приймати `is_active`, `published_at` та `unpublished_at`; порожня чи ненадіслана дата публікації SHALL замінюватися поточним моментом, порожня чи ненадіслана дата зняття SHALL означати «без дати зняття», а автором запису SHALL ставати поточний користувач незалежно від надісланого. Дата зняття SHALL бути пізніше за дату публікації (за порожньої дати публікації — за поточний момент). Після успіху користувача SHALL бути перенаправлено до списку записів цього типу з повідомленням про успіх, а запис SHALL з'явитися в таблиці. Помилки валідації SHALL повертатися до форми й показуватися біля відповідних полів, зокрема біля окремих елементів множинного поля; введені дані при цьому SHALL зберігатися у формі.
+Submitting the creation form SHALL create a record of the type with the entered values in the language `default`. An empty slug SHALL lead to an automatic slug from `title`; an explicitly entered slug SHALL be checked for format and uniqueness among all records and SHALL not change. The form SHALL also accept `is_active`, `published_at` and `unpublished_at`; an empty or not sent publication date SHALL be replaced by the current moment, an empty or not sent unpublish date SHALL mean «no unpublish date», and the author of the record SHALL become the current user regardless of what was sent. The unpublish date SHALL be later than the publication date (for an empty publication date — than the current moment). After success the user SHALL be redirected to the list of records of this type with a success message, and the record SHALL appear in the table. Validation errors SHALL return to the form and be shown next to the corresponding fields, including next to individual elements of a multiple field; the entered data SHALL be kept in the form.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач вводить `title` «Про нас» і відправляє форму
-- **THEN** запис збережено зі slug `pro-nas`, користувач бачить список записів, тост про успіх і новий рядок у таблиці
+#### Scenario: Successful creation
+- **WHEN** the user enters `title` «Про нас» and submits the form
+- **THEN** the record is saved with the slug `pro-nas`, the user sees the list of records, a success toast and a new row in the table
 
-#### Scenario: Явний slug
-- **WHEN** користувач вводить slug `about` і `title` «Про нас»
-- **THEN** збережено запис зі slug `about`
+#### Scenario: Explicit slug
+- **WHEN** the user enters the slug `about` and `title` «Про нас»
+- **THEN** a record with the slug `about` is saved
 
-#### Scenario: Зайнятий slug
-- **WHEN** користувач вводить slug, який уже має запис будь-якого типу чи виду
-- **THEN** запис не створено, біля поля slug показано помилку, решта введеного лишається у формі
+#### Scenario: Occupied slug
+- **WHEN** the user enters a slug that already belongs to a record of any type or kind
+- **THEN** the record is not created, an error is shown next to the slug field, and the rest of the entered data remains in the form
 
-#### Scenario: Недопустимий формат slug
-- **WHEN** користувач вводить slug `Про нас`
-- **THEN** запис не створено, біля поля slug показано помилку
+#### Scenario: Invalid slug format
+- **WHEN** the user enters the slug `Про нас`
+- **THEN** the record is not created, an error is shown next to the slug field
 
-#### Scenario: Обов'язкове поле
-- **WHEN** користувач відправляє форму з порожнім `title`
-- **THEN** запис не створено, біля поля `title` показано помилку
+#### Scenario: Required field
+- **WHEN** the user submits the form with an empty `title`
+- **THEN** the record is not created, an error is shown next to the field `title`
 
-#### Scenario: Помилка елемента множинного поля
-- **WHEN** множинне числове поле `scores` отримує другим елементом нечислове значення
-- **THEN** запис не створено, помилка показана біля другого елемента списку
+#### Scenario: Error of an element of a multiple field
+- **WHEN** the multiple numeric field `scores` gets a non-numeric value as its second element
+- **THEN** the record is not created, the error is shown next to the second element of the list
 
-#### Scenario: Значення за налаштуваннями поля
-- **WHEN** поле має в налаштуваннях максимум 5, а введено 7
-- **THEN** запис не створено, біля поля показано помилку
+#### Scenario: Value by the field settings
+- **WHEN** the field has a maximum of 5 in its settings, and 7 is entered
+- **THEN** the record is not created, an error is shown next to the field
 
-#### Scenario: Дата публікації за замовчуванням
-- **WHEN** користувач створює запис, не змінюючи дати публікації
-- **THEN** запис збережено з датою публікації, що дорівнює моменту створення (з точністю до хвилини), і без дати зняття
+#### Scenario: Default publication date
+- **WHEN** the user creates a record without changing the publication date
+- **THEN** the record is saved with a publication date equal to the moment of creation (to the minute), and without an unpublish date
 
-#### Scenario: Відкладена публікація
-- **WHEN** користувач задає дату публікації в майбутньому й зберігає
-- **THEN** запис збережено з цією датою, а в таблиці його стан — «Заплановано»
+#### Scenario: Deferred publication
+- **WHEN** the user sets a publication date in the future and saves
+- **THEN** the record is saved with this date, and in the table its status is «Заплановано»
 
-#### Scenario: Некоректна дата публікації
-- **WHEN** користувач вводить у поле дати публікації нерозпізнаваний текст
-- **THEN** запис не створено, біля поля дати показано помилку
+#### Scenario: Invalid publication date
+- **WHEN** the user enters unrecognizable text in the publication date field
+- **THEN** the record is not created, an error is shown next to the date field
 
-#### Scenario: Створення з датою зняття
-- **WHEN** користувач задає дату публікації й пізнішу дату зняття та зберігає
-- **THEN** запис збережено з обома датами
+#### Scenario: Creation with an unpublish date
+- **WHEN** the user sets a publication date and a later unpublish date and saves
+- **THEN** the record is saved with both dates
 
-#### Scenario: Дата зняття не пізніше за дату публікації
-- **WHEN** користувач задає дату зняття, що дорівнює або передує даті публікації
-- **THEN** запис не створено, біля поля дати зняття показано помилку, решта введеного лишається у формі
+#### Scenario: Unpublish date not later than the publication date
+- **WHEN** the user sets an unpublish date that equals or precedes the publication date
+- **THEN** the record is not created, an error is shown next to the unpublish date field, and the rest of the entered data remains in the form
 
-#### Scenario: Дата зняття без дати публікації
-- **WHEN** користувач залишає дату публікації порожньою й задає дату зняття в минулому
-- **THEN** запис не створено, біля поля дати зняття показано помилку
+#### Scenario: Unpublish date without a publication date
+- **WHEN** the user leaves the publication date empty and sets an unpublish date in the past
+- **THEN** the record is not created, an error is shown next to the unpublish date field
 
-#### Scenario: Некоректна дата зняття
-- **WHEN** користувач вводить у поле дати зняття нерозпізнаваний текст
-- **THEN** запис не створено, біля поля дати зняття показано помилку
+#### Scenario: Invalid unpublish date
+- **WHEN** the user enters unrecognizable text in the unpublish date field
+- **THEN** the record is not created, an error is shown next to the unpublish date field
 
-#### Scenario: Автор не підміняється
-- **WHEN** запит створення містить `user_id` іншого користувача
-- **THEN** автором запису стає поточний користувач
+#### Scenario: Author is not substituted
+- **WHEN** the creation request contains the `user_id` of another user
+- **THEN** the author of the record becomes the current user
 
 ### Requirement: Збереження змін запису
-Відправлення форми редагування SHALL замінювати значення всіх полів типу в мові `default` введеними (порядок елементів множинного поля зберігається таким, як у формі) (очищене поле SHALL втрачати значення) і SHALL дозволяти змінити slug запису на вільне допустиме значення, а також `is_active`, `published_at` і `unpublished_at`; `uuid`, тип запису й автор SHALL лишатися без змін (надіслане `user_id` SHALL ігноруватися), а очищена дата публікації SHALL давати помилку валідації. Очищена дата зняття SHALL прибирати її (запис знову без дати зняття), а задана SHALL бути пізніше за дату публікації. Кожне успішне збереження SHALL оновлювати `updated_at` запису, навіть якщо змінилися лише значення полів. Незмінений slug SHALL не вважатися дублікатом самого себе. Після успіху користувача SHALL бути перенаправлено до списку записів з повідомленням про успіх. Помилки SHALL показуватися так само, як при створенні. Значення інших мов SHALL лишатися без змін.
+Submitting the edit form SHALL replace the values of all fields of the type in the language `default` with the entered ones (the order of the elements of a multiple field is kept as in the form) (a cleared field SHALL lose its value), and SHALL allow changing the slug of the record to a free valid value, as well as `is_active`, `published_at` and `unpublished_at`; `uuid`, the type of the record and the author SHALL remain unchanged (the sent `user_id` SHALL be ignored), and a cleared publication date SHALL give a validation error. A cleared unpublish date SHALL remove it (the record is again without an unpublish date), and a set one SHALL be later than the publication date. Every successful saving SHALL update the `updated_at` of the record, even if only the values of the fields changed. An unchanged slug SHALL not be considered a duplicate of itself. After success the user SHALL be redirected to the list of records with a success message. Errors SHALL be shown the same way as on creation. The values of other languages SHALL remain unchanged.
 
-#### Scenario: Зміна значення
-- **WHEN** користувач змінює `title` запису і зберігає
-- **THEN** новий `title` показано у списку, slug лишився тим самим
+#### Scenario: Changing a value
+- **WHEN** the user changes the `title` of a record and saves
+- **THEN** the new `title` is shown in the list, the slug remained the same
 
-#### Scenario: Очищення необов'язкового поля
-- **WHEN** користувач очищає необов'язкове поле `summary` і зберігає
-- **THEN** значення `summary` у запису відсутнє
+#### Scenario: Clearing an optional field
+- **WHEN** the user clears the optional field `summary` and saves
+- **THEN** the value of `summary` is absent in the record
 
-#### Scenario: Зміна slug
-- **WHEN** користувач змінює slug запису на вільне `about-us`
-- **THEN** запис і далі відкривається за тією самою адресою редагування (за `uuid`), його `uuid` не змінився, а відкрита в іншій вкладці форма цього запису зберігається без помилки 404
+#### Scenario: Changing the slug
+- **WHEN** the user changes the slug of a record to the free `about-us`
+- **THEN** the record still opens by the same edit address (by `uuid`), its `uuid` did not change, and the form of this record opened in another tab is saved without a 404 error
 
-#### Scenario: Збереження без зміни slug
-- **WHEN** користувач зберігає форму, не змінюючи slug
-- **THEN** збереження успішне, помилки унікальності немає
+#### Scenario: Saving without changing the slug
+- **WHEN** the user saves the form without changing the slug
+- **THEN** the saving succeeds, there is no uniqueness error
 
-#### Scenario: Slug іншого запису
-- **WHEN** користувач вводить slug, який має інший запис
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another record
+- **WHEN** the user enters a slug that belongs to another record
+- **THEN** the changes are not saved, an error is shown next to the slug field
 
-#### Scenario: Переклади
-- **WHEN** запис має переклад `title` мовою `en`, а користувач змінює `title` у формі
-- **THEN** змінюється лише значення `default`, переклад `en` лишається
+#### Scenario: Translations
+- **WHEN** the record has a translation of `title` in `en`, and the user changes `title` in the form
+- **THEN** only the value `default` changes, the translation `en` remains
 
-#### Scenario: Вимкнення запису
-- **WHEN** користувач вимикає перемикач «Показувати на сайті» і зберігає
-- **THEN** запис має `is_active = false`, його дати публікації й зняття не змінились, а в таблиці стан — «Вимкнено»
+#### Scenario: Disabling a record
+- **WHEN** the user turns off the switch «Показувати на сайті» and saves
+- **THEN** the record has `is_active = false`, its publication and unpublish dates did not change, and in the table the status is «Вимкнено»
 
-#### Scenario: Зміна дати публікації
-- **WHEN** користувач змінює дату публікації запису й зберігає
-- **THEN** форма редагування після повторного відкриття показує нову дату
+#### Scenario: Changing the publication date
+- **WHEN** the user changes the publication date of a record and saves
+- **THEN** after reopening the edit form shows the new date
 
-#### Scenario: Очищена дата публікації
-- **WHEN** користувач очищає поле дати публікації й зберігає
-- **THEN** зміни не збережено, біля поля дати показано помилку
+#### Scenario: Cleared publication date
+- **WHEN** the user clears the publication date field and saves
+- **THEN** the changes are not saved, an error is shown next to the date field
 
-#### Scenario: Встановлення дати зняття
-- **WHEN** користувач задає дату зняття пізніше за дату публікації й зберігає
-- **THEN** форма редагування після повторного відкриття показує цю дату
+#### Scenario: Setting an unpublish date
+- **WHEN** the user sets an unpublish date later than the publication date and saves
+- **THEN** after reopening the edit form shows this date
 
-#### Scenario: Завершення показу
-- **WHEN** користувач задає дату зняття в минулому (пізніше за дату публікації) активному запису й зберігає
-- **THEN** у таблиці стан запису — «Завершено»
+#### Scenario: Ending the display
+- **WHEN** the user sets an unpublish date in the past (later than the publication date) on an active record and saves
+- **THEN** in the table the state of the record is «Завершено»
 
-#### Scenario: Очищення дати зняття
-- **WHEN** користувач очищає поле дати зняття й зберігає
-- **THEN** запис без дати зняття, а форма після повторного відкриття показує порожнє поле
+#### Scenario: Clearing the unpublish date
+- **WHEN** the user clears the unpublish date field and saves
+- **THEN** the record is without an unpublish date, and the form after reopening shows an empty field
 
-#### Scenario: Дата зняття не пізніше за дату публікації
-- **WHEN** користувач задає дату зняття, що дорівнює або передує даті публікації, і зберігає
-- **THEN** зміни не збережено, біля поля дати зняття показано помилку
+#### Scenario: Unpublish date not later than the publication date
+- **WHEN** the user sets an unpublish date that equals or precedes the publication date, and saves
+- **THEN** the changes are not saved, an error is shown next to the unpublish date field
 
-#### Scenario: Автор незмінний
-- **WHEN** запит оновлення містить `user_id` іншого користувача
-- **THEN** автор запису лишається попереднім
+#### Scenario: Author unchanged
+- **WHEN** the update request contains the `user_id` of another user
+- **THEN** the author of the record remains the previous one
 
-#### Scenario: Оновлення часу зміни
-- **WHEN** користувач змінює лише значення поля `title` й зберігає
-- **THEN** `updated_at` запису оновлюється
+#### Scenario: Updating the change time
+- **WHEN** the user changes only the value of the field `title` and saves
+- **THEN** the `updated_at` of the record is updated
 
 ### Requirement: Деталі запису у формі
-Блок «Деталі» SHALL містити, у такому порядку: перемикач «Показувати на сайті» (`is_active`; у формі створення увімкнений), бейдж поточного стану запису, поле «Дата публікації» (`published_at`, вибір дати й часу; у формі створення заповнене поточним моментом), поле «Показувати до» (`unpublished_at`, вибір дати й часу; може бути порожнім, у формі створення порожнє), поле slug (з тими самими підказками й правилами, що й раніше), «Оновлено» (`updated_at`, лише для читання, лише у формі редагування) і «Автор» (ім'я автора, лише для читання; у формі створення — поточний користувач). Дата створення (`created_at`) SHALL НЕ показуватися. Бейдж SHALL відображати стан за поточним станом форми (до збереження): вимкнений перемикач дає «Вимкнено», увімкнений із майбутньою датою публікації — «Заплановано», увімкнений із датою зняття, що не пізніше за поточний момент (і датою публікації не в майбутньому), — «Завершено», інакше — «Опубліковано». Редаговані поля SHALL показувати помилки валідації всередині блоку.
+The block «Деталі» SHALL contain, in this order: the switch «Показувати на сайті» (`is_active`; enabled in the creation form), the badge of the current state of the record, the field «Дата публікації» (`published_at`, a date and time selection; filled with the current moment in the creation form), the field «Показувати до» (`unpublished_at`, a date and time selection; may be empty, empty in the creation form), the slug field (with the same hints and rules as before), «Оновлено» (`updated_at`, read-only, only in the edit form) and «Автор» (the name of the author, read-only; in the creation form — the current user). The creation date (`created_at`) SHALL NOT be shown. The badge SHALL display the state by the current state of the form (before saving): a disabled switch gives «Вимкнено», an enabled one with a publication date in the future — «Заплановано», an enabled one with an unpublish date not later than the current moment (and a publication date not in the future) — «Завершено», otherwise — «Опубліковано». The editable fields SHALL show validation errors inside the block.
 
-#### Scenario: Службовий блок створення
-- **WHEN** користувач відкриває форму створення
-- **THEN** у блоці перемикач «Показувати на сайті» увімкнений, дата публікації заповнена поточним моментом, поле «Показувати до» порожнє, slug порожній, «Оновлено» немає, автором показано поточного користувача
+#### Scenario: Service block on creation
+- **WHEN** the user opens the creation form
+- **THEN** in the block the switch «Показувати на сайті» is enabled, the publication date is filled with the current moment, the field «Показувати до» is empty, the slug is empty, there is no «Оновлено», and the current user is shown as the author
 
-#### Scenario: Службовий блок редагування
-- **WHEN** користувач відкриває форму редагування запису, створеного іншим користувачем
-- **THEN** «Автор» показує того користувача, а «Оновлено» — час останньої зміни запису, обидва не редагуються
+#### Scenario: Service block on editing
+- **WHEN** the user opens the edit form of a record created by another user
+- **THEN** «Автор» shows that user, and «Оновлено» — the time of the last change of the record, neither is editable
 
-#### Scenario: Бейдж реагує на форму
-- **WHEN** користувач вимикає перемикач «Показувати на сайті»
-- **THEN** бейдж одразу показує «Вимкнено», хоч запис ще не збережено
+#### Scenario: Badge reacts to the form
+- **WHEN** the user turns off the switch «Показувати на сайті»
+- **THEN** the badge immediately shows «Вимкнено», although the record is not saved yet
 
-#### Scenario: Бейдж «Заплановано»
-- **WHEN** користувач вводить дату публікації в майбутньому за увімкненого перемикача
-- **THEN** бейдж показує «Заплановано»
+#### Scenario: Badge «Заплановано»
+- **WHEN** the user enters a publication date in the future with the switch enabled
+- **THEN** the badge shows «Заплановано»
 
-#### Scenario: Бейдж «Завершено»
-- **WHEN** користувач за увімкненого перемикача вводить дату зняття в минулому
-- **THEN** бейдж показує «Завершено»
+#### Scenario: Badge «Завершено»
+- **WHEN** the user enters an unpublish date in the past with the switch enabled
+- **THEN** the badge shows «Завершено»
 
-#### Scenario: Поле «Показувати до»
-- **WHEN** користувач відкриває форму редагування запису з датою зняття
-- **THEN** поле «Показувати до» заповнене цією датою, а після очищення поля й збереження запис лишається без дати зняття
+#### Scenario: Field «Показувати до»
+- **WHEN** the user opens the edit form of a record with an unpublish date
+- **THEN** the field «Показувати до» is filled with this date, and after clearing the field and saving the record remains without an unpublish date
 
-#### Scenario: Помилка дати зняття
-- **WHEN** сервер відхиляє дату зняття
-- **THEN** помилку показано всередині блоку біля поля «Показувати до»
+#### Scenario: Error of the unpublish date
+- **WHEN** the server rejects the unpublish date
+- **THEN** the error is shown inside the block next to the field «Показувати до»
 
-#### Scenario: Дата створення
-- **WHEN** користувач відкриває форму редагування
-- **THEN** дати створення у формі немає
+#### Scenario: Creation date
+- **WHEN** the user opens the edit form
+- **THEN** there is no creation date in the form

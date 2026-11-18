@@ -1,199 +1,199 @@
 # image-styles Specification
 
 ## Purpose
-Надає похідні розміри зображень (стилі), які шаблон теми запитує за потреби: пресети з конфігурації розробника й довільні розміри, створювані ліниво на першому запиті без залежності від налаштувань вебсервера.
+Provides derived sizes of images (styles) which the template of the theme requests when necessary: the presets from the configuration of the developer and the arbitrary sizes, created lazily on the first request without dependence on the settings of the web server.
 
 ## ADDED Requirements
 
 ### Requirement: Стиль зображення
-Система SHALL підтримувати стилі зображень двох видів: **пресет** — іменований розмір із конфігурації розробника (на старті існує пресет `thumb`) і **довільний розмір** — рядок `{ширина}x{висота}`, `{ширина}x` або `x{висота}`, де розмір у пікселях є додатним цілим, а літера `x` — латинська мала або велика (нормалізується до малої). Назва пресету SHALL не збігатися з форматом довільного розміру.
+The system SHALL support image styles of two kinds: a **preset** — a named size from the configuration of the developer (at the start the preset `thumb` exists) and an **arbitrary size** — a string `{width}x{height}`, `{width}x` or `x{height}`, where the size in pixels is a positive integer, and the letter `x` is Latin, lower or upper case (normalized to lower case). The name of a preset SHALL NOT match the format of an arbitrary size.
 
-Стиль із обома сторонами SHALL давати зображення рівно заданих ширини й висоти: оригінал пропорційно вписується всередину по центру без обрізання (менший за стиль оригінал збільшується), а порожні поля заповнюються розмитою копією того самого оригіналу, масштабованою так, щоб покрити всю площу. Якщо пропорції оригіналу збігаються з пропорціями стилю, порожніх полів немає. Якщо в зображенні є прозорі пікселі, порожні поля SHALL лишатися прозорими без розмиття. Стиль з однією стороною SHALL пропорційно змінювати розмір за цією стороною (збільшуючи менший оригінал) без порожніх полів. Анімовані GIF і WebP SHALL віддаватися з вмістом оригіналу. Застосування EXIF-орієнтації SHALL збігатися з правилами зменшення при завантаженні.
+A style with both sides SHALL give an image of exactly the set width and height: the original is proportionally fitted inside in the centre without cropping (an original smaller than the style is enlarged), and the empty fields are filled with a blurred copy of the same original, scaled so as to cover the whole area. If the proportions of the original match the proportions of the style, there are no empty fields. If the image has transparent pixels, the empty fields SHALL remain transparent without blurring. A style with one side SHALL proportionally change the size by this side (enlarging a smaller original) without empty fields. Animated GIF and WebP SHALL be served with the contents of the original. The application of the EXIF orientation SHALL match the rules of the reduction during the upload.
 
-Формат файла стилю SHALL визначати налаштування розробника: за замовчуванням `webp` — JPEG, PNG і WebP-оригінали віддаються як WebP із збереженням прозорості, а файл стилю має розширення `webp`; значення `original` зберігає формат оригіналу. GIF-оригінали SHALL завжди лишатися GIF, у будь-якому режимі.
+The format of the file of a style SHALL be defined by the developer's setting: by default `webp` — the JPEG, PNG and WebP originals are served as WebP with the transparency kept, and the file of the style has the extension `webp`; the value `original` keeps the format of the original. GIF originals SHALL always remain GIF, in any mode.
 
-#### Scenario: Довільний розмір, оригінал ширший за стиль
-- **WHEN** запитано стиль `300x250` для непрозорого зображення 1200×600
-- **THEN** результат має розмір 300×250: зображення 300×150 по центру, зверху й знизу поля заповнено розмитою копією оригіналу
+#### Scenario: Arbitrary size, original wider than the style
+- **WHEN** the style `300x250` is requested for an opaque image 1200×600
+- **THEN** the result has the size 300×250: the image 300×150 in the centre, the fields above and below are filled with the blurred copy of the original
 
-#### Scenario: Книжна орієнтація в альбомному стилі
-- **WHEN** запитано стиль `300x250` для непрозорого зображення 600×1200
-- **THEN** результат має розмір 300×250: зображення 125×250 по центру, ліворуч і праворуч поля заповнено розмитою копією оригіналу
+#### Scenario: Portrait orientation in a landscape style
+- **WHEN** the style `300x250` is requested for an opaque image 600×1200
+- **THEN** the result has the size 300×250: the image 125×250 in the centre, the fields to the left and to the right are filled with the blurred copy of the original
 
-#### Scenario: Однакові пропорції
-- **WHEN** запитано стиль `300x250` для зображення 1200×1000
-- **THEN** результат має розмір 300×250 без заповнення, зображення просто зменшено
+#### Scenario: Equal proportions
+- **WHEN** the style `300x250` is requested for an image 1200×1000
+- **THEN** the result has the size 300×250 without filling, the image is simply reduced
 
-#### Scenario: Оригінал менший за стиль
-- **WHEN** запитано стиль `300x250` для непрозорого зображення 200×100
-- **THEN** результат має розмір 300×250: зображення збільшено до 300×150 по центру, зверху й знизу поля заповнено розмитою копією
+#### Scenario: Original smaller than the style
+- **WHEN** the style `300x250` is requested for an opaque image 200×100
+- **THEN** the result has the size 300×250: the image is enlarged to 300×150 in the centre, the fields above and below are filled with the blurred copy
 
-#### Scenario: Прозоре зображення
-- **WHEN** запитано стиль `300x250` для PNG 600×1200 з прозорими пікселями
-- **THEN** результат має розмір 300×250, порожні поля ліворуч і праворуч прозорі, розмитого тла немає, прозорі пікселі самого зображення збережено
+#### Scenario: Transparent image
+- **WHEN** the style `300x250` is requested for a PNG 600×1200 with transparent pixels
+- **THEN** the result has the size 300×250, the empty fields to the left and to the right are transparent, there is no blurred background, the transparent pixels of the image itself are kept
 
-#### Scenario: Розмір лише за шириною
-- **WHEN** запитано стиль `300x` для зображення 1200×600
-- **THEN** результат має розмір 300×150 без порожніх полів
+#### Scenario: Size by width only
+- **WHEN** the style `300x` is requested for an image 1200×600
+- **THEN** the result has the size 300×150 without empty fields
 
-#### Scenario: Розмір лише за висотою
-- **WHEN** запитано стиль `x300` для зображення 600×1200
-- **THEN** результат має розмір 150×300 без порожніх полів
+#### Scenario: Size by height only
+- **WHEN** the style `x300` is requested for an image 600×1200
+- **THEN** the result has the size 150×300 without empty fields
 
-#### Scenario: Оригінал менший за одну сторону
-- **WHEN** запитано стиль `300x` для зображення 200×100
-- **THEN** результат збільшено до 300×150
+#### Scenario: Original smaller than one side
+- **WHEN** the style `300x` is requested for an image 200×100
+- **THEN** the result is enlarged to 300×150
 
-#### Scenario: Велика літера
-- **WHEN** запитано стиль `300X250`
-- **THEN** він трактується як `300x250` і дає ті самі адреси й файли
+#### Scenario: Capital letter
+- **WHEN** the style `300X250` is requested
+- **THEN** it is treated as `300x250` and gives the same addresses and files
 
-#### Scenario: Пресет
-- **WHEN** розробник задає в конфігурації пресет `thumb` із розмірами 200×200 і запитано стиль `thumb`
-- **THEN** результат відповідає розміру цього пресету без змін інших частин системи
+#### Scenario: Preset
+- **WHEN** the developer sets in the configuration the preset `thumb` with the sizes 200×200 and the style `thumb` is requested
+- **THEN** the result corresponds to the size of this preset without changes to the other parts of the system
 
-#### Scenario: Некоректний стиль
-- **WHEN** запитано стиль `0x0`, `300х250` з кириличною «х», `abc` (якого немає серед пресетів) або `300` без літери `x`
-- **THEN** стиль відхилено й похідний файл не створюється
+#### Scenario: Invalid style
+- **WHEN** the style `0x0`, `300х250` with the Cyrillic «х» (Cyrillic letter, looks like Latin x), `abc` (which is absent among the presets) or `300` without the letter `x` is requested
+- **THEN** the style is rejected and no derived file is created
 
-#### Scenario: Анімований GIF
-- **WHEN** запитано стиль для анімованого GIF
-- **THEN** результат має вміст оригіналу без змін і розширення `gif`
+#### Scenario: Animated GIF
+- **WHEN** a style is requested for an animated GIF
+- **THEN** the result has the contents of the original without changes and the extension `gif`
 
-#### Scenario: Формат WebP за замовчуванням
-- **WHEN** запитано будь-який стиль для JPEG-оригіналу
-- **THEN** результат — зображення WebP із розширенням `webp`
+#### Scenario: WebP format by default
+- **WHEN** any style is requested for a JPEG original
+- **THEN** the result is a WebP image with the extension `webp`
 
-#### Scenario: Збереження формату оригіналу
-- **WHEN** розробник задає формат `original` і запитано стиль для JPEG-оригіналу
-- **THEN** результат — JPEG із розширенням `jpg`
+#### Scenario: Keeping the format of the original
+- **WHEN** the developer sets the format `original` and a style is requested for a JPEG original
+- **THEN** the result is a JPEG with the extension `jpg`
 
-#### Scenario: GIF у режимі WebP
-- **WHEN** формат `webp` і запитано стиль для статичного GIF
-- **THEN** результат лишається GIF
+#### Scenario: GIF in the WebP mode
+- **WHEN** the format `webp` is set and a style is requested for a static GIF
+- **THEN** the result remains a GIF
 
 ### Requirement: Пресети при завантаженні
-Система SHALL створювати файли пресетів, які розробник позначив у конфігурації для створення при завантаженні (на старті — `thumb`), одразу після збереження зображення, до відповіді на завантаження. Помилка створення такого пресету SHALL не відхиляти завантаження: файл збережено, а пресет створиться ліниво на першому запиті. Інші пресети й довільні розміри SHALL створюватися лише ліниво.
+The system SHALL create the files of the presets that the developer marked in the configuration for creation at the upload (at the start — `thumb`), right after saving the image, before the response to the upload. An error in the creation of such a preset SHALL NOT reject the upload: the file is saved, and the preset is created lazily on the first request. The other presets and the arbitrary sizes SHALL be created only lazily.
 
-#### Scenario: Завантаження зображення
-- **WHEN** завантажується зображення за профілем `image`
-- **THEN** одразу існує файл `styles/thumb/{uuid}.{розширення}` розміру пресету
+#### Scenario: Uploading an image
+- **WHEN** an image is uploaded under the profile `image`
+- **THEN** the file `styles/thumb/{uuid}.{extension}` of the size of the preset exists immediately
 
-#### Scenario: Пресет без ознаки
-- **WHEN** у конфігурації є пресет без ознаки створення при завантаженні
-- **THEN** при завантаженні його файл не створюється, а створюється на першому запиті
+#### Scenario: Preset without the mark
+- **WHEN** the configuration has a preset without the mark of creation at the upload
+- **THEN** at the upload its file is not created, and it is created on the first request
 
-#### Scenario: Збій створення
-- **WHEN** створення пресету при завантаженні завершується помилкою
-- **THEN** завантаження успішне, оригінал збережено, а пресет створюється ліниво пізніше
+#### Scenario: Failure of creation
+- **WHEN** the creation of a preset at the upload ends with an error
+- **THEN** the upload is successful, the original is saved, and the preset is created lazily later
 
-#### Scenario: Документ
-- **WHEN** завантажується файл за профілем `document`
-- **THEN** стилі не створюються
+#### Scenario: Document
+- **WHEN** a file is uploaded under the profile `document`
+- **THEN** no styles are created
 
 ### Requirement: Розташування й адреса стилю
-Система SHALL зберігати файл стилю на диску профілю `image` у каталозі `styles/{стиль}/`, під іменем `{uuid}.{розширення}`, де `{uuid}` збігається з оригіналом, `{розширення}` визначає формат стилю (див. «Стиль зображення»), а `{стиль}` — назва пресету або нормалізований довільний розмір. Адреса файла стилю SHALL будуватися з адреси оригіналу вставкою `styles/{стиль}/` перед іменем файла із заміною розширення за форматом стилю, тож стилі лежать поруч з оригіналами й віддаються тим самим способом.
+The system SHALL store the file of a style on the disk of the profile `image` in the directory `styles/{style}/`, under the name `{uuid}.{extension}`, where `{uuid}` matches the original, `{extension}` is defined by the format of the style (see «Image style»), and `{style}` is the name of a preset or the normalized arbitrary size. The address of the file of a style SHALL be built from the address of the original by inserting `styles/{style}/` before the file name with the replacement of the extension by the format of the style, so the styles lie next to the originals and are served in the same way.
 
-#### Scenario: Пресет
-- **WHEN** оригінал `/storage/{uuid}.jpg`, стиль `thumb`, формат `webp`
-- **THEN** файл стилю лежить на диску за шляхом `styles/thumb/{uuid}.webp`, а його адреса — `/storage/styles/thumb/{uuid}.webp`
+#### Scenario: Preset
+- **WHEN** the original `/storage/{uuid}.jpg`, the style `thumb`, the format `webp`
+- **THEN** the file of the style lies on the disk by the path `styles/thumb/{uuid}.webp`, and its address is `/storage/styles/thumb/{uuid}.webp`
 
-#### Scenario: Довільний розмір
-- **WHEN** стиль `300x250`, оригінал `{uuid}.png`, формат `webp`
-- **THEN** файл стилю лежить за шляхом `styles/300x250/{uuid}.webp`
+#### Scenario: Arbitrary size
+- **WHEN** the style `300x250`, the original `{uuid}.png`, the format `webp`
+- **THEN** the file of the style lies by the path `styles/300x250/{uuid}.webp`
 
-#### Scenario: Формат `original`
-- **WHEN** формат `original`, оригінал `{uuid}.jpg`, стиль `thumb`
-- **THEN** файл стилю лежить за шляхом `styles/thumb/{uuid}.jpg`
+#### Scenario: Format `original`
+- **WHEN** the format `original`, the original `{uuid}.jpg`, the style `thumb`
+- **THEN** the file of the style lies by the path `styles/thumb/{uuid}.jpg`
 
 ### Requirement: Лінива генерація стилю
-Система SHALL створювати файл стилю на першому запиті до його адреси, коли файла ще немає (довільні розміри, пресети без створення при завантаженні, файли, завантажені до появи стилів, і пресети після очищення): записати його на диск профілю `image` і віддати у відповіді. Подальші запити SHALL обслуговуватися без повторного створення. Створення SHALL спрацьовувати без жодних правил вебсервера, крім стандартного переспрямування неіснуючих файлів на front controller застосунку, і SHALL не вимагати доступу до конфігурації вебсервера. Оригінал SHALL шукатися за `uuid` серед дозволених розширень зображень, а розширення запитаного файла стилю SHALL відповідати формату стилю цього оригіналу. Якщо оригіналу немає, або ім'я файла не має вигляду `{uuid}.{розширення}`, або формат не обробляється, або розширення не відповідає формату стилю, система SHALL відповідати 404 і не створювати файлів.
+The system SHALL create the file of a style on the first request to its address, when the file does not exist yet (the arbitrary sizes, the presets without creation at the upload, the files uploaded before the styles appeared, and the presets after a clearing): write it to the disk of the profile `image` and serve it in the response. The next requests SHALL be served without re-creation. The creation SHALL work without any rules of the web server, except the standard redirection of non-existent files to the front controller of the application, and SHALL NOT require access to the configuration of the web server. The original SHALL be searched by `uuid` among the allowed image extensions, and the extension of the requested file of a style SHALL match the format of the style of this original. If the original does not exist, or the file name does not have the form `{uuid}.{extension}`, or the format is not processed, or the extension does not match the format of the style, the system SHALL respond 404 and not create files.
 
-#### Scenario: Перший запит
-- **WHEN** запитано адресу стилю `thumb` для наявного оригіналу, і файла стилю ще немає
-- **THEN** відповідь 200 віддає зображення розміру стилю, а файл стилю з'являється на диску
+#### Scenario: First request
+- **WHEN** the address of the style `thumb` is requested for an existing original, and the file of the style does not exist yet
+- **THEN** the response 200 serves the image of the size of the style, and the file of the style appears on the disk
 
-#### Scenario: Повторний запит
-- **WHEN** адресу стилю запитано вдруге
-- **THEN** файл на диску не перестворюється й віддається той самий вміст
+#### Scenario: Repeated request
+- **WHEN** the address of the style is requested a second time
+- **THEN** the file on the disk is not re-created, and the same contents is served
 
-#### Scenario: Оригіналу немає
-- **WHEN** запитано адресу стилю для `uuid`, якого немає на диску
-- **THEN** відповідь 404 і файл стилю не створюється
+#### Scenario: Original does not exist
+- **WHEN** the address of the style is requested for a `uuid` which is absent from the disk
+- **THEN** the response is 404 and the file of the style is not created
 
-#### Scenario: Не файл сховища
-- **WHEN** запитано адресу стилю з ім'ям, що не має вигляду `{uuid}.{розширення}` (наприклад, із `..`)
-- **THEN** відповідь 404 і нічого не записано
+#### Scenario: Not a file of the storage
+- **WHEN** the address of the style is requested with a name that does not have the form `{uuid}.{extension}` (for example, with `..`)
+- **THEN** the response is 404 and nothing is written
 
-#### Scenario: Не зображення
-- **WHEN** запитано стиль для файла документа
-- **THEN** відповідь 404
+#### Scenario: Not an image
+- **WHEN** a style is requested for a file of a document
+- **THEN** the response is 404
 
 ### Requirement: Захист від довільних розмірів
-Система SHALL створювати файл довільного розміру лише на запит із чинним підписом, який хелпер шаблонів додає до адреси (параметр `itok`, обчислений з секрету застосунку, стилю й імені файла). Пресети з конфігурації SHALL не потребувати підпису. Запит довільного розміру без підпису або з підписом іншого стилю чи файла SHALL відхилятися з 404 без створення файла. Сторона довільного розміру SHALL бути не більшою за межу з конфігурації розробника (за замовчуванням 4096 пікселів); стиль більший за межу SHALL відхилятися так само.
+The system SHALL create the file of an arbitrary size only on a request with a valid signature, which the template helper adds to the address (the parameter `itok`, computed from the secret of the application, the style and the file name). The presets from the configuration SHALL not require a signature. A request for an arbitrary size without a signature or with a signature of another style or file SHALL be rejected with 404 without creating a file. The side of an arbitrary size SHALL be not greater than the limit from the configuration of the developer (by default 4096 pixels); a style larger than the limit SHALL be rejected in the same way.
 
-#### Scenario: Підписаний довільний розмір
-- **WHEN** шаблон просить стиль `300x250` через хелпер і браузер запитує отриману адресу
-- **THEN** файл створюється й віддається
+#### Scenario: Signed arbitrary size
+- **WHEN** the template requests the style `300x250` through the helper and the browser requests the obtained address
+- **THEN** the file is created and served
 
-#### Scenario: Без підпису
-- **WHEN** запитано адресу `/storage/styles/300x250/{uuid}.webp` без підпису
-- **THEN** відповідь 404 і файл не створюється
+#### Scenario: Without a signature
+- **WHEN** the address `/storage/styles/300x250/{uuid}.webp` is requested without a signature
+- **THEN** the response is 404 and the file is not created
 
-#### Scenario: Підпис іншого розміру
-- **WHEN** до адреси стилю `300x250` додано підпис, обчислений для `400x400`
-- **THEN** відповідь 404 і файл не створюється
+#### Scenario: Signature of another size
+- **WHEN** a signature computed for `400x400` is added to the address of the style `300x250`
+- **THEN** the response is 404 and the file is not created
 
-#### Scenario: Занадто великий розмір
-- **WHEN** запитано стиль `99999x99999` навіть із чинним підписом
-- **THEN** відповідь 404 і файл не створюється
+#### Scenario: Too large a size
+- **WHEN** the style `99999x99999` is requested even with a valid signature
+- **THEN** the response is 404 and the file is not created
 
-#### Scenario: Пресет без підпису
-- **WHEN** запитано адресу пресету `thumb` без підпису
-- **THEN** файл створюється й віддається
+#### Scenario: Preset without a signature
+- **WHEN** the address of the preset `thumb` is requested without a signature
+- **THEN** the file is created and served
 
 ### Requirement: Хелпер для шаблонів
-Система SHALL надавати в шаблонах теми функцію `image_style($url, $style)`, яка приймає адресу зображення сховища (або значення `{uuid}.{розширення}`) і стиль (пресет чи довільний розмір) та повертає адресу файла стилю, без звернень до бази й диска. Для довільного розміру адреса SHALL містити підпис. Адреса, яка не вказує на файл сховища зображень (порожня, зовнішня, неочікуваного вигляду), та некоректний стиль SHALL повертатися без змін, щоб шаблон не ламався. Повернена адреса SHALL зберігати початок оригіналу (схему й хост, якщо вони були).
+The system SHALL provide in the templates of the theme the function `image_style($url, $style)`, which takes the address of an image of the storage (or the value `{uuid}.{extension}`) and a style (a preset or an arbitrary size) and returns the address of the file of the style, without access to the database and the disk. For an arbitrary size the address SHALL contain the signature. An address that does not point to a file of the storage of images (empty, external, of an unexpected form) and an invalid style SHALL be returned without changes, so that the template does not break. The returned address SHALL keep the beginning of the original (the scheme and the host, if they were present).
 
-#### Scenario: Пресет
-- **WHEN** шаблон викликає `image_style('/storage/{uuid}.jpg', 'thumb')`
-- **THEN** результат — `/storage/styles/thumb/{uuid}.webp` (формат `webp`)
+#### Scenario: Preset
+- **WHEN** the template calls `image_style('/storage/{uuid}.jpg', 'thumb')`
+- **THEN** the result is `/storage/styles/thumb/{uuid}.webp` (the format `webp`)
 
-#### Scenario: Довільний розмір
-- **WHEN** шаблон викликає `image_style('/storage/{uuid}.jpg', '300x250')`
-- **THEN** результат — `/storage/styles/300x250/{uuid}.webp` з підписом у параметрі `itok`
+#### Scenario: Arbitrary size
+- **WHEN** the template calls `image_style('/storage/{uuid}.jpg', '300x250')`
+- **THEN** the result is `/storage/styles/300x250/{uuid}.webp` with the signature in the parameter `itok`
 
-#### Scenario: Значення замість адреси
-- **WHEN** шаблон викликає `image_style('{uuid}.png', 'thumb')`
-- **THEN** результат — адреса `styles/thumb/{uuid}.webp` на диску профілю `image`
+#### Scenario: Value instead of an address
+- **WHEN** the template calls `image_style('{uuid}.png', 'thumb')`
+- **THEN** the result is the address `styles/thumb/{uuid}.webp` on the disk of the profile `image`
 
-#### Scenario: Абсолютна адреса
-- **WHEN** оригінал `http://localhost:8080/storage/{uuid}.jpg`
-- **THEN** результат зберігає схему й хост: `http://localhost:8080/storage/styles/thumb/{uuid}.webp`
+#### Scenario: Absolute address
+- **WHEN** the original is `http://localhost:8080/storage/{uuid}.jpg`
+- **THEN** the result keeps the scheme and the host: `http://localhost:8080/storage/styles/thumb/{uuid}.webp`
 
 #### Scenario: GIF
-- **WHEN** шаблон викликає `image_style('/storage/{uuid}.gif', 'thumb')`
-- **THEN** результат — `/storage/styles/thumb/{uuid}.gif`
+- **WHEN** the template calls `image_style('/storage/{uuid}.gif', 'thumb')`
+- **THEN** the result is `/storage/styles/thumb/{uuid}.gif`
 
-#### Scenario: Зовнішня адреса
-- **WHEN** шаблон викликає `image_style('https://cdn.example.com/photo.jpg', 'thumb')`
-- **THEN** результат — та сама адреса без змін
+#### Scenario: External address
+- **WHEN** the template calls `image_style('https://cdn.example.com/photo.jpg', 'thumb')`
+- **THEN** the result is the same address without changes
 
-#### Scenario: Порожнє значення
-- **WHEN** шаблон викликає `image_style(null, 'thumb')`
-- **THEN** результат — `null`
+#### Scenario: Empty value
+- **WHEN** the template calls `image_style(null, 'thumb')`
+- **THEN** the result is `null`
 
 ### Requirement: Очищення стилів
-Система SHALL надавати консольну команду `image-styles:flush`, що видаляє створені файли стилів: усі стилі без аргументу або лише вказаний стиль за його назвою. Команда SHALL не торкатися оригіналів і SHALL не видаляти нічого, крім каталогів `styles/`. Видалені стилі SHALL створюватися знову на наступному запиті.
+The system SHALL provide the console command `image-styles:flush`, which deletes the created files of the styles: all the styles without an argument or only the given style by its name. The command SHALL NOT touch the originals and SHALL NOT delete anything except the directories `styles/`. The deleted styles SHALL be created again on the next request.
 
-#### Scenario: Усі стилі
-- **WHEN** виконано `image-styles:flush` без аргументу
-- **THEN** каталог `styles/` диска профілю `image` порожній, а оригінали на місці
+#### Scenario: All styles
+- **WHEN** `image-styles:flush` is run without an argument
+- **THEN** the directory `styles/` of the disk of the profile `image` is empty, and the originals are in place
 
-#### Scenario: Один стиль
-- **WHEN** виконано `image-styles:flush thumb`
-- **THEN** каталог `styles/thumb/` видалено, інші стилі лишаються
+#### Scenario: One style
+- **WHEN** `image-styles:flush thumb` is run
+- **THEN** the directory `styles/thumb/` is deleted, the other styles remain
 
-#### Scenario: Повторне створення
-- **WHEN** після очищення запитано адресу стилю
-- **THEN** файл створюється знову за поточними налаштуваннями пресету
+#### Scenario: Re-creation
+- **WHEN** after the clearing the address of a style is requested
+- **THEN** the file is created again according to the current settings of the preset

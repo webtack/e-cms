@@ -2,25 +2,25 @@
 
 ## Why
 
-Керування типом контенту розкидане по кількох сторінках (редагування типу, список полів, створення/редагування поля), і між ними можна перейти лише через список типів чи окремі посилання. Адміністратору потрібне єдине горизонтальне меню розділу, щоб швидко перемикатися між сторінками одного типу.
+The management of a content type is spread across several pages (the type edit page, the list of fields, the creation/editing of a field), and moving between them is possible only through the list of types or separate links. The administrator needs a single horizontal section menu to switch quickly between the pages of one type.
 
 ## What Changes
 
-- Нова спільна панель горизонтального меню розділу типу контенту з пунктами «Налаштування» (форма редагування типу) та «Поля» (список полів).
-- Меню показується на сторінках: редагування типу, список полів, створення поля, редагування поля. Активний пункт підсвічено; на сторінках створення й редагування поля активним є «Поля».
-- На сторінці створення типу меню немає (типу ще не існує).
-- Посилання «← Типи контенту» зі сторінки полів переноситься в загальний блок над меню на всіх сторінках розділу.
+- A new shared horizontal section menu panel for a content type with the items "Settings" (the type edit form) and "Fields" (the list of fields).
+- The menu is shown on the pages: type edit, list of fields, field creation, field editing. The active item is highlighted; on the field creation and edit pages the active item is "Fields".
+- The creation page of a type has no menu (the type does not exist yet).
+- The link "← Content types" from the fields page is moved to a common block above the menu on all pages of the section.
 
 ## Capabilities
 
 ### New Capabilities
 
 ### Modified Capabilities
-- `admin-content-types`: додається вимога про горизонтальне меню розділу типу на сторінках керування типом.
+- `admin-content-types`: a requirement on the horizontal section menu of a type is added to the pages for managing the type.
 
 ## Impact
 
-- Фронтенд: новий компонент у `resources/js/Components/Admin/ContentTypes/`, зміни сторінок `Pages/Admin/ContentTypes/Edit.tsx`, `Pages/Admin/ContentFields/{Index,Create,Edit}.tsx`; бекенд не змінюється (усі сторінки вже отримують `type`/ключ).
-- Переклади `lang/uk.json`, `lang/en.json` (нові рядки «Settings»/«Fields», якщо відсутні).
+- Frontend: a new component in `resources/js/Components/Admin/ContentTypes/`, changes to the pages `Pages/Admin/ContentTypes/Edit.tsx`, `Pages/Admin/ContentFields/{Index,Create,Edit}.tsx`; the backend does not change (all pages already receive `type`/key).
+- Translations `lang/uk.json`, `lang/en.json` (new rows "Settings"/"Fields", if missing).
 - e2e: `e2e/admin-content-types.spec.js`, `e2e/admin-content-fields.spec.js`.
 - Docs: `docs/admin-content-types.md`, `docs/admin-content-fields.md`.

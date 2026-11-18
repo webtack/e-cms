@@ -3,51 +3,51 @@
 ## ADDED Requirements
 
 ### Requirement: Тип поля «термін»
-Система SHALL підтримувати тип поля «термін», значення якого — `uuid` терміна таксономії, а словник задається налаштуванням поля `vocabulary` (ключ словника). Поле належить типу контенту, а значення — записам. Значення SHALL зберігатися в наявній таблиці значень рядків (`content_values_string`, зі спільним контрактом: мова, вага) окремої таблиці не вимагаючи, і читатися як рядок — `uuid` терміна. Поле SHALL підтримувати множинність і ліміт елементів так само, як інші типи. Запис SHALL приймати лише `uuid` існуючого терміна саме того словника, що вказано в налаштуваннях поля; інше — помилка валідації за ключем поля. Перекладність поля (`is_translatable`) діє за загальними правилами: переклад значення — це окремий рядок значення в іншій мові, який також посилається на термін.
+The system SHALL support the field type «термін», whose value is the `uuid` of a taxonomy term, and the vocabulary is set by the setting `vocabulary` of the field (the key of the vocabulary). The field belongs to the content type, and the values — to the records. The value SHALL be stored in the existing table of string values (`content_values_string`, with the shared contract: language, weight) without requiring a separate table, and read as a string — the `uuid` of the term. The field SHALL support multiplicity and the limit of elements in the same way as other types. The record SHALL accept only the `uuid` of an existing term of exactly the vocabulary specified in the settings of the field; anything else is a validation error under the key of the field. The translatability of the field (`is_translatable`) acts by the general rules: a translation of the value is a separate value row in another language, which also references the term.
 
-#### Scenario: Збереження й читання
-- **WHEN** у поле `category` запису записується `uuid` існуючого терміна словника `categories`
-- **THEN** при читанні повертається цей `uuid`
+#### Scenario: Saving and reading
+- **WHEN** the `uuid` of an existing term of the vocabulary `categories` is written into the field `category` of a record
+- **THEN** on reading this `uuid` is returned
 
-#### Scenario: Множинне поле
-- **WHEN** у множинне поле `tags` записується список із трьох `uuid` термінів словника `tags`
-- **THEN** при читанні повертається список із трьох значень у збереженому порядку
+#### Scenario: Multiple field
+- **WHEN** a list of three `uuid` of terms of the vocabulary `tags` is written into the multiple field `tags`
+- **THEN** on reading a list of three values in the saved order is returned
 
-#### Scenario: Термін іншого словника
-- **WHEN** у поле зі словником `categories` записується `uuid` терміна словника `tags`
-- **THEN** запис відхилено з помилкою валідації за ключем поля
+#### Scenario: Term of another vocabulary
+- **WHEN** the `uuid` of a term of the vocabulary `tags` is written into a field with the vocabulary `categories`
+- **THEN** the record is rejected with a validation error under the key of the field
 
-#### Scenario: Неіснуючий термін
-- **WHEN** записується `uuid`, якого немає серед термінів
-- **THEN** запис відхилено з помилкою валідації за ключем поля
+#### Scenario: Non-existent term
+- **WHEN** a `uuid` that is not among the terms is written
+- **THEN** the record is rejected with a validation error under the key of the field
 
-#### Scenario: Не uuid
-- **WHEN** у поле записується значення, що не є UUID (наприклад, `slug` терміна або число)
-- **THEN** запис відхилено з помилкою валідації за ключем поля
+#### Scenario: Not a uuid
+- **WHEN** a value that is not a UUID is written into the field (for example, the `slug` of a term or a number)
+- **THEN** the record is rejected with a validation error under the key of the field
 
-#### Scenario: Видалення використаного терміна
-- **WHEN** видаляється термін, на який посилається значення поля запису
-- **THEN** видалення відхилено, значення лишається (див. вимоги до видалення терміна в `taxonomy`)
+#### Scenario: Deleting a used term
+- **WHEN** a term is deleted that is referenced by the value of a field of a record
+- **THEN** the deletion is rejected, the value remains (see the requirements of the deletion of a term in `taxonomy`)
 
-#### Scenario: Запис проти одночасного видалення
-- **WHEN** значення з посиланням на термін записується одночасно з видаленням цього терміна
-- **THEN** успішною є лише одна з операцій: або термін видалено (а запис відхилено як посилання на неіснуючий термін), або значення збережено (а видалення відхилено як використання)
+#### Scenario: Writing against a simultaneous deletion
+- **WHEN** a value with a reference to a term is written simultaneously with the deletion of this term
+- **THEN** only one of the operations succeeds: either the term is deleted (and the record is rejected as a reference to a non-existent term), or the value is saved (and the deletion is rejected as a usage)
 
 ### Requirement: Налаштування поля «термін»
-Система SHALL вимагати для поля типу «термін» налаштування `vocabulary` з ключем існуючого словника. Поле без нього або з ключем неіснуючого словника SHALL не зберігатися. Словник поля SHALL бути незмінним, якщо в поля вже є значення.
+The system SHALL require for a field of the type «термін» the setting `vocabulary` with the key of an existing vocabulary. A field without it or with the key of a non-existent vocabulary SHALL not be saved. The vocabulary of the field SHALL be immutable if the field already has values.
 
-#### Scenario: Поле без словника
-- **WHEN** створюється поле типу «термін» без налаштування `vocabulary`
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Field without a vocabulary
+- **WHEN** a field of the type «термін» is created without the setting `vocabulary`
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Неіснуючий словник
-- **WHEN** у налаштуванні вказано ключ словника, якого немає
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Non-existent vocabulary
+- **WHEN** the setting specifies a key of a vocabulary that does not exist
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Зміна словника в поля зі значеннями
-- **WHEN** змінюється `vocabulary` поля, у якого вже є значення
-- **THEN** зміну відхилено з помилкою валідації
+#### Scenario: Changing the vocabulary of a field with values
+- **WHEN** the `vocabulary` of a field that already has values is changed
+- **THEN** the change is rejected with a validation error
 
-#### Scenario: Зміна словника в порожнього поля
-- **WHEN** змінюється `vocabulary` поля без значень на ключ існуючого словника
-- **THEN** зміну збережено
+#### Scenario: Changing the vocabulary of an empty field
+- **WHEN** the `vocabulary` of a field without values is changed to the key of an existing vocabulary
+- **THEN** the change is saved

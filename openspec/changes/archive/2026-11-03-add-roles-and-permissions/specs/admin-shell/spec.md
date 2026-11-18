@@ -3,12 +3,12 @@
 ## ADDED Requirements
 
 ### Requirement: Sidebar за правами
-Sidebar SHALL показувати лише ті розділи, до яких роль поточного користувача має доступ, і містити пункти «Користувачі» та «Ролі» для користувачів із відповідними правами. Пункти типів контенту показуються за наявності рівня `own` або `any` на хоча б одному типі відповідного виду.
+The sidebar SHALL show only the sections to which the role of the current user has access, and contain the items «Користувачі» ("Users") and «Ролі» ("Roles") for users with the corresponding rights. The items of content types are shown if there is the level `own` or `any` on at least one type of the corresponding kind.
 
-#### Scenario: Роль без доступу до меню
-- **WHEN** користувач без права на меню відкриває адмінку
-- **THEN** пункту «Menus» у sidebar немає
+#### Scenario: Role without access to menus
+- **WHEN** a user without the right to menus opens the admin
+- **THEN** there is no item «Menus» in the sidebar
 
-#### Scenario: Адміністратор
-- **WHEN** користувач ролі `admin` відкриває адмінку
-- **THEN** sidebar містить усі пункти, зокрема «Користувачі» та «Ролі»
+#### Scenario: Administrator
+- **WHEN** a user of the role `admin` opens the admin
+- **THEN** the sidebar contains all items, including «Користувачі» and «Ролі»

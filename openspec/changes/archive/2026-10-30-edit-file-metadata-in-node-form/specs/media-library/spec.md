@@ -1,16 +1,16 @@
 ## ADDED Requirements
 
-### Requirement: Опис файлу
-Файл сховища SHALL мати необов'язковий текстовий опис, який користувач задає у формі редагування запису. Панель деталей файлу в медіатеці SHALL показувати опис, якщо він є, і не показувати порожнього рядка, якщо його немає. Оригінальна назва, змінена у формі запису, SHALL відображатися в медіатеці (колонка «Назва», заголовок панелі деталей) так само, як будь-яка інша.
+### Requirement: Description of a file
+A storage file SHALL have an optional text description, which the user sets in the edit form of the record. The file details panel in the media library SHALL show the description if there is one, and SHALL NOT show an empty line if there is none. The original name, changed in the record form, SHALL be displayed in the media library (the column "Name", the title of the details panel) in the same way as any other name.
 
-#### Scenario: Опис у деталях
-- **WHEN** файл має опис, а користувач відкриває його деталі в медіатеці
-- **THEN** панель показує цей опис
+#### Scenario: Description in the details
+- **WHEN** a file has a description, and the user opens its details in the media library
+- **THEN** the panel shows this description
 
-#### Scenario: Файл без опису
-- **WHEN** файл не має опису
-- **THEN** панель деталей не показує рядка опису
+#### Scenario: File without a description
+- **WHEN** a file has no description
+- **THEN** the details panel shows no description line
 
-#### Scenario: Перейменований файл
-- **WHEN** користувач змінив назву файлу у формі редагування запису
-- **THEN** медіатека показує нову назву в таблиці й у заголовку деталей, пошук за назвою знаходить файл за новою назвою
+#### Scenario: Renamed file
+- **WHEN** the user changed the name of a file in the edit form of a record
+- **THEN** the media library shows the new name in the table and in the title of the details panel, and searching by name finds the file by the new name

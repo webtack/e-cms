@@ -1,23 +1,23 @@
 ## ADDED Requirements
 
-### Requirement: Дії рядка
-Таблиця SHALL підтримувати необов'язкову колонку дій: якщо сторінка надала дії для рядків, кожен рядок SHALL мати в кінці кнопку меню «⋮» з доступною назвою, що відкриває випадаюче меню дій цього рядка. Колонка дій SHALL бути поза вибором видимих колонок (її не можна приховати), SHALL NOT брати участі в пошуку, фільтрах і сортуванні та SHALL працювати однаково в серверному й клієнтському режимах. Без наданих дій таблиця SHALL виглядати й поводитись як раніше.
+### Requirement: Row actions
+The table SHALL support an optional actions column: if the page provides actions for rows, each row SHALL have at the end a "⋮" menu button with an accessible name, which opens the dropdown menu of actions of this row. The actions column SHALL be outside the choice of visible columns (it cannot be hidden), SHALL NOT take part in search, filters and sorting, and SHALL work the same way in server and client modes. Without provided actions the table SHALL look and behave as before.
 
-#### Scenario: Відкриття меню рядка
-- **WHEN** користувач натискає «⋮» у рядку таблиці з діями
-- **THEN** відкривається меню з діями саме цього рядка, а клавіатурою його можна відкрити, обрати пункт і закрити
+#### Scenario: Opening the row menu
+- **WHEN** the user clicks "⋮" in a row of a table with actions
+- **THEN** the menu with the actions of exactly this row opens, and it can be opened with the keyboard, an item chosen and the menu closed
 
-#### Scenario: Таблиця без дій
-- **WHEN** сторінка не надає дій рядка
-- **THEN** додаткової колонки немає й розмітка таблиці не змінюється
+#### Scenario: Table without actions
+- **WHEN** the page provides no row actions
+- **THEN** there is no additional column, and the table markup does not change
 
-#### Scenario: Дії не впливають на вибір колонок
-- **WHEN** користувач відкриває меню вибору видимих колонок
-- **THEN** колонки дій там немає, і вона залишається видимою
+#### Scenario: Actions do not affect the column choice
+- **WHEN** the user opens the menu for choosing the visible columns
+- **THEN** the actions column is not there, and it remains visible
 
-### Requirement: Дії в панелі інструментів
-Таблиця SHALL давати сторінці розмістити власні елементи керування (наприклад кнопку створення) у панелі інструментів поруч із пошуком, фільтрами й вибором колонок. На вузьких екранах ці елементи SHALL переноситися, не ламаючи розкладку.
+### Requirement: Actions in the toolbar
+The table SHALL let the page place its own controls (for example, a create button) in the toolbar next to the search, filters and column choice. On narrow screens these controls SHALL wrap without breaking the layout.
 
-#### Scenario: Кнопка в панелі
-- **WHEN** сторінка передала кнопку в слот дій панелі інструментів
-- **THEN** вона відображається в панелі інструментів і не скидається при зміні пошуку, фільтрів чи сторінки
+#### Scenario: Button in the toolbar
+- **WHEN** the page passed a button to the toolbar actions slot
+- **THEN** it is displayed in the toolbar and is not reset when the search, filters or page change

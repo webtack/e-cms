@@ -3,28 +3,28 @@
 ## ADDED Requirements
 
 ### Requirement: Поле «термін» у формі поля
-Форми створення й редагування поля типу `content` SHALL пропонувати тип значення «термін» серед зареєстрованих типів. Форми page- і block-типів SHALL не пропонувати «термін», а сервер SHALL відхиляти `type = term` для полів таких типів з помилкою біля вибору типу. Для цього типу форма SHALL показувати обов'язковий вибір словника (серед наявних; якщо словників немає, форма SHALL пояснювати, що спершу треба створити словник, із посиланням на розділ «Таксономія»). Збереження поля типу «термін» без словника або з неіснуючим словником SHALL бути відхилено з помилкою біля вибору словника. Вибір словника SHALL бути заблокований у формі редагування, якщо в поля вже є значення; сервер SHALL відхиляти зміну словника такого поля. Для інших типів вибір словника SHALL не показуватися, а сервер SHALL відхиляти налаштування `vocabulary` для них.
+The create and edit forms of a field of the type `content` SHALL offer the value type «термін» among the registered types. The forms of page and block types SHALL not offer «термін», and the server SHALL reject `type = term` for fields of such types with an error next to the type choice. For this type the form SHALL show a mandatory choice of a vocabulary (among the existing ones; if there are no vocabularies, the form SHALL explain that a vocabulary must be created first, with a link to the section «Таксономія»). Saving a field of the type «термін» without a vocabulary or with a non-existent vocabulary SHALL be rejected with an error next to the choice of the vocabulary. The choice of the vocabulary SHALL be blocked in the edit form if the field already has values; the server SHALL reject a change of the vocabulary of such a field. For other types the choice of the vocabulary SHALL not be shown, and the server SHALL reject the setting `vocabulary` for them.
 
-#### Scenario: Створення поля «термін»
-- **WHEN** користувач створює поле `category` типу «термін» і обирає словник «Категорії»
-- **THEN** поле створено, у списку полів воно має тип «term»
+#### Scenario: Creating a field «термін»
+- **WHEN** the user creates a field `category` of the type «термін» and chooses the vocabulary «Категорії»
+- **THEN** the field is created, in the list of fields it has the type «term»
 
-#### Scenario: Тип без словника
-- **WHEN** користувач обирає тип «термін» і зберігає, не обравши словник
-- **THEN** біля вибору словника з'являється помилка валідації, поле не створюється
+#### Scenario: Type without a vocabulary
+- **WHEN** the user chooses the type «термін» and saves without choosing a vocabulary
+- **THEN** a validation error appears next to the choice of the vocabulary, the field is not created
 
-#### Scenario: Немає словників
-- **WHEN** користувач обирає тип «термін», а жодного словника немає
-- **THEN** форма показує пояснення й посилання на розділ «Таксономія»
+#### Scenario: No vocabularies
+- **WHEN** the user chooses the type «термін», and there is no vocabulary at all
+- **THEN** the form shows an explanation and a link to the section «Таксономія»
 
-#### Scenario: Заблокований словник
-- **WHEN** користувач відкриває редагування поля «термін», у якого є значення
-- **THEN** вибір словника заблокований
+#### Scenario: Blocked vocabulary
+- **WHEN** the user opens the editing of a field «термін» that has values
+- **THEN** the choice of the vocabulary is blocked
 
-#### Scenario: Тип сторінки або блока
-- **WHEN** користувач відкриває форму поля сторінкового або блокового типу
-- **THEN** «термін» відсутній серед типів, а POST із `type=term` відхиляється валідацією
+#### Scenario: Page or block type
+- **WHEN** the user opens the form of a field of a page or block type
+- **THEN** «термін» is absent among the types, and a POST with `type=term` is rejected by validation
 
-#### Scenario: Інший тип
-- **WHEN** користувач обирає тип «string»
-- **THEN** вибір словника не показується
+#### Scenario: Another type
+- **WHEN** the user chooses the type «string»
+- **THEN** the choice of the vocabulary is not shown

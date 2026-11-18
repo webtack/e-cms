@@ -2,35 +2,37 @@
 
 ## Why
 
-Публічна частина сайту ще не існує, а шаблонам знадобиться знати, які додані поля типу виводити в картці списку й на сторінці запису, як сортувати список, скільки записів показувати та чи потрібен пагінатор. Зараз `content_types.settings` має лише `list` (адмінський список), тож ці рішення довелося б вшивати в шаблони. Налаштування треба зберігати в даних типу, щоб шаблон лише читав і резолвив їх.
+The public part of the site does not exist yet, and the templates will need to know which added fields of a type to show in the card of the list and on the page of the record, how to sort the list, how many records to show and whether a paginator is needed. Right now `content_types.settings` has only `list` (the admin list), so these decisions would have to be hard-coded into the templates. The settings must be stored in the data of the type, so that the template only reads and resolves them.
 
 ## What Changes
 
-- Новий ключ `settings.public` у налаштуваннях типу з полями:
-  - `list_fields` — додані поля, що показуються в картці (тизері) запису у списку; за замовчуванням порожньо (лише `title`);
-  - `page_fields` — додані поля, що показуються на сторінці запису; ключ **відсутній** означає «усі додані поля» (динамічно: нове поле з'являється автоматично), після явного вибору — перелік;
-  - `sort` — `{field, direction}` для публічного списку; за замовчуванням `published_at` за спаданням;
-  - `per_page` — кількість записів на сторінці, `0` (за замовчуванням) — усі;
-  - `pagination` — чи виводити пагінатор (так/ні); при `per_page = 0` ігнорується.
-- «Додані» поля — користувацькі (`is_system = false`) поля, що тримають значення записів. `title`, службові атрибути запису, мета-поля (`meta_*`) і значення розділу типу (`section_*`) завжди доступні шаблону й не налаштовуються.
-- `list_fields`, `sort`, `per_page`, `pagination` — лише для виду `content` (публічний список є тільки в нього); для `page` і `block` налаштовується тільки `page_fields`.
-- Секція «Публічне відображення» у формі типу: перемикач «Усі додані поля» з чекбоксами для сторінки, чекбокси для картки, сортування, кількість на сторінці, пагінатор.
-- Вибірка записів уміє режим «усі» (`per_page = 0`) з окремою стелею `content.max_all` (окремо від `max_per_page`).
-- Збереження форми типу оновлює лише ключ `public`, не чіпаючи `list` та інші ключі `settings`; посилання на видалені чи несортовні поля при читанні відкидаються.
-- Самі публічні маршрути й шаблони — **поза межами** цієї зміни: вона лише зберігає та віддає налаштування.
+- A new key `settings.public` in the settings of the type with the fields:
+  - `list_fields` — the added fields that are shown in the card (teaser) of the record in the list; by default empty (only `title`);
+  - `page_fields` — the added fields that are shown on the page of the record; the key **absent** means «all added fields» (dynamically: a new field appears automatically), after an explicit choice — a list;
+  - `sort` — `{field, direction}` for the public list; by default `published_at` descending;
+  - `per_page` — the number of records per page, `0` (by default) — all;
+  - `pagination` — whether to show the paginator (yes/no); ignored when `per_page = 0`.
+- The «added» fields are the user fields (`is_system = false`) that hold the values of records. `title`, the service attributes of the record, the meta fields (`meta_*`) and the values of the section of the type (`section_*`) are always available to the template and are not configured.
+- `list_fields`, `sort`, `per_page`, `pagination` — only for the kind `content` (the public list exists only for it); for `page` and `block` only `page_fields` is configured.
+- The section «Публічне відображення» in the form of the type: a switch «Усі додані поля» with checkboxes for the page, checkboxes for the card, the sorting, the number per page, the paginator.
+- The selection of records can have the mode «all» (`per_page = 0`) with a separate ceiling `content.max_all` (separate from `max_per_page`).
+- Saving the form of the type updates only the key `public`, without touching `list` and the other keys of `settings`; references to deleted or non-sortable fields are discarded on reading.
+- The public routes and templates themselves are **outside** the scope of this change: it only stores and returns the settings.
 
 ## Capabilities
 
 ### New Capabilities
 
+None.
+
 ### Modified Capabilities
-- `content-model`: ключ `settings.public` (структура, значення за замовчуванням, обмеження за видом, перевірка при збереженні).
-- `content-querying`: режим «усі записи» для `per_page = 0` зі стелею та читання публічних налаштувань (ефективний набір полів, сортування).
-- `admin-content-types`: секція «Публічне відображення» у формі типу, її поведінка за видами й збереження.
+- `content-model`: the key `settings.public` (the structure, the default values, the restrictions by kind, the check on saving).
+- `content-querying`: the mode «all records» for `per_page = 0` with a ceiling, and reading of the public settings (the effective set of fields, the sorting).
+- `admin-content-types`: the section «Публічне відображення» in the form of the type, its behaviour by kinds and saving.
 
 ## Impact
 
-- Код: `app/Content/` (новий клас читання/очищення публічних налаштувань за зразком `NodeListSettings`), `app/Content/ContentNodeQuery.php`, `app/Content/NodeQueryParams.php`, `app/Models/ContentType.php` (перевірка `settings.public`), `ContentTypeController`, `StoreContentTypeRequest`/`UpdateContentTypeRequest`, `config/content.php` (`max_all`), сторінки `resources/js/Pages/Admin/ContentTypes/` (Create/Edit), `lang/uk.json`, `lang/en.json`.
-- Тести: Feature-тести налаштувань типу й вибірки; e2e `e2e/admin-content-types.spec.js`.
-- Docs: оновити `docs/content-model.md` (розділ «Налаштування типу»), `docs/content-querying.md`, `docs/admin-content-types.md`, `docs/e2e-testing.md` (опис спека), за потреби `docs/README.md`.
-- Міграцій БД немає: `settings` — наявна JSON-колонка.
+- Code: `app/Content/` (a new class of reading/cleaning of the public settings by the pattern of `NodeListSettings`), `app/Content/ContentNodeQuery.php`, `app/Content/NodeQueryParams.php`, `app/Models/ContentType.php` (the check of `settings.public`), `ContentTypeController`, `StoreContentTypeRequest`/`UpdateContentTypeRequest`, `config/content.php` (`max_all`), the pages `resources/js/Pages/Admin/ContentTypes/` (Create/Edit), `lang/uk.json`, `lang/en.json`.
+- Tests: Feature tests of the settings of the type and of the selection; e2e `e2e/admin-content-types.spec.js`.
+- Docs: update `docs/content-model.md` (the section «Налаштування типу»), `docs/content-querying.md`, `docs/admin-content-types.md`, `docs/e2e-testing.md` (the description of the spec), `docs/README.md` if needed.
+- There are no DB migrations: `settings` is an existing JSON column.

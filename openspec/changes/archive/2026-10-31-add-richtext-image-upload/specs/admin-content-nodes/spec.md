@@ -3,158 +3,158 @@
 ## MODIFIED Requirements
 
 ### Requirement: Поле «форматований текст» у формі та списку записів
-Для поля типу `richtext` форма запису SHALL показувати редактор форматованого тексту замість звичайного текстового поля: панель інструментів із заголовками, жирним, курсивом, підкресленням, закресленням, вирівнюванням (випадаючий список: ліворуч, по центру, праворуч, за шириною), кольором тексту, кольором фону, маркованим і нумерованим списком, посиланням, кнопкою зображення (вставка файлу, а для виділеного зображення — параметри), вставкою відео YouTube, вставкою фрейму, вибором смайликів, кнопкою очищення форматування, кнопкою перегляду сирого HTML («Джерело»), кнопкою розгортання на весь екран; область редагування SHALL показувати форматування під час введення. Вставка файлів, крім зображень, у редакторі SHALL бути недоступна. Форма редагування SHALL бути заповнена збереженим значенням з форматуванням. Редактор SHALL мати доступну назву з підписом поля, позначку помилки з сервера біля поля, а в множинному полі — окремий редактор у кожному рядку. Збереження запису SHALL надсилати HTML значення; порожній редактор SHALL надсилати порожнє значення. У таблиці записів значення `richtext` SHALL виводитися звичайним текстом без тегів, скороченим до розумної довжини, а не сирим HTML.
+For a field of the type `richtext` the record form SHALL show a formatted text editor instead of a plain text field: a toolbar with headings, bold, italic, underline, strikethrough, alignment (a drop-down list: left, centre, right, justify), text colour, background colour, bulleted and numbered lists, a link, the image button (inserting a file, and for a selected image — its parameters), inserting a YouTube video, inserting a frame, choosing emoji, the button to clear the formatting, the button to view the raw HTML («Джерело»), the button to expand to full screen; the editing area SHALL show the formatting while typing. Inserting files other than images in the editor SHALL be unavailable. The edit form SHALL be filled with the saved value with its formatting. The editor SHALL have an accessible name with the label of the field, a server error mark next to the field, and in a multiple field a separate editor in each row. Saving the record SHALL send the HTML of the value; an empty editor SHALL send an empty value. In the table of records the value of `richtext` SHALL be shown as plain text without tags, shortened to a reasonable length, rather than as raw HTML.
 
-#### Scenario: Форматування у формі
-- **WHEN** користувач у редакторі поля `richtext` вводить текст, робить його жирним і додає маркований список та зберігає запис
-- **THEN** запис збережено, а після повторного відкриття форми редагування в редакторі видно жирний текст і список
+#### Scenario: Formatting in the form
+- **WHEN** the user in the editor of the field `richtext` types a text, makes it bold, adds a bulleted list and saves the record
+- **THEN** the record is saved, and after reopening the edit form the bold text and the list are visible in the editor
 
-#### Scenario: Посилання
-- **WHEN** користувач виділяє текст, додає посилання `https://example.com` і зберігає запис
-- **THEN** після повторного відкриття форми текст є посиланням на цю адресу
+#### Scenario: Link
+- **WHEN** the user selects a text, adds the link `https://example.com` and saves the record
+- **THEN** after reopening the form the text is a link to this address
 
-#### Scenario: Без зображень
-- **WHEN** користувач відкриває панель інструментів редактора
-- **THEN** у ній є лише дія вставки зображення, а дій для вставки інших файлів (документів) немає
+#### Scenario: No files other than images
+- **WHEN** the user opens the toolbar of the editor
+- **THEN** it has only the action of inserting an image, and there are no actions for inserting other files (documents)
 
-#### Scenario: Порожнє значення
-- **WHEN** користувач залишає редактор необов'язкового поля `richtext` порожнім і зберігає запис
-- **THEN** запис збережено без значення в цьому полі
+#### Scenario: Empty value
+- **WHEN** the user leaves the editor of an optional field `richtext` empty and saves the record
+- **THEN** the record is saved without a value in this field
 
-#### Scenario: Помилка поля
-- **WHEN** сервер відхиляє значення `richtext`
-- **THEN** помилка показана біля редактора, введений вміст збережено у формі
+#### Scenario: Field error
+- **WHEN** the server rejects the value of `richtext`
+- **THEN** the error is shown next to the editor, and the entered content is kept in the form
 
-#### Scenario: Значення в таблиці записів
-- **WHEN** у списку видиме поле `richtext` зі значенням `<p>Привіт, <strong>світе</strong></p>`
-- **THEN** у комірці показано «Привіт, світе» без тегів
+#### Scenario: Value in the table of records
+- **WHEN** a field `richtext` with the value `<p>Привіт, <strong>світе</strong></p>` is visible in the list
+- **THEN** the cell shows «Привіт, світе» without tags
 
 ## ADDED Requirements
 
 ### Requirement: Вставка зображення в редактор форматованого тексту
-Редактор `richtext` SHALL мати кнопку «Зображення» з доступною назвою. Коли в тексті виділено зображення, кнопка SHALL відкривати діалог параметрів зображення; інакше SHALL відкривати вибір файлу. Виділене зображення SHALL мати помітне візуальне виділення (контур), щоб було видно, що воно вибране. Вибір файлу SHALL завантажувати його одразу, як у віджеті поля `image` (за правилами профілю `image`), і вставляти зображення в позицію курсора. Адреса зображення в тексті SHALL бути відносною, без протоколу й домену (`/storage/{uuid}.{розширення}`). Файл SHALL з'являтися в медіатеці одразу після завантаження. Під час завантаження кнопка SHALL бути вимкнена; помилка завантаження (непідтримуваний тип, завеликий файл, помилка сервера) SHALL показуватися біля редактора, а вміст SHALL лишатися без змін. У режимі «Джерело» кнопка SHALL бути вимкнена разом з рештою кнопок форматування. Збережене зображення SHALL показуватися в редакторі після повторного відкриття форми. Зображення SHALL виділятися лише дією користувача (клік, вставка, подвійний клік): при відкритті форми й після оновлення значення жодне зображення не виділене, навіть якщо текст починається із зображення.
+The editor `richtext` SHALL have a button «Зображення» with an accessible name. When an image is selected in the text, the button SHALL open a dialog of the parameters of the image; otherwise it SHALL open a file selection. The selected image SHALL have a noticeable visual selection (an outline), so that it is visible that it is chosen. Choosing a file SHALL upload it at once, as in the widget of the field `image` (by the rules of the profile `image`), and insert the image at the cursor position. The address of the image in the text SHALL be relative, without the protocol and the domain (`/storage/{uuid}.{extension}`). The file SHALL appear in the media library right after the upload. During the upload the button SHALL be disabled; an upload error (an unsupported type, a file that is too large, a server error) SHALL be shown next to the editor, and the content SHALL remain unchanged. In the «Джерело» mode the button SHALL be disabled together with the other formatting buttons. A saved image SHALL be shown in the editor after reopening the form. An image SHALL be selected only by a user action (a click, insertion, a double click): when the form is opened and after the value is updated, no image is selected, even if the text starts with an image.
 
-#### Scenario: Вставка зображення
-- **WHEN** користувач ставить курсор у текст, натискає «Зображення» й обирає PNG
-- **THEN** файл завантажено, у позиції курсора з'являється зображення, а в «Джерелі» його `src` має вигляд `/storage/{uuid}.png` без `http` і домену
+#### Scenario: Inserting an image
+- **WHEN** the user puts the cursor in the text, presses «Зображення» and chooses a PNG
+- **THEN** the file is uploaded, an image appears at the cursor position, and in «Джерело» its `src` has the form `/storage/{uuid}.png` without `http` and the domain
 
-#### Scenario: Збереження й повторне відкриття
-- **WHEN** користувач вставляє зображення й зберігає запис, потім відкриває форму редагування
-- **THEN** зображення видно в редакторі
+#### Scenario: Saving and reopening
+- **WHEN** the user inserts an image and saves the record, then opens the edit form
+- **THEN** the image is visible in the editor
 
-#### Scenario: Файл у медіатеці
-- **WHEN** користувач вставляє зображення й зберігає запис
-- **THEN** у медіатеці є цей файл з кількістю використань 1, а в деталях файлу вказано запис, поле й мову
+#### Scenario: File in the media library
+- **WHEN** the user inserts an image and saves the record
+- **THEN** this file is in the media library with one usage, and the details of the file state the record, the field and the language
 
-#### Scenario: Непідтримуваний файл
-- **WHEN** користувач обирає файл, тип якого не дозволено профілем `image`
-- **THEN** біля редактора показано помилку, зображення не вставлено, вміст не змінено
+#### Scenario: Unsupported file
+- **WHEN** the user chooses a file whose type is not allowed by the profile `image`
+- **THEN** an error is shown next to the editor, the image is not inserted, and the content is not changed
 
-#### Scenario: Режим «Джерело»
-- **WHEN** користувач вмикає «Джерело»
-- **THEN** кнопка «Зображення» вимкнена
+#### Scenario: Source mode
+- **WHEN** the user turns on «Джерело»
+- **THEN** the button «Зображення» is disabled
 
-#### Scenario: Виділення зображення
-- **WHEN** користувач клікає по зображенню в редакторі
-- **THEN** зображення має видимий контур виділення, а після кліку повз зображення контуру немає
+#### Scenario: Selecting an image
+- **WHEN** the user clicks on an image in the editor
+- **THEN** the image has a visible selection outline, and after a click elsewhere from the image there is no outline
 
-#### Scenario: Зображення не виділене після відкриття
-- **WHEN** користувач відкриває форму запису, текст якого починається із зображення
-- **THEN** зображення не має контуру виділення, діалог параметрів не відкритий, а кнопка «Зображення» відкриває вибір файлу
+#### Scenario: Image is not selected after opening
+- **WHEN** the user opens the form of a record whose text starts with an image
+- **THEN** the image has no selection outline, the dialog of the parameters is not open, and the button «Зображення» opens the file selection
 
-#### Scenario: Кнопка з виділеним зображенням
-- **WHEN** зображення виділено й користувач натискає «Зображення»
-- **THEN** відкривається діалог «Параметри зображення», вибір файлу не відкривається
+#### Scenario: Button with a selected image
+- **WHEN** an image is selected and the user presses «Зображення»
+- **THEN** the dialog «Параметри зображення» opens, and the file selection does not open
 
-#### Scenario: Кнопка без виділеного зображення
-- **WHEN** зображення не виділено й користувач натискає «Зображення»
-- **THEN** відкривається вибір файлу
+#### Scenario: Button without a selected image
+- **WHEN** no image is selected and the user presses «Зображення»
+- **THEN** the file selection opens
 
 ### Requirement: Параметри зображення в редакторі форматованого тексту
-Подвійний клік по зображенню в редакторі `richtext` SHALL відкривати діалог «Параметри зображення» (так само, як кнопка «Зображення» при виділеному зображенні); окремої дії в панелі інструментів немає. Діалог SHALL бути модальним, з доступною назвою «Параметри зображення», з полями «Ширина (px)», «Альтернативний текст» і «Підпис» та кнопками «Готово» й «Початковий розмір»; поточні значення виділеного зображення SHALL бути в полях. «Готово» SHALL застосовувати значення до зображення. Ширина SHALL бути цілим числом пікселів від 1 до 4000; інше значення SHALL давати помилку біля поля без застосування. Порожня ширина або «Початковий розмір» SHALL прибирати ширину (зображення показується в природному розмірі, висота пропорційна). Альтернативний текст за замовчуванням SHALL дорівнювати імені завантаженого файлу. Непорожній підпис SHALL показуватися під зображенням у редакторі й зберігатися як видимий підпис; порожній підпис SHALL прибирати його. Збережені ширина, альтернативний текст і підпис SHALL відновлюватися після повторного відкриття форми.
+A double click on an image in the editor `richtext` SHALL open the dialog «Параметри зображення» (in the same way as the button «Зображення» with an image selected); there is no separate action in the toolbar. The dialog SHALL be modal, with the accessible name «Параметри зображення», with the fields «Ширина (px)», «Альтернативний текст» and «Підпис» and the buttons «Готово» and «Початковий розмір»; the current values of the selected image SHALL be in the fields. «Готово» SHALL apply the values to the image. The width SHALL be an integer number of pixels from 1 to 4000; another value SHALL give an error next to the field without applying. An empty width or «Початковий розмір» SHALL remove the width (the image is shown at its natural size, the height is proportional). The default alternative text SHALL equal the name of the uploaded file. A non-empty caption SHALL be shown under the image in the editor and stored as a visible caption; an empty caption SHALL remove it. The saved width, alternative text and caption SHALL be restored after reopening the form.
 
-#### Scenario: Зміна ширини
-- **WHEN** користувач двічі клікає по вставленому зображенню, у діалозі «Параметри зображення» вводить ширину 200 і натискає «Готово», зберігає запис
-- **THEN** зображення в редакторі має ширину 200 px, а після повторного відкриття форми ширина лишається 200 (у «Джерелі» `width="200"`)
+#### Scenario: Changing the width
+- **WHEN** the user double-clicks an inserted image, enters the width 200 in the dialog «Параметри зображення» and presses «Готово», and saves the record
+- **THEN** the image in the editor has a width of 200 px, and after reopening the form the width remains 200 (in «Джерело» `width="200"`)
 
-#### Scenario: Некоректна ширина
-- **WHEN** користувач вводить ширину `0`, `5000` або `abc`
-- **THEN** біля поля показано помилку, ширина зображення не змінюється
+#### Scenario: Invalid width
+- **WHEN** the user enters the width `0`, `5000` or `abc`
+- **THEN** an error is shown next to the field, and the width of the image does not change
 
-#### Scenario: Початковий розмір
-- **WHEN** користувач двічі клікає по зображенню з шириною 200 і натискає «Початковий розмір»
-- **THEN** ширину прибрано, у «Джерелі» немає `width`
+#### Scenario: Natural size
+- **WHEN** the user double-clicks an image with the width 200 and presses «Початковий розмір»
+- **THEN** the width is removed, and in «Джерело» there is no `width`
 
-#### Scenario: Підпис
-- **WHEN** користувач вводить підпис «Наш офіс» і натискає «Готово», зберігає запис
-- **THEN** під зображенням видно «Наш офіс», у «Джерелі» зображення в `figure` з `figcaption`, а після повторного відкриття форми підпис на місці
+#### Scenario: Caption
+- **WHEN** the user enters the caption «Наш офіс», presses «Готово» and saves the record
+- **THEN** «Наш офіс» is visible under the image, in «Джерело» the image is in a `figure` with a `figcaption`, and after reopening the form the caption is in place
 
-#### Scenario: Альтернативний текст
-- **WHEN** користувач вставляє зображення з файлу `logo.png`, потім змінює альтернативний текст на «Логотип»
-- **THEN** спершу `alt` дорівнює `logo.png`, після «Готово» — «Логотип»
+#### Scenario: Alternative text
+- **WHEN** the user inserts an image from the file `logo.png`, then changes the alternative text to «Логотип»
+- **THEN** at first `alt` equals `logo.png`, and after «Готово» — «Логотип»
 
-#### Scenario: Очищення підпису
-- **WHEN** користувач очищає підпис зображення й натискає «Готово»
-- **THEN** зображення лишається без `figure` і `figcaption`
+#### Scenario: Clearing the caption
+- **WHEN** the user clears the caption of the image and presses «Готово»
+- **THEN** the image remains without `figure` and `figcaption`
 
-#### Scenario: Подвійний клік
-- **WHEN** користувач двічі клікає по зображенню з шириною 200 і підписом «Наш офіс»
-- **THEN** відкривається діалог «Параметри зображення», у полях стоять 200, поточний `alt` і «Наш офіс»
+#### Scenario: Double click
+- **WHEN** the user double-clicks an image with the width 200 and the caption «Наш офіс»
+- **THEN** the dialog «Параметри зображення» opens, the fields contain 200, the current `alt` and «Наш офіс»
 
-#### Scenario: Немає окремої дії в панелі
-- **WHEN** користувач дивиться на панель інструментів
-- **THEN** окремої дії «Параметри зображення» немає
+#### Scenario: No separate action in the toolbar
+- **WHEN** the user looks at the toolbar
+- **THEN** there is no separate action «Параметри зображення»
 
 ### Requirement: Вирівнювання зображення в редакторі форматованого тексту
-Коли в редакторі `richtext` виділено зображення, наявне меню вирівнювання SHALL застосовувати вибір до зображення: «Ліворуч», «По центру» і «Праворуч»; «По ширині» SHALL бути вимкнена. Підпис SHALL бути завжди по центру саме під зображенням (а не по центру області редагування), незалежно від вирівнювання зображення: `figure` SHALL мати ширину зображення (`width: {width}px; max-width: 100%`, а без заданої ширини — `width: fit-content`), так що довгий підпис переноситься в межах ширини зображення і не стискає його, вирівнюватися полями (`margin-left`/`margin-right: auto`) і центрувати підпис всередині (`text-align: center`). Вирівнювання SHALL зберігатися стандартним HTML: inline-стиль на `figure` (центр — `margin-left: auto; margin-right: auto`, праворуч — `margin-left: auto`, ліворуч — без полів), а «Ліворуч» без підпису SHALL повертати зображення до голого `img`; раніше збережений `figure` лише з `text-align: center|right` SHALL читатися як центр/праворуч. Без виділеного зображення меню SHALL працювати як раніше. Збережене вирівнювання SHALL відновлюватися після повторного відкриття форми.
+When an image is selected in the editor `richtext`, the existing alignment menu SHALL apply the choice to the image: «Ліворуч», «По центру» and «Праворуч»; «По ширині» SHALL be disabled. The caption SHALL always be centred right under the image (and not centred in the editing area), regardless of the alignment of the image: `figure` SHALL have the width of the image (`width: {width}px; max-width: 100%`, and without a set width — `width: fit-content`), so that a long caption wraps within the width of the image and does not shrink it, be aligned by margins (`margin-left`/`margin-right: auto`) and centre the caption inside (`text-align: center`). The alignment SHALL be stored as standard HTML: an inline style on `figure` (centre — `margin-left: auto; margin-right: auto`, right — `margin-left: auto`, left — no margins), and «Ліворуч» without a caption SHALL return the image to a bare `img`; a previously saved `figure` with only `text-align: center|right` SHALL be read as centre/right. Without a selected image the menu SHALL work as before. The saved alignment SHALL be restored after reopening the form.
 
-#### Scenario: По центру
-- **WHEN** користувач виділяє зображення, обирає «По центру» і зберігає запис
-- **THEN** зображення в редакторі стоїть по центру, у «Джерелі» воно в `figure` з `margin-left: auto; margin-right: auto`, а після повторного відкриття форми лишається по центру
+#### Scenario: Center («По центру» — "Center")
+- **WHEN** the user selects an image, chooses «По центру» and saves the record
+- **THEN** the image in the editor is centred, in «Джерело» it is in a `figure` with `margin-left: auto; margin-right: auto`, and after reopening the form it remains centred
 
-#### Scenario: Зображення з підписом
-- **WHEN** виділено зображення з підписом «Наш офіс» і обрано «По центру»
-- **THEN** і зображення, і підпис стоять по центру
+#### Scenario: Image with a caption
+- **WHEN** an image with the caption «Наш офіс» is selected and «По центру» is chosen
+- **THEN** both the image and the caption are centred
 
-#### Scenario: Підпис не йде за зображенням
-- **WHEN** виділено зображення з підписом і обрано «Праворуч» або «Ліворуч»
-- **THEN** зображення стоїть праворуч (ліворуч), а підпис по центру саме під зображенням (центр підпису збігається з центром зображення)
+#### Scenario: The caption does not follow the image
+- **WHEN** an image with a caption is selected and «Праворуч» or «Ліворуч» is chosen
+- **THEN** the image is on the right (left), and the caption is centred right under the image (the centre of the caption coincides with the centre of the image)
 
-#### Scenario: Задана ширина з довгим підписом
-- **WHEN** зображення має ширину 500 і підпис з довгим словом або довгим реченням
-- **THEN** ширина зображення лишається 500 (не стискається до найдовшого слова), а підпис переноситься по рядках у межах цієї ширини
+#### Scenario: Set width with a long caption
+- **WHEN** an image has the width 500 and a caption with a long word or a long sentence
+- **THEN** the width of the image remains 500 (it does not shrink to the longest word), and the caption wraps over lines within this width
 
-#### Scenario: Праворуч
-- **WHEN** виділено зображення й обрано «Праворуч»
-- **THEN** зображення стоїть праворуч, у «Джерелі» `figure` з `margin-left: auto`
+#### Scenario: Right («Праворуч» — "Right")
+- **WHEN** an image is selected and «Праворуч» is chosen
+- **THEN** the image is on the right, and in «Джерело» there is a `figure` with `margin-left: auto`
 
-#### Scenario: Повернення ліворуч
-- **WHEN** виділено центроване зображення без підпису й обрано «Ліворуч»
-- **THEN** у «Джерелі» зображення знову голий `img` без `figure` і `style`
+#### Scenario: Return to the left
+- **WHEN** a centred image without a caption is selected and «Ліворуч» is chosen
+- **THEN** in «Джерело» the image is again a bare `img` without `figure` and `style`
 
-#### Scenario: По ширині недоступна
-- **WHEN** виділено зображення й відкрито меню вирівнювання
-- **THEN** пункт «По ширині» вимкнений
+#### Scenario: Justify is unavailable («По ширині» — "Justify")
+- **WHEN** an image is selected and the alignment menu is opened
+- **THEN** the item «По ширині» is disabled
 
-#### Scenario: Саме зображення вирівнюється
-- **WHEN** виділено зображення без підпису й обрано «По центру» (потім «Праворуч»)
-- **THEN** саме зображення (а не лише підпис) візуально стоїть по центру (праворуч) області редагування
+#### Scenario: The image itself is aligned
+- **WHEN** an image without a caption is selected and «По центру» is chosen (then «Праворуч»)
+- **THEN** the image itself (not only the caption) is visually on the centre (on the right) of the editing area
 
 ### Requirement: Ширина форми запису ноди
-Форма створення й редагування запису ноди SHALL мати максимальну ширину `max-w-5xl` (1024px), щоб редактор `richtext` і поля не були тісними.
+The create and edit form of a record of a node SHALL have a maximum width `max-w-5xl` (1024px), so that the editor `richtext` and the fields are not cramped.
 
-#### Scenario: Широкий екран
-- **WHEN** користувач відкриває форму запису на екрані ширшому за 1100px
-- **THEN** форма займає ширину понад 672px, але не більше 1024px
+#### Scenario: Wide screen
+- **WHEN** the user opens the form of a record on a screen wider than 1100px
+- **THEN** the form takes a width of more than 672px, but not more than 1024px
 
-#### Scenario: Довгий підпис
-- **WHEN** зображення має підпис, довший за ширину зображення
-- **THEN** підпис переноситься по рядках у межах ширини зображення, `figure` не стає ширшим за зображення, а центр підпису збігається з центром зображення
+#### Scenario: Long caption
+- **WHEN** an image has a caption longer than the width of the image
+- **THEN** the caption wraps over lines within the width of the image, `figure` does not become wider than the image, and the centre of the caption coincides with the centre of the image
 
-#### Scenario: Ширина за замовчуванням
-- **WHEN** користувач вставляє зображення
-- **THEN** воно вставляється з шириною 500 px (`width="500"` у «Джерелі»), а в діалозі параметрів поле «Ширина» показує 500
+#### Scenario: Default width
+- **WHEN** the user inserts an image
+- **THEN** it is inserted with the width of 500 px (`width="500"` in «Джерело»), and in the dialog of the parameters the field «Ширина» shows 500
 
-#### Scenario: Початковий розмір після вставки
-- **WHEN** користувач натискає «Початковий розмір» для щойно вставленого зображення
-- **THEN** `width` прибрано, зображення має природний розмір
+#### Scenario: Natural size after insertion
+- **WHEN** the user presses «Початковий розмір» for a just inserted image
+- **THEN** `width` is removed, and the image has its natural size

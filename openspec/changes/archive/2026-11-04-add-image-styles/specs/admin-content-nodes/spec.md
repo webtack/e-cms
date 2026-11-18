@@ -3,12 +3,12 @@
 ## ADDED Requirements
 
 ### Requirement: Мініатюра `thumb` у комірці списку записів
-Комірка поля типу `image` у таблиці записів SHALL показувати стиль `thumb` зображення (поле `preview` даних файла; якщо його немає — оригінал). Мініатюра SHALL бути посиланням на оригінал із `target="_blank"` і `rel="noopener noreferrer"` та SHALL мати `cursor-pointer`. Для множинного поля це стосується кожної мініатюри.
+The cell of a field of the type `image` in the table of records SHALL show the style `thumb` of the image (the field `preview` of the data of the file; if there is none — the original). The thumbnail SHALL be a link to the original with `target="_blank"` and `rel="noopener noreferrer"` and SHALL have `cursor-pointer`. For a multiple field this applies to each thumbnail.
 
-#### Scenario: Мініатюра в комірці
-- **WHEN** запис має поле `image` із файлом
-- **THEN** `src` зображення в комірці — адреса стилю `thumb`, а `href` посилання — адреса оригіналу
+#### Scenario: Thumbnail in the cell
+- **WHEN** a record has a field `image` with a file
+- **THEN** the `src` of the image in the cell is the address of the style `thumb`, and the `href` of the link is the address of the original
 
-#### Scenario: Курсор
-- **WHEN** користувач наводить курсор на мініатюру в комірці
-- **THEN** курсор — вказівник (`cursor-pointer`)
+#### Scenario: Cursor
+- **WHEN** the user hovers the cursor over a thumbnail in the cell
+- **THEN** the cursor is a pointer (`cursor-pointer`)

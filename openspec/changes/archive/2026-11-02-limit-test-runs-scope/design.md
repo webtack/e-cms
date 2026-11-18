@@ -2,26 +2,26 @@
 
 ## Context
 
-Правила про вибірковий e2e уже закріплені в `CLAUDE.md` (розділ «Playwright (e2e)»), `openspec/config.yaml` (`rules.tasks`) і `docs/e2e-testing.md` (розділ «Коли запускати e2e»). Для PHP-тестів у цих місцях є лише команди (`docker compose exec app php artisan test ...`), а правила вибору немає. Див. proposal.md — Why.
+The rules about the selective e2e are already fixed in `CLAUDE.md` (section «Playwright (e2e)»), `openspec/config.yaml` (`rules.tasks`) and `docs/e2e-testing.md` (section «Коли запускати e2e» — "When to run e2e"). For PHP tests these places contain only commands (`docker compose exec app php artisan test ...`), and there is no rule for the choice. See proposal.md — Why.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Дзеркально повторити для PHP-тестів структуру правила e2e: вибірково за областю, повний прогін лише за переліку винятків, без підтвердження, зі звітом.
+- Mirror for PHP tests the structure of the e2e rule: selective by area, the full run only for the listed exceptions, without confirmation, with a report.
 
 **Non-Goals:**
-- Змінювати тести, `phpunit.xml` чи скрипти запуску.
-- Вводити автоматичну відповідність «область → тест» (таблицю) для PHP; обмежуємось `--filter`/шляхом, бо назви тестів у `tests/Feature` вже відповідають областям (див. `docs/admin-*.md`).
+- Changing the tests, `phpunit.xml` or the run scripts.
+- Introducing an automatic correspondence «area → test» (a table) for PHP; we limit ourselves to `--filter`/a path, because the names of the tests in `tests/Feature` already match the areas (see `docs/admin-*.md`).
 
 ## Decisions
 
-- **Місце правила: `CLAUDE.md` + `openspec/config.yaml` + `docs/e2e-testing.md`.** Це ті самі три місця, де живе правило e2e, тож вони лишаються узгодженими. Альтернатива — окремий `docs/php-testing.md`: відхилена, бо правила двох видів тестів мають читатися разом, а нового індексного запису в `docs/README.md` не потрібно.
-- **Окремий розділ у `CLAUDE.md` «PHP-тести»** (поряд із «Docker» і «Playwright (e2e)»), а не доповнення розділу Docker: правило про вибір тестів, а не про середовище.
-- **Перелік винятків для повного прогону** (міграції/схема, `tests/TestCase.php` і спільні хелпери, `phpunit.xml`, `composer`-залежності, глобальні middleware, провайдери, конфіг, автентифікація) — припущення, записане в proposal.md; його можна уточнити, не змінюючи структури правила.
-- **Специфікація:** вимога додається до наявної capability `e2e-testing` (поряд із вимогою про вибір e2e-спеків і вимогою про розділення e2e та PHPUnit), без створення нової capability.
+- **Place of the rule: `CLAUDE.md` + `openspec/config.yaml` + `docs/e2e-testing.md`.** These are the same three places where the e2e rule lives, so they remain consistent. Alternative — a separate `docs/php-testing.md`: rejected, because the rules of the two kinds of tests must be read together, and no new index entry in `docs/README.md` is needed.
+- **A separate section in `CLAUDE.md` «PHP-тести» («PHP tests»)** (next to «Docker» and «Playwright (e2e)»), not an addition to the Docker section: the rule is about the choice of tests, not about the environment.
+- **The list of exceptions for the full run** (migrations/schema, `tests/TestCase.php` and shared helpers, `phpunit.xml`, `composer` dependencies, global middleware, providers, configuration, authentication) — an assumption, recorded in proposal.md; it can be refined without changing the structure of the rule.
+- **Specification:** the requirement is added to the existing capability `e2e-testing` (next to the requirement about the choice of e2e specs and the requirement about separating e2e and PHPUnit), without creating a new capability.
 
-Документація компонентів: `docs/e2e-testing.md` (розділ «Коли запускати e2e» та новий розділ про PHP-тести).
+Component documentation: `docs/e2e-testing.md` (section «Коли запускати e2e» and a new section about PHP tests).
 
 ## Risks / Trade-offs
 
-- [Вибірковий запуск пропустить регресію в суміжній області] → винятки для повного прогону охоплюють спільний код; для решти — запускати тести споживачів (`grep` використань), як і для e2e.
+- [A selective run will miss a regression in an adjacent area] → the exceptions for the full run cover the shared code; for the rest — run the consumers' tests (`grep` of the usages), as for e2e.

@@ -1,102 +1,102 @@
 ## MODIFIED Requirements
 
-### Requirement: Поле «форматований текст» у формі та списку записів
-Для поля типу `richtext` форма запису SHALL показувати редактор форматованого тексту замість звичайного текстового поля: панель інструментів із заголовками, жирним, курсивом, підкресленням, закресленням, вирівнюванням (випадаючий список: ліворуч, по центру, праворуч, за шириною), кольором тексту, кольором фону, маркованим і нумерованим списком, посиланням, вставкою відео YouTube, вставкою фрейму, вибором смайликів, кнопкою очищення форматування, кнопкою перегляду сирого HTML («Джерело»), кнопкою розгортання на весь екран; область редагування SHALL показувати форматування під час введення. Зображення й файли в редакторі SHALL бути недоступні. Форма редагування SHALL бути заповнена збереженим значенням з форматуванням. Редактор SHALL мати доступну назву з підписом поля, позначку помилки з сервера біля поля, а в множинному полі — окремий редактор у кожному рядку. Збереження запису SHALL надсилати HTML значення; порожній редактор SHALL надсилати порожнє значення. У таблиці записів значення `richtext` SHALL виводитися звичайним текстом без тегів, скороченим до розумної довжини, а не сирим HTML.
+### Requirement: Field "rich text" in the form and the list of records
+For a field of the type `richtext` the record form SHALL show a formatted text editor instead of a plain text field: a toolbar with headings, bold, italic, underline, strikethrough, alignment (a drop-down list: left, centre, right, justify), text colour, background colour, bulleted and numbered lists, a link, inserting a YouTube video, inserting a frame, choosing emoji, a button for clearing the formatting, a button for viewing the raw HTML ("Source"), a button for expanding to full screen; the editing area SHALL show the formatting while typing. Images and files in the editor SHALL be unavailable. The edit form SHALL be filled with the stored value with its formatting. The editor SHALL have an accessible name with the label of the field, an error mark from the server next to the field, and in a multiple field — a separate editor in each row. Saving the record SHALL send the HTML of the value; an empty editor SHALL send an empty value. In the table of records the value of `richtext` SHALL be output as plain text without tags, shortened to a reasonable length, and not as raw HTML.
 
-#### Scenario: Форматування у формі
-- **WHEN** користувач у редакторі поля `richtext` вводить текст, робить його жирним і додає маркований список та зберігає запис
-- **THEN** запис збережено, а після повторного відкриття форми редагування в редакторі видно жирний текст і список
+#### Scenario: Formatting in the form
+- **WHEN** the user in the editor of the field `richtext` types text, makes it bold, adds a bulleted list and saves the record
+- **THEN** the record is saved, and after reopening the edit form the bold text and the list are visible in the editor
 
-#### Scenario: Посилання
-- **WHEN** користувач виділяє текст, додає посилання `https://example.com` і зберігає запис
-- **THEN** після повторного відкриття форми текст є посиланням на цю адресу
+#### Scenario: Link
+- **WHEN** the user selects text, adds the link `https://example.com` and saves the record
+- **THEN** after reopening the form the text is a link to this address
 
-#### Scenario: Без зображень
-- **WHEN** користувач відкриває панель інструментів редактора
-- **THEN** у ній немає дій для вставки зображення чи файлу
+#### Scenario: No images
+- **WHEN** the user opens the toolbar of the editor
+- **THEN** it has no actions for inserting an image or a file
 
-#### Scenario: Порожнє значення
-- **WHEN** користувач залишає редактор необов'язкового поля `richtext` порожнім і зберігає запис
-- **THEN** запис збережено без значення в цьому полі
+#### Scenario: Empty value
+- **WHEN** the user leaves the editor of an optional field `richtext` empty and saves the record
+- **THEN** the record is saved without a value in this field
 
-#### Scenario: Помилка поля
-- **WHEN** сервер відхиляє значення `richtext`
-- **THEN** помилка показана біля редактора, введений вміст збережено у формі
+#### Scenario: Error of the field
+- **WHEN** the server rejects the value of `richtext`
+- **THEN** the error is shown next to the editor, and the entered content is kept in the form
 
-#### Scenario: Значення в таблиці записів
-- **WHEN** у списку видиме поле `richtext` зі значенням `<p>Привіт, <strong>світе</strong></p>`
-- **THEN** у комірці показано «Привіт, світе» без тегів
+#### Scenario: Value in the table of records
+- **WHEN** the field `richtext` with the value `<p>Привіт, <strong>світе</strong></p>` is visible in the list
+- **THEN** the cell shows "Привіт, світе" without tags
 
 ## ADDED Requirements
 
-### Requirement: Розширені дії редактора форматованого тексту
-Редактор `richtext` SHALL надавати такі дії; кожна кнопка SHALL мати доступну назву, а кнопки стану (підкреслення, закреслення, джерело, повноекранний режим) SHALL позначати активний стан через `aria-pressed`.
-- Підкреслення й закреслення SHALL перемикати форматування виділеного тексту.
-- Вирівнювання SHALL застосовуватися до блоку (абзац, заголовок) із курсором; кнопка списку SHALL показувати поточне вирівнювання (ліворуч, якщо блок не вирівняно), а в меню SHALL бути позначено поточний пункт.
-- Колір тексту й колір фону SHALL відкривати палітру з готовими кольорами й полем для коду `#rrggbb`, застосовувати колір до виділеного тексту й мати дію «Скинути колір».
-- Очищення форматування SHALL прибирати з виділеного тексту всі позначки, крім жирного, курсиву, підкреслення й посилання, прибирати вирівнювання, колір і фон, а заголовки (`h2`–`h4`) SHALL лишатися заголовками.
-- Вставка відео YouTube SHALL приймати адресу відео (`youtube.com/watch?v=`, `youtu.be/`) і вставляти вбудований плеєр; некоректна адреса SHALL давати помилку біля поля без вставки.
-- Вставка фрейму SHALL приймати в одному полі як адресу `https`, так і код `<iframe>` цілком (з нього SHALL переноситися `src`, `width`, `height`, `title`, `allowfullscreen`, `allow`, а решта атрибутів відкидатися) і вставляти фрейм лише з дозволеного хоста (і префікса шляху), зокрема Google Drive та соцмереж; адреса з недозволеного хоста SHALL давати помилку біля поля без вставки.
-- Вибір смайлика SHALL вставляти символ у позицію курсора й залишати фокус у редакторі.
-- Кнопка «Джерело» SHALL показувати замість форматованого тексту сирий HTML значення в текстовому полі, застосовувати його правки до редактора й вимикати решту кнопок форматування, поки режим увімкнено; повернення SHALL показувати відредагований вміст.
-- Розгортання на весь екран SHALL розтягувати редактор з тулбаром на все вікно, повертатися кнопкою або клавішею `Escape`, і SHALL не втрачати вміст і курсор.
+### Requirement: Extended actions of the rich text editor
+The editor `richtext` SHALL provide the following actions; each button SHALL have an accessible name, and the state buttons (underline, strikethrough, source, full-screen mode) SHALL mark the active state through `aria-pressed`.
+- Underline and strikethrough SHALL toggle the formatting of the selected text.
+- Alignment SHALL be applied to the block (paragraph, heading) with the cursor; the alignment button SHALL show the current alignment (left, if the block is not aligned), and in the menu the current item SHALL be marked.
+- The text colour and the background colour SHALL open a palette with ready colours and a field for the code `#rrggbb`, apply the colour to the selected text and have the action "Reset colour".
+- Clearing the formatting SHALL remove from the selected text all marks except bold, italic, underline and link, remove alignment, colour and background, and the headings (`h2`–`h4`) SHALL remain headings.
+- Inserting a YouTube video SHALL accept the address of a video (`youtube.com/watch?v=`, `youtu.be/`) and insert an embedded player; an invalid address SHALL give an error next to the field without insertion.
+- Inserting a frame SHALL accept in one field both an address `https` and a whole `<iframe>` code (from it `src`, `width`, `height`, `title`, `allowfullscreen`, `allow` SHALL be carried over, and the other attributes dropped), and insert a frame only from an allowed host (and path prefix), in particular Google Drive and social networks; an address from a disallowed host SHALL give an error next to the field without insertion.
+- Choosing an emoji SHALL insert the character at the cursor position and leave the focus in the editor.
+- The button "Source" SHALL show the raw HTML of the value in a text field instead of the formatted text, apply its edits to the editor, and disable the other formatting buttons while the mode is on; returning SHALL show the edited content.
+- Expanding to full screen SHALL stretch the editor with the toolbar to the whole window, return with the button or the `Escape` key, and SHALL not lose the content or the cursor.
 
-#### Scenario: Підкреслення й закреслення
-- **WHEN** користувач виділяє текст і натискає «Підкреслений», потім «Закреслений» та зберігає запис
-- **THEN** після перезавантаження текст підкреслений і закреслений
+#### Scenario: Underline and strikethrough
+- **WHEN** the user selects text and presses "Underlined", then "Strikethrough", and saves the record
+- **THEN** after a reload the text is underlined and struck through
 
-#### Scenario: Вирівнювання
-- **WHEN** користувач ставить курсор в абзац і натискає «По центру»
-- **THEN** абзац вирівняно по центру, у меню позначено «По центру», а збережений HTML містить `text-align: center`
+#### Scenario: Alignment
+- **WHEN** the user puts the cursor in a paragraph and presses "Centre"
+- **THEN** the paragraph is centred, in the menu "Centre" is marked, and the saved HTML contains `text-align: center`
 
-#### Scenario: Колір тексту й фону
-- **WHEN** користувач виділяє текст і обирає колір тексту й колір фону
-- **THEN** текст показано обраними кольорами, а після збереження й перезавантаження кольори збережено
+#### Scenario: Text and background colour
+- **WHEN** the user selects text and chooses a text colour and a background colour
+- **THEN** the text is shown in the chosen colours, and after saving and a reload the colours are kept
 
-#### Scenario: Скидання кольору
-- **WHEN** користувач виділяє текст із кольором і обирає «Скинути колір»
-- **THEN** текст показано кольором за замовчуванням
+#### Scenario: Resetting the colour
+- **WHEN** the user selects coloured text and chooses "Reset colour"
+- **THEN** the text is shown in the default colour
 
-#### Scenario: Очищення форматування
-- **WHEN** користувач виділяє жирний підкреслений текст із кольором, фоном і вирівнюванням у заголовку й натискає «Очистити форматування»
-- **THEN** жирний, підкреслення й заголовок лишаються, а колір, фон і вирівнювання зникають
+#### Scenario: Clearing the formatting
+- **WHEN** the user selects bold underlined text with a colour, a background and alignment in a heading and presses "Clear formatting"
+- **THEN** bold, underline and the heading remain, and the colour, the background and the alignment disappear
 
-#### Scenario: Вставка відео YouTube
-- **WHEN** користувач вставляє адресу `https://youtu.be/dQw4w9WgXcQ`
-- **THEN** у редакторі з'являється плеєр, а в збереженому HTML — `iframe` з адресою `youtube-nocookie.com/embed/dQw4w9WgXcQ`
+#### Scenario: Inserting a YouTube video
+- **WHEN** the user inserts the address `https://youtu.be/dQw4w9WgXcQ`
+- **THEN** a player appears in the editor, and the saved HTML contains an `iframe` with the address `youtube-nocookie.com/embed/dQw4w9WgXcQ`
 
-#### Scenario: Некоректна адреса відео
-- **WHEN** користувач вводить адресу, що не є адресою YouTube
-- **THEN** біля поля показано помилку, а вміст редактора не змінено
+#### Scenario: Invalid video address
+- **WHEN** the user enters an address that is not a YouTube address
+- **THEN** an error is shown next to the field, and the content of the editor is not changed
 
-#### Scenario: Вставка фрейму за посиланням
-- **WHEN** користувач вставляє адресу `https` на дозволений хост
-- **THEN** у редакторі з'являється фрейм, який зберігається в запису
+#### Scenario: Inserting a frame by link
+- **WHEN** the user inserts an `https` address on an allowed host
+- **THEN** a frame appears in the editor, and it is stored in the record
 
-#### Scenario: Вставка фрейму кодом iframe
-- **WHEN** користувач вставляє `<iframe src="https://www.youtube-nocookie.com/embed/abc" width="560" height="315" title="Відео" allow="autoplay; camera" frameborder="0" allowfullscreen></iframe>`
-- **THEN** у редакторі з'являється фрейм, а збережений `iframe` має `src`, `width="560"`, `height="315"`, `title`, `allowfullscreen`, `allow="autoplay"` і не має `frameborder` та `camera`
+#### Scenario: Inserting a frame by iframe code
+- **WHEN** the user inserts `<iframe src="https://www.youtube-nocookie.com/embed/abc" width="560" height="315" title="Відео" allow="autoplay; camera" frameborder="0" allowfullscreen></iframe>`
+- **THEN** a frame appears in the editor, and the saved `iframe` has `src`, `width="560"`, `height="315"`, `title`, `allowfullscreen`, `allow="autoplay"` and has no `frameborder` and `camera`
 
-#### Scenario: Фрейм Google Drive
-- **WHEN** користувач вставляє адресу `https://drive.google.com/file/d/abc/preview`
-- **THEN** у редакторі з'являється фрейм, який зберігається в запису
+#### Scenario: Google Drive frame
+- **WHEN** the user inserts the address `https://drive.google.com/file/d/abc/preview`
+- **THEN** a frame appears in the editor, and it is stored in the record
 
-#### Scenario: Фрейм Google Forms
-- **WHEN** користувач вставляє код «Вставити» з Google Forms (`<iframe src="https://docs.google.com/forms/d/e/abc/viewform?embedded=true">`)
-- **THEN** у редакторі з'являється форма, а в записі зберігається фрейм з цією адресою
+#### Scenario: Google Forms frame
+- **WHEN** the user inserts the "Embed" code from Google Forms (`<iframe src="https://docs.google.com/forms/d/e/abc/viewform?embedded=true">`)
+- **THEN** the form appears in the editor, and the record stores a frame with this address
 
-#### Scenario: Недозволений фрейм
-- **WHEN** користувач вставляє адресу на хост, якого немає в дозволеному списку
-- **THEN** біля поля показано помилку, а фрейм не вставлено
+#### Scenario: Disallowed frame
+- **WHEN** the user inserts an address on a host that is not in the allowed list
+- **THEN** an error is shown next to the field, and no frame is inserted
 
-#### Scenario: Смайлик
-- **WHEN** користувач обирає смайлик у панелі
-- **THEN** символ вставлено в позицію курсора, а фокус лишається в редакторі
+#### Scenario: Emoji
+- **WHEN** the user chooses an emoji in the panel
+- **THEN** the symbol is inserted at the cursor position, and the focus stays in the editor
 
-#### Scenario: Сирий HTML
-- **WHEN** користувач вмикає «Джерело», змінює HTML у полі й вимикає «Джерело»
-- **THEN** у редакторі видно змінений вміст, а поки режим був увімкнений, кнопки форматування були вимкнені
+#### Scenario: Raw HTML
+- **WHEN** the user turns on "Source", changes the HTML in the field and turns "Source" off
+- **THEN** the changed content is visible in the editor, and while the mode was on, the formatting buttons were disabled
 
-#### Scenario: Повноекранний режим
-- **WHEN** користувач натискає «На весь екран»
-- **THEN** редактор займає все вікно, текст і курсор збережено, а клавіша `Escape` повертає звичайний вигляд
+#### Scenario: Full-screen mode
+- **WHEN** the user presses "Full screen"
+- **THEN** the editor takes the whole window, the text and the cursor are kept, and the `Escape` key returns the normal view

@@ -2,22 +2,22 @@
 
 ## Context
 
-Адмінка — Inertia + React + TypeScript. Розділи типів будуються за одним шаблоном: контролер повертає `Inertia::render`, список — `DataTable` (серверний режим через `TableRequest`/`TablePage`, або клієнтський з `reorder`), форми — `useForm` з `FormActionBar`, меню в `navigation.ts` (одне джерело для sidebar і хлібних крихт), підписи — англійські ключі, переклади в `lang/uk.json`. Поле типу в адмінці створюється формою `ContentFieldForm`; значення запису вводить `NodeFieldInput`, єдине місце відображення типу значення на віджет; список записів форматує `ContentNodeController::cell()/text()`. Запис редагує лише базову мову `default`.
+The admin is Inertia + React + TypeScript. The sections of types are built by one pattern: the controller returns `Inertia::render`, the list is a `DataTable` (server mode through `TableRequest`/`TablePage`, or client mode with `reorder`), the forms use `useForm` with `FormActionBar`, the menu is in `navigation.ts` (one source for the sidebar and the breadcrumbs), the labels are English keys, the translations are in `lang/uk.json`. A field of a type is created in the admin by the form `ContentFieldForm`; the value of a record is entered by `NodeFieldInput`, the single place of the display of the value type as a widget; the list of records formats the values through `ContentNodeController::cell()/text()`. A record edits only the base language `default`.
 
-Ця зміна залежить від [add-taxonomy-core](../add-taxonomy-core/design.md): моделі `Vocabulary`/`Term`, сервіси `TermTree`, `TermWriter`, `TermUsage`, тип `term`. Вимоги — у [specs/](specs/); мотивація — у [proposal.md](proposal.md). Описують компоненти: новий `docs/admin-taxonomy.md`, а також `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/admin-shell.md`, `docs/taxonomy.md`, `docs/e2e-testing.md`.
+This change depends on [add-taxonomy-core](../add-taxonomy-core/design.md): the models `Vocabulary`/`Term`, the services `TermTree`, `TermWriter`, `TermUsage`, the type `term`. The requirements are in [specs/](specs/); the motivation is in [proposal.md](proposal.md). The components described: the new `docs/admin-taxonomy.md`, and also `docs/admin-content-fields.md`, `docs/admin-content-nodes.md`, `docs/admin-shell.md`, `docs/taxonomy.md`, `docs/e2e-testing.md`.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Розділ «Таксономія» за тими самими патернами, що й типи/поля (без нових бібліотек).
-- Інваріанти не дублюються в UI: контролери й запити перетворюють `ValidationException` ядра на помилки форми й повідомлення.
+- The section «Таксономія» by the same patterns as the types/fields (without new libraries).
+- The invariants are not duplicated in the UI: the controllers and the requests turn the `ValidationException` of the core into the errors of the form and the messages.
 
 **Non-Goals:**
-- Автокомпліт/створення терміна у формі запису; перетягування між батьками; публічні сторінки; права доступу.
+- Autocomplete/creation of a term in the form of a record; dragging between parents; public pages; access rights.
 
 ## Decisions
 
-### 1. Маршрути й прив'язка
+### 1. Routes and binding
 
 ```
 /admin/taxonomy                              GET   vocabularies index      admin.taxonomy.index
@@ -32,51 +32,51 @@
 /admin/taxonomy/{vocabulary}/terms/{term}/edit | PUT | DELETE              ...edit / update / destroy
 ```
 
-`Route::bind('vocabulary')` за `key` (єдиний ідентифікатор словника: `uuid` у словника немає, тож `key` стоїть в URL, у `settings.vocabulary` і в `Select` форми поля); `Route::bind('term')` за `uuid` лише в межах словника з маршруту (за прикладом `field`, який шукається за парою). `terms/order` оголошується перед `{term}`, як `fields/order`. Контролери `VocabularyController` і `TermController`, запити `Store/Update` для кожного й `ReorderTermsRequest`.
+`Route::bind('vocabulary')` by `key` (the single identifier of the vocabulary: the vocabulary has no `uuid`, so `key` stands in the URL, in `settings.vocabulary` and in the `Select` of the form of the field); `Route::bind('term')` by `uuid` only within the vocabulary from the route (by the example of `field`, which is looked up by the pair). `terms/order` is declared before `{term}`, as `fields/order`. The controllers `VocabularyController` and `TermController`, the requests `Store/Update` for each and `ReorderTermsRequest`.
 
-### 2. Помилки ядра → UX
+### 2. Errors of the core → UX
 
-Моделі й `TermWriter` кидають `ValidationException` з ключами полів; запити дублюють формат-правила, щоб форма мала помилки по полях (як `StoreContentFieldRequest`), а ядро лишається останнім бар'єром. Видалення (`destroy`) ловить `ValidationException` і повертає `back()` з flash-повідомленням про помилку (існуючий `FlashToaster`), для використаного терміна повідомлення складається з `TermUsage` (поле, тип, кількість).
+The models and `TermWriter` throw `ValidationException` with the keys of the fields; the requests duplicate the format rules, so that the form has errors by fields (as `StoreContentFieldRequest`), and the core remains the last barrier. The deletion (`destroy`) catches `ValidationException` and returns `back()` with a flash message about the error (the existing `FlashToaster`); for a used term the message is composed from `TermUsage` (the field, the type, the count).
 
-### 3. Дерево в таблиці і порядок
+### 3. The tree in the table and the order
 
-Сторінка термінів віддає **усі** терміни словника рядками в порядку обходу дерева з `depth`, `children_count`, `usage_count` (з `TermUsage` ядра: один згрупований запит за `content_values_string` для полів типу `term`, для діалогу видалення), `uuid` і базовою назвою; `DataTable` `mode="client"` з `reorder`, назва з відступом за `depth` (клітинка `cell`). Дерево збирає `TermTree::tree`; рядки сплющує контролер.
-**Перетягування змінює лише порядок.** Клієнт шле `order[]` — `uuid` усіх термінів у новому порядку рядків; сервер переписує `weight = позиція` (прямим `UPDATE`, інваріанти дерева від ваги не залежать) і вимагає рівно весь набір `uuid` словника. Оскільки братні сортуються за `weight`, їхній відносний порядок збігається з порядком рядків; рядок, скинутий у чужу гілку, лише змінює порядок серед братів після оновлення. Батька змінює форма.
-**Альтернативи:** вкладене перетягування з перепідпорядкуванням (потрібен власний tree-віджет, `@dnd-kit` у проєкті лише плоский сортований список) — відкладено; кнопки «вгору/вниз» — незручно при багатьох термінах.
+The page of terms gives **all** terms of the vocabulary as rows in the order of the walk of the tree with `depth`, `children_count`, `usage_count` (from the `TermUsage` of the core: one grouped query by `content_values_string` for the fields of the type `term`, for the deletion dialog), `uuid` and the base name; `DataTable` `mode="client"` with `reorder`, the name with an indent by `depth` (the cell `cell`). The tree is assembled by `TermTree::tree`; the controller flattens the rows.
+**Dragging changes only the order.** The client sends `order[]` — the `uuid` of all terms in the new order of rows; the server rewrites `weight = position` (a direct `UPDATE`, the invariants of the tree do not depend on the weight) and requires exactly the whole set of `uuid` of the vocabulary. Since the siblings are sorted by `weight`, their relative order coincides with the order of the rows; a row dropped into a foreign branch only changes the order among its siblings after the refresh. The parent is changed by the form.
+**Alternatives:** nested dragging with re-parenting (requires its own tree widget; `@dnd-kit` in the project is only a flat sortable list) — postponed; buttons «вгору/вниз» — inconvenient with many terms.
 
-### 4. Перелік можливих батьків
+### 4. The list of possible parents
 
-Сервер рахує і передає форму `parentOptions: {uuid, name, depth}[]` у порядку дерева: усі терміни словника, крім (на редагуванні) самого терміна й його нащадків, і лише ті, для яких `depth(батька) + 1 + висота піддерева ≤ max_depth` (для нового терміна висота піддерева 0). Клієнт не рахує глибину сам.
+The server computes and passes the form `parentOptions: {uuid, name, depth}[]` in the order of the tree: all terms of the vocabulary, except (on editing) the term itself and its descendants, and only those for which `depth(parent) + 1 + height of the subtree ≤ max_depth` (for a new term the height of the subtree is 0). The client does not compute the depth itself.
 
-### 5. Форма терміна і переклади
+### 5. The form of a term and the translations
 
-`TermForm`: `name`, `description`, `slug`, `parent_uuid`, `weight`, `image` (вибір або завантаження файлу профілю `image` тим самим механізмом, що й `NodeFieldInput` для поля `image`; сервер перевіряє правилом ядра й зберігає разом із зв'язком у `media_relations` через `TermWriter`) та, коли `ContentLanguages::isMultilingual()`, блок `translations[lang][name|description]` для кожної активної мови (`ContentLanguages::active()`; сервер передає `languages`). Збереження викликає `TermWriter` (ядро) у транзакції; порожній переклад видаляється. Вага за замовчуванням: найбільша вага серед братів + 1. Мова інтерфейсу адміністратора й мови контенту незалежні; мови контенту беруться лише з `ContentLanguages`.
+`TermForm`: `name`, `description`, `slug`, `parent_uuid`, `weight`, `image` (a choice or an upload of a file of the profile `image` by the same mechanism as `NodeFieldInput` for the field `image`; the server checks it by the rule of the core and stores it together with the link in `media_relations` through `TermWriter`) and, when `ContentLanguages::isMultilingual()`, a block `translations[lang][name|description]` for each active language (`ContentLanguages::active()`; the server passes `languages`). Saving calls `TermWriter` (the core) in a transaction; an empty translation is deleted. The default weight: the largest weight among the siblings + 1. The interface language of the administrator and the content languages are independent; the content languages are taken only from `ContentLanguages`.
 
-### 6. Поле `term` у формі поля типу
+### 6. The field `term` in the form of a field of a type
 
-`ContentFieldController` перестає ховати `term` (`admin_hidden_field_types` видаляється з `config/content.php` разом із фільтром), але `term` лишається в `typeOptions` лише для секції `content`; для `page` і `block` його прибрано, а `StoreContentFieldRequest`/`UpdateContentFieldRequest` відхиляють `type = term`, коли тип-власник не `content` (помилка біля `type`). Форми отримують `vocabularies: {key, name}[]`. `ContentFieldForm` показує `Select` словника для типу `term`, вибір блокується, коли `has_values`. `StoreContentFieldRequest::settingsRules` отримує гілку для `term`: `settings` — масив лише з `vocabulary`, `settings.vocabulary` обов'язковий і `exists:taxonomy_vocabularies,key`; для решти не-файлових типів лишається `prohibited`. `UpdateContentFieldRequest` використовує ті самі правила, а заборону зміни словника зі значеннями забезпечує ядро (`settings.vocabulary`).
+`ContentFieldController` stops hiding `term` (`admin_hidden_field_types` is removed from `config/content.php` together with the filter), but `term` remains in `typeOptions` only for the section `content`; for `page` and `block` it is removed, and `StoreContentFieldRequest`/`UpdateContentFieldRequest` reject `type = term` when the owner type is not `content` (an error next to `type`). The forms receive `vocabularies: {key, name}[]`. `ContentFieldForm` shows a `Select` of the vocabulary for the type `term`, the choice is blocked when `has_values`. `StoreContentFieldRequest::settingsRules` gets a branch for `term`: `settings` — an array with only `vocabulary`, `settings.vocabulary` is required and `exists:taxonomy_vocabularies,key`; for the other non-file types `prohibited` remains. `UpdateContentFieldRequest` uses the same rules, and the prohibition of changing the vocabulary of a field with values is ensured by the core (`settings.vocabulary`).
 
-### 7. Поле `term` у формі й списку запису
+### 7. The field `term` in the form and the list of a record
 
-`PresentsFormFields::formFieldData` для `term` додає `settings.terms: {uuid, name, depth}[]` (дерево словника, базові назви) — один запит на поле. `NodeFieldInput` отримує гілку `term`: для немножинного поля `Select` з порожнім варіантом, для множинного — список прапорців з відступами (множинність і `max_items` вже обробляє `NodeFieldList`). Стан форми — рядок із `uuid`, сервер перевіряє його правилом типу `term` (формат UUID, термін існує в словнику поля). У списку `ContentNodeController::text` для `term` бере назву з карти `termNames` (один запит на сторінку за всіма `uuid`, як `fileNames`), `sortable()` повертає `false` для `term`.
-**Обмеження:** список термінів передається цілком, без автокомпліту; для словників на тисячі термінів знадобиться окремий пошуковий віджет (поза зміною).
+`PresentsFormFields::formFieldData` for `term` adds `settings.terms: {uuid, name, depth}[]` (the tree of the vocabulary, the base names) — one query per field. `NodeFieldInput` gets a branch `term`: for a non-multiple field a `Select` with an empty option, for a multiple one — a list of checkboxes with indents (the multiplicity and `max_items` are already handled by `NodeFieldList`). The state of the form is a string with the `uuid`; the server checks it by the rule of the type `term` (the UUID format, the term exists in the vocabulary of the field). In the list `ContentNodeController::text` for `term` takes the name from the map `termNames` (one query per page for all `uuid`, as `fileNames`), `sortable()` returns `false` for `term`.
+**Limitation:** the list of terms is passed entirely, without autocomplete; for vocabularies with thousands of terms a separate search widget will be needed (outside this change).
 
-### 8. Навігація
+### 8. Navigation
 
-`navigation.ts` отримує `{ title: 'Taxonomy', href: '/admin/taxonomy', icon: Tags }` між Block Types і Pages; `extraTitles` і `patternTitles` — «Create vocabulary», «Edit vocabulary», «Terms», «Create term», «Edit term». Українські переклади — у `lang/uk.json`.
+`navigation.ts` gets `{ title: 'Taxonomy', href: '/admin/taxonomy', icon: Tags }` between Block Types and Pages; `extraTitles` and `patternTitles` — «Create vocabulary», «Edit vocabulary», «Terms», «Create term», «Edit term». The Ukrainian translations are in `lang/uk.json`.
 
 ## Risks / Trade-offs
 
-- [Перетягування «чужої» гілки поводиться неочевидно] → тільки порядок змінюється, документувати в `docs/admin-taxonomy.md`, підказка в UI; батька міняє форма.
-- [Великі словники важкі для форми запису і сторінки термінів] → пагінація клієнтської таблиці, вибір у формі запису без автокомпліту; ліміт задокументовано, автокомпліт — окрема зміна.
-- [Клієнтське сортування таблиці ламає дерево] → `reorder` і так вимкнено при сортуванні/пошуку; показ дерева без сортування за замовчуванням.
-- [Кілька спільних компонентів змінено (`ContentFieldForm`, `NodeFieldInput`, `navigation.ts`)] → запускаємо залежні e2e-спеки з таблиці «Спільний код → спеки», повний прогін не потрібен.
-- [Гонки: термін видалено в іншій вкладці, поки відкрита форма запису] → сервер відхиляє неіснуючий термін помилкою біля поля.
+- [Dragging a «foreign» branch behaves non-obviously] → only the order changes; document it in `docs/admin-taxonomy.md`, a hint in the UI; the parent is changed by the form.
+- [Large vocabularies are heavy for the form of a record and the page of terms] → pagination of the client table, the choice in the form of a record without autocomplete; the limit is documented, the autocomplete is a separate change.
+- [Client-side sorting of the table breaks the tree] → `reorder` is already disabled when sorting/searching; the tree is shown without sorting by default.
+- [Several shared components are changed (`ContentFieldForm`, `NodeFieldInput`, `navigation.ts`)] → we run the dependent e2e specs from the table «Спільний код → спеки»; a full run is not needed.
+- [Races: a term is deleted in another tab while the form of a record is open] → the server rejects a non-existent term with an error next to the field.
 
 ## Migration Plan
 
-Міграцій немає. Розгортання після `add-taxonomy-core`; відкат — прибрати маршрути/сторінки й повернути `admin_hidden_field_types => ['term']` (для page/block `term` відфільтровано за секцією окремо). Дані таксономії не зачіпаються.
+There are no migrations. Deployment after `add-taxonomy-core`; the rollback — remove the routes/pages and return `admin_hidden_field_types => ['term']` (for page/block `term` is filtered by the section separately). The data of the taxonomy is not affected.
 
 ## Open Questions
 
-- Підписи й переклади нових фраз (точні тексти) — уточнюються під час реалізації, на специфікації не впливають.
+- The labels and translations of the new phrases (the exact texts) are specified during the implementation, they do not affect the specification.

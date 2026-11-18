@@ -2,117 +2,117 @@
 
 ## Context
 
-Мотивація: див. [proposal.md](proposal.md). Поточний стан, від якого відштовхується підхід:
+The motivation: see [proposal.md](proposal.md). The current state, from which the approach starts:
 
-- `vite.config.js` (один конфіг) через `themeEntries()` додає до входів адмінки всі файли `themes/*/assets/{css,js}/*`. Вихід спільний: `public/build` + `manifest.json`; `npm run build` = `tsc --noEmit && vite build`.
-- `ThemeManager::assets()` читає `public/build/manifest.json` (ключі з префіксом `themes/<active>/assets/`, лише `isEntry`) або, якщо є `public/hot`, перелічує файли теми на диску. `html.blade.php` викликає `@vite($assets)`.
-- Laravel `Vite` (`__invoke($entrypoints, $buildDirectory)`) приймає каталог збірки другим аргументом, а hot-файл бере зі свого стану (`useHotFile`, за замовчуванням `public/hot`) і перевіряє його до маніфеста: у hot-режимі `$buildDirectory` ігнорується.
-- Tailwind 4 не розрахований на препроцесори (Sass, Less, Stylus); документація Tailwind: «Think of Tailwind CSS itself as your preprocessor». `themes/default/assets/css/app.css` — Tailwind-вхід (`@import 'tailwindcss' source(none)` + `@source`).
-- `sass` у `node_modules` відсутній; Vite 8 (`laravel-vite-plugin` 3.2) компілює `.scss` сам, коли пакет `sass` встановлено.
+- `vite.config.js` (one config) through `themeEntries()` adds to the entries of the admin all files `themes/*/assets/{css,js}/*`. The output is shared: `public/build` + `manifest.json`; `npm run build` = `tsc --noEmit && vite build`.
+- `ThemeManager::assets()` reads `public/build/manifest.json` (the keys with the prefix `themes/<active>/assets/`, only `isEntry`) or, if `public/hot` exists, lists the files of the theme on the disk. `html.blade.php` calls `@vite($assets)`.
+- The Laravel `Vite` (`__invoke($entrypoints, $buildDirectory)`) takes the build directory as the second argument, and takes the hot file from its state (`useHotFile`, by default `public/hot`) and checks it before the manifest: in the hot mode `$buildDirectory` is ignored.
+- Tailwind 4 is not designed for preprocessors (Sass, Less, Stylus); the documentation of Tailwind: «Think of Tailwind CSS itself as your preprocessor». `themes/default/assets/css/app.css` is the Tailwind entry (`@import 'tailwindcss' source(none)` + `@source`).
+- `sass` is absent from `node_modules`; Vite 8 (`laravel-vite-plugin` 3.2) compiles `.scss` itself when the package `sass` is installed.
 
-Описані компоненти: [docs/site-themes.md](../../../docs/site-themes.md) (розділ «Ресурси теми (Vite)»), [docs/e2e-testing.md](../../../docs/e2e-testing.md) (передумови).
+The components described: [docs/site-themes.md](../../../docs/site-themes.md) (the section «Ресурси теми (Vite)» — "Resources of the theme (Vite)"), [docs/e2e-testing.md](../../../docs/e2e-testing.md) (the prerequisites).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Працювати над однією темою (збірка, dev-сервер) без `tsc`, без React-адмінки й без впливу на `public/build`.
-- SCSS, компільований JS, бібліотеки з `node_modules` або з файлів теми, розділення на `vendor.*` і `app.*`.
-- Мінімальна зміна публічного коду: тема й далі підключається одним викликом у `html.blade.php`.
+- Work on one theme (the build, the dev server) without `tsc`, without the React admin and without an impact on `public/build`.
+- SCSS, compiled JS, libraries from `node_modules` or from the files of the theme, the separation into `vendor.*` and `app.*`.
+- A minimal change of the public code: the theme is still connected by one call in `html.blade.php`.
 
 **Non-Goals:**
-- SCSS у темі `default` (лишається Tailwind у чистому CSS).
-- Окремий `package.json` на тему / npm workspaces (залежності лежать у кореневому `package.json`).
-- Збірка тем із PHP/artisan, автоматична збірка під час деплою, перевірка ресурсів у `theme:check`.
-- Мови сайту, регіони блоків, зміна теми в адмінці (поза цією зміною).
+- SCSS in the theme `default` (it stays Tailwind in plain CSS).
+- A separate `package.json` per theme / npm workspaces (the dependencies lie in the root `package.json`).
+- The build of themes from PHP/artisan, an automatic build during deployment, the check of the resources in `theme:check`.
+- The languages of the site, the regions of blocks, the change of the theme in the admin (outside this change).
 
 ## Decisions
 
-### 1. Окремий конфіг `vite.theme.config.js` і запуск через `scripts/theme.mjs`
+### 1. A separate config `vite.theme.config.js` and the launch through `scripts/theme.mjs`
 
-Тема збирається окремим конфігом, який читає `THEME=<name>`. Скрипти:
-
-```
-"theme:dev":   "node scripts/theme.mjs dev"      # ім'я теми обов'язкове
-"theme:build": "node scripts/theme.mjs build"    # ім'я необов'язкове
-```
-
-`scripts/theme.mjs` розбирає аргумент, перевіряє, що `themes/<name>/assets` існує, і запускає `vite -c vite.theme.config.js` (`build` — послідовно для кожної теми з `assets/`, коли імені немає) із `THEME` у середовищі. Імена без `assets/` пропускаються (збірка всіх), а явно названа тема без `assets/` дає помилку.
-
-Чому не `vite build` з аргументом: Vite не має власних параметрів, а змінна середовища в конфігу — стандартний спосіб. Чому не один конфіг із `--mode`: `emptyOutDir` і набір плагінів адмінки (React, `tsc`) тоді лишаються спільними, а розділення — суть зміни.
-
-Альтернатива: масив конфігів (`defineConfig([...])`) у `vite.config.js` — Vite не збирає кілька конфігів за один виклик, тож не вирішує проблеми незалежного запуску.
-
-### 2. Вихід `public/themes/<name>/` з власним маніфестом і hot-файлом
-
-`laravel({ input, buildDirectory: 'themes/<name>', hotFile: 'public/themes/<name>.hot' })`. Тоді:
+The theme is built by a separate config that reads `THEME=<name>`. The scripts:
 
 ```
-public/build/               адмінка (не змінюється)
-public/hot                  dev-сервер адмінки
-public/themes/<name>/       збірка теми + manifest.json
-public/themes/<name>.hot    dev-сервер теми
+"theme:dev":   "node scripts/theme.mjs dev"      # the name of the theme is mandatory
+"theme:build": "node scripts/theme.mjs build"    # the name is optional
 ```
 
-`/public/themes` додається до `.gitignore` (як `/public/build`). Dev-сервер теми: порт із `THEME_DEV_PORT` (за замовчуванням 5174), `strictPort: true`, щоб не підмінити порт адмінки тихо.
+`scripts/theme.mjs` parses the argument, checks that `themes/<name>/assets` exists, and runs `vite -c vite.theme.config.js` (`build` — sequentially for each theme with `assets/`, when there is no name) with `THEME` in the environment. Names without `assets/` are skipped (all are built), and an explicitly named theme without `assets/` gives an error.
 
-### 3. Входи за конвенцією `assets/{app,vendor}.{css,scss,js}`
+Why not `vite build` with an argument: Vite has no own parameters of this kind, and an environment variable in the config is the standard way. Why not one config with `--mode`: then `emptyOutDir` and the set of plugins of the admin (React, `tsc`) would remain shared, and the separation — the essence of the change — would not be.
 
-`vite.theme.config.js` додає до `input` лише існуючі `themes/<name>/assets/{vendor,app}.{css,scss,js}`. Усе інше (`_*.scss`, `lib/`, `js/*.js`) — partials. Ключі маніфеста залишаються шляхами від кореня проєкту (`themes/default/assets/app.css`, `themes/x/assets/vendor.scss`).
+Alternative: an array of configs (`defineConfig([...])`) in `vite.config.js` — Vite does not build several configs in one call, so it does not solve the problem of the independent launch.
 
-Замість каталогів `assets/css` і `assets/js` входи лежать у корені `assets/`: SCSS і JS одного бандла (`app.scss` + `app.js`) стоять поруч, а підкаталоги вільні для partials.
+### 2. The output `public/themes/<name>/` with its own manifest and hot file
 
-Альтернатива: лишити glob по `assets/{css,js}/*`. Відкинуто: будь-який partial став би входом, а vendor/app не відрізнити від решти.
+`laravel({ input, buildDirectory: 'themes/<name>', hotFile: 'public/themes/<name>.hot' })`. Then:
 
-### 4. Vendor явний, а не автоматичний
+```
+public/build/               the admin (does not change)
+public/hot                  the dev server of the admin
+public/themes/<name>/       the build of the theme + manifest.json
+public/themes/<name>.hot    the dev server of the theme
+```
 
-`vendor.scss`/`vendor.css` і `vendor.js` самі перелічують бібліотеки (`@use 'bootstrap/scss/bootstrap'`, `import 'swiper'`), `app.*` містить код теми. Джерело бібліотеки — пакет із `node_modules` або файл у темі (`assets/lib/...`, імпорт за відносним шляхом): обидва — звичайні ES-імпорти Vite. Плагінам, яким потрібні глобальні змінні, `vendor.js` присвоює їх сам (`window.$ = jQuery`); `app.js` не імпортує те, що вже в `vendor`.
+`/public/themes` is added to `.gitignore` (like `/public/build`). The dev server of the theme: the port from `THEME_DEV_PORT` (by default 5174), `strictPort: true`, so as not to silently replace the port of the admin.
 
-Чому не автоматично (усе з `node_modules` → `vendor` через групи чанків): для JS це працює, для CSS — ні (Sass інлайнить `@use`/`@import` у файл, що імпортує), тож правило було б різним для JS і CSS, а порядок каскаду (`vendor` перед `app`) не під контролем автора. Явний `vendor.*` дає той самий механізм для CSS і JS.
+### 3. Entries by the convention `assets/{app,vendor}.{css,scss,js}`
 
-Якщо `app.js` усе ж імпортує модуль, який імпортує й `vendor.js`, Rolldown виносить його у спільний чанк (дубля немає, `@vite` додає `modulepreload`). Це допустимо, але не конвенція.
+`vite.theme.config.js` adds to `input` only the existing `themes/<name>/assets/{vendor,app}.{css,scss,js}`. Everything else (`_*.scss`, `lib/`, `js/*.js`) — partials. The keys of the manifest remain the paths from the root of the project (`themes/default/assets/app.css`, `themes/x/assets/vendor.scss`).
 
-Файли зберігають хеші в іменах (кеш-бастинг через маніфест); `vendor`/`app` — ключі маніфеста (`vendor.scss` → `vendor-<hash>.css`).
+Instead of the directories `assets/css` and `assets/js`, the entries lie in the root of `assets/`: the SCSS and JS of one bundle (`app.scss` + `app.js`) stand next to each other, and the subdirectories are free for partials.
 
-### 5. Підключення: окремий екземпляр `Vite`, порядок vendor → app
+Alternative: to keep the glob over `assets/{css,js}/*`. Rejected: any partial would become an entry, and vendor/app could not be told apart from the rest.
+
+### 4. Vendor is explicit, not automatic
+
+`vendor.scss`/`vendor.css` and `vendor.js` list the libraries themselves (`@use 'bootstrap/scss/bootstrap'`, `import 'swiper'`), `app.*` contains the code of the theme. The source of a library — a package from `node_modules` or a file in the theme (`assets/lib/...`, the import by a relative path): both are ordinary ES imports of Vite. For the plugins that need global variables, `vendor.js` assigns them itself (`window.$ = jQuery`); `app.js` does not import what is already in `vendor`.
+
+Why not automatic (everything from `node_modules` → `vendor` through the groups of chunks): for JS it works, for CSS it does not (Sass inlines `@use`/`@import` into the file that imports them), so the rule would differ for JS and CSS, and the order of the cascade (`vendor` before `app`) would not be under the control of the author. The explicit `vendor.*` gives the same mechanism for CSS and JS.
+
+If `app.js` nevertheless imports a module that also imports `vendor.js`, Rolldown moves it into a shared chunk (there is no duplicate, `@vite` adds `modulepreload`). This is permissible, but not the convention.
+
+The files keep the hashes in their names (cache busting through the manifest); `vendor`/`app` are the keys of the manifest (`vendor.scss` → `vendor-<hash>.css`).
+
+### 5. The connection: a separate instance of `Vite`, the order vendor → app
 
 `ThemeManager`:
 
-- `assets()` повертає ключі входів активної теми в порядку `vendor`, потім `app` (усередині — як у маніфесті). У prod читає `public/themes/<name>/manifest.json` (немає файла — порожній список, як зараз без маніфеста); у dev (існує `public/themes/<name>.hot`) перелічує `assets/{vendor,app}.*` на диску.
-- Новий метод (наприклад `assetTags()`) повертає HTML тегів: `(new Vite)->useHotFile(public_path('themes/<name>.hot'))->useBuildDirectory('themes/<name>')->__invoke($assets)`. Окремий екземпляр, а не глобальний singleton, тож hot-файл теми не підміняє `public/hot` адмінки й тести не залежать від стану.
+- `assets()` returns the keys of the entries of the active theme in the order `vendor`, then `app` (inside — as in the manifest). In prod it reads `public/themes/<name>/manifest.json` (no file — an empty list, as now without the manifest); in dev (the file `public/themes/<name>.hot` exists) it lists `assets/{vendor,app}.*` on the disk.
+- A new method (for example `assetTags()`) returns the HTML of the tags: `(new Vite)->useHotFile(public_path('themes/<name>.hot'))->useBuildDirectory('themes/<name>')->__invoke($assets)`. A separate instance, not the global singleton, so the hot file of the theme does not replace `public/hot` of the admin and the tests do not depend on the state.
 
-`html.blade.php` викликає `{!! $assetTags !!}` (або `@themeAssets`) замість `@vite($assets)`; `PublicData` передає тег поряд зі списком `$assets`.
+`html.blade.php` calls `{!! $assetTags !!}` (or `@themeAssets`) instead of `@vite($assets)`; `PublicData` passes the tag next to the list `$assets`.
 
-Альтернатива: `@vite($assets, 'themes/x')` без окремого екземпляра. Відкинуто: у hot-режимі Laravel бере глобальний `public/hot`, тож dev-сервер теми ніколи не буде використано.
+Alternative: `@vite($assets, 'themes/x')` without a separate instance. Rejected: in the hot mode Laravel takes the global `public/hot`, so the dev server of the theme would never be used.
 
-### 6. Адмінка не знає про теми
+### 6. The admin does not know about the themes
 
-`vite.config.js` втрачає `themeEntries()`, `fs` і `path` для тем. `npm run build` лишається `tsc --noEmit && vite build` і пише лише в `public/build`. Правила ізоляції CSS адмінки ([default-theme-styling](../../specs/default-theme-styling/spec.md)) не змінюються.
+`vite.config.js` loses `themeEntries()`, `fs` and `path` for the themes. `npm run build` remains `tsc --noEmit && vite build` and writes only to `public/build`. The rules of the isolation of the CSS of the admin ([default-theme-styling](../../specs/default-theme-styling/spec.md)) do not change.
 
-### 7. Tailwind у `default`, SCSS в інших темах
+### 7. Tailwind in `default`, SCSS in the other themes
 
-`vite.theme.config.js` підключає `tailwindcss()` для всіх тем (плагін не чіпає файли без Tailwind-директив), `sass` — залежність проєкту. `default/assets/app.css` лишається чистим CSS; його `@source` коригуються на нову глибину (`../views`, `../../*/views`, `../../../vendor/...`). Тема на SCSS не використовує Tailwind-директив у `.scss`.
+`vite.theme.config.js` connects `tailwindcss()` for all themes (the plugin does not touch the files without Tailwind directives), `sass` is a dependency of the project. `default/assets/app.css` remains plain CSS; its `@source` are corrected for the new depth (`../views`, `../../*/views`, `../../../vendor/...`). A theme on SCSS does not use Tailwind directives in `.scss`.
 
-### 8. Міграція існуючої теми
+### 8. Migration of the existing theme
 
-`themes/default/assets/css/app.css` → `themes/default/assets/app.css` (`git mv`), `@source` коригуються. Тести `ThemeManagerTest`/`DefaultThemeStylingTest` читають `public/themes/default/manifest.json` і ключ `themes/default/assets/app.css`; тест порядку `vendor` → `app` будує маніфест фікстурної теми в `public/themes/<унікальне-ім'я>/` і прибирає його в `tearDown`.
+`themes/default/assets/css/app.css` → `themes/default/assets/app.css` (`git mv`), the `@source` are corrected. The tests `ThemeManagerTest`/`DefaultThemeStylingTest` read `public/themes/default/manifest.json` and the key `themes/default/assets/app.css`; the test of the order `vendor` → `app` builds the manifest of a fixture theme in `public/themes/<unique-name>/` and removes it in `tearDown`.
 
 ## Risks / Trade-offs
 
-- [Забули зібрати тему після оновлення: `public/themes/default` немає, сторінка без стилів] → `assets()` дає порожній список без помилки (вимога «Тема без ресурсів»); у `docs/site-themes.md` і `docs/e2e-testing.md` додати команду в передумови; e2e `public-site` це виявить.
-- [Rolldown дублює або виносить у спільний чанк модуль, що імпортують і `vendor.js`, і `app.js`] → конвенція «бібліотеки лише у `vendor`»; перевірка в задачах: збірка `default` + фікстурна тема з `vendor.js`, у вихідних файлах немає дубля.
-- [Hot-файл теми лишився після аварійної зупинки dev-сервера: сторінки шукають мертвий порт] → той самий ризик, що й у `public/hot` адмінки; плагін Laravel видаляє файл при зупинці; у документації — «видали `public/themes/<name>.hot`».
-- [Два dev-сервери (адмінка 5173, тема 5174) і CORS] → плагін Laravel виставляє CORS для `APP_URL`, як і для адмінки; порт 5174 з `strictPort`, щоб конфлікт був явною помилкою.
-- [`sass` — нова dev-залежність] → лише `devDependencies`, не потрапляє в прод-збірку адмінки.
-- [**BREAKING** для сторонніх тем у `assets/css` і `assets/js`] → у проєкті одна тема з ресурсами (`default`); міграція описана в задачах і в `docs/site-themes.md`.
+- [The theme was forgotten to be built after the update: `public/themes/default` is absent, the page without styles] → `assets()` gives an empty list without an error (the requirement «Тема без ресурсів» — "A theme without resources"); in `docs/site-themes.md` and `docs/e2e-testing.md` add the command to the prerequisites; the e2e `public-site` will reveal it.
+- [Rolldown duplicates or moves into a shared chunk a module imported by both `vendor.js` and `app.js`] → the convention «libraries only in `vendor`»; a check in the tasks: the build of `default` + a fixture theme with `vendor.js`, there is no duplicate in the output files.
+- [The hot file of the theme is left after an emergency stop of the dev server: the pages look for a dead port] → the same risk as with `public/hot` of the admin; the plugin of Laravel removes the file on the stop; in the documentation — «remove `public/themes/<name>.hot`».
+- [Two dev servers (the admin 5173, the theme 5174) and CORS] → the plugin of Laravel sets CORS for `APP_URL`, as for the admin; the port 5174 with `strictPort`, so that the conflict is an explicit error.
+- [`sass` — a new dev dependency] → only `devDependencies`, does not get into the production build of the admin.
+- [**BREAKING** for the third-party themes in `assets/css` and `assets/js`] → the project has one theme with resources (`default`); the migration is described in the tasks and in `docs/site-themes.md`.
 
 ## Migration Plan
 
 1. `npm install --save-dev sass`.
-2. Перенести `default/assets/css/app.css` → `default/assets/app.css`, виправити `@source`.
-3. `npm run build` (адмінка) і `npm run theme:build` (теми); перевірити `public/themes/default/manifest.json`.
-4. Видалити старі файли тем із `public/build` (зникнуть самі після повторної `npm run build`).
-5. Відкат: повернути `themeEntries()` у `vite.config.js` і файл у `assets/css/`; `public/themes` видалити.
+2. Move `default/assets/css/app.css` → `default/assets/app.css`, fix the `@source`.
+3. `npm run build` (the admin) and `npm run theme:build` (the themes); check `public/themes/default/manifest.json`.
+4. Remove the old files of the themes from `public/build` (they will disappear by themselves after the repeated `npm run build`).
+5. Rollback: return `themeEntries()` to `vite.config.js` and the file to `assets/css/`; remove `public/themes`.
 
 ## Open Questions
 
-- Чи додавати `theme:build` до деплой-скрипта — деплой у цьому репозиторії не описаний, вирішується під час розгортання, на поведінку не впливає.
+- Whether to add `theme:build` to the deployment script — the deployment is not described in this repository, it is decided during the deployment, it does not affect the behaviour.

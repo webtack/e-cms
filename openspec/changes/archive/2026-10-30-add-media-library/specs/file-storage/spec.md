@@ -2,153 +2,153 @@
 
 ## MODIFIED Requirements
 
-### Requirement: Облік файлів
-Система SHALL зберігати кожен завантажений файл як окремий запис із власною ідентичністю: внутрішній числовий ідентифікатор, незмінний `uuid` без дефісів (32 символи) як єдиний зовнішній ідентифікатор, профіль завантаження, диск, шлях на диску, оригінальне ім'я, визначений тип (mime), розмір у байтах і хеш вмісту; для зображень також ширину й висоту в пікселях; користувача, що завантажив файл (порожній, якщо користувача невідомо чи видалено). Споживачі SHALL посилатися на файл за його `uuid`.
+### Requirement: File records
+The system SHALL store each uploaded file as a separate record with its own identity: an internal numeric identifier, an immutable `uuid` without hyphens (32 characters) as the single external identifier, the upload profile, the disk, the path on the disk, the original name, the detected type (mime), the size in bytes and the content hash; for images also the width and height in pixels; the user who uploaded the file (empty if the user is unknown or deleted). Consumers SHALL refer to a file by its `uuid`.
 
-#### Scenario: Метадані документа
-- **WHEN** завантажується PDF-файл `report.pdf` розміром 1 МБ
-- **THEN** створюється запис із оригінальним ім'ям `report.pdf`, типом `application/pdf`, розміром у байтах, хешем вмісту, профілем, диском і шляхом, а ширина й висота відсутні
+#### Scenario: Document metadata
+- **WHEN** the PDF file `report.pdf` of 1 MB is uploaded
+- **THEN** a record is created with the original name `report.pdf`, the type `application/pdf`, the size in bytes, the content hash, the profile, the disk and the path, and the width and height are absent
 
-#### Scenario: Метадані зображення
-- **WHEN** завантажується PNG-зображення 640×480
-- **THEN** запис містить тип `image/png`, ширину 640 і висоту 480
+#### Scenario: Image metadata
+- **WHEN** a PNG image of 640×480 is uploaded
+- **THEN** the record contains the type `image/png`, the width 640 and the height 480
 
-#### Scenario: Формат uuid
-- **WHEN** створюється запис файлу
-- **THEN** його `uuid` складається з 32 символів `0-9a-f` без дефісів і не змінюється після створення
+#### Scenario: Format of the uuid
+- **WHEN** a file record is created
+- **THEN** its `uuid` consists of 32 characters `0-9a-f` without hyphens and does not change after creation
 
-#### Scenario: Користувач, що завантажив
-- **WHEN** авторизований адміністратор завантажує файл
-- **THEN** запис фіксує цього користувача як завантажувача
+#### Scenario: User who uploaded
+- **WHEN** an authenticated administrator uploads a file
+- **THEN** the record captures this user as the uploader
 
-#### Scenario: Видалення користувача
-- **WHEN** користувача, що завантажив файл, видалено
-- **THEN** файл і його запис лишаються, а завантажувач стає невідомим
+#### Scenario: Deleting the user
+- **WHEN** the user who uploaded a file is deleted
+- **THEN** the file and its record remain, and the uploader becomes unknown
 
-#### Scenario: Однаковий вміст
-- **WHEN** двічі завантажується файл з однаковим вмістом
-- **THEN** створюються два окремі записи з різними `uuid` та однаковим хешем
+#### Scenario: Identical content
+- **WHEN** a file with identical content is uploaded twice
+- **THEN** two separate records with different `uuid` values and an identical hash are created
 
-### Requirement: Профілі завантаження
-Система SHALL описувати правила завантаження іменованими профілями в конфігурації розробника: кожен профіль визначає диск, дозволені типи та максимальний розмір. Профіль SHALL не визначати каталог: файл зберігається в корені диска, а розташування задає стандартне налаштування цього диска. Користувач SHALL не обирати диск і не задавати правила під час завантаження. На старті SHALL існувати профілі `image` (зображення JPEG, PNG, WebP, GIF, до 5 МБ) і `document` (PDF, DOCX, XLSX, до 20 МБ).
+### Requirement: Upload profiles
+The system SHALL describe upload rules as named profiles in the developer's configuration: each profile defines the disk, the allowed types and the maximum size. A profile SHALL NOT define a directory: the file is stored in the root of the disk, and the location is set by the standard setting of this disk. The user SHALL NOT choose the disk and SHALL NOT set the rules during the upload. At the start there SHALL be the profiles `image` (images JPEG, PNG, WebP, GIF, up to 5 MB) and `document` (PDF, DOCX, XLSX, up to 20 MB).
 
-#### Scenario: Диск із профілю
-- **WHEN** завантажується файл за профілем `image`
-- **THEN** файл зберігається в корені диска, вказаного в конфігурації цього профілю, а запис фіксує цей диск
+#### Scenario: Disk from the profile
+- **WHEN** a file is uploaded by the profile `image`
+- **THEN** the file is stored in the root of the disk specified in the configuration of this profile, and the record captures this disk
 
-#### Scenario: Невідомий профіль
-- **WHEN** запитано завантаження за профілем, якого немає в конфігурації
-- **THEN** завантаження відхилено з помилкою валідації, файл не зберігається
+#### Scenario: Unknown profile
+- **WHEN** an upload is requested by a profile that is not in the configuration
+- **THEN** the upload is rejected with a validation error, and the file is not stored
 
-#### Scenario: Новий профіль без змін коду
-- **WHEN** розробник додає профіль до конфігурації
-- **THEN** він доступний для завантаження без змін інших частин системи
+#### Scenario: New profile without code changes
+- **WHEN** the developer adds a profile to the configuration
+- **THEN** it is available for uploads without changes to other parts of the system
 
-#### Scenario: Різні профілі на одному диску
-- **WHEN** файли профілів `image` і `document` зберігаються на одному диску
-- **THEN** обидва лежать у корені диска під іменами `{uuid}.{розширення}` і не конфліктують
+#### Scenario: Different profiles on one disk
+- **WHEN** files of the profiles `image` and `document` are stored on one disk
+- **THEN** both lie in the root of the disk under the names `{uuid}.{extension}` and do not conflict
 
-### Requirement: Безпека збережених файлів
-Система SHALL відхиляти виконувані файли (зокрема `php`, `phtml`, `sh`, `exe`) та SVG незалежно від профілю, SHALL називати файл на диску `{uuid}.{розширення}`, де `uuid` — ідентифікатор його запису, а розширення визначається дозволеним типом, і SHALL зберігати оригінальне ім'я лише як метадані.
+### Requirement: Security of stored files
+The system SHALL reject executable files (in particular `php`, `phtml`, `sh`, `exe`) and SVG regardless of the profile, SHALL name the file on the disk `{uuid}.{extension}`, where `uuid` is the identifier of its record and the extension is defined by the allowed type, and SHALL keep the original name only as metadata.
 
-#### Scenario: Виконуваний файл
-- **WHEN** завантажується файл `shell.php` за будь-яким профілем, зокрема профілем, що дозволяє довільні типи
-- **THEN** завантаження відхилено
+#### Scenario: Executable file
+- **WHEN** the file `shell.php` is uploaded under any profile, including a profile that allows arbitrary types
+- **THEN** the upload is rejected
 
 #### Scenario: SVG
-- **WHEN** завантажується SVG-зображення за профілем `image`
-- **THEN** завантаження відхилено
+- **WHEN** an SVG image is uploaded by the profile `image`
+- **THEN** the upload is rejected
 
-#### Scenario: Ім'я на диску
-- **WHEN** завантажується файл з оригінальним ім'ям `../../evil name.png`
-- **THEN** на диску файл лежить у корені диска профілю під ім'ям `{uuid}.png`, а оригінальне ім'я збережено лише як метадані
+#### Scenario: Name on the disk
+- **WHEN** a file with the original name `../../evil name.png` is uploaded
+- **THEN** on the disk the file lies in the root of the disk of the profile under the name `{uuid}.png`, and the original name is stored only as metadata
 
-### Requirement: Завантаження файлу окремим запитом
-Система SHALL приймати файл окремим запитом адмінки (multipart) лише від автентифікованого користувача з підтвердженою поштою. Запит SHALL вказувати або профіль завантаження, або поле типу контенту (його тип і ключ), але не обидва одразу. За полем система SHALL брати профіль з типу поля та застосовувати налаштування поля, що звужують правила профілю (дозволені типи й максимальний розмір); правила SHALL бути не ширшими за профіль. У відповідь система SHALL повертати метадані створеного запису: `uuid`, профіль, оригінальне ім'я, тип, розмір, ширину та висоту (для зображень) і посилання на файл. Форми, що використовують файл, SHALL передавати надалі лише його `uuid`.
+### Requirement: Uploading a file in a separate request
+The system SHALL accept a file in a separate admin request (multipart) only from an authenticated user with a confirmed email. The request SHALL specify either an upload profile or a field of a content type (its type and key), but not both at once. For a field the system SHALL take the profile from the type of the field and apply the settings of the field that narrow the rules of the profile (the allowed types and the maximum size); the rules SHALL NOT be wider than the profile. In the response the system SHALL return the metadata of the created record: `uuid`, profile, original name, type, size, width and height (for images) and the link to the file. Forms that use a file SHALL pass on only its `uuid`.
 
-#### Scenario: Успішне завантаження
-- **WHEN** авторизований адміністратор надсилає файл і профіль `image`
-- **THEN** відповідь містить `uuid` і метадані запису та посилання, за яким файл доступний
+#### Scenario: Successful upload
+- **WHEN** an authorized administrator sends a file and the profile `image`
+- **THEN** the response contains the `uuid` and the metadata of the record and the link by which the file is available
 
-#### Scenario: Завантаження за полем
-- **WHEN** адміністратор надсилає файл і поле `image`, що дозволяє лише `image/png`, та файл є PNG у межах розміру поля
-- **THEN** файл прийнято, профіль запису дорівнює профілю типу поля
+#### Scenario: Upload by field
+- **WHEN** an administrator sends a file and the field `image` that allows only `image/png`, and the file is a PNG within the size of the field
+- **THEN** the file is accepted, and the profile of the record equals the profile of the type of the field
 
-#### Scenario: Тип поза налаштуваннями поля
-- **WHEN** адміністратор надсилає JPEG у поле, що дозволяє лише `image/png`
-- **THEN** завантаження відхилено з помилкою валідації, на диску нічого не створено
+#### Scenario: Type outside the field settings
+- **WHEN** an administrator sends a JPEG into the field that allows only `image/png`
+- **THEN** the upload is rejected with a validation error, and nothing is created on the disk
 
-#### Scenario: Розмір понад налаштування поля
-- **WHEN** адміністратор надсилає файл, більший за `max_size` поля, але в межах профілю
-- **THEN** завантаження відхилено з помилкою валідації
+#### Scenario: Size above the field settings
+- **WHEN** an administrator sends a file larger than the `max_size` of the field, but within the profile
+- **THEN** the upload is rejected with a validation error
 
-#### Scenario: Профіль і поле одночасно
-- **WHEN** запит містить і профіль, і поле
-- **THEN** відповідь містить помилку валідації, запис не створюється
+#### Scenario: Profile and field at the same time
+- **WHEN** the request contains both a profile and a field
+- **THEN** the response contains a validation error, and no record is created
 
-#### Scenario: Невідоме поле
-- **WHEN** запит указує поле, якого немає, або поле іншого типу (не `image`/`file`)
-- **THEN** відповідь містить помилку валідації, запис не створюється
+#### Scenario: Unknown field
+- **WHEN** the request specifies a field that does not exist, or a field of another type (not `image`/`file`)
+- **THEN** the response contains a validation error, and no record is created
 
-#### Scenario: Гість
-- **WHEN** запит завантаження надходить без автентифікації
-- **THEN** файл не приймається, запис не створюється
+#### Scenario: Guest
+- **WHEN** an upload request arrives without authentication
+- **THEN** the file is not accepted, and no record is created
 
-#### Scenario: Немає файлу
-- **WHEN** запит надіслано без файлу або без профілю чи поля
-- **THEN** відповідь містить помилки валідації, запис не створюється
+#### Scenario: No file
+- **WHEN** the request is sent without a file or without a profile or field
+- **THEN** the response contains validation errors, and no record is created
 
-### Requirement: Перевірка посилання на файл у споживачів
-Система SHALL надавати споживачам правило валідації, що приймає значення лише тоді, коли воно є `uuid` наявного файлу, завантаженого за вказаним профілем.
+### Requirement: Validation of a file reference in consumers
+The system SHALL provide consumers with a validation rule that accepts a value only when it is the `uuid` of an existing file uploaded under the specified profile.
 
-#### Scenario: Файл потрібного профілю
-- **WHEN** значення є `uuid` файлу, завантаженого за профілем `image`, а споживач вимагає профіль `image`
-- **THEN** перевірка проходить
+#### Scenario: File of the required profile
+- **WHEN** the value is the `uuid` of a file uploaded under the profile `image`, and the consumer requires the profile `image`
+- **THEN** the check passes
 
-#### Scenario: Файл іншого профілю
-- **WHEN** значення є `uuid` файлу профілю `document`, а споживач вимагає профіль `image`
-- **THEN** перевірка не проходить з помилкою валідації
+#### Scenario: File of another profile
+- **WHEN** the value is the `uuid` of a file of the profile `document`, and the consumer requires the profile `image`
+- **THEN** the check fails with a validation error
 
-#### Scenario: Неіснуючий файл
-- **WHEN** значення не збігається з жодним файлом
-- **THEN** перевірка не проходить з помилкою валідації
+#### Scenario: Non-existing file
+- **WHEN** the value matches no file
+- **THEN** the check fails with a validation error
 
-#### Scenario: Некоректний формат
-- **WHEN** значення не є рядком із 32 символів `0-9a-f`
-- **THEN** перевірка не проходить з помилкою валідації
+#### Scenario: Invalid format
+- **WHEN** the value is not a string of 32 characters `0-9a-f`
+- **THEN** the check fails with a validation error
 
-### Requirement: Захист файлів, що використовуються
-Система SHALL не допускати видалення запису файлу, для якого існує зв'язок використання (див. `media-library`), а споживач SHALL відпускати файл лише зміною або очищенням власного значення, не видаляючи сам файл.
+### Requirement: Protection of files in use
+The system SHALL not allow the deletion of a file record for which a usage relation exists (see `media-library`), and a consumer SHALL release a file only by changing or clearing its own value, without deleting the file itself.
 
-#### Scenario: Спроба видалити використовуваний файл
-- **WHEN** запис файлу, на який є зв'язок використання, видаляється
-- **THEN** видалення відхилено, запис і файл на диску лишаються
+#### Scenario: Attempt to delete a file in use
+- **WHEN** the record of a file that has a usage relation is deleted
+- **THEN** the deletion is rejected, the record and the file on the disk remain
 
-#### Scenario: Заміна файлу споживачем
-- **WHEN** споживач замінює значення з одного файлу на інший
-- **THEN** старий запис і файл на диску лишаються у сховищі
+#### Scenario: Replacement of a file by a consumer
+- **WHEN** a consumer replaces a value from one file with another
+- **THEN** the old record and the file on the disk remain in the storage
 
-### Requirement: Віджет завантаження в адмінці
-Адмінка SHALL надавати повторно використовуваний компонент завантаження файлу: вибір файлу або перетягування, індикацію завантаження, показ помилок валідації, перегляд завантаженого зображення, очищення вибору та передачу `uuid` файлу формі. Компонент SHALL завантажувати файл окремим запитом до форми.
+### Requirement: Upload widget in the admin
+The admin SHALL provide a reusable file upload component: file selection or drag-and-drop, an indication of the upload, display of validation errors, preview of an uploaded image, clearing of the selection and passing the `uuid` of the file to the form. The component SHALL upload the file in a separate request to the form.
 
-#### Scenario: Успішне завантаження
-- **WHEN** користувач вибирає допустимий файл
-- **THEN** компонент показує перебіг, а після завершення — ім'я файлу (для зображення — його перегляд) і передає формі `uuid` файлу
+#### Scenario: Successful upload
+- **WHEN** the user selects an allowed file
+- **THEN** the component shows the progress, and after completion — the file name (for an image — its preview) and passes the `uuid` of the file to the form
 
-#### Scenario: Відхилений файл
-- **WHEN** користувач вибирає файл недозволеного типу чи завеликий
-- **THEN** компонент показує повідомлення про помилку, `uuid` формі не передається
+#### Scenario: Rejected file
+- **WHEN** the user selects a file of a disallowed type or one that is too large
+- **THEN** the component shows an error message, and the `uuid` is not passed to the form
 
-#### Scenario: Очищення
-- **WHEN** користувач очищає вибраний файл
-- **THEN** компонент забирає значення з форми
+#### Scenario: Clearing
+- **WHEN** the user clears the selected file
+- **THEN** the component removes the value from the form
 
-#### Scenario: Демонстраційна сторінка
-- **WHEN** розробник відкриває демонстраційну сторінку компонента поза production
-- **THEN** вона показує компонент для профілів `image` і `document`; у production сторінка відповідає 404
+#### Scenario: Demo page
+- **WHEN** a developer opens the demo page of the component outside production
+- **THEN** it shows the component for the profiles `image` and `document`; in production the page responds 404
 
 ## REMOVED Requirements
 
-### Requirement: Очищення невикористовуваних файлів
-**Reason**: Невикористані файли тепер видаляє вручну адміністратор у медіатеці, де видно кількість використань кожного файлу; автоматичне очищення за розкладом (і конфігурація переліку місць посилань) більше не потрібні.
-**Migration**: Видалення невикористаних файлів — на сторінці медіатеки (див. `media-library`, «Ручне видалення невикористаних файлів»). Команда `files:prune`, її розклад і налаштування `references` та `prune_after_hours` вилучаються.
+### Requirement: Cleanup of unused files
+**Reason**: Unused files are now deleted manually by the administrator in the media library, where the number of uses of each file is visible; automatic cleanup on a schedule (and the configuration of the list of reference places) is no longer needed.
+**Migration**: Deleting unused files — on the media library page (see `media-library`, "Manual deletion of unused files"). The command `files:prune`, its schedule and the settings `references` and `prune_after_hours` are removed.

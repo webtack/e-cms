@@ -1,47 +1,47 @@
 ## MODIFIED Requirements
 
-### Requirement: Форма редагування поля
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/fields/{fieldKey}/edit` з тією самою формою, заповненою поточними значеннями поля. Ключ SHALL бути лише для читання з підказкою про незмінність. Тип значення SHALL бути заблокований для кожного поля з підказкою про незмінність типу; для системного поля додатково SHALL бути заблоковані «множинне» й «обов'язкове». Для ключа поля, якого немає в цьому типі, сторінка SHALL відповідати 404.
+### Requirement: Field edit form
+The admin SHALL have the page `/admin/content-types/{key}/fields/{fieldKey}/edit` with the same form, filled with the current values of the field. The key SHALL be read-only with a hint about its immutability. The value type SHALL be locked for every field with a hint about the immutability of the type; for a system field, "multiple" and "required" SHALL additionally be locked. For a field key that does not exist in this type, the page SHALL respond with 404.
 
-#### Scenario: Відкриття форми
-- **WHEN** користувач обирає «Редагувати» для поля `views` типу `news`
-- **THEN** відкривається `/admin/content-types/news/fields/views/edit` з поточними значеннями, ключ і тип значення неможливо змінити
+#### Scenario: Opening the form
+- **WHEN** the user selects "Edit" for the field `views` of the type `news`
+- **THEN** `/admin/content-types/news/fields/views/edit` opens with the current values, and the key and the value type cannot be changed
 
-#### Scenario: Системне поле
-- **WHEN** користувач відкриває форму поля `title`
-- **THEN** тип значення, «множинне» й «обов'язкове» заблоковані, а назва, «перекладне» і вага доступні
+#### Scenario: System field
+- **WHEN** the user opens the form of the field `title`
+- **THEN** the value type, "multiple" and "required" are locked, and the name, "translatable" and weight are available
 
-#### Scenario: Поле зі значеннями
-- **WHEN** користувач відкриває форму поля, для якого існують значення
-- **THEN** тип значення заблокований, решта полів доступні
+#### Scenario: Field with values
+- **WHEN** the user opens the form of a field for which values exist
+- **THEN** the value type is locked, the other fields are available
 
-#### Scenario: Поле без значень
-- **WHEN** користувач відкриває форму поля, для якого немає значень
-- **THEN** тип значення так само заблокований, решта полів (назва, вага, «множинне», «обов'язкове», «перекладне», налаштування) доступні
+#### Scenario: Field without values
+- **WHEN** the user opens the form of a field for which there are no values
+- **THEN** the value type is locked as well, the other fields (name, weight, "multiple", "required", "translatable", settings) are available
 
-#### Scenario: Невідоме поле
-- **WHEN** користувач відкриває форму для ключа, якого немає в типі
-- **THEN** сервер відповідає 404
+#### Scenario: Unknown field
+- **WHEN** the user opens the form for a key that does not exist in the type
+- **THEN** the server responds with 404
 
-### Requirement: Збереження змін поля
-Надсилання форми редагування SHALL оновлювати назву, вагу й ознаки поля; ключ, тип-власник і тип значення SHALL НЕ змінюватися. Значення ключа й типу-власника із запиту ігноруються. Тип значення з іншим значенням, ніж у поля, SHALL відхилятися з помилкою біля поля типу незалежно від стану форми й від наявності збережених значень; запит із тим самим типом SHALL не вважатися помилкою. Сервер SHALL також відхиляти зміну множинності й обов'язковості системного поля. Валідація назви й ваги збігається з валідацією створення. Після успіху користувач SHALL потрапити на список полів типу з повідомленням про успіх.
+### Requirement: Saving changes of a field
+Submitting the edit form SHALL update the name, the weight and the flags of the field; the key, the owner type and the value type SHALL NOT change. The values of the key and the owner type from the request are ignored. A value type different from the current one of the field SHALL be rejected with an error next to the type field regardless of the state of the form and of the presence of stored values; a request with the same type SHALL not be considered an error. The server SHALL also reject a change of multiplicity and required status of a system field. The validation of the name and the weight matches the validation of creation. After success the user SHALL land on the list of fields of the type with a success message.
 
-#### Scenario: Успішна зміна
-- **WHEN** користувач змінює назву поля `views` та вагу й зберігає (форма надсилає той самий тип)
-- **THEN** зміни збережено, користувача повернено до списку полів із повідомленням про успіх, у таблиці нові значення
+#### Scenario: Successful change
+- **WHEN** the user changes the name of the field `views` and the weight and saves (the form sends the same type)
+- **THEN** the changes are saved, the user is returned to the list of fields with a success message, and the table shows the new values
 
-#### Scenario: Тип поля зі значеннями
-- **WHEN** запит змінює тип значення поля, що має збережені значення
-- **THEN** зміни не збережено, біля поля типу показано помилку, значення не змінюються
+#### Scenario: Type of a field with values
+- **WHEN** the request changes the value type of a field that has stored values
+- **THEN** the changes are not saved, an error is shown next to the type field, and the values do not change
 
-#### Scenario: Тип поля без значень
-- **WHEN** запит змінює тип значення поля без збережених значень
-- **THEN** зміни не збережено, біля поля типу показано помилку, тип лишається попереднім
+#### Scenario: Type of a field without values
+- **WHEN** the request changes the value type of a field without stored values
+- **THEN** the changes are not saved, an error is shown next to the type field, and the type remains the previous one
 
-#### Scenario: Заборонені зміни title
-- **WHEN** запит змінює множинність або обов'язковість поля `title`
-- **THEN** зміни не збережено, показано помилку, поле лишається попереднім
+#### Scenario: Forbidden changes of title
+- **WHEN** the request changes the multiplicity or the required status of the field `title`
+- **THEN** the changes are not saved, an error is shown, and the field remains as before
 
-#### Scenario: Ключ у запиті
-- **WHEN** запит редагування містить інший ключ поля
-- **THEN** ключ не змінюється
+#### Scenario: Key in the request
+- **WHEN** the edit request contains a different field key
+- **THEN** the key does not change

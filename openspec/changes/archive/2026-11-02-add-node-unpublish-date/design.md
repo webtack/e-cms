@@ -2,84 +2,84 @@
 
 ## Context
 
-Записи (`content_nodes`) мають `published_at` (NOT NULL), `is_active` і `ContentNode::scopeVisible()`: `is_active AND published_at <= now()`. Меню вже розширило цю модель дією «зняти за розкладом»: `menu_items.unpublished_at`, видимість на читанні, статус `expired` і перевірка інтервалу в моделі та запиті (`MenuItem::status()`, `scopeVisible()`, `StoreMenuItemRequest::withValidator`). Мотивацію див. у [proposal.md](proposal.md), вимоги — у [specs/](specs/).
+Records (`content_nodes`) have `published_at` (NOT NULL), `is_active` and `ContentNode::scopeVisible()`: `is_active AND published_at <= now()`. The menu has already extended this model with the action «unpublish by schedule»: `menu_items.unpublished_at`, visibility computed on read, the status `expired` and the check of the interval in the model and in the request (`MenuItem::status()`, `scopeVisible()`, `StoreMenuItemRequest::withValidator`). The motivation is in [proposal.md](proposal.md), the requirements — in [specs/](specs/).
 
-Де сьогодні живе логіка стану запису: `ContentNodeController::status()` (PHP, для таблиці), `nodeStatus()` у `resources/js/Components/Admin/ContentNodes/status.ts` (клієнт, для бейджа форми до збереження) і `NodeStatusBadge` у `NodeServicePanel.tsx`. Форма й панель «Деталі» спільні для записів контенту, сторінок і блоків. Описують компоненти: `docs/content-model.md` (службові атрибути), `docs/content-querying.md` (видимість), `docs/admin-content-nodes.md` (таблиця, контракт форми, блок «Деталі»), `docs/menus.md` (перший застосунок моделі).
+Where the logic of the state of a record lives today: `ContentNodeController::status()` (PHP, for the table), `nodeStatus()` in `resources/js/Components/Admin/ContentNodes/status.ts` (the client, for the badge of the form before saving) and `NodeStatusBadge` in `NodeServicePanel.tsx`. The form and the panel «Деталі» are shared by the records of content, pages and blocks. The components described: `docs/content-model.md` (service attributes), `docs/content-querying.md` (visibility), `docs/admin-content-nodes.md` (the table, the contract of the form, the block «Деталі»), `docs/menus.md` (the first application of the model).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Та сама модель видимості, що в меню: інтервал `[published_at, unpublished_at)`, обчислення на читанні, без cron, черг і подій.
-- Нуль змін для наявних записів і для коду, що не знає про нову дату: `unpublished_at = NULL` означає «без обмеження».
-- Один обчислювач стану на сервері (замість копії в контролері) і дзеркало в клієнті для бейджа до збереження.
+- The same visibility model as in the menu: the interval `[published_at, unpublished_at)`, computed on read, without cron, queues and events.
+- Zero changes for the existing records and for the code that does not know about the new date: `unpublished_at = NULL` means «no limit».
+- One state calculator on the server (instead of a copy in the controller) and a mirror in the client for the badge before saving.
 
 **Non-Goals:**
-- Дата зняття для самих типів контенту (`content_types`): за уточненням власника зміна стосується записів.
-- Зарезервований ключ `unpublished_at` для користувацьких полів: це не колонка таблиці записів у списку, тож `ContentField::RESERVED_KEYS` не чіпаємо.
-- Колонка й сортування за `unpublished_at` у таблиці; фільтр за станом.
-- Зробити `published_at` необов'язковою (як у меню): це змінило б наявну поведінку записів і не потрібно для зняття.
-- Спільна абстракція «розклад видимості» для `ContentNode` і `MenuItem`: два вживання не виправдовують трейт.
+- An unpublish date for the content types themselves (`content_types`): by the owner's clarification the change concerns records.
+- The reserved key `unpublished_at` for user fields: it is not a column of the table of records in the list, so `ContentField::RESERVED_KEYS` is not touched.
+- A column and sorting by `unpublished_at` in the table; a filter by state.
+- Making `published_at` optional (as in the menu): it would change the existing behaviour of records and is not needed for the unpublishing.
+- A shared abstraction «visibility schedule» for `ContentNode` and `MenuItem`: two uses do not justify a trait.
 
 ## Decisions
 
-### 1. Колонка `content_nodes.unpublished_at`, nullable, без індексу
+### 1. The column `content_nodes.unpublished_at`, nullable, without an index
 
-Нова міграція додає `dateTime('unpublished_at')->nullable()` після `published_at`; бекфілу немає (наявні записи лишаються без дати зняття), відкат видаляє колонку. Індекс `(content_type, published_at)` лишається: умова на `unpublished_at` — це `IS NULL OR > now`, вона відсікає мало рядків і працює поверх уже вибраного діапазону, тож додатковий індекс не потрібен, доки немає вимірюваної проблеми.
+A new migration adds `dateTime('unpublished_at')->nullable()` after `published_at`; there is no backfill (the existing records remain without an unpublish date), the rollback drops the column. The index `(content_type, published_at)` remains: the condition on `unpublished_at` is `IS NULL OR > now`, it cuts few rows and works on top of the already selected range, so an additional index is not needed while there is no measurable problem.
 
-**Альтернативи:** окрема таблиця розкладів (навіть для багатьох інтервалів) — надмірно для однієї пари дат; `status`-колонка, яку перемикає планувальник — стан розходиться з розкладом при збоях і стирає намір редактора (те саме відхилено в меню).
+**Alternatives:** a separate table of schedules (even for many intervals) — excessive for one pair of dates; a `status` column switched by a scheduler — the state diverges from the schedule on failures and erases the intent of the editor (the same rejected for the menu).
 
-### 2. Видимість і стан — на читанні, за зразком `MenuItem`
+### 2. Visibility and state — on read, modeled on `MenuItem`
 
 ```
 visible(node) = is_active
                 AND published_at <= now
                 AND (unpublished_at IS NULL OR unpublished_at > now)
 
-status(node)  = disabled   якщо !is_active
-                scheduled  якщо published_at > now
-                expired    якщо unpublished_at IS NOT NULL AND unpublished_at <= now
-                published  інакше
+status(node)  = disabled   if !is_active
+                scheduled  if published_at > now
+                expired    if unpublished_at IS NOT NULL AND unpublished_at <= now
+                published  otherwise
 ```
 
-`ContentNode::scopeVisible()` додає третю умову (`orWhere`-група, як у `MenuItem::scopeVisible()`), тож `ContentNodeQuery` (режим «лише видимі», лічильник), `ContentNode::findBySlug(onlyVisible: true)` та інші споживачі скоупу отримують нову поведінку без змін свого коду. Межа: рівно в момент `unpublished_at` запис невидимий (`> now`, строго), а в момент `published_at` уже видимий (`<= now`): інтервал напіввідкритий і без перекриття. Додається `ContentNode::status(?CarbonInterface $now = null)`, що повертає `disabled | scheduled | expired | published`; параметр `now` робить метод детермінованим у тестах, як у `MenuItem`. `ContentNodeController::status()` стає тонкою обгорткою над ним (або видаляється, а контролер викликає модель): правило стану живе в одному місці PHP.
+`ContentNode::scopeVisible()` adds the third condition (an `orWhere` group, as in `MenuItem::scopeVisible()`), so `ContentNodeQuery` (the mode «only visible», the counter), `ContentNode::findBySlug(onlyVisible: true)` and the other consumers of the scope get the new behaviour without changes of their own code. The boundary: exactly at the moment `unpublished_at` the record is invisible (`> now`, strict), and at the moment `published_at` it is already visible (`<= now`): the interval is half-open and has no overlap. `ContentNode::status(?CarbonInterface $now = null)` is added, which returns `disabled | scheduled | expired | published`; the parameter `now` makes the method deterministic in tests, as in `MenuItem`. `ContentNodeController::status()` becomes a thin wrapper over it (or is removed, and the controller calls the model): the rule of the state lives in one place in PHP.
 
-### 3. Інтервал перевіряється в трьох місцях, арбітр — модель
+### 3. The interval is checked in three places, the arbiter is the model
 
-- `ContentNode::assertValid()` (хук `saving`, остання межа для коду й імпорту): коли обидві дати задані, `unpublished_at` має бути пізніше за `published_at`, інакше `ValidationException` для ключа `unpublished_at`.
-- `StoreContentNodeRequest` і `UpdateContentNodeRequest`: `unpublished_at` — `nullable|date_format:Y-m-d\TH:i` (той самий `PUBLISHED_AT_FORMAT`, UTC без перетворення) і перевірка порядку в `withValidator` (після базових правил), щоб помилка стояла біля поля. Для створення порожня `published_at` означає «зараз»: порівняння ведеться з поточною хвилиною, тож дата зняття в минулому без дати публікації відхиляється (сценарій у специфікації).
-- `ContentNodeCreator::create()` отримує параметр `?CarbonInterface $unpublishedAt = null` (передається в `new ContentNode([...])`); перевірку виконує модель на `save()`.
+- `ContentNode::assertValid()` (the hook `saving`, the last boundary for the code and the import): when both dates are set, `unpublished_at` must be later than `published_at`, otherwise a `ValidationException` for the key `unpublished_at`.
+- `StoreContentNodeRequest` and `UpdateContentNodeRequest`: `unpublished_at` — `nullable|date_format:Y-m-d\TH:i` (the same `PUBLISHED_AT_FORMAT`, UTC without conversion) and the check of the order in `withValidator` (after the basic rules), so that the error stands next to the field. For creation an empty `published_at` means «now»: the comparison is made with the current minute, so an unpublish date in the past without a publication date is rejected (the scenario in the spec).
+- `ContentNodeCreator::create()` receives the parameter `?CarbonInterface $unpublishedAt = null` (passed into `new ContentNode([...])`); the check is performed by the model on `save()`.
 
-Порівняння ведеться за хвилиною (`startOfMinute()`), як у `StoreMenuItemRequest`, бо форма працює з точністю до хвилини.
+The comparison is made by the minute (`startOfMinute()`), as in `StoreMenuItemRequest`, because the form works to the minute.
 
-**Альтернатива:** лише правило `after:published_at` у запиті — не захищає код і імпорт та не працює, коли дата публікації підставляється сервером; відхилено.
+**Alternative:** only the rule `after:published_at` in the request — it does not protect the code and the import and does not work when the publication date is substituted by the server; rejected.
 
-### 4. Контракт форми й контролера
+### 4. The contract of the form and the controller
 
-`ContentNodeController` додає `unpublished_at` у `SERVICE_KEYS`, у пропси `node` сторінок `Create` (`null`) і `Edit` (`Y-m-d\TH:i` або `null`), у `store()` (`unpublishedAt: $this->publishedAt($request->validated('unpublished_at'))`; існуючий `publishedAt()` уже повертає `null` для порожнього значення) і в `update()`. У `update()` порожнє значення означає «очистити» (`null`), а відсутній ключ лишає значення як є (`$request->has('unpublished_at')`), так форма (яка надсилає ключ завжди) може очистити дату, а код/тест, що не знає про поле, її не стирає. Помилки службових атрибутів уже повертаються без префікса `values.`, тож ключ `unpublished_at` потрапляє біля поля без змін у `forForm()`.
+`ContentNodeController` adds `unpublished_at` to `SERVICE_KEYS`, to the props `node` of the pages `Create` (`null`) and `Edit` (`Y-m-d\TH:i` or `null`), to `store()` (`unpublishedAt: $this->publishedAt($request->validated('unpublished_at'))`; the existing `publishedAt()` already returns `null` for an empty value) and to `update()`. In `update()` an empty value means «clear» (`null`), and an absent key leaves the value as it is (`$request->has('unpublished_at')`): so the form (which always sends the key) can clear the date, while the code/test that does not know about the field does not erase it. The errors of the service attributes are already returned without the prefix `values.`, so the key `unpublished_at` gets next to the field without changes in `forForm()`.
 
-### 5. Клієнт: дзеркало стану й нове поле
+### 5. The client: a mirror of the state and the new field
 
-- `status.ts`: `NodeStatus` отримує `'expired'`; `nodeStatus(isActive, publishedAt, unpublishedAt, now)` зберігає порядок серверу (вимкнено, заплановано, завершено, опубліковано); некоректна або порожня `unpublishedAt` рахується як «без дати», а порожня `publishedAt` — як «зараз» (як зараз). Порівняння текстом `YYYY-MM-DDTHH:mm`, як у наявній функції.
-- `NodeServicePanel.tsx`: рядок «Показувати до» (`datetime-local`, `id="unpublished_at"`, підпис — наявний ключ перекладу `Show until`) одразу після «Дати публікації»; `STATUS_LABEL` додає `expired: 'Expired'` (ключ уже є в `lang/*.json`); бейдж `expired` рендериться як `outline`, відмінність — `data-status="expired"`. Помилка показується тим самим `message('unpublished_at')`.
-- `ContentNodeForm.tsx` і `types.ts`: `unpublished_at` у `useForm`, пропсах `node` та переліку ключів помилок, що запалюють червону крапку кнопки «Деталі» на вузьких екранах.
-- `Pages/Admin/ContentNodes/Index.tsx`: нових колонок немає; `NodeStatus` розширюється, тож бейдж «Завершено» з'являється сам. Змін у `DataTable` нема.
+- `status.ts`: `NodeStatus` gets `'expired'`; `nodeStatus(isActive, publishedAt, unpublishedAt, now)` keeps the order of the server (disabled, scheduled, expired, published); an incorrect or empty `unpublishedAt` is counted as «no date», and an empty `publishedAt` — as «now» (as now). The comparison is by text `YYYY-MM-DDTHH:mm`, as in the existing function.
+- `NodeServicePanel.tsx`: a row «Показувати до» (`datetime-local`, `id="unpublished_at"`, the label — the existing translation key `Show until`) right after «Дата публікації»; `STATUS_LABEL` adds `expired: 'Expired'` (the key is already in `lang/*.json`); the badge `expired` is rendered as `outline`, the difference — `data-status="expired"`. The error is shown by the same `message('unpublished_at')`.
+- `ContentNodeForm.tsx` and `types.ts`: `unpublished_at` in `useForm`, in the props `node` and in the list of the keys of errors that light up the red dot of the button «Деталі» on narrow screens.
+- `Pages/Admin/ContentNodes/Index.tsx`: there are no new columns; `NodeStatus` is extended, so the badge «Завершено» appears by itself. No changes in `DataTable`.
 
-Новий переклад не потрібен: підписи `Show until` і `Expired` вже є в `lang/en.json` і `lang/uk.json`. Це перевіряється задачею, а не припускається.
+No new translation is needed: the labels `Show until` and `Expired` already exist in `lang/en.json` and `lang/uk.json`. This is checked by the task, not assumed.
 
-### 6. Документація й e2e
+### 6. Documentation and e2e
 
-Службові атрибути, видимість і контракт форми описують `docs/content-model.md`, `docs/content-querying.md`, `docs/admin-content-nodes.md`; `docs/menus.md` лишається джерелом опису меню (посилання на нього не потрібне, лише коротка примітка, що логіка збігається, у `content-model.md`). Спільна форма записів покриває три розділи, тому, крім `admin-content-nodes`, перевіряються `admin-page-types` і `admin-block-types` за таблицею «Спільний код → спеки» (`docs/e2e-testing.md`, рядок про форму записів); нових спеків і нових рядків таблиць не потрібно, лише оновлення опису блоку «службова інформація» спеку записів.
+The service attributes, the visibility and the contract of the form are described in `docs/content-model.md`, `docs/content-querying.md`, `docs/admin-content-nodes.md`; `docs/menus.md` remains the source of the description of the menu (a link to it is not needed, only a short note that the logic matches, in `content-model.md`). The shared form of records covers three sections, so, apart from `admin-content-nodes`, the specs `admin-page-types` and `admin-block-types` are checked by the table «Спільний код → спеки» (`docs/e2e-testing.md`, the row about the form of records); no new specs and no new rows of the tables are needed, only the update of the description of the block «службова інформація» in the spec of the records.
 
 ## Risks / Trade-offs
 
-- [Запис невидимий для сайту, поки редактор не помітить, що минула дата зняття] → стан «Завершено» видно в таблиці записів і в бейджі форми; поле «Показувати до» стоїть поруч із датою публікації.
-- [Зміна `scopeVisible()` зачіпає всіх споживачів скоупу] → умова додається лише відсіканням (`unpublished_at` NULL або в майбутньому), тож наявні записи з `NULL` видимі як раніше; покривається тестами `ContentNodeTest` і `ContentNodeQueryTest`, включно з межею в момент `unpublished_at`.
-- [Розбіжність серверного й клієнтського обчислення стану] → обидва в одному порядку перевірок; сервер — арбітр, клієнт показує лише попередній бейдж до збереження (так само, як зараз).
-- [Час без пояса: UTC, як `published_at`] → поведінка збігається з наявною; редактор бачить час у тому ж вигляді.
-- [Дублювання логіки розкладу з `MenuItem`] → навмисно (див. Non-Goals); третє вживання стане підставою для спільної абстракції.
+- [A record is invisible for the site until the editor notices that the unpublish date has passed] → the state «Завершено» is visible in the table of records and in the badge of the form; the field «Показувати до» stands next to the publication date.
+- [The change of `scopeVisible()` affects all consumers of the scope] → the condition is added only as a cut (`unpublished_at` NULL or in the future), so the existing records with `NULL` are visible as before; covered by the tests `ContentNodeTest` and `ContentNodeQueryTest`, including the boundary at the moment `unpublished_at`.
+- [A discrepancy of the server and client computation of the state] → both in the same order of checks; the server is the arbiter, the client shows only a preliminary badge before saving (as now).
+- [Time without a zone: UTC, as `published_at`] → the behaviour matches the existing one; the editor sees the time in the same form.
+- [Duplication of the schedule logic with `MenuItem`] → deliberate (see Non-Goals); a third use will be the basis for a shared abstraction.
 
 ## Migration Plan
 
-1. Нова міграція додає nullable-колонку; даних для перенесення немає, `php artisan migrate` швидка (додавання nullable-колонки).
-2. Розгортання: `migrate`, звичайна збірка фронтенду (`npm run build`). Нових змінних середовища й залежностей немає.
-3. Відкат: `migrate:rollback` видаляє колонку разом із датами зняття; записи лишаються й знову видимі за `is_active` та `published_at`.
+1. The new migration adds a nullable column; there is no data to transfer, `php artisan migrate` is fast (adding a nullable column).
+2. Deployment: `migrate`, the usual front-end build (`npm run build`). There are no new environment variables or dependencies.
+3. Rollback: `migrate:rollback` drops the column together with the unpublish dates; the records remain and are visible again by `is_active` and `published_at`.

@@ -2,28 +2,28 @@
 
 ## Why
 
-Адмінка вже керує типами контенту виду `content` (список, створення, редагування, видалення, поля), але типи виду `page` у ній недоступні: маршрути `/admin/content-types/**` для них відповідають 404, а в навігації немає розділу. Щоб описувати структуру сторінок сайту (набори полів сторінок), адміністратору потрібні такі самі сторінки для `kind=page`.
+The admin already manages content types of the kind `content` (list, creation, editing, deletion, fields), but types of the kind `page` are not available in it: the routes `/admin/content-types/**` for them respond 404, and there is no section in the navigation. To describe the structure of the site's pages (sets of page fields), the administrator needs the same pages for `kind=page`.
 
 ## What Changes
 
-- Новий розділ «Типи сторінок» за адресою `/admin/page-types` з тими самими сторінками, що й для типів контенту: список (серверна таблиця), створення, редагування, видалення типу, а також список, створення, редагування, видалення й впорядкування полів типу (`/admin/page-types/{key}/fields/**`).
-- Відмінності від типів контенту: у формі та таблиці немає `slug` (модель забороняє slug для `page`); батьківським типом можна обрати лише тип виду `page`; `kind` завжди `page`.
-- Горизонтальне меню розділу («Налаштування» / «Поля») працює і на сторінках типу сторінки; посилання назад веде до списку типів сторінок.
-- Пункт «Типи сторінок» у бічній навігації та відповідні хлібні крихти. Існуючий макетний пункт «Pages» (майбутній список самих сторінок-вузлів) лишається без змін.
-- Сторінки `/admin/content-types/**` і далі відповідають 404 для типів `page` і `block`; типи `block` лишаються поза цією зміною.
+- A new section "Page Types" at the address `/admin/page-types` with the same pages as for content types: the list (a server-side table), creation, editing, deletion of a type, as well as the list, creation, editing, deletion and ordering of the fields of a type (`/admin/page-types/{key}/fields/**`).
+- The differences from content types: the form and the table have no `slug` (the model forbids a slug for `page`); the parent type can be chosen only from types of the kind `page`; `kind` is always `page`.
+- The horizontal section menu ("Settings" / "Fields") works on the pages of a page type too; the link back leads to the list of page types.
+- The item "Page Types" in the sidebar navigation and the corresponding breadcrumbs. The existing layout item "Pages" (the future list of the node pages themselves) remains unchanged.
+- The pages `/admin/content-types/**` continue to respond 404 for types `page` and `block`; types `block` remain outside this change.
 
 ## Capabilities
 
 ### New Capabilities
-- `admin-page-types`: сторінки адмінки для керування типами виду `page` та їхніми полями.
+- `admin-page-types`: the admin pages for managing types of the kind `page` and their fields.
 
 ### Modified Capabilities
-- `admin-shell`: у бічній навігації з'являється робочий пункт «Типи сторінок».
+- `admin-shell`: a working item "Page Types" appears in the sidebar navigation.
 
 ## Impact
 
-- Бекенд: маршрути `routes/web.php`; `ContentTypeController`, `ContentFieldController` і form requests стають залежними від виду (вид береться з маршруту), без дублювання контролерів.
-- Фронтенд: сторінки `Pages/Admin/ContentTypes/*`, `Pages/Admin/ContentFields/*` та компоненти `Components/Admin/ContentTypes/*`, `ContentFields/*` приймають базову адресу розділу й вид; `navigation.ts` (пункт меню, хлібні крихти).
-- Переклади `lang/uk.json`, `lang/en.json` («Page Types», заголовки/діалоги для сторінок).
-- Тести: `tests/Feature/Admin/*` (сторінки типів сторінок), e2e `e2e/admin-page-types.spec.js`.
-- Docs: новий `docs/admin-page-types.md`; оновити `docs/admin-content-types.md`, `docs/admin-content-fields.md`, `docs/admin-shell.md`, `docs/README.md` (індекс).
+- Backend: the routes in `routes/web.php`; `ContentTypeController`, `ContentFieldController` and the form requests become dependent on the kind (the kind is taken from the route), without duplicating the controllers.
+- Frontend: the pages `Pages/Admin/ContentTypes/*`, `Pages/Admin/ContentFields/*` and the components `Components/Admin/ContentTypes/*`, `ContentFields/*` accept the base address of the section and the kind; `navigation.ts` (the menu item, breadcrumbs).
+- Translations `lang/uk.json`, `lang/en.json` ("Page Types", the headers/dialogs for pages).
+- Tests: `tests/Feature/Admin/*` (the pages of page types), e2e `e2e/admin-page-types.spec.js`.
+- Docs: a new `docs/admin-page-types.md`; update `docs/admin-content-types.md`, `docs/admin-content-fields.md`, `docs/admin-shell.md`, `docs/README.md` (the index).

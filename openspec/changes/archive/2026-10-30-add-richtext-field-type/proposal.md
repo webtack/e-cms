@@ -2,35 +2,35 @@
 
 ## Why
 
-Довгий текст (`text`) у формі запису редагується звичайним `Textarea`: без заголовків, списків, посилань і виділення. Для сторінок і статей потрібне поле з форматуванням. Редактор має бути лише opensource, а збережений контент — читатися будь-яким клієнтом без власного рендерера (відображення на сайті — справа клієнтського коду, див. `docs/content-values.md`).
+A long text (`text`) in the record form is edited with a plain `Textarea`: no headings, lists, links or emphasis. Pages and articles need a field with formatting. The editor must be open-source only, and the stored content must be readable by any client without its own renderer (display on the site is the business of the client code, see `docs/content-values.md`).
 
 ## What Changes
 
-- Новий тип значення `richtext`: HTML-рядок у `content_values_text` (`LONGTEXT`), без нової таблиці (як `image` і `file` у `content_values_string`).
-- Серверна санітизація HTML за allow-list тегів і атрибутів перед збереженням (XSS); посилання лише з безпечними схемами. Клієнтському HTML не довіряємо.
-- Граничні значення довжини `min`/`max` (якщо задані в `settings` поля) рахуються за видимим текстом, а не за HTML-розміткою.
-- Пошук (`contains`) і текстовий пошук по записах працюють для `richtext`, як для `text`.
-- Віджет у формі запису на **Tiptap** (MIT, `@tiptap/react` + `@tiptap/starter-kit`): тулбар із заголовками, жирним, курсивом, списками (марковані й нумеровані) та посиланням. Без зображень і файлів (вставка з медіатеки — окрема майбутня зміна).
-- У списку записів значення `richtext` показується як звичайний текст без тегів (скорочено), а не сирий HTML.
-- Значення без видимого тексту (`<p></p>`) вважається порожнім: невеликий загальний гачок, яким тип визначає порожнє значення.
-- Форма створення/редагування поля у `richtext` не має додаткових налаштувань (як `text`).
+- A new value type `richtext`: an HTML string in `content_values_text` (`LONGTEXT`), without a new table (as `image` and `file` in `content_values_string`).
+- Server-side sanitization of the HTML by an allow-list of tags and attributes before saving (XSS); links only with safe schemes. The client HTML is not trusted.
+- The boundary values of length `min`/`max` (if set in the `settings` of the field) are counted by the visible text, not by the HTML markup.
+- The search (`contains`) and the text search over records work for `richtext`, as for `text`.
+- A widget in the record form on **Tiptap** (MIT, `@tiptap/react` + `@tiptap/starter-kit`): a toolbar with headings, bold, italic, lists (bulleted and numbered) and a link. Without images and files (inserting from the media library is a separate future change).
+- In the list of records the value of `richtext` is shown as plain text without tags (shortened), not as raw HTML.
+- A value without visible text (`<p></p>`) is considered empty: a small shared hook by which the type defines an empty value.
+- The form of creating/editing a field for `richtext` has no additional settings (as for `text`).
 
-Не входить: зміна правил зміни типу поля (окрема зміна), блочний редактор (дублював би `block-types`), вставка зображень і файлів, колаборативне редагування, Markdown, зберігання JSON-документа.
+Not included: a change of the rules for changing the type of a field (a separate change), a block editor (it would duplicate `block-types`), inserting images and files, collaborative editing, Markdown, storing a JSON document.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `content-values`: новий тип `richtext` (HTML у `content_values_text`), санітизація, довжина за видимим текстом, порожнє значення визначає тип.
-- `admin-content-nodes`: елемент введення `richtext` у формі запису (Tiptap) і показ значення без тегів у таблиці записів.
+- `content-values`: the new type `richtext` (HTML in `content_values_text`), sanitization, length by the visible text, an empty value is defined by the type.
+- `admin-content-nodes`: the input element `richtext` in the record form (Tiptap) and the display of the value without tags in the table of records.
 
 ## Impact
 
-- Код (PHP): новий `app/Content/FieldTypes/RichTextType.php` і сервіс санітизації HTML, рядок у `config/content.php` (`field_types`), `ContentValueWriter` і `FieldType` (тип може сам визначати порожнє значення: `<p></p>` = порожньо), `ContentNodeController` (тип колонки та відображення значення в списку), залежність `composer` для санітизації (кандидат: `symfony/html-sanitizer`, MIT).
-- Код (фронтенд): `Components/Admin/ContentNodes/NodeFieldInput.tsx` + новий компонент редактора, залежності `npm`: `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`; переклади `lang/*.json`.
-- Тести: Feature-тести типу й санітизації; e2e `admin-content-nodes` (і `admin-content-fields` для вибору типу).
-- Документація, що оновлюється: `docs/content-values.md` (реєстр типів, розділ про `richtext` і санітизацію), `docs/admin-content-nodes.md` (віджет), `docs/admin-content-fields.md` (список типів), `docs/e2e-testing.md` (сценарії); `docs/README.md` лишається чинним (нових файлів немає).
+- Code (PHP): the new `app/Content/FieldTypes/RichTextType.php` and an HTML sanitization service, a row in `config/content.php` (`field_types`), `ContentValueWriter` and `FieldType` (the type can itself define an empty value: `<p></p>` = empty), `ContentNodeController` (the column type and the display of the value in the list), a `composer` dependency for sanitization (a candidate: `symfony/html-sanitizer`, MIT).
+- Code (frontend): `Components/Admin/ContentNodes/NodeFieldInput.tsx` + a new editor component, `npm` dependencies: `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`; translations `lang/*.json`.
+- Tests: Feature tests of the type and sanitization; e2e `admin-content-nodes` (and `admin-content-fields` for the choice of the type).
+- Documentation to be updated: `docs/content-values.md` (the registry of types, a section on `richtext` and sanitization), `docs/admin-content-nodes.md` (the widget), `docs/admin-content-fields.md` (the list of types), `docs/e2e-testing.md` (the scenarios); `docs/README.md` remains valid (no new files).

@@ -2,164 +2,164 @@
 
 ## Purpose
 
-Надає єдиний спільний механізм збереження файлів: приймає файл, перевіряє його за профілем завантаження, зберігає на диск, веде облік метадані й дає посилання, щоб споживачі (поля, аватар, налаштування) зберігали лише посилання на файл і не мали власної логіки роботи з диском.
+Provides a single shared mechanism for storing files: it accepts a file, checks it against an upload profile, saves it to a disk, keeps the metadata records and gives a link, so that consumers (fields, avatar, settings) store only a reference to the file and have no own logic for working with the disk.
 
 ## ADDED Requirements
 
-### Requirement: Облік файлів
-Система SHALL зберігати кожен завантажений файл як окремий запис із власною ідентичністю: стабільний числовий ідентифікатор, незмінний `uuid`, профіль завантаження, диск, шлях на диску, оригінальне ім'я, визначений тип (mime), розмір у байтах і хеш вмісту; для зображень також ширину й висоту в пікселях. Споживачі SHALL посилатися на файл за його ідентифікатором.
+### Requirement: File records
+The system SHALL store each uploaded file as a separate record with its own identity: a stable numeric identifier, an immutable `uuid`, the upload profile, the disk, the path on the disk, the original name, the detected type (mime), the size in bytes and the content hash; for images also the width and height in pixels. Consumers SHALL refer to a file by its identifier.
 
-#### Scenario: Метадані документа
-- **WHEN** завантажується PDF-файл `report.pdf` розміром 1 МБ
-- **THEN** створюється запис із оригінальним ім'ям `report.pdf`, типом `application/pdf`, розміром у байтах, хешем вмісту, профілем, диском і шляхом, а ширина й висота відсутні
+#### Scenario: Document metadata
+- **WHEN** the PDF file `report.pdf` of 1 MB is uploaded
+- **THEN** a record is created with the original name `report.pdf`, the type `application/pdf`, the size in bytes, the content hash, the profile, the disk and the path, and the width and height are absent
 
-#### Scenario: Метадані зображення
-- **WHEN** завантажується PNG-зображення 640×480
-- **THEN** запис містить тип `image/png`, ширину 640 і висоту 480
+#### Scenario: Image metadata
+- **WHEN** a PNG image of 640×480 is uploaded
+- **THEN** the record contains the type `image/png`, the width 640 and the height 480
 
-#### Scenario: Однаковий вміст
-- **WHEN** двічі завантажується файл з однаковим вмістом
-- **THEN** створюються два окремі записи з різними ідентифікаторами та однаковим хешем
+#### Scenario: Identical content
+- **WHEN** a file with identical content is uploaded twice
+- **THEN** two separate records with different identifiers and an identical hash are created
 
-### Requirement: Профілі завантаження
-Система SHALL описувати правила завантаження іменованими профілями в конфігурації розробника: кожен профіль визначає диск, каталог, дозволені типи та максимальний розмір. Користувач SHALL не обирати диск і не задавати правила під час завантаження. На старті SHALL існувати профілі `image` (зображення JPEG, PNG, WebP, GIF, до 5 МБ) і `document` (PDF, DOCX, XLSX, до 20 МБ).
+### Requirement: Upload profiles
+The system SHALL describe upload rules as named profiles in the developer's configuration: each profile defines the disk, the directory, the allowed types and the maximum size. The user SHALL NOT choose the disk and SHALL NOT set the rules during the upload. At the start there SHALL be the profiles `image` (images JPEG, PNG, WebP, GIF, up to 5 MB) and `document` (PDF, DOCX, XLSX, up to 20 MB).
 
-#### Scenario: Диск із профілю
-- **WHEN** завантажується файл за профілем `image`
-- **THEN** файл зберігається на диску, вказаному в конфігурації цього профілю, у його каталозі, і запис фіксує цей диск
+#### Scenario: Disk from the profile
+- **WHEN** a file is uploaded by the profile `image`
+- **THEN** the file is stored on the disk specified in the configuration of this profile, in its directory, and the record captures this disk
 
-#### Scenario: Невідомий профіль
-- **WHEN** запитано завантаження за профілем, якого немає в конфігурації
-- **THEN** завантаження відхилено з помилкою валідації, файл не зберігається
+#### Scenario: Unknown profile
+- **WHEN** an upload is requested by a profile that is not in the configuration
+- **THEN** the upload is rejected with a validation error, and the file is not stored
 
-#### Scenario: Новий профіль без змін коду
-- **WHEN** розробник додає профіль до конфігурації
-- **THEN** він доступний для завантаження без змін інших частин системи
+#### Scenario: New profile without code changes
+- **WHEN** the developer adds a profile to the configuration
+- **THEN** it is available for uploads without changes to other parts of the system
 
-### Requirement: Перевірка файлу за профілем
-Система SHALL відхиляти файл до збереження на диск, якщо його тип не входить до дозволених профілю або розмір перевищує максимальний профілю. Тип SHALL визначатися за вмістом файлу, а не за розширенням чи заголовком, який надіслав клієнт.
+### Requirement: Checking a file against the profile
+The system SHALL reject a file before it is saved to the disk if its type is not among the types allowed by the profile or its size exceeds the profile's maximum. The type SHALL be determined by the content of the file, not by the extension or the header sent by the client.
 
-#### Scenario: Дозволений файл
-- **WHEN** за профілем `image` завантажується справжнє JPEG-зображення в межах ліміту
-- **THEN** файл прийнято
+#### Scenario: Allowed file
+- **WHEN** a genuine JPEG image within the limit is uploaded by the profile `image`
+- **THEN** the file is accepted
 
-#### Scenario: Недозволений тип
-- **WHEN** за профілем `image` завантажується PDF-файл
-- **THEN** завантаження відхилено з помилкою валідації, на диску нічого не створено
+#### Scenario: Disallowed type
+- **WHEN** a PDF file is uploaded by the profile `image`
+- **THEN** the upload is rejected with a validation error, and nothing is created on the disk
 
-#### Scenario: Підроблене розширення
-- **WHEN** текстовий або виконуваний файл названо `photo.jpg` і завантажується за профілем `image`
-- **THEN** завантаження відхилено, бо вміст не є дозволеним зображенням
+#### Scenario: Faked extension
+- **WHEN** a text or executable file is named `photo.jpg` and uploaded by the profile `image`
+- **THEN** the upload is rejected, because the content is not an allowed image
 
-#### Scenario: Перевищення розміру
-- **WHEN** за профілем `image` завантажується зображення більше 5 МБ
-- **THEN** завантаження відхилено з помилкою валідації, на диску нічого не створено
+#### Scenario: Size exceeded
+- **WHEN** an image larger than 5 MB is uploaded by the profile `image`
+- **THEN** the upload is rejected with a validation error, and nothing is created on the disk
 
-### Requirement: Безпека збережених файлів
-Система SHALL відхиляти виконувані файли (зокрема `php`, `phtml`, `sh`, `exe`) та SVG незалежно від профілю, SHALL називати файл на диску згенерованим ім'ям, що не залежить від оригінального, і SHALL зберігати оригінальне ім'я лише як метадані.
+### Requirement: Security of stored files
+The system SHALL reject executable files (in particular `php`, `phtml`, `sh`, `exe`) and SVG regardless of the profile, SHALL name the file on the disk with a generated name that does not depend on the original one, and SHALL keep the original name only as metadata.
 
-#### Scenario: Виконуваний файл
-- **WHEN** завантажується файл `shell.php` за будь-яким профілем, зокрема профілем, що дозволяє довільні типи
-- **THEN** завантаження відхилено
+#### Scenario: Executable file
+- **WHEN** the file `shell.php` is uploaded under any profile, including a profile that allows arbitrary types
+- **THEN** the upload is rejected
 
 #### Scenario: SVG
-- **WHEN** завантажується SVG-зображення за профілем `image`
-- **THEN** завантаження відхилено
+- **WHEN** an SVG image is uploaded by the profile `image`
+- **THEN** the upload is rejected
 
-#### Scenario: Ім'я на диску
-- **WHEN** завантажується файл з оригінальним ім'ям `../../evil name.png`
-- **THEN** на диску файл лежить під згенерованим ім'ям у каталозі профілю, а оригінальне ім'я збережено лише як метадані
+#### Scenario: Name on the disk
+- **WHEN** a file with the original name `../../evil name.png` is uploaded
+- **THEN** on the disk the file lies under a generated name in the directory of the profile, and the original name is stored only as metadata
 
-### Requirement: Завантаження файлу окремим запитом
-Система SHALL приймати файл окремим запитом адмінки (multipart) з указаним профілем лише від автентифікованого користувача з підтвердженою поштою і SHALL у відповідь повертати метадані створеного запису: ідентифікатор, `uuid`, профіль, оригінальне ім'я, тип, розмір, ширину та висоту (для зображень) і посилання на файл. Форми, що використовують файл, SHALL передавати надалі лише його ідентифікатор.
+### Requirement: Uploading a file in a separate request
+The system SHALL accept a file in a separate admin request (multipart) with the specified profile only from an authenticated user with a confirmed email, and SHALL return in the response the metadata of the created record: the identifier, `uuid`, profile, original name, type, size, width and height (for images) and the link to the file. Forms that use a file SHALL pass on only its identifier.
 
-#### Scenario: Успішне завантаження
-- **WHEN** авторизований адміністратор надсилає файл і профіль `image`
-- **THEN** відповідь містить ідентифікатор і метадані запису та посилання, за яким файл доступний
+#### Scenario: Successful upload
+- **WHEN** an authorized administrator sends a file and the profile `image`
+- **THEN** the response contains the identifier and the metadata of the record and the link by which the file is available
 
-#### Scenario: Гість
-- **WHEN** запит завантаження надходить без автентифікації
-- **THEN** файл не приймається, запис не створюється
+#### Scenario: Guest
+- **WHEN** an upload request arrives without authentication
+- **THEN** the file is not accepted, and no record is created
 
-#### Scenario: Немає файлу
-- **WHEN** запит надіслано без файлу або без профілю
-- **THEN** відповідь містить помилки валідації, запис не створюється
+#### Scenario: No file
+- **WHEN** the request is sent without a file or without a profile
+- **THEN** the response contains validation errors, and no record is created
 
-### Requirement: Посилання на файл
-Система SHALL надавати єдиний спосіб отримати посилання на файл за його записом, який враховує диск файлу, щоб споживачі не залежали від того, де файл фактично лежить.
+### Requirement: Link to a file
+The system SHALL provide a single way to obtain a link to a file by its record, which takes into account the disk of the file, so that consumers do not depend on where the file actually lies.
 
-#### Scenario: Публічний диск
-- **WHEN** запитано посилання на файл, збережений на публічному диску
-- **THEN** повертається адреса, за якою файл віддається вебсервером
+#### Scenario: Public disk
+- **WHEN** a link to a file stored on the public disk is requested
+- **THEN** an address is returned by which the file is served by the web server
 
-#### Scenario: Незалежність від споживача
-- **WHEN** диск профілю змінено в конфігурації для нових файлів
-- **THEN** посилання на раніше завантажені файли й надалі будуються за диском, збереженим у їхніх записах
+#### Scenario: Independence from the consumer
+- **WHEN** the disk of a profile is changed in the configuration for new files
+- **THEN** links to previously uploaded files continue to be built by the disk stored in their records
 
-### Requirement: Перевірка посилання на файл у споживачів
-Система SHALL надавати споживачам правило валідації, що приймає значення лише тоді, коли воно є ідентифікатором наявного файлу, завантаженого за вказаним профілем.
+### Requirement: Validation of a file reference in consumers
+The system SHALL provide consumers with a validation rule that accepts a value only when it is the identifier of an existing file uploaded under the specified profile.
 
-#### Scenario: Файл потрібного профілю
-- **WHEN** значення є ідентифікатором файлу, завантаженого за профілем `image`, а споживач вимагає профіль `image`
-- **THEN** перевірка проходить
+#### Scenario: File of the required profile
+- **WHEN** the value is the identifier of a file uploaded under the profile `image`, and the consumer requires the profile `image`
+- **THEN** the check passes
 
-#### Scenario: Файл іншого профілю
-- **WHEN** значення є ідентифікатором файлу профілю `document`, а споживач вимагає профіль `image`
-- **THEN** перевірка не проходить з помилкою валідації
+#### Scenario: File of another profile
+- **WHEN** the value is the identifier of a file of the profile `document`, and the consumer requires the profile `image`
+- **THEN** the check fails with a validation error
 
-#### Scenario: Неіснуючий файл
-- **WHEN** значення не збігається з жодним файлом
-- **THEN** перевірка не проходить з помилкою валідації
+#### Scenario: Non-existing file
+- **WHEN** the value matches no file
+- **THEN** the check fails with a validation error
 
-### Requirement: Захист файлів, що використовуються
-Система SHALL не допускати видалення запису файлу, на який посилається будь-який споживач, а споживач SHALL відпускати файл лише зміною або очищенням власного посилання, не видаляючи сам файл.
+### Requirement: Protection of files in use
+The system SHALL not allow the deletion of a file record that is referenced by any consumer, and a consumer SHALL release a file only by changing or clearing its own reference, without deleting the file itself.
 
-#### Scenario: Спроба видалити використовуваний файл
-- **WHEN** запис файлу, на який посилається значення поля, видаляється
-- **THEN** видалення відхилено, запис і файл на диску лишаються
+#### Scenario: Attempt to delete a file in use
+- **WHEN** the record of a file, which a field value references, is deleted
+- **THEN** the deletion is rejected, the record and the file on the disk remain
 
-#### Scenario: Заміна файлу споживачем
-- **WHEN** споживач замінює посилання на файл іншим
-- **THEN** старий запис і файл на диску лишаються до наступного очищення
+#### Scenario: Replacement of a file by a consumer
+- **WHEN** a consumer replaces the reference to a file with another one
+- **THEN** the old record and the file on the disk remain until the next cleanup
 
-### Requirement: Очищення невикористовуваних файлів
-Система SHALL надавати команду очищення, що видаляє файли (запис і файл на диску), на які ніхто не посилається і які створено понад 24 години тому, та SHALL запускати її за розкладом. Перелік місць, що містять посилання на файли, SHALL задаватися в конфігурації. Команда SHALL не видаляти файли, на які є посилання, і файли молодші за 24 години, а помилка видалення одного файлу SHALL не переривати очищення решти.
+### Requirement: Cleanup of unused files
+The system SHALL provide a cleanup command that deletes files (the record and the file on the disk) which no one references and which were created more than 24 hours ago, and SHALL run it on a schedule. The list of places that contain references to files SHALL be specified in the configuration. The command SHALL NOT delete files that have references and files younger than 24 hours, and an error in deleting one file SHALL NOT interrupt the cleanup of the rest.
 
-#### Scenario: Осиротілий файл
-- **WHEN** файл створено понад 24 години тому і жоден споживач на нього не посилається
-- **THEN** команда видаляє запис і файл на диску
+#### Scenario: Orphaned file
+- **WHEN** a file was created more than 24 hours ago and no consumer references it
+- **THEN** the command deletes the record and the file on the disk
 
-#### Scenario: Свіжий файл
-- **WHEN** файл завантажено годину тому і ще не прив'язано до споживача
-- **THEN** команда його не видаляє
+#### Scenario: Fresh file
+- **WHEN** a file was uploaded an hour ago and is not yet attached to a consumer
+- **THEN** the command does not delete it
 
-#### Scenario: Використовуваний файл
-- **WHEN** на файл, створений понад 24 години тому, посилається споживач
-- **THEN** команда його не видаляє
+#### Scenario: File in use
+- **WHEN** a consumer references a file created more than 24 hours ago
+- **THEN** the command does not delete it
 
-#### Scenario: Файл відсутній на диску
-- **WHEN** файл невикористовуваний, але на диску вже відсутній
-- **THEN** команда видаляє запис і завершується без помилки
+#### Scenario: File missing on the disk
+- **WHEN** a file is unused but already missing on the disk
+- **THEN** the command deletes the record and finishes without an error
 
-#### Scenario: Підсумок
-- **WHEN** команда завершується
-- **THEN** вона повідомляє, скільки файлів видалено
+#### Scenario: Summary
+- **WHEN** the command finishes
+- **THEN** it reports how many files were deleted
 
-### Requirement: Віджет завантаження в адмінці
-Адмінка SHALL надавати повторно використовуваний компонент завантаження файлу: вибір файлу або перетягування, індикацію завантаження, показ помилок валідації, перегляд завантаженого зображення, очищення вибору та передачу ідентифікатора файлу формі. Компонент SHALL завантажувати файл окремим запитом до форми.
+### Requirement: Upload widget in the admin
+The admin SHALL provide a reusable file upload component: file selection or drag-and-drop, an indication of the upload, display of validation errors, preview of an uploaded image, clearing of the selection and passing the file identifier to the form. The component SHALL upload the file in a separate request to the form.
 
-#### Scenario: Успішне завантаження
-- **WHEN** користувач вибирає допустимий файл
-- **THEN** компонент показує перебіг, а після завершення — ім'я файлу (для зображення — його перегляд) і передає формі ідентифікатор файлу
+#### Scenario: Successful upload
+- **WHEN** the user selects an allowed file
+- **THEN** the component shows the progress, and after completion — the file name (for an image — its preview) and passes the file identifier to the form
 
-#### Scenario: Відхилений файл
-- **WHEN** користувач вибирає файл недозволеного типу чи завеликий
-- **THEN** компонент показує повідомлення про помилку, ідентифікатор формі не передається
+#### Scenario: Rejected file
+- **WHEN** the user selects a file of a disallowed type or one that is too large
+- **THEN** the component shows an error message, and the file identifier is not passed to the form
 
-#### Scenario: Очищення
-- **WHEN** користувач очищає вибраний файл
-- **THEN** компонент забирає значення з форми
+#### Scenario: Clearing
+- **WHEN** the user clears the selected file
+- **THEN** the component removes the value from the form
 
-#### Scenario: Демонстраційна сторінка
-- **WHEN** розробник відкриває демонстраційну сторінку компонента поза production
-- **THEN** вона показує компонент для профілів `image` і `document`; у production сторінка відповідає 404
+#### Scenario: Demo page
+- **WHEN** a developer opens the demo page of the component outside production
+- **THEN** it shows the component for the profiles `image` and `document`; in production the page responds 404

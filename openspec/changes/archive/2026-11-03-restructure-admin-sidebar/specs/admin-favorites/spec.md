@@ -2,59 +2,59 @@
 
 ## Purpose
 
-Особисте меню «Обране»: користувач позначає типи, з якими працює найчастіше, і бачить їх у sidebar окремим блоком. Список належить лише цьому користувачу й завжди відповідає його поточним доступам.
+The personal menu «Обране» ("Favourites"): the user marks the types he works with most often and sees them in the sidebar as a separate block. The list belongs only to this user and always matches his current access.
 
 ## ADDED Requirements
 
 ### Requirement: Зірочка «Обране» на сторінці записів типу
-Заголовок сторінки записів типу (будь-якого виду) і рядок у списку типів SHALL містити зірочку, що додає тип до «Обраного» поточного користувача або прибирає його. Стан зірочки (обраний чи ні) SHALL відповідати збереженому списку користувача. Зміна SHALL застосовуватися без втрати стану сторінки (фільтрів і сортування таблиці).
+The heading of the page of records of a type (of any kind) and the row in the list of types SHALL contain a star that adds the type to the «Обране» of the current user or removes it. The state of the star (selected or not) SHALL match the saved list of the user. The change SHALL be applied without losing the state of the page (the filters and sorting of the table).
 
-#### Scenario: Додавання до обраного
-- **WHEN** користувач натискає зірочку на сторінці записів типу, якого немає в його обраному
-- **THEN** зірочка стає заповненою, а тип з'являється в блоці «Обране» у sidebar
+#### Scenario: Adding to the favourites
+- **WHEN** the user clicks the star on the page of records of a type that is not in his favourites
+- **THEN** the star becomes filled, and the type appears in the block «Обране» in the sidebar
 
-#### Scenario: Додавання зі списку типів
-- **WHEN** користувач натискає зірочку в рядку типу у списку типів
-- **THEN** тип з'являється в блоці «Обране», а зірочка рядка стає заповненою
+#### Scenario: Adding from the list of types
+- **WHEN** the user clicks the star in the row of a type in the list of types
+- **THEN** the type appears in the block «Обране», and the star of the row becomes filled
 
-#### Scenario: Прибирання з обраного
-- **WHEN** користувач натискає заповнену зірочку
-- **THEN** зірочка стає порожньою, а тип зникає з блоку «Обране»
+#### Scenario: Removing from the favourites
+- **WHEN** the user clicks a filled star
+- **THEN** the star becomes empty, and the type disappears from the block «Обране»
 
-#### Scenario: Список належить користувачу
-- **WHEN** один користувач додає тип до обраного
-- **THEN** інший користувач не бачить цього типу у своєму «Обраному»
+#### Scenario: The list belongs to the user
+- **WHEN** one user adds a type to the favourites
+- **THEN** another user does not see this type in his «Обране»
 
 ### Requirement: Блок «Обране» в sidebar
-Sidebar SHALL показувати блок «Обране» з типами, що їх обрав поточний користувач, у порядку додавання. Пункт SHALL вести на список записів типу, мати іконку за видом типу (`content`, `page`, `block`) і показувати назву типу. Підсвітка активного пункту SHALL працювати за адресою записів типу. Без жодного видимого пункту блок SHALL NOT відображатися.
+The sidebar SHALL show the block «Обране» with the types chosen by the current user, in the order of adding. The item SHALL lead to the list of records of the type, have an icon by the kind of the type (`content`, `page`, `block`) and show the name of the type. The highlighting of the active item SHALL work by the address of the records of the type. Without a single visible item the block SHALL NOT be displayed.
 
-#### Scenario: Перехід з обраного
-- **WHEN** користувач натискає тип у блоці «Обране»
-- **THEN** відкривається список записів цього типу, а пункт позначено як активний
+#### Scenario: Navigation from the favourites
+- **WHEN** the user clicks a type in the block «Обране»
+- **THEN** the list of records of this type opens, and the item is marked as active
 
-#### Scenario: Порядок
-- **WHEN** користувач послідовно додає типи A, потім B
-- **THEN** у блоці «Обране» A стоїть перед B
+#### Scenario: Order
+- **WHEN** the user adds the types A and then B in turn
+- **THEN** in the block «Обране» A stands before B
 
-#### Scenario: Порожнє обране
-- **WHEN** користувач не обрав жодного типу
-- **THEN** блок «Обране» у sidebar не відображається
+#### Scenario: Empty favourites
+- **WHEN** the user has not chosen any type
+- **THEN** the block «Обране» is not displayed in the sidebar
 
 ### Requirement: Обране відповідає доступам
-Тип SHALL показуватися в «Обраному» лише коли рівень доступу користувача до записів цього типу не `none`. Збережені типи, до яких доступ відкликано або які видалено, SHALL зникати з показаного списку одразу після зміни, без дій користувача. Додати до обраного тип без доступу SHALL бути неможливо (відповідь 403). Видалення типу SHALL прибирати його з «Обраного» всіх користувачів.
+A type SHALL be shown in «Обране» only when the user's level of access to the records of this type is not `none`. The saved types to which access has been revoked, or which have been deleted, SHALL disappear from the displayed list immediately after the change, without any action of the user. Adding to the favourites a type without access SHALL be impossible (the response 403). Deleting a type SHALL remove it from the «Обране» of all users.
 
-#### Scenario: Відкликання доступу
-- **WHEN** адміністратор змінює роль користувача так, що рівень на обраний тип стає `none`
-- **THEN** при наступному відкритті сторінки цей тип зникає з блоку «Обране» цього користувача
+#### Scenario: Revoking access
+- **WHEN** the administrator changes the role of a user so that the level on the favourite type becomes `none`
+- **THEN** at the next opening of a page this type disappears from the block «Обране» of this user
 
-#### Scenario: Повернення доступу
-- **WHEN** користувачеві знову надають доступ до типу, що раніше був у його обраному
-- **THEN** тип знову показується в блоці «Обране»
+#### Scenario: Restoring access
+- **WHEN** a user is again granted access to a type that was previously in his favourites
+- **THEN** the type is shown again in the block «Обране»
 
-#### Scenario: Тип видалено
-- **WHEN** тип видаляють
-- **THEN** він зникає з «Обраного» всіх користувачів
+#### Scenario: Type deleted
+- **WHEN** a type is deleted
+- **THEN** it disappears from the «Обране» of all users
 
-#### Scenario: Додавання без доступу
-- **WHEN** користувач без доступу до записів типу надсилає запит на додавання цього типу до обраного
-- **THEN** сервер відповідає 403 і список не змінюється
+#### Scenario: Adding without access
+- **WHEN** a user without access to the records of a type sends a request to add this type to the favourites
+- **THEN** the server responds 403 and the list does not change

@@ -1,13 +1,13 @@
 # Tasks
 
-## 1. Компонент меню
+## 1. Menu component
 
-- [x] 1.1 Створити `ContentTypeNav` (пункти «Налаштування»/«Поля», `aria-current` на активному, посилання назад до списку типів) з JSDoc англійською та `@example`; перевірка: `npm run build` без помилок типів
-- [x] 1.2 Додати рядок «Settings» у `lang/uk.json` та `lang/en.json` (якщо відсутній); перевірка: перемикання мови показує переклад меню
+- [x] 1.1 Create `ContentTypeNav` (the items "Settings"/"Fields", `aria-current` on the active one, a link back to the list of types) with JSDoc in English and `@example`; check: `npm run build` without type errors
+- [x] 1.2 Add the row "Settings" to `lang/uk.json` and `lang/en.json` (if missing); check: switching the language shows the translation of the menu
 
-## 2. Підключення до сторінок
+## 2. Connection to the pages
 
-- [x] 2.1 Використати `ContentTypeNav` у `ContentTypes/Edit.tsx` (active=settings) та `ContentFields/Index.tsx` (active=fields, прибрати власне посилання «Типи контенту»); перевірка: сторінки відкриваються в браузері з меню
-- [x] 2.2 Використати `ContentTypeNav` у `ContentFields/Create.tsx` і `Edit.tsx` (active=fields); перевірка: меню видно, «Поля» виділено; `ContentTypes/Create.tsx` без змін
-- [x] 2.3 Додати e2e у `e2e/admin-content-types.spec.js` і `e2e/admin-content-fields.spec.js` (меню на всіх чотирьох сторінках, `aria-current`, перемикання, відсутність меню на створенні типу); перевірка: `npm run test:e2e` проходить
-- [x] 2.4 Оновити `docs/admin-content-types.md` і `docs/admin-content-fields.md` описом меню та компонента; перевірка: посилання в `docs/README.md` валідні
+- [x] 2.1 Use `ContentTypeNav` in `ContentTypes/Edit.tsx` (active=settings) and `ContentFields/Index.tsx` (active=fields, remove its own link "Content types"); check: the pages open in the browser with the menu
+- [x] 2.2 Use `ContentTypeNav` in `ContentFields/Create.tsx` and `Edit.tsx` (active=fields); check: the menu is visible, "Fields" is highlighted; `ContentTypes/Create.tsx` unchanged
+- [x] 2.3 Add e2e to `e2e/admin-content-types.spec.js` and `e2e/admin-content-fields.spec.js` (the menu on all four pages, `aria-current`, switching, no menu on the creation of a type); check: `npm run test:e2e` passes
+- [x] 2.4 Update `docs/admin-content-types.md` and `docs/admin-content-fields.md` with a description of the menu and the component; check: the links in `docs/README.md` are valid

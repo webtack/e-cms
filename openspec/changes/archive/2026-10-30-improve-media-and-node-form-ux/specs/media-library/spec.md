@@ -2,44 +2,44 @@
 
 ## ADDED Requirements
 
-### Requirement: Тип файлу в медіатеці
-Таблиця медіатеки й панель деталей файлу SHALL показувати тип файлу коротким позначенням розширення (наприклад, `docx`, `pdf`, `jpg`), а не повним MIME-типом. Сортування за колонкою типу SHALL лишатися робочим.
+### Requirement: File type in the media library
+The media library table and the file details panel SHALL show the file type by a short extension label (for example, `docx`, `pdf`, `jpg`), not by the full MIME type. Sorting by the type column SHALL remain working.
 
-#### Scenario: Колонка типу
-- **WHEN** у сховищі є файл Word
-- **THEN** у колонці «Тип» цього файлу показано `docx`
+#### Scenario: Type column
+- **WHEN** the storage has a Word file
+- **THEN** the "Type" column of this file shows `docx`
 
-#### Scenario: Деталі файлу
-- **WHEN** користувач відкриває деталі зображення JPEG
-- **THEN** підзаголовок панелі показує `jpg`
+#### Scenario: File details
+- **WHEN** the user opens the details of a JPEG image
+- **THEN** the subtitle of the panel shows `jpg`
 
-### Requirement: Фільтр медіатеки за типом
-Панель інструментів медіатеки SHALL містити випадний список типу поруч із полем пошуку з варіантами «Усі типи» і коротких позначень типів, що їх приймають профілі завантаження. Вибір типу SHALL показувати лише файли цього типу, додавати чіп активного фільтра під панеллю (знімається хрестиком) і зберігатися в адресі сторінки. Кнопка «Скинути» SHALL скидати і тип. Фільтр SHALL виконуватися на сервері до пагінації та діяти разом із пошуком і сортуванням. Позначення, якого немає в списку, SHALL ігноруватися без помилки.
+### Requirement: Media library filter by type
+The media library toolbar SHALL contain a drop-down type list next to the search field, with the options "All types" and the short labels of the types accepted by the upload profiles. Choosing a type SHALL show only the files of this type, add a chip of the active filter under the panel (removed with its ×), and be stored in the address of the page. The button "Reset" SHALL reset the type too. The filter SHALL be applied on the server before pagination and SHALL work together with the search and sorting. A label that is not in the list SHALL be ignored without an error.
 
-#### Scenario: Вибір типу
-- **WHEN** у сховищі є файли `docx`, `pdf` і `jpg`, а користувач вибирає у списку тип `pdf`
-- **THEN** таблиця показує лише файли `pdf`, під панеллю з'являється чіп фільтра, а загальна кількість і сторінки відповідають цьому вибору
+#### Scenario: Choosing a type
+- **WHEN** the storage has files `docx`, `pdf` and `jpg`, and the user chooses the type `pdf` in the list
+- **THEN** the table shows only the `pdf` files, a chip of the filter appears under the panel, and the total count and the pages match this choice
 
-#### Scenario: Усі типи
-- **WHEN** тип вибрано, а користувач вибирає «Усі типи»
-- **THEN** фільтр знято, чіп зникає, таблиця показує всі файли
+#### Scenario: All types
+- **WHEN** a type is chosen, and the user chooses "All types"
+- **THEN** the filter is removed, the chip disappears, and the table shows all files
 
-#### Scenario: Зняття чіпа
-- **WHEN** користувач знімає чіп фільтра за типом
-- **THEN** таблиця показує всі файли, а список типу повертається до «Усі типи»
+#### Scenario: Removing the chip
+- **WHEN** the user removes the chip of the filter by type
+- **THEN** the table shows all files, and the type list returns to "All types"
 
-#### Scenario: Скидання
-- **WHEN** вибрано тип і введено пошук, а користувач натискає «Скинути»
-- **THEN** і тип, і пошук скинуто
+#### Scenario: Reset
+- **WHEN** a type is chosen and a search is entered, and the user presses "Reset"
+- **THEN** both the type and the search are reset
 
-#### Scenario: Фільтр разом із пошуком
-- **WHEN** користувач вибирає тип `pdf` і шукає «звіт»
-- **THEN** таблиця показує лише файли `pdf`, назва яких містить «звіт»
+#### Scenario: Filter together with the search
+- **WHEN** the user chooses the type `pdf` and searches for "звіт"
+- **THEN** the table shows only the `pdf` files whose name contains "звіт"
 
-#### Scenario: Фільтр в адресі
-- **WHEN** користувач відкриває адресу сторінки з фільтром за типом `docx`
-- **THEN** список показує `docx`, чіп видно, а таблиця містить лише файли `docx`
+#### Scenario: Filter in the address
+- **WHEN** the user opens the address of the page with a filter by the type `docx`
+- **THEN** the list shows `docx`, the chip is visible, and the table contains only `docx` files
 
-#### Scenario: Невідоме значення
-- **WHEN** адреса містить фільтр за типом, якого немає в списку
-- **THEN** фільтр ігнорується, а таблиця показує всі файли
+#### Scenario: Unknown value
+- **WHEN** the address contains a filter by a type that is not in the list
+- **THEN** the filter is ignored, and the table shows all files

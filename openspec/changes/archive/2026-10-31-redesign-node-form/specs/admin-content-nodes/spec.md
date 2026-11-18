@@ -1,282 +1,282 @@
 ## MODIFIED Requirements
 
-### Requirement: Колонки таблиці записів
-Таблиця SHALL завжди показувати колонку `title` першою і неприховуваною та колонку slug запису. Одразу після slug SHALL бути колонка стану запису (бейдж «Опубліковано», «Заплановано» або «Вимкнено», несортована) і колонка дати публікації (`published_at`), за якою можна сортувати. Окрім них SHALL показувати видимі поля з налаштувань списку типу (`settings.list.visible`) у вказаному там порядку; без таких налаштувань — лише `title`. Посилання налаштувань на поле, якого в типу вже немає, SHALL ігноруватися без помилки. Значення множинного поля SHALL виводитися через кому, булеве — як «Так»/«Ні» мовою інтерфейсу, відсутнє значення — порожньою коміркою. Значення береться з мови `default`. Стан SHALL визначатися так: «Вимкнено», якщо `is_active = false` (незалежно від дати); інакше «Заплановано», якщо `published_at` пізніше за поточний момент; інакше «Опубліковано».
+### Requirement: Columns of the table of records
+The table SHALL always show the column `title` first and not hideable, and the column of the slug of the record. Right after the slug there SHALL be the status column of the record (the badge «Опубліковано», «Заплановано» or «Вимкнено», not sortable) and the publication date column (`published_at`), by which one can sort. Besides them, it SHALL show the visible fields from the list settings of the type (`settings.list.visible`) in the order specified there; without such settings — only `title`. A setting that refers to a field the type no longer has SHALL be ignored without an error. The value of a multiple field SHALL be shown separated by commas, a boolean — as «Так»/«Ні» in the language of the interface, a missing value — as an empty cell. The value is taken from the language `default`. The status SHALL be determined as follows: «Вимкнено» if `is_active = false` (regardless of the date); otherwise «Заплановано» if `published_at` is later than the current moment; otherwise «Опубліковано».
 
-#### Scenario: Налаштування за замовчуванням
-- **WHEN** тип не має налаштувань списку
-- **THEN** таблиця показує колонки `title`, slug, стан і дату публікації
+#### Scenario: Default settings
+- **WHEN** the type has no list settings
+- **THEN** the table shows the columns `title`, slug, status and publication date
 
-#### Scenario: Видимі поля з налаштувань
-- **WHEN** `settings.list.visible` типу — `title`, `price`, `tags`, а запис має `price` = 12.5 і `tags` = `["a", "b"]`
-- **THEN** у його рядку видно колонки `title`, `price` зі значенням 12.5, `tags` зі значенням «a, b», slug, стан і дату публікації
+#### Scenario: Visible fields from the settings
+- **WHEN** `settings.list.visible` of the type is `title`, `price`, `tags`, and the record has `price` = 12.5 and `tags` = `["a", "b"]`
+- **THEN** its row shows the columns `title`, `price` with the value 12.5, `tags` with the value «a, b», slug, status and publication date
 
-#### Scenario: Видалене поле в налаштуваннях
-- **WHEN** `settings.list.visible` містить ключ поля, яке вже видалено з типу
-- **THEN** сторінка відкривається без помилки, а колонки цього поля немає
+#### Scenario: Deleted field in the settings
+- **WHEN** `settings.list.visible` contains the key of a field that has already been deleted from the type
+- **THEN** the page opens without an error, and there is no column of this field
 
-#### Scenario: Булеве значення
-- **WHEN** запис має поле типу «булеве» зі значенням «істина»
-- **THEN** у комірці показано «Так»
+#### Scenario: Boolean value
+- **WHEN** the record has a field of the type «булеве» with the value «істина»
+- **THEN** the cell shows «Так»
 
-#### Scenario: Стан «Опубліковано»
-- **WHEN** запис активний, а його `published_at` не пізніше за поточний момент
-- **THEN** у колонці стану показано «Опубліковано»
+#### Scenario: Status «Опубліковано»
+- **WHEN** the record is active, and its `published_at` is not later than the current moment
+- **THEN** the status column shows «Опубліковано»
 
-#### Scenario: Стан «Заплановано»
-- **WHEN** запис активний, а його `published_at` у майбутньому
-- **THEN** у колонці стану показано «Заплановано»
+#### Scenario: Status «Заплановано»
+- **WHEN** the record is active, and its `published_at` is in the future
+- **THEN** the status column shows «Заплановано»
 
-#### Scenario: Стан «Вимкнено»
-- **WHEN** запис вимкнено, а його `published_at` у майбутньому
-- **THEN** у колонці стану показано «Вимкнено»
+#### Scenario: Status «Вимкнено»
+- **WHEN** the record is disabled, and its `published_at` is in the future
+- **THEN** the status column shows «Вимкнено»
 
-#### Scenario: Сортування за датою публікації
-- **WHEN** користувач сортує таблицю за колонкою дати публікації за спаданням
-- **THEN** записи йдуть від найпізнішої дати публікації до найранішої
+#### Scenario: Sorting by the publication date
+- **WHEN** the user sorts the table by the publication date column in descending order
+- **THEN** the records go from the latest publication date to the earliest
 
-### Requirement: Форма запису
-Форма створення (`/admin/content-types/{key}/nodes/create`) і редагування (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL показувати над формою меню розділу типу й по одному елементу введення на кожне поле типу в порядку ваги (`weight`), з назвою поля як підписом; обов'язкові поля SHALL бути позначені. Службові атрибути запису (slug та інші, див. вимогу про деталі запису) SHALL бути не серед полів типу, а в окремій службовій колонці. Елемент введення SHALL відповідати типу значення: «короткий текст» — однорядкове поле, «текст» — багаторядкове, «ціле число» і «десяткове число» — числове поле, «булеве» — прапорець, «дата» — вибір дати, «дата й час» — вибір дати й часу. Множинне поле SHALL редагуватися списком елементів, до якого можна додавати елементи, з якого можна їх видаляти та в якому можна змінювати їхній порядок (перетягуванням і з клавіатури). Форма не показує вибору мови. Форма редагування SHALL бути заповнена поточними значеннями запису в мові `default`, а slug у ній — поточним slug.
+### Requirement: Form of a record
+The creation form (`/admin/content-types/{key}/nodes/create`) and the edit form (`/admin/content-types/{key}/nodes/{uuid}/edit`) SHALL show above the form the section menu of the type and one input element for each field of the type in the order of the weight (`weight`), with the name of the field as the label; required fields SHALL be marked. The service attributes of the record (the slug and others, see the requirement about the details of the record) SHALL not be among the fields of the type, but in a separate service column. The input element SHALL correspond to the value type: «короткий текст» — a single-line field, «текст» — a multi-line one, «ціле число» and «десяткове число» — numeric fields, «булеве» — a checkbox, «дата» — a date selection, «дата й час» — a date and time selection. A multiple field SHALL be edited as a list of elements, to which elements can be added, from which they can be removed, and in which their order can be changed (by dragging and from the keyboard). The form does not show a language selection. The edit form SHALL be filled with the current values of the record in the language `default`, and the slug in it — with the current slug.
 
-#### Scenario: Форма створення
-- **WHEN** користувач відкриває форму створення запису типу з полями `title` (вага 0), `price` (ціле число, вага 10) і `body` (текст, вага 20)
-- **THEN** він бачить порожні поля `title`, `price` і `body` у цьому порядку, `title` позначене як обов'язкове, а порожнє поле slug — у службовій колонці
+#### Scenario: Creation form
+- **WHEN** the user opens the creation form of a record of a type with the fields `title` (weight 0), `price` (integer, weight 10) and `body` (text, weight 20)
+- **THEN** they see the empty fields `title`, `price` and `body` in this order, `title` is marked as required, and the empty slug field is in the service column
 
-#### Scenario: Елементи за типом
-- **WHEN** тип має поля типів «булеве», «дата» і «дата й час»
-- **THEN** вони показані як прапорець, вибір дати й вибір дати й часу відповідно
+#### Scenario: Elements by type
+- **WHEN** the type has fields of the types «булеве», «дата» and «дата й час»
+- **THEN** they are shown as a checkbox, a date selection and a date and time selection respectively
 
-#### Scenario: Множинне поле
-- **WHEN** тип має множинне поле `tags`, а користувач додає два елементи й видаляє перший
-- **THEN** у списку лишається один елемент, а додавання нового елемента додає порожній рядок введення
+#### Scenario: Multiple field
+- **WHEN** the type has a multiple field `tags`, and the user adds two elements and removes the first
+- **THEN** one element remains in the list, and adding a new element adds an empty input row
 
-#### Scenario: Зміна порядку елементів
-- **WHEN** користувач переставляє елементи множинного поля `tags` зі `a, b, c` на `c, a, b` і зберігає
-- **THEN** після повторного відкриття форми редагування елементи йдуть у порядку `c, a, b`, а в списку записів значення показано як «c, a, b»
+#### Scenario: Changing the order of elements
+- **WHEN** the user rearranges the elements of the multiple field `tags` from `a, b, c` to `c, a, b` and saves
+- **THEN** after reopening the edit form the elements are in the order `c, a, b`, and in the list of records the value is shown as «c, a, b»
 
-#### Scenario: Форма редагування
-- **WHEN** користувач відкриває форму редагування запису зі slug `pro-nas`, `title` «Про нас» і `tags` `["a", "b"]`
-- **THEN** поле slug у службовій колонці містить `pro-nas`, `title` — «Про нас», а список `tags` — два елементи «a» і «b»
+#### Scenario: Edit form
+- **WHEN** the user opens the edit form of a record with the slug `pro-nas`, `title` «Про нас» and `tags` `["a", "b"]`
+- **THEN** the slug field in the service column contains `pro-nas`, `title` — «Про нас», and the list `tags` — two elements «a» and «b»
 
-#### Scenario: Запис іншого типу
-- **WHEN** користувач відкриває форму редагування для `uuid` запису, що належить іншому типу
-- **THEN** сервер відповідає 404
+#### Scenario: Record of another type
+- **WHEN** the user opens the edit form for the `uuid` of a record that belongs to another type
+- **THEN** the server responds with 404
 
-### Requirement: Збереження нового запису
-Відправлення форми створення SHALL створювати запис типу з введеними значеннями в мові `default`. Порожній slug SHALL призводити до автоматичного slug із `title`; явно введений slug SHALL перевірятися на формат і унікальність серед усіх записів і не змінюватися. Форма SHALL також приймати `is_active` та `published_at`; порожня чи ненадіслана дата публікації SHALL замінюватися поточним моментом, а автором запису SHALL ставати поточний користувач незалежно від надісланого. Після успіху користувача SHALL бути перенаправлено до списку записів цього типу з повідомленням про успіх, а запис SHALL з'явитися в таблиці. Помилки валідації SHALL повертатися до форми й показуватися біля відповідних полів, зокрема біля окремих елементів множинного поля; введені дані при цьому SHALL зберігатися у формі.
+### Requirement: Saving a new record
+Submitting the creation form SHALL create a record of the type with the entered values in the language `default`. An empty slug SHALL lead to an automatic slug from `title`; an explicitly entered slug SHALL be checked for format and uniqueness among all records and SHALL not change. The form SHALL also accept `is_active` and `published_at`; an empty or not sent publication date SHALL be replaced by the current moment, and the author of the record SHALL become the current user regardless of what was sent. After success the user SHALL be redirected to the list of records of this type with a success message, and the record SHALL appear in the table. Validation errors SHALL return to the form and be shown next to the corresponding fields, including next to individual elements of a multiple field; the entered data SHALL be kept in the form.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач вводить `title` «Про нас» і відправляє форму
-- **THEN** запис збережено зі slug `pro-nas`, користувач бачить список записів, тост про успіх і новий рядок у таблиці
+#### Scenario: Successful creation
+- **WHEN** the user enters `title` «Про нас» and submits the form
+- **THEN** the record is saved with the slug `pro-nas`, the user sees the list of records, a success toast and a new row in the table
 
-#### Scenario: Явний slug
-- **WHEN** користувач вводить slug `about` і `title` «Про нас»
-- **THEN** збережено запис зі slug `about`
+#### Scenario: Explicit slug
+- **WHEN** the user enters the slug `about` and `title` «Про нас»
+- **THEN** a record with the slug `about` is saved
 
-#### Scenario: Зайнятий slug
-- **WHEN** користувач вводить slug, який уже має запис будь-якого типу чи виду
-- **THEN** запис не створено, біля поля slug показано помилку, решта введеного лишається у формі
+#### Scenario: Occupied slug
+- **WHEN** the user enters a slug that already belongs to a record of any type or kind
+- **THEN** the record is not created, an error is shown next to the slug field, and the rest of the entered data remains in the form
 
-#### Scenario: Недопустимий формат slug
-- **WHEN** користувач вводить slug `Про нас`
-- **THEN** запис не створено, біля поля slug показано помилку
+#### Scenario: Invalid slug format
+- **WHEN** the user enters the slug `Про нас`
+- **THEN** the record is not created, an error is shown next to the slug field
 
-#### Scenario: Обов'язкове поле
-- **WHEN** користувач відправляє форму з порожнім `title`
-- **THEN** запис не створено, біля поля `title` показано помилку
+#### Scenario: Required field
+- **WHEN** the user submits the form with an empty `title`
+- **THEN** the record is not created, an error is shown next to the field `title`
 
-#### Scenario: Помилка елемента множинного поля
-- **WHEN** множинне числове поле `scores` отримує другим елементом нечислове значення
-- **THEN** запис не створено, помилка показана біля другого елемента списку
+#### Scenario: Error of an element of a multiple field
+- **WHEN** the multiple numeric field `scores` gets a non-numeric value as its second element
+- **THEN** the record is not created, the error is shown next to the second element of the list
 
-#### Scenario: Значення за налаштуваннями поля
-- **WHEN** поле має в налаштуваннях максимум 5, а введено 7
-- **THEN** запис не створено, біля поля показано помилку
+#### Scenario: Value by the field settings
+- **WHEN** the field has a maximum of 5 in its settings, and 7 is entered
+- **THEN** the record is not created, an error is shown next to the field
 
-#### Scenario: Дата публікації за замовчуванням
-- **WHEN** користувач створює запис, не змінюючи дати публікації
-- **THEN** запис збережено з датою публікації, що дорівнює моменту створення (з точністю до хвилини)
+#### Scenario: Default publication date
+- **WHEN** the user creates a record without changing the publication date
+- **THEN** the record is saved with a publication date equal to the moment of creation (to the minute)
 
-#### Scenario: Відкладена публікація
-- **WHEN** користувач задає дату публікації в майбутньому й зберігає
-- **THEN** запис збережено з цією датою, а в таблиці його стан — «Заплановано»
+#### Scenario: Deferred publication
+- **WHEN** the user sets a publication date in the future and saves
+- **THEN** the record is saved with this date, and in the table its status is «Заплановано»
 
-#### Scenario: Некоректна дата публікації
-- **WHEN** користувач вводить у поле дати публікації нерозпізнаваний текст
-- **THEN** запис не створено, біля поля дати показано помилку
+#### Scenario: Invalid publication date
+- **WHEN** the user enters unrecognizable text in the publication date field
+- **THEN** the record is not created, an error is shown next to the date field
 
-#### Scenario: Автор не підміняється
-- **WHEN** запит створення містить `user_id` іншого користувача
-- **THEN** автором запису стає поточний користувач
+#### Scenario: Author is not substituted
+- **WHEN** the creation request contains the `user_id` of another user
+- **THEN** the author of the record becomes the current user
 
-### Requirement: Збереження змін запису
-Відправлення форми редагування SHALL замінювати значення всіх полів типу в мові `default` введеними (порядок елементів множинного поля зберігається таким, як у формі) (очищене поле SHALL втрачати значення) і SHALL дозволяти змінити slug запису на вільне допустиме значення, а також `is_active` і `published_at`; `uuid`, тип запису й автор SHALL лишатися без змін (надіслане `user_id` SHALL ігноруватися), а очищена дата публікації SHALL давати помилку валідації. Кожне успішне збереження SHALL оновлювати `updated_at` запису, навіть якщо змінилися лише значення полів. Незмінений slug SHALL не вважатися дублікатом самого себе. Після успіху користувача SHALL бути перенаправлено до списку записів з повідомленням про успіх. Помилки SHALL показуватися так само, як при створенні. Значення інших мов SHALL лишатися без змін.
+### Requirement: Saving changes of a record
+Submitting the edit form SHALL replace the values of all fields of the type in the language `default` with the entered ones (the order of the elements of a multiple field is kept as in the form) (a cleared field SHALL lose its value), and SHALL allow changing the slug of the record to a free valid value, as well as `is_active` and `published_at`; `uuid`, the type of the record and the author SHALL remain unchanged (the sent `user_id` SHALL be ignored), and a cleared publication date SHALL give a validation error. Every successful saving SHALL update the `updated_at` of the record, even if only the values of the fields changed. An unchanged slug SHALL not be considered a duplicate of itself. After success the user SHALL be redirected to the list of records with a success message. Errors SHALL be shown the same way as on creation. The values of other languages SHALL remain unchanged.
 
-#### Scenario: Зміна значення
-- **WHEN** користувач змінює `title` запису і зберігає
-- **THEN** новий `title` показано у списку, slug лишився тим самим
+#### Scenario: Changing a value
+- **WHEN** the user changes the `title` of a record and saves
+- **THEN** the new `title` is shown in the list, the slug remained the same
 
-#### Scenario: Очищення необов'язкового поля
-- **WHEN** користувач очищає необов'язкове поле `summary` і зберігає
-- **THEN** значення `summary` у запису відсутнє
+#### Scenario: Clearing an optional field
+- **WHEN** the user clears the optional field `summary` and saves
+- **THEN** the value of `summary` is absent in the record
 
-#### Scenario: Зміна slug
-- **WHEN** користувач змінює slug запису на вільне `about-us`
-- **THEN** запис і далі відкривається за тією самою адресою редагування (за `uuid`), його `uuid` не змінився, а відкрита в іншій вкладці форма цього запису зберігається без помилки 404
+#### Scenario: Changing the slug
+- **WHEN** the user changes the slug of a record to the free `about-us`
+- **THEN** the record still opens by the same edit address (by `uuid`), its `uuid` did not change, and the form of this record opened in another tab is saved without a 404 error
 
-#### Scenario: Збереження без зміни slug
-- **WHEN** користувач зберігає форму, не змінюючи slug
-- **THEN** збереження успішне, помилки унікальності немає
+#### Scenario: Saving without changing the slug
+- **WHEN** the user saves the form without changing the slug
+- **THEN** the saving succeeds, there is no uniqueness error
 
-#### Scenario: Slug іншого запису
-- **WHEN** користувач вводить slug, який має інший запис
-- **THEN** зміни не збережено, біля поля slug показано помилку
+#### Scenario: Slug of another record
+- **WHEN** the user enters a slug that belongs to another record
+- **THEN** the changes are not saved, an error is shown next to the slug field
 
-#### Scenario: Переклади
-- **WHEN** запис має переклад `title` мовою `en`, а користувач змінює `title` у формі
-- **THEN** змінюється лише значення `default`, переклад `en` лишається
+#### Scenario: Translations
+- **WHEN** the record has a translation of `title` in `en`, and the user changes `title` in the form
+- **THEN** only the value `default` changes, the translation `en` remains
 
-#### Scenario: Вимкнення запису
-- **WHEN** користувач вимикає перемикач «Показувати на сайті» і зберігає
-- **THEN** запис має `is_active = false`, його дата публікації не змінилась, а в таблиці стан — «Вимкнено»
+#### Scenario: Disabling a record
+- **WHEN** the user turns off the switch «Показувати на сайті» and saves
+- **THEN** the record has `is_active = false`, its publication date did not change, and in the table the status is «Вимкнено»
 
-#### Scenario: Зміна дати публікації
-- **WHEN** користувач змінює дату публікації запису й зберігає
-- **THEN** форма редагування після повторного відкриття показує нову дату
+#### Scenario: Changing the publication date
+- **WHEN** the user changes the publication date of a record and saves
+- **THEN** after reopening the edit form shows the new date
 
-#### Scenario: Очищена дата публікації
-- **WHEN** користувач очищає поле дати публікації й зберігає
-- **THEN** зміни не збережено, біля поля дати показано помилку
+#### Scenario: Cleared publication date
+- **WHEN** the user clears the publication date field and saves
+- **THEN** the changes are not saved, an error is shown next to the date field
 
-#### Scenario: Автор незмінний
-- **WHEN** запит оновлення містить `user_id` іншого користувача
-- **THEN** автор запису лишається попереднім
+#### Scenario: Author unchanged
+- **WHEN** the update request contains the `user_id` of another user
+- **THEN** the author of the record remains the previous one
 
-#### Scenario: Оновлення часу зміни
-- **WHEN** користувач змінює лише значення поля `title` й зберігає
-- **THEN** `updated_at` запису оновлюється
+#### Scenario: Updating the change time
+- **WHEN** the user changes only the value of the field `title` and saves
+- **THEN** the `updated_at` of the record is updated
 
-### Requirement: Контейнер кожного поля форми запису
-Форми створення й редагування запису SHALL розміщувати кожне поле типу у власному контейнері з рамкою, підписом якого (легендою) є назва поля з позначкою обов'язковості, оформленому так само, як блок налаштувань файлу у формі поля. Булеве поле SHALL показувати прапорець із підписом усередині рамки. Підказки й повідомлення про помилки SHALL лишатися всередині контейнера свого поля. Кнопки «Зберегти» й «Скасувати» SHALL лишатися поза контейнерами, у липкій панелі дій унизу вікна. Контейнери не змінюють порядку полів, позначок обов'язковості та поведінки множинних полів. Службова колонка, на відміну від полів типу, SHALL бути одним блоком «Деталі» (не окремими рамками на атрибут).
+### Requirement: Container of each field of the record form
+The create and edit forms of a record SHALL place each field of the type in its own container with a frame, whose caption (the legend) is the name of the field with the required mark, styled in the same way as the block of the file settings in the field form. A boolean field SHALL show the checkbox with its label inside the frame. Hints and error messages SHALL remain inside the container of their own field. The buttons «Скасувати» and «Зберегти» SHALL remain outside the containers, in the sticky action bar at the bottom of the window. The containers do not change the order of the fields, the required marks and the behaviour of the multiple fields. The service column, unlike the fields of the type, SHALL be one block «Деталі» (not separate frames per attribute).
 
-#### Scenario: Кожне поле в рамці
-- **WHEN** користувач відкриває форму створення запису типу з полями `title` і `body`
-- **THEN** `title` і `body` розташовані кожне у власному контейнері з рамкою й підписом-назвою, а кнопки «Скасувати» й «Зберегти» — у липкій панелі внизу вікна
+#### Scenario: Each field in a frame
+- **WHEN** the user opens the creation form of a record of a type with the fields `title` and `body`
+- **THEN** `title` and `body` are each in their own container with a frame and a caption-name, and the buttons «Скасувати» and «Зберегти» are in the sticky bar at the bottom of the window
 
-#### Scenario: Помилки всередині контейнера
-- **WHEN** користувач зберігає форму з порожнім обов'язковим полем
-- **THEN** повідомлення про помилку показано всередині контейнера цього поля
+#### Scenario: Errors inside the container
+- **WHEN** the user saves the form with an empty required field
+- **THEN** the error message is shown inside the container of this field
 
-#### Scenario: Булеве поле
-- **WHEN** тип має булеве поле
-- **THEN** його прапорець і підпис стоять в одному рядку всередині рамки
+#### Scenario: Boolean field
+- **WHEN** the type has a boolean field
+- **THEN** its checkbox and label are in one line inside the frame
 
-### Requirement: Ліміт елементів множинного поля у формі запису
-Форма запису SHALL дотримуватися максимальної кількості елементів множинного поля, якщо вона більша за 0. Лічильник «кількість / ліміт» SHALL показуватися в одному рядку з підписом поля (поруч із ним, а не під ним). Коли елементів стільки, скільки дозволено, кнопка «Додати елемент» (у не файлових полях) SHALL бути недоступною, а зона множинного завантаження файлів (`image`, `file`) SHALL НЕ показуватися, замість неї SHALL виводитися пояснення про досягнутий ліміт; після видалення елемента зона SHALL з'явитися знову. Якщо користувач вибирає файлів більше за вільні місця, завантажуватися SHALL лише перші за порядком вибору файли в межах вільних місць, а решта — відхилятися з повідомленням, що названо ліміт. Поле без ліміту (`0`) SHALL поводитися як раніше. Сервер SHALL відхиляти перевищення незалежно від форми, а помилка SHALL показуватися біля поля.
+### Requirement: Item limit of a multiple field in the record form
+The record form SHALL respect the maximum number of items of a multiple field if it is greater than 0. The counter «кількість / ліміт» SHALL be shown in one line with the label of the field (next to it, not below it). When there are as many items as allowed, the button «Додати елемент» (in non-file fields) SHALL be unavailable, and the zone of multiple file upload (`image`, `file`) SHALL NOT be shown; instead, an explanation of the reached limit SHALL be displayed; after removing an item the zone SHALL reappear. If the user selects more files than there are free places, only the first files in the order of selection SHALL be uploaded within the free places, and the rest SHALL be rejected with a message that names the limit. A field without a limit (`0`) SHALL behave as before. The server SHALL reject the excess regardless of the form, and the error SHALL be shown next to the field.
 
-#### Scenario: Лічильник
-- **WHEN** користувач відкриває форму запису з множинним полем з лімітом 3 і двома елементами
-- **THEN** поруч із підписом поля видно «2 / 3»
+#### Scenario: Counter
+- **WHEN** the user opens the record form with a multiple field with a limit of 3 and two items
+- **THEN** «2 / 3» is visible next to the label of the field
 
-#### Scenario: Лічильник в одному рядку з підписом
-- **WHEN** множинне поле має ліміт, у тому числі обов'язкове поле з позначкою «*»
-- **THEN** підпис і лічильник стоять в одному рядку, лічильник не переноситься під підпис
+#### Scenario: Counter in one line with the label
+- **WHEN** a multiple field has a limit, including a required field with the mark «*»
+- **THEN** the label and the counter stand in one line, the counter does not wrap under the label
 
-#### Scenario: Ліміт досягнуто в рядковому полі
-- **WHEN** у множинному рядковому полі з лімітом 2 вже два елементи
-- **THEN** кнопка «Додати елемент» недоступна
+#### Scenario: Limit reached in a string field
+- **WHEN** a multiple string field with a limit of 2 already has two items
+- **THEN** the button «Додати елемент» is unavailable
 
-#### Scenario: Ліміт досягнуто в полі зображень
-- **WHEN** у множинному полі `image` з лімітом 2 вже два зображення
-- **THEN** зони завантаження немає, натомість показано пояснення, що ліміт досягнуто
+#### Scenario: Limit reached in an image field
+- **WHEN** a multiple field `image` with a limit of 2 already has two images
+- **THEN** there is no upload zone, and an explanation that the limit is reached is shown instead
 
-#### Scenario: Вибрано більше файлів, ніж місць
-- **WHEN** у полі `image` з лімітом 3 уже одне зображення, а користувач вибирає чотири допустимі файли
-- **THEN** завантажено лише перші два, у списку три елементи, решта названа в повідомленні про ліміт
+#### Scenario: More files selected than places
+- **WHEN** the field `image` with a limit of 3 already has one image, and the user selects four allowed files
+- **THEN** only the first two are uploaded, the list has three items, and the rest is named in the limit message
 
-#### Scenario: Видалення звільняє місце
-- **WHEN** ліміт досягнуто, а користувач видаляє один елемент
-- **THEN** додавання знову доступне, а в полі зображень або файлів знову з'являється зона завантаження
+#### Scenario: Removal frees a place
+- **WHEN** the limit is reached, and the user removes one item
+- **THEN** adding is available again, and in the field of images or files the upload zone reappears
 
-#### Scenario: Без ліміту
-- **WHEN** поле має ліміт 0
-- **THEN** лічильника з лімітом немає, додавати можна без обмеження
+#### Scenario: No limit
+- **WHEN** the field has a limit of 0
+- **THEN** there is no counter with a limit, and items can be added without restriction
 
-#### Scenario: Сервер відхиляє перевищення
-- **WHEN** запит на збереження обходить форму й надсилає більше елементів, ніж ліміт
-- **THEN** збереження відхилено, біля поля показано помилку
+#### Scenario: Server rejects the excess
+- **WHEN** a save request bypasses the form and sends more items than the limit
+- **THEN** the save is rejected, and an error is shown next to the field
 
 ## ADDED Requirements
 
-### Requirement: Дворядна розкладка форми запису
-На екранах шириною від `lg` (1024 px) форма створення й редагування SHALL мати дві колонки приблизно 70/30: у лівій — поля типу, у правій — блок «Деталі», що лишається на видноті при прокрутці довгої форми. Колонки SHALL ділити одну форму: відправлення зберігає і поля типу, і службові атрибути одним запитом. Широкі елементи (редактор `richtext`, віджети файлів, картка `youtube`) SHALL не розпирати ліву колонку й не перекривати праву.
+### Requirement: Two-column layout of the record form
+On screens from `lg` (1024 px) wide the create and edit form SHALL have two columns of about 70/30: on the left the fields of the type, on the right the block «Деталі», which stays in view when a long form is scrolled. The columns SHALL share one form: submitting saves both the fields of the type and the service attributes in one request. Wide elements (the `richtext` editor, the file widgets, the `youtube` card) SHALL not push the left column apart or overlap the right one.
 
-#### Scenario: Десктоп
-- **WHEN** користувач відкриває форму запису у вікні шириною 1280 px
-- **THEN** поля типу розташовані ліворуч, блок «Деталі» — праворуч, і обидва видно одночасно
+#### Scenario: Desktop
+- **WHEN** the user opens the form of a record in a window 1280 px wide
+- **THEN** the fields of the type are on the left, the block «Деталі» on the right, and both are visible at the same time
 
-#### Scenario: Прокрутка
-- **WHEN** користувач прокручує довгу форму вниз на десктопі
-- **THEN** блок «Деталі» лишається видимим у вікні
+#### Scenario: Scrolling
+- **WHEN** the user scrolls a long form down on the desktop
+- **THEN** the block «Деталі» remains visible in the window
 
-#### Scenario: Широке поле youtube
-- **WHEN** запис містить поле `youtube` (одиночне чи множинне) з довгим заголовком і описом, а вікно має ширину 1280 px
-- **THEN** контейнер поля не виходить за ліву колонку, а блок «Деталі» нічим не перекритий
+#### Scenario: Wide youtube field
+- **WHEN** the record contains a field `youtube` (single or multiple) with a long title and description, and the window is 1280 px wide
+- **THEN** the container of the field does not go beyond the left column, and the block «Деталі» is not overlapped by anything
 
-#### Scenario: Один запит
-- **WHEN** користувач змінює `title` і статус, а потім натискає «Зберегти»
-- **THEN** зберігаються обидві зміни одним відправленням форми
+#### Scenario: One request
+- **WHEN** the user changes `title` and the status, and then presses «Зберегти»
+- **THEN** both changes are saved in one submission of the form
 
-### Requirement: Деталі запису у формі
-Блок «Деталі» SHALL містити, у такому порядку: перемикач «Показувати на сайті» (`is_active`; у формі створення увімкнений), бейдж поточного стану запису, поле «Дата публікації» (`published_at`, вибір дати й часу; у формі створення заповнене поточним моментом), поле slug (з тими самими підказками й правилами, що й раніше), «Оновлено» (`updated_at`, лише для читання, лише у формі редагування) і «Автор» (ім'я автора, лише для читання; у формі створення — поточний користувач). Дата створення (`created_at`) SHALL НЕ показуватися. Бейдж SHALL відображати стан за поточним станом форми (до збереження): вимкнений перемикач дає «Вимкнено», увімкнений із майбутньою датою — «Заплановано», інакше — «Опубліковано». Редаговані поля SHALL показувати помилки валідації всередині блоку.
+### Requirement: Details of a record in the form
+The block «Деталі» SHALL contain, in this order: the switch «Показувати на сайті» (`is_active`; enabled in the creation form), the badge of the current status of the record, the field «Дата публікації» (`published_at`, a date and time selection; filled with the current moment in the creation form), the slug field (with the same hints and rules as before), «Оновлено» (`updated_at`, read-only, only in the edit form) and «Автор» (the name of the author, read-only; in the creation form — the current user). The creation date (`created_at`) SHALL NOT be shown. The badge SHALL display the status by the current state of the form (before saving): a disabled switch gives «Вимкнено», an enabled one with a future date — «Заплановано», otherwise — «Опубліковано». The editable fields SHALL show validation errors inside the block.
 
-#### Scenario: Службовий блок створення
-- **WHEN** користувач відкриває форму створення
-- **THEN** у блоці перемикач «Показувати на сайті» увімкнений, дата публікації заповнена поточним моментом, slug порожній, «Оновлено» немає, автором показано поточного користувача
+#### Scenario: Service block on creation
+- **WHEN** the user opens the creation form
+- **THEN** in the block the switch «Показувати на сайті» is enabled, the publication date is filled with the current moment, the slug is empty, there is no «Оновлено», and the current user is shown as the author
 
-#### Scenario: Службовий блок редагування
-- **WHEN** користувач відкриває форму редагування запису, створеного іншим користувачем
-- **THEN** «Автор» показує того користувача, а «Оновлено» — час останньої зміни запису, обидва не редагуються
+#### Scenario: Service block on editing
+- **WHEN** the user opens the edit form of a record created by another user
+- **THEN** «Автор» shows that user, and «Оновлено» — the time of the last change of the record, neither is editable
 
-#### Scenario: Бейдж реагує на форму
-- **WHEN** користувач вимикає перемикач «Показувати на сайті»
-- **THEN** бейдж одразу показує «Вимкнено», хоч запис ще не збережено
+#### Scenario: Badge reacts to the form
+- **WHEN** the user turns off the switch «Показувати на сайті»
+- **THEN** the badge immediately shows «Вимкнено», although the record is not saved yet
 
-#### Scenario: Бейдж «Заплановано»
-- **WHEN** користувач вводить дату публікації в майбутньому за увімкненого перемикача
-- **THEN** бейдж показує «Заплановано»
+#### Scenario: Badge «Заплановано»
+- **WHEN** the user enters a publication date in the future with the switch enabled
+- **THEN** the badge shows «Заплановано»
 
-#### Scenario: Дата створення
-- **WHEN** користувач відкриває форму редагування
-- **THEN** дати створення у формі немає
+#### Scenario: Creation date
+- **WHEN** the user opens the edit form
+- **THEN** there is no creation date in the form
 
-### Requirement: Панель деталей на вузьких екранах
-На екранах вужчих за `lg` блок «Деталі» SHALL відкриватися як висувна панель, а не бути колонкою. Липка панель дій унизу вікна SHALL, крім «Скасувати» й «Зберегти», містити кнопку деталей (на `lg` і ширше цієї кнопки немає). Кнопка SHALL бути іконкою без видимого тексту й без бейджа стану, SHALL мати доступну назву «Деталі» і SHALL показувати індикатор помилки, якщо будь-яке службове поле має помилку валідації. Закриття панелі SHALL НЕ втрачати введених у ній значень, а відправлення форми SHALL надсилати їх так само, як на десктопі. Поки панель закрита, службові поля SHALL НЕ дублюватися на сторінці. Після невдалого збереження з помилкою службового поля панель SHALL лишатися закритою, але кнопка SHALL показувати індикатор помилки; відкриття панелі показує повідомлення біля відповідного поля. Кнопки «Скасувати» й «Зберегти» лишаються доступними в панелі.
+### Requirement: Details panel on narrow screens
+On screens narrower than `lg` the block «Деталі» SHALL open as a slide-out panel, not be a column. The sticky action bar at the bottom of the window SHALL, besides «Скасувати» and «Зберегти», contain the details button (on `lg` and wider there is no such button). The button SHALL be an icon without visible text and without the status badge, SHALL have the accessible name «Деталі», and SHALL show an error indicator if any service field has a validation error. Closing the panel SHALL NOT lose the values entered in it, and submitting the form SHALL send them the same way as on the desktop. While the panel is closed, the service fields SHALL NOT be duplicated on the page. After a failed saving with an error of a service field, the panel SHALL stay closed, but the button SHALL show the error indicator; opening the panel shows the message next to the corresponding field. The buttons «Скасувати» and «Зберегти» remain available in the bar.
 
-#### Scenario: Мобільний вигляд
-- **WHEN** користувач відкриває форму у вікні шириною 390 px
-- **THEN** він бачить поля типу в одну колонку, а внизу екрана — панель з кнопкою-іконкою деталей та кнопками «Скасувати» і «Зберегти», без колонки справа
+#### Scenario: Mobile view
+- **WHEN** the user opens the form in a window 390 px wide
+- **THEN** they see the fields of the type in one column, and at the bottom of the screen the bar with the icon button of the details and the buttons «Скасувати» and «Зберегти», without a column on the right
 
-#### Scenario: Відкриття панелі
-- **WHEN** користувач натискає кнопку-іконку деталей
-- **THEN** відкривається панель із перемикачем, датою публікації, slug, «Оновлено» й «Автором»
+#### Scenario: Opening the panel
+- **WHEN** the user presses the icon button of the details
+- **THEN** a panel opens with the switch, the publication date, the slug, «Оновлено» and «Автор»
 
-#### Scenario: Значення переживають закриття
-- **WHEN** користувач у панелі змінює slug, закриває її й натискає «Зберегти»
-- **THEN** запис збережено з новим slug
+#### Scenario: Values survive closing
+- **WHEN** the user changes the slug in the panel, closes it and presses «Зберегти»
+- **THEN** the record is saved with the new slug
 
-#### Scenario: Помилка службового поля
-- **WHEN** користувач на вузькому екрані вводить зайнятий slug й натискає «Зберегти»
-- **THEN** запис не збережено, а кнопка деталей показує індикатор помилки
+#### Scenario: Error of a service field
+- **WHEN** the user on a narrow screen enters an occupied slug and presses «Зберегти»
+- **THEN** the record is not saved, and the details button shows the error indicator
 
-#### Scenario: Повідомлення в панелі
-- **WHEN** після невдалого збереження з помилкою slug користувач відкриває панель
-- **THEN** біля поля slug показано повідомлення про помилку
+#### Scenario: Message in the panel
+- **WHEN** after a failed saving with a slug error the user opens the panel
+- **THEN** an error message is shown next to the slug field
 
-#### Scenario: Кнопка без тексту
-- **WHEN** користувач відкриває форму на вузькому екрані
-- **THEN** кнопка деталей не містить видимого тексту й бейджа стану, але має доступну назву «Деталі»
+#### Scenario: Button without text
+- **WHEN** the user opens the form on a narrow screen
+- **THEN** the details button contains no visible text and no status badge, but has the accessible name «Деталі»
 
-#### Scenario: Поворот екрана
-- **WHEN** користувач на вузькому екрані змінив значення в панелі й збільшив вікно до ширини від `lg`
-- **THEN** змінені значення показано в правій колонці без втрати
+#### Scenario: Rotating the screen
+- **WHEN** on a narrow screen the user changed the values in the panel and enlarged the window to a width from `lg`
+- **THEN** the changed values are shown in the right column without loss

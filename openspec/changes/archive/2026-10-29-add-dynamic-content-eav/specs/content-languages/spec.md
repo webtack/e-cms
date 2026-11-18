@@ -2,69 +2,69 @@
 
 ## Purpose
 
-Дає змогу керувати мовами контенту (перелік доступних мов) та глобальним вмикачем багатомовності контенту. Стосується лише контенту й фронтенд-частини; мова інтерфейсу адмінки не змінюється.
+Allows managing the content languages (the list of available languages) and the global content multilingualism switch. It concerns only the content and the frontend part; the language of the admin interface does not change.
 
 ## ADDED Requirements
 
-### Requirement: Перелік мов контенту
-Система SHALL зберігати перелік доступних мов контенту записами загальної системної таблиці мов (`app_languages`) з унікальним кодом, назвою, ознакою активності (за замовчуванням неактивна) та вагою (`weight`), без нових міграцій і змін коду. Код `default` SHALL бути зарезервований для базових значень і SHALL НЕ додаватися як мова. Код мови SHALL мати BCP-47-подібний формат (`uk`, `en`, `pt-BR`) довжиною до 16 символів. Система SHALL зберігати код лише в нормалізованому вигляді (канонічний регістр BCP-47: мова малими, письмо з великої, регіон великими) і SHALL так само нормалізувати мову, вказану при записі, читанні й вибірці значень, тож варіанти регістру одного коду є однією мовою.
+### Requirement: List of content languages
+The system SHALL store the list of available content languages as records of the common system languages table (`app_languages`) with a unique code, a name, an activity flag (inactive by default) and a weight (`weight`), without new migrations and code changes. The code `default` SHALL be reserved for base values and SHALL NOT be added as a language. A language code SHALL have a BCP-47-like format (`uk`, `en`, `pt-BR`) up to 16 characters long. The system SHALL store the code only in normalized form (the canonical BCP-47 case: the language in lowercase, the script capitalized, the region in uppercase) and SHALL normalize the language given on writing, reading and selection of values in the same way, so that case variants of one code are one language.
 
-#### Scenario: Нормалізація коду
-- **WHEN** додається мова з кодом `PT-br`
-- **THEN** збережено код `pt-BR`; додавання `pt-br` після цього відхилено з помилкою унікальності, а запис значення з `lang = pt-br` зберігається з `lang = pt-BR`
+#### Scenario: Code normalization
+- **WHEN** a language with the code `PT-br` is added
+- **THEN** the code `pt-BR` is stored; adding `pt-br` afterwards is rejected with a uniqueness error, and a value write with `lang = pt-br` is saved with `lang = pt-BR`
 
-#### Scenario: Додавання мови
-- **WHEN** додається мова з кодом `en` і назвою «English»
-- **THEN** мову збережено; вона неактивна за замовчуванням і стає доступною для запису значень контенту після активації
+#### Scenario: Adding a language
+- **WHEN** a language with the code `en` and the name "English" is added
+- **THEN** the language is saved; it is inactive by default and becomes available for writing content values after activation
 
-#### Scenario: Дублікат коду
-- **WHEN** додається мова з уже наявним кодом
-- **THEN** збереження відхилено з помилкою унікальності
+#### Scenario: Duplicate code
+- **WHEN** a language with an already existing code is added
+- **THEN** the save is rejected with a uniqueness error
 
-#### Scenario: Зарезервований або некоректний код
-- **WHEN** додається мова з кодом `default`, `!!` або довшим за 16 символів
-- **THEN** збереження відхилено з помилкою валідації
+#### Scenario: Reserved or invalid code
+- **WHEN** a language with the code `default`, `!!` or longer than 16 characters is added
+- **THEN** the save is rejected with a validation error
 
-### Requirement: Деактивація та видалення мови
-Система SHALL дозволяти деактивувати мову зі збереженням її значень і SHALL відхиляти видалення мови, для якої існують значення; мову без значень SHALL дозволяти видалити.
+### Requirement: Deactivation and deletion of a language
+The system SHALL allow deactivating a language while keeping its values, and SHALL reject deletion of a language for which values exist; a language without values SHALL be allowed to be deleted.
 
-#### Scenario: Деактивація
-- **WHEN** мова з наявними значеннями деактивується
-- **THEN** її значення збережено й доступні для читання, але нові значення цією мовою записати не можна
+#### Scenario: Deactivation
+- **WHEN** a language with existing values is deactivated
+- **THEN** its values are kept and available for reading, but new values cannot be written in this language
 
-#### Scenario: Видалення мови зі значеннями
-- **WHEN** видаляється мова, для якої існують значення
-- **THEN** видалення відхилено
+#### Scenario: Deleting a language with values
+- **WHEN** a language for which values exist is deleted
+- **THEN** the deletion is rejected
 
-#### Scenario: Видалення порожньої мови
-- **WHEN** видаляється мова без значень
-- **THEN** її видалено
+#### Scenario: Deleting an empty language
+- **WHEN** a language without values is deleted
+- **THEN** it is deleted
 
-### Requirement: Вмикач багатомовності
-Система SHALL мати єдиний глобальний вмикач багатомовності контенту, який зберігається в загальному сховищі налаштувань (`app-settings`) під ключем `content.multilingual`, за замовчуванням вимкнений і змінюється без змін коду. Коли вимкнений, система SHALL приймати, читати та вибирати значення лише з мовою `default`. Коли ввімкнений, система SHALL додатково приймати активні мови з переліку. Вмикач SHALL НЕ видаляти й не змінювати вже збережені переклади.
+### Requirement: Multilingualism switch
+The system SHALL have a single global content multilingualism switch, stored in the common settings storage (`app-settings`) under the key `content.multilingual`, disabled by default and changeable without code changes. When disabled, the system SHALL accept, read and select values only with the language `default`. When enabled, the system SHALL additionally accept the active languages from the list. The switch SHALL NOT delete or change already stored translations.
 
-#### Scenario: Вимкнена багатомовність
-- **WHEN** багатомовність вимкнена, а значення записується, читається або вибирається з `lang = en`
-- **THEN** операцію відхилено з помилкою валідації
+#### Scenario: Disabled multilingualism
+- **WHEN** multilingualism is disabled and a value is written, read or selected with `lang = en`
+- **THEN** the operation is rejected with a validation error
 
-#### Scenario: Увімкнена багатомовність
-- **WHEN** багатомовність увімкнена, мова `en` активна, і перекладному полю записується значення з `lang = en`
-- **THEN** значення збережено
+#### Scenario: Enabled multilingualism
+- **WHEN** multilingualism is enabled, the language `en` is active, and a translatable field is written with `lang = en`
+- **THEN** the value is saved
 
-#### Scenario: Вимкнення зі збереженням перекладів
-- **WHEN** багатомовність вимикають після запису перекладів, а потім вмикають знову
-- **THEN** переклади збережені без змін
+#### Scenario: Switching off with translations preserved
+- **WHEN** multilingualism is switched off after translations were written, and then switched on again
+- **THEN** the translations are saved without changes
 
-### Requirement: Незалежність від мови адмінки
-Мови контенту та вмикач багатомовності SHALL НЕ впливати на мову інтерфейсу адмінки та її перемикач; і навпаки, мова адмінки SHALL НЕ впливати на мову значень контенту.
+### Requirement: Independence from the admin language
+The content languages and the multilingualism switch SHALL NOT affect the language of the admin interface and its switcher; and vice versa, the admin language SHALL NOT affect the language of content values.
 
-#### Scenario: Зміна налаштувань мов контенту
-- **WHEN** додається мова контенту або перемикається вмикач багатомовності
-- **THEN** доступні мови й вибір мови інтерфейсу адмінки залишаються без змін
+#### Scenario: Change of content language settings
+- **WHEN** a content language is added or the multilingualism switch is toggled
+- **THEN** the available admin interface languages and the choice of the admin interface language remain unchanged
 
-### Requirement: Доступність налаштувань для фронтенду
-Система SHALL надавати для використання в коді стан вмикача багатомовності та впорядкований перелік активних мов контенту.
+### Requirement: Availability of the settings for the frontend
+The system SHALL provide, for use in code, the state of the multilingualism switch and the ordered list of active content languages.
 
-#### Scenario: Перелік активних мов
-- **WHEN** багатомовність увімкнена, мови `uk` (активна), `en` (активна), `de` (неактивна)
-- **THEN** повертається перелік `uk`, `en` у порядку ваги (`weight`); коли вимкнена — порожній перелік додаткових мов
+#### Scenario: List of active languages
+- **WHEN** multilingualism is enabled, the languages `uk` (active), `en` (active), `de` (inactive)
+- **THEN** the list `uk`, `en` is returned in the order of the weight (`weight`); when disabled — an empty list of additional languages

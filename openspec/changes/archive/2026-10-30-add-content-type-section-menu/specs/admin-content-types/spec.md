@@ -2,25 +2,25 @@
 
 ## ADDED Requirements
 
-### Requirement: Горизонтальне меню розділу типу
-Сторінки керування наявним типом контенту виду `content` — форма редагування типу (`/admin/content-types/{key}/edit`), список полів (`/admin/content-types/{key}/fields`), форми створення й редагування поля — SHALL показувати над вмістом горизонтальне меню розділу з пунктами «Налаштування» (веде на форму редагування типу) та «Поля» (веде на список полів цього типу). Пункт поточного розділу SHALL бути візуально виділений і позначений як поточний для допоміжних технологій; на сторінках створення й редагування поля поточним SHALL бути «Поля». Меню SHALL бути однаковим на всіх цих сторінках, а над ним SHALL бути посилання назад до списку типів. Сторінка створення типу меню НЕ показує.
+### Requirement: Horizontal section menu of a content type
+The pages for managing an existing content type of the kind `content` — the type edit form (`/admin/content-types/{key}/edit`), the list of fields (`/admin/content-types/{key}/fields`), and the field creation and edit forms — SHALL show above the content a horizontal section menu with the items "Settings" (leads to the type edit form) and "Fields" (leads to the list of fields of this type). The item of the current section SHALL be visually highlighted and marked as current for assistive technologies; on the field creation and edit pages the current item is "Fields". The menu SHALL be the same on all these pages, and above it there SHALL be a link back to the list of types. The creation page of a type does NOT show the menu.
 
-#### Scenario: Меню на формі редагування типу
-- **WHEN** користувач відкриває `/admin/content-types/news/edit`
-- **THEN** він бачить меню з пунктами «Налаштування» та «Поля», де «Налаштування» виділено як поточний
+#### Scenario: Menu on the type edit form
+- **WHEN** the user opens `/admin/content-types/news/edit`
+- **THEN** they see a menu with the items "Settings" and "Fields", where "Settings" is highlighted as current
 
-#### Scenario: Меню на списку полів
-- **WHEN** користувач відкриває `/admin/content-types/news/fields`
-- **THEN** меню показано, поточним є «Поля», а посилання назад до списку типів міститься над меню
+#### Scenario: Menu on the list of fields
+- **WHEN** the user opens `/admin/content-types/news/fields`
+- **THEN** the menu is shown, "Fields" is current, and the link back to the list of types is above the menu
 
-#### Scenario: Меню на формах поля
-- **WHEN** користувач відкриває форму створення чи редагування поля типу `news`
-- **THEN** меню показано, поточним є «Поля»
+#### Scenario: Menu on the field forms
+- **WHEN** the user opens the field creation or edit form of the type `news`
+- **THEN** the menu is shown, "Fields" is current
 
-#### Scenario: Перемикання між сторінками
-- **WHEN** користувач натискає «Поля» на формі редагування типу `news`, а потім «Налаштування»
-- **THEN** він потрапляє на `/admin/content-types/news/fields`, а потім на `/admin/content-types/news/edit`
+#### Scenario: Switching between pages
+- **WHEN** the user clicks "Fields" on the edit form of the type `news`, and then "Settings"
+- **THEN** they land on `/admin/content-types/news/fields`, and then on `/admin/content-types/news/edit`
 
-#### Scenario: Створення типу
-- **WHEN** користувач відкриває `/admin/content-types/create`
-- **THEN** меню розділу не показується
+#### Scenario: Creating a type
+- **WHEN** the user opens `/admin/content-types/create`
+- **THEN** the section menu is not shown

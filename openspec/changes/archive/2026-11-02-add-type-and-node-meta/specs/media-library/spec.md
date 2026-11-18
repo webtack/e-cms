@@ -3,20 +3,20 @@
 ## ADDED Requirements
 
 ### Requirement: Зв'язки файлів значень типу
-Система SHALL обліковувати файли в значеннях самого типу (`meta_image`, `section_cover`) так само, як у значеннях записів: зв'язком, власником якого є тип (його ідентифікатор), з роллю, що дорівнює ключу поля, і мовою значення. Зв'язки типу SHALL оновлюватися в тій самій транзакції, що й запис значення, і SHALL прибиратися при видаленні типу; самі файли лишаються. Сторінка «Де використовується файл» SHALL показувати використання у значенні типу, з назвою типу й посиланням на сторінку його налаштувань.
+The system SHALL account for files in the values of the type itself (`meta_image`, `section_cover`) in the same way as in the values of records: by a link whose owner is the type (its identifier), with a role equal to the key of the field, and the language of the value. The links of a type SHALL be updated in the same transaction as the record of the value, and SHALL be removed when the type is deleted; the files themselves remain. The page «Де використовується файл» («Where the file is used») SHALL show the usage in a value of a type, with the name of the type and a link to the page of its settings.
 
-#### Scenario: Прив'язка файлу до типу
-- **WHEN** у `section_cover` типу `news` зберігається файл
-- **THEN** існує зв'язок цього файлу з типом `news`, роль `section_cover`, мова значення, а кількість використань файлу збільшилась
+#### Scenario: Attaching a file to a type
+- **WHEN** a file is saved in `section_cover` of the type `news`
+- **THEN** a link of this file with the type `news` exists, with the role `section_cover`, the language of the value, and the count of usages of the file has increased
 
-#### Scenario: Заміна файлу в значенні типу
-- **WHEN** у `meta_image` типу замінюють файл A файлом B
-- **THEN** зв'язок із A видалено, з B створено, файли лишаються
+#### Scenario: Replacing a file in a value of a type
+- **WHEN** the file A is replaced by the file B in `meta_image` of a type
+- **THEN** the link with A is removed, a link with B is created, the files remain
 
-#### Scenario: Видалення типу
-- **WHEN** видаляється тип, що використовує файл у `section_cover`
-- **THEN** зв'язки цього типу видалено, лічильник використань файлу зменшився, файл лишився у сховищі
+#### Scenario: Deleting a type
+- **WHEN** a type that uses a file in `section_cover` is deleted
+- **THEN** the links of this type are removed, the count of usages of the file has decreased, the file remains in the storage
 
-#### Scenario: Використання у сторінці медіатеки
-- **WHEN** користувач відкриває «Де використовується» для файлу, обраного як `section_cover` типу `news`
-- **THEN** він бачить тип `news` з посиланням на сторінку його налаштувань
+#### Scenario: Usage on the media library page
+- **WHEN** the user opens «Де використовується» for a file selected as `section_cover` of the type `news`
+- **THEN** they see the type `news` with a link to the page of its settings

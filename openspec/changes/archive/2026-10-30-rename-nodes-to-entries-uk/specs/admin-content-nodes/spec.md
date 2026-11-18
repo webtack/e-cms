@@ -6,24 +6,24 @@
 ## MODIFIED Requirements
 
 ### Requirement: Сторінка списку записів
-Адмінка SHALL мати сторінку `/admin/content-types/{key}/nodes`, доступну лише автентифікованим користувачам з підтвердженою поштою, що показує записи типу контенту виду `content` із цим ключем у таблиці даних у серверному режимі: пошук, сортування, пагінацію й розмір сторінки виконує сервер, а стан таблиці зберігається в адресі. Таблиця SHALL НЕ мати фільтрів. Заголовок сторінки SHALL називати тип, а над таблицею SHALL бути горизонтальне меню розділу типу з поточним пунктом «Записи». Для ключа, якого немає серед типів виду `content` (зокрема ключа типу `page` чи `block`), сторінка SHALL відповідати 404. Сторінка SHALL відкриватися й для типу без записів.
+The admin SHALL have the page `/admin/content-types/{key}/nodes`, available only to authenticated users with a confirmed email, which shows the records of the content type of the kind `content` with this key in the data table in server mode: the search, sorting, pagination and page size are performed by the server, and the state of the table is stored in the address. The table SHALL NOT have filters. The page title SHALL name the type, and above the table SHALL be the horizontal menu of the type section with the current item «Записи». For a key that is not among the types of the kind `content` (in particular, a key of a type `page` or `block`), the page SHALL respond with 404. The page SHALL open also for a type without records.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/news/nodes`
-- **THEN** він бачить таблицю записів типу `news`, заголовок із назвою типу та меню розділу, де поточним є «Записи»; кнопки фільтрів у панелі таблиці немає
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types/news/nodes`
+- **THEN** they see the table of records of the type `news`, the title with the name of the type and the section menu where «Записи» is current; there is no filter button in the toolbar of the table
 
-#### Scenario: Вузли лише цього типу
-- **WHEN** існують записи типів `news` і `product`, а користувач відкриває список типу `news`
-- **THEN** у таблиці лише записи типу `news`
+#### Scenario: Only records of this type
+- **WHEN** records of the types `news` and `product` exist, and the user opens the list of the type `news`
+- **THEN** the table contains only the records of the type `news`
 
-#### Scenario: Порожній стан
-- **WHEN** тип не має записів
-- **THEN** сторінка відкривається зі стандартним повідомленням таблиці про відсутність даних, кнопка «Створити» видима
+#### Scenario: Empty state
+- **WHEN** the type has no records
+- **THEN** the page opens with the standard message of the table about the absence of data, and the button «Створити» is visible
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває `/admin/content-types/home/nodes` для ключа типу виду `page`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens `/admin/content-types/home/nodes` for the key of a type of the kind `page`
+- **THEN** the server responds with 404
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/news/nodes`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/news/nodes`
+- **THEN** they are redirected to the login page

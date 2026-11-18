@@ -1,38 +1,38 @@
 ## ADDED Requirements
 
 ### Requirement: Налаштування публічного відображення типу
-Система SHALL зберігати в `content_types.settings.public` налаштування публічного відображення типу: `list_fields` (додані поля картки в списку), `page_fields` (додані поля сторінки запису), `sort` (`field` та `direction` — `asc` або `desc`), `per_page` (ціле ≥ 0) і `pagination` (булеве). «Доданими» вважаються поля з `is_system = false`, що тримають значення записів і мають не зарезервований ключ. Система SHALL відхиляти посилання на інші поля, на поля іншого типу, несортовне поле в `sort.field` та `per_page` поза допустимими межами через `ValidationException`. Збереження `public` SHALL не змінювати інші ключі `settings`.
+The system SHALL store in `content_types.settings.public` the public display settings of a type: `list_fields` (the added fields of the card in the list), `page_fields` (the added fields of the page of the record), `sort` (`field` and `direction` — `asc` or `desc`), `per_page` (an integer ≥ 0) and `pagination` (a boolean). «Added» fields are the fields with `is_system = false` that hold the values of records and have a non-reserved key. The system SHALL reject, through `ValidationException`, references to other fields, to fields of another type, a non-sortable field in `sort.field`, and `per_page` outside the admissible limits. Saving `public` SHALL NOT change the other keys of `settings`.
 
-#### Scenario: Збереження допустимих налаштувань
-- **WHEN** тип зберігається з `settings.public` = `{ "list_fields": ["price"], "sort": { "field": "published_at", "direction": "desc" }, "per_page": 10, "pagination": true }` і поле `price` є доданим полем типу
-- **THEN** налаштування зберігаються, а ключ `settings.list` лишається без змін
+#### Scenario: Saving admissible settings
+- **WHEN** a type is saved with `settings.public` = `{ "list_fields": ["price"], "sort": { "field": "published_at", "direction": "desc" }, "per_page": 10, "pagination": true }` and the field `price` is an added field of the type
+- **THEN** the settings are saved, and the key `settings.list` remains unchanged
 
-#### Scenario: Системне або чуже поле відхиляється
-- **WHEN** `list_fields` або `page_fields` містить `meta_title`, `title` чи ключ, якого немає в полях типу
-- **THEN** зберігання завершується `ValidationException` з ключем `settings`
+#### Scenario: System or foreign field is rejected
+- **WHEN** `list_fields` or `page_fields` contains `meta_title`, `title`, or a key that is not among the fields of the type
+- **THEN** the saving ends with a `ValidationException` with the key `settings`
 
-#### Scenario: Некоректний напрямок або кількість
-- **WHEN** `sort.direction` не є `asc`/`desc` або `per_page` від'ємний чи більший за `content.max_per_page`
-- **THEN** зберігання завершується `ValidationException`
+#### Scenario: Incorrect direction or number
+- **WHEN** `sort.direction` is not `asc`/`desc`, or `per_page` is negative or greater than `content.max_per_page`
+- **THEN** the saving ends with a `ValidationException`
 
 ### Requirement: Значення за замовчуванням публічних налаштувань
-Без налаштувань (`settings.public` відсутній або порожній) система SHALL застосовувати: у картці — лише `title` (порожній `list_fields`), на сторінці — усі додані поля типу, сортування `published_at` за спаданням, `per_page = 0` (усі записи). Відсутній ключ `page_fields` SHALL означати «усі додані поля» на момент читання, тож нове додане поле одразу входить до сторінки; явно збережений `page_fields` (навіть порожній) SHALL означати саме перелік.
+Without settings (`settings.public` absent or empty) the system SHALL apply: in the card — only `title` (an empty `list_fields`), on the page — all added fields of the type, the sorting `published_at` descending, `per_page = 0` (all records). The absent key `page_fields` SHALL mean «all added fields» at the moment of reading, so a new added field immediately enters the page; an explicitly saved `page_fields` (even an empty one) SHALL mean exactly the list.
 
-#### Scenario: Нове поле з'являється на сторінці
-- **WHEN** у типу немає ключа `page_fields` і додається нове поле
-- **THEN** ефективний набір полів сторінки включає нове поле без зміни налаштувань
+#### Scenario: New field appears on the page
+- **WHEN** a type has no key `page_fields` and a new field is added
+- **THEN** the effective set of fields of the page includes the new field without a change of the settings
 
-#### Scenario: Явний перелік не росте сам
-- **WHEN** `page_fields` збережено як `["price"]` і додається нове поле
-- **THEN** ефективний набір полів сторінки лишається `["price"]`
+#### Scenario: Explicit list does not grow by itself
+- **WHEN** `page_fields` is saved as `["price"]` and a new field is added
+- **THEN** the effective set of fields of the page remains `["price"]`
 
 ### Requirement: Публічні налаштування залежать від виду типу
-Система SHALL приймати `list_fields`, `sort`, `per_page` і `pagination` лише для типів виду `content`; для `page` і `block` спроба їх вказати SHALL завершуватись `ValidationException`, а `page_fields` приймається для всіх видів. Мета-поля, службові атрибути запису та значення розділу типу SHALL лишатися доступними для шаблону незалежно від налаштувань.
+The system SHALL accept `list_fields`, `sort`, `per_page` and `pagination` only for types of the kind `content`; for `page` and `block` an attempt to specify them SHALL end with a `ValidationException`, while `page_fields` is accepted for all kinds. The meta fields, the service attributes of the record and the values of the section of the type SHALL remain available to the template regardless of the settings.
 
-#### Scenario: Список для сторінки відхиляється
-- **WHEN** тип виду `page` зберігається з `settings.public.per_page`
-- **THEN** зберігання завершується `ValidationException`
+#### Scenario: List for a page is rejected
+- **WHEN** a type of the kind `page` is saved with `settings.public.per_page`
+- **THEN** the saving ends with a `ValidationException`
 
-#### Scenario: Посилання на видалене поле
-- **WHEN** поле, згадане в `list_fields`, видалено
-- **THEN** читання налаштувань відкидає цей ключ і не падає
+#### Scenario: Reference to a deleted field
+- **WHEN** a field mentioned in `list_fields` has been deleted
+- **THEN** reading the settings discards this key and does not fail

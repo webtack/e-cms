@@ -2,44 +2,48 @@
 
 ## Context
 
-Налаштування типу лежать у JSON-колонці `content_types.settings`. Ключ `list` (адмінський список) читає й чистить `App\Content\NodeListSettings`; `ContentTypeController::mergeListSettings()` при збереженні замінює лише його, а `ContentType::assertValidListSettings()` перевіряє ключі проти полів типу. Секція «Список записів» у формі (`NodeListSettingsSection`) показується тільки в режимі `edit`. `ContentNodeQuery::paginate()` обмежує `perPage` значеннями `[1, max_per_page]`, режиму «усі» немає. Публічних маршрутів і шаблонів ще немає (мотивація — у proposal.md).
+The settings of a type live in the JSON column `content_types.settings`. The key `list` (the admin list) is read and cleaned by `App\Content\NodeListSettings`; `ContentTypeController::mergeListSettings()` replaces only it on saving, and `ContentType::assertValidListSettings()` checks the keys against the fields of the type. The section «Список записів» in the form (`NodeListSettingsSection`) is shown only in the mode `edit`. `ContentNodeQuery::paginate()` limits `perPage` to the values `[1, max_per_page]`; there is no mode «all». There are no public routes and templates yet (the motivation is in proposal.md).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Зберігати публічні налаштування поруч із `list`, за тим самим шаблоном (перевірка при збереженні, очищення при читанні, окремий ключ у merge).
-- Дати шаблону один «ефективний» результат (поля картки й сторінки, сортування, `per_page`, `pagination`) без потреби знати про значення за замовчуванням.
+- Store the public settings next to `list`, by the same pattern (checking on saving, cleaning on reading, a separate key in the merge).
+- Give the template one «effective» result (the fields of the card and the page, the sorting, `per_page`, `pagination`) without the need to know about the default values.
 
 **Non-Goals:**
-- Публічні маршрути, шаблони, рендер полів, кешування.
-- Вибір мета-полів і службових атрибутів (вони завжди доступні).
-- Налаштування пошуку, фільтрів чи вибору сортування відвідувачем.
+- Public routes, templates, rendering of the fields, caching.
+- The choice of meta fields and service attributes (they are always available).
+- The settings of search, filters or the choice of sorting by the visitor.
 
 ## Decisions
 
-**1. Ключ `settings.public`, не окрема таблиця й не розширення `list`.** `list` описує адмінку, `public` — сайт; різні значення за замовчуванням (сортування `created_at asc` проти `published_at desc`). Міграція не потрібна. Альтернатива «спільні налаштування» відхилена: вона змушувала б адмінську таблицю й сайт мати однакові колонки.
+**1. The key `settings.public`, not a separate table and not an extension of `list`.** `list` describes the admin, `public` — the site; different default values (the sorting `created_at asc` versus `published_at desc`). No migration is needed. The alternative «shared settings» was rejected: it would force the admin table and the site to have the same columns.
 
-**2. `page_fields` відсутній = «усі додані» (динамічно).** Ключ не пишеться, поки адміністратор не вимкне «Усі додані поля»; повернення перемикача видаляє ключ. Це дає поведінку «нове поле з'являється автоматично» без міграцій і без обходу всіх типів при додаванні поля. Альтернатива — явний список з моменту створення типу — потребувала б дописувати його при кожному новому полі. `list_fields` такого режиму не має: порожньо = лише `title`.
+**2. `page_fields` absent = «all added» (dynamic).** The key is not written while the administrator does not switch off «Усі додані поля»; switching it back on removes the key. This gives the behaviour «a new field appears automatically» without migrations and without walking through all types when a field is added. The alternative — an explicit list from the moment the type is created — would need the list to be extended with every new field. `list_fields` has no such mode: empty = only `title`.
 
-**3. Допустимі поля — лише додані.** `is_system = false`, поле тримає значення записів (`ValueOwner::forNodesOfType`), ключ не зарезервований. `title`, `meta_*`, `section_*` і службові атрибути завжди доступні шаблону, тому не зберігаються в налаштуваннях.
+**3. The admissible fields — only the added ones.** `is_system = false`, the field holds the values of records (`ValueOwner::forNodesOfType`), the key is not reserved. `title`, `meta_*`, `section_*` and the service attributes are always available to the template, so they are not stored in the settings.
 
-**4. Клас `PublicDisplaySettings` за зразком `NodeListSettings`** (`clean()`, `formOptions()`, плюс `resolve()` — ефективний результат для шаблону). Для сортування він використовує ті самі правила, що й адмінський список (`NodeListSettings::sortable()`, `ContentType::LIST_SORT_SERVICE_KEYS`), але значення за замовчуванням — `published_at desc`. Перевірка при збереженні — `ContentType::assertValidPublicSettings()` поруч з `assertValidListSettings()`; читання мовчки відкидає застарілі посилання.
+**4. The class `PublicDisplaySettings` modeled on `NodeListSettings`** (`clean()`, `formOptions()`, plus `resolve()` — the effective result for the template). For sorting it uses the same rules as the admin list (`NodeListSettings::sortable()`, `ContentType::LIST_SORT_SERVICE_KEYS`), but the default value is `published_at desc`. The check on saving — `ContentType::assertValidPublicSettings()` next to `assertValidListSettings()`; reading silently discards stale references.
 
-**5. Обмеження за видом у моделі.** `list_fields`, `sort`, `per_page`, `pagination` для `page`/`block` відхиляються `ValidationException` (як `slug` типу), форма їх не показує.
+**5. Restrictions by kind in the model.** `list_fields`, `sort`, `per_page`, `pagination` for `page`/`block` are rejected with a `ValidationException` (as the `slug` of a type); the form does not show them.
 
-**6. `per_page = 0` — гілка в `ContentNodeQuery`, а не «великий per_page».** Для `0` запит бере `limit(content.max_all)` і повертає `LengthAwarePaginator` на одну сторінку, щоб форма результату лишилась тією самою. `max_per_page` (100) діє тільки для `per_page > 0`. `NodeQueryParams::$perPage` зараз приймає `null` (за замовчуванням) і число; `0` раніше піднімався до 1, але жоден виклик у `app/` його не передає, тож зміна семантики безпечна. `max_all` за замовчуванням — 1000. Верхня межа збереженого `per_page` — `max_per_page`.
+**6. `per_page = 0` is a branch in `ContentNodeQuery`, not a «large per_page».** For `0` the query takes `limit(content.max_all)` and returns a `LengthAwarePaginator` on one page, so that the shape of the result stays the same. `max_per_page` (100) applies only to `per_page > 0`. `NodeQueryParams::$perPage` now accepts `null` (by default) and a number; `0` was previously raised to 1, but no call in `app/` passes it, so the change of semantics is safe. `max_all` by default is 1000. The upper bound of the saved `per_page` is `max_per_page`.
 
-**7. Ефективне `pagination` при `per_page = 0` — «ні».** Збережене значення не змінюється (повернення `per_page > 0` відновлює вибір), але `resolve()` віддає `false`; у формі перемикач вимкнений. За замовчуванням `pagination = true` (для `per_page > 0` типова поведінка).
+**7. The effective `pagination` with `per_page = 0` is «no».** The saved value does not change (returning `per_page > 0` restores the choice), but `resolve()` gives `false`; in the form the switch is disabled. By default `pagination = true` (for `per_page > 0` the usual behaviour).
 
-**8. Форма.** Нова секція «Публічне відображення» поруч з `NodeListSettingsSection` у `ContentTypeForm` (лише `edit`); `ContentTypeController::edit()` додає `publicOptions`; `mergeListSettings()` узагальнюється до заміни одного ключа, щоб `list` і `public` не затирали один одного. `StoreContentTypeRequest` розширює `array:list` до `array:list,public` і додає правила форми.
+**8. The form.** A new section «Публічне відображення» next to `NodeListSettingsSection` in `ContentTypeForm` (only `edit`); `ContentTypeController::edit()` adds `publicOptions`; `mergeListSettings()` is generalized to the replacement of one key, so that `list` and `public` do not erase each other. `StoreContentTypeRequest` extends `array:list` to `array:list,public` and adds the rules of the form.
 
-**9. Значення за замовчуванням не зберігаються.** Форма не пише в `settings.public` значення, що збігаються з типовими: порожній `list_fields`, сортування `published_at desc`, `per_page = 0`, `pagination = true`; порожній `public` видаляється (як у `list`). Читання (`resolve()`) підставляє типові значення, тож результат той самий. Наслідок: зміна типових значень у коді торкнеться типів без явно збережених значень. Виняток — види без списку (`page`, `block`): надіслані ключі списку не відкидаються як типові, щоб модель їх відхилила.
+**9. Default values are not stored.** The form does not write to `settings.public` the values that coincide with the typical ones: an empty `list_fields`, the sorting `published_at desc`, `per_page = 0`, `pagination = true`; an empty `public` is removed (as `list`). Reading (`resolve()`) substitutes the typical values, so the result is the same. The consequence: a change of the typical values in the code affects the types without explicitly saved values. The exception — the kinds without a list (`page`, `block`): the sent keys of the list are not discarded as typical, so that the model rejects them.
 
-Описані компоненти: [content-model.md](../../../docs/content-model.md), [content-querying.md](../../../docs/content-querying.md), [admin-content-types.md](../../../docs/admin-content-types.md).
+The components described: [content-model.md](../../../docs/content-model.md), [content-querying.md](../../../docs/content-querying.md), [admin-content-types.md](../../../docs/admin-content-types.md).
 
 ## Risks / Trade-offs
 
-- [`per_page = 0` на великому типі повертає до `max_all` записів] → окрема стеля `content.max_all`; зберігається впорядкування, а перевищення мовчки обрізається (шаблон може показати пагінатор вручну, коли знадобиться).
-- [Динамічне «усі» означає, що нове поле одразу публічне] → це свідоме рішення; приховати поле можна явним переліком.
-- [Два набори `*_fields` ускладнюють форму] → `list_fields` — простий чекбокс-список, «Усі» тільки для сторінки.
-- [Видалене поле лишається в збереженому JSON] → читання відкидає його; чиститься при наступному збереженні форми.
+- [`per_page = 0` on a large type returns up to `max_all` records] → a separate ceiling `content.max_all`; the ordering is kept, and an excess is silently cut (the template can show the paginator by hand when needed).
+- [The dynamic «all» means that a new field is immediately public] → this is a deliberate decision; a field can be hidden by an explicit list.
+- [Two sets of `*_fields` complicate the form] → `list_fields` is a simple checkbox list, «Усі» exists only for the page.
+- [A deleted field remains in the saved JSON] → reading discards it; it is cleaned at the next saving of the form.
+
+## Migration Plan
+
+There are no migrations: the JSON column `settings` already exists. The types without the key `public` work with the typical values (`resolve()`); the first saving of the form writes the key only if a value differs from the typical ones. Rollback: the key `public` in `settings` is ignored by the code of the previous version and can be left as it is.

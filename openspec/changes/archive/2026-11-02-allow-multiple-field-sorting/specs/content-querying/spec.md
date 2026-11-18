@@ -3,91 +3,91 @@
 ## MODIFIED Requirements
 
 ### Requirement: Сортування за типом поля
-Система SHALL сортувати записи за значенням поля у вказаній мові у напрямку зростання або спадання згідно з типом значення (числа — числово, дати — хронологічно, текст — лексикографічно, логічне — false перед true), SHALL розміщувати записи без значення в кінці незалежно від напрямку, і SHALL застосовувати детермінований другорядний порядок: за значенням поля `title` у вказаній мові за зростанням незалежно від напрямку основного сортування, записи без `title` у цій мові — після тих, що його мають, а далі за ідентифікатором запису. Другорядний порядок за `title` SHALL застосовуватися до явного сортування (за полем і за датою публікації); без явного сортування порядок не змінюється. Fallback `title` на мову `default` SHALL не застосовуватися. Сортувати SHALL бути можливо за будь-яким полем типу контенту, включно з множинним і полем будь-якого типу; ключем сортування запису SHALL бути його перше значення поля (з найменшою вагою) у вказаній мові, незалежно від напрямку й від фільтрів запиту.
+The system SHALL sort records by the value of a field in the specified language in ascending or descending direction according to the value type (numbers — numerically, dates — chronologically, text — lexicographically, boolean — false before true), SHALL place records without a value at the end regardless of the direction, and SHALL apply a deterministic secondary order: by the value of the field `title` in the specified language in ascending order regardless of the direction of the main sorting, records without `title` in this language — after those that have it, and then by the identifier of the record. The secondary order by `title` SHALL apply to an explicit sorting (by a field and by the date of publication); without an explicit sorting the order does not change. The fallback of `title` to the language `default` SHALL NOT apply. It SHALL be possible to sort by any field of the content type, including a multiple one and a field of any type; the sort key of a record SHALL be its first value of the field (with the smallest weight) in the specified language, regardless of the direction and of the filters of the request.
 
-#### Scenario: Числове сортування
-- **WHEN** сортування за `views` за спаданням, значення `9`, `10`, `100`
-- **THEN** порядок `100`, `10`, `9`
+#### Scenario: Numeric sorting
+- **WHEN** sorting by `views` in descending order, values `9`, `10`, `100`
+- **THEN** the order is `100`, `10`, `9`
 
-#### Scenario: Записи без значення
-- **WHEN** частина записів не має значення в полі сортування (у вказаній мові)
-- **THEN** вони розміщені після записів зі значенням у будь-якому напрямку
+#### Scenario: Records without a value
+- **WHEN** some records have no value in the sort field (in the specified language)
+- **THEN** they are placed after the records with a value in any direction
 
-#### Scenario: Сортування за множинним полем
-- **WHEN** сортування за зростанням за множинним полем `dates`, запис A має значення `2026-12-20` (перше) і `2026-10-01`, запис Б — `2026-11-05`
-- **THEN** порядок Б (ключ `2026-11-05`), A (ключ `2026-12-20`)
+#### Scenario: Sorting by a multiple field
+- **WHEN** sorting in ascending order by the multiple field `dates`, record A has the values `2026-12-20` (first) and `2026-10-01`, record B — `2026-11-05`
+- **THEN** the order is B (key `2026-11-05`), A (key `2026-12-20`)
 
-#### Scenario: Множинне поле за спаданням
-- **WHEN** сортування за спаданням за множинним полем `dates`, запис A має значення `2026-12-20` (перше) і `2026-10-01`, запис Б — `2026-11-05`
-- **THEN** порядок A (ключ `2026-12-20`), Б (ключ `2026-11-05`)
+#### Scenario: Multiple field in descending order
+- **WHEN** sorting in descending order by the multiple field `dates`, record A has the values `2026-12-20` (first) and `2026-10-01`, record B — `2026-11-05`
+- **THEN** the order is A (key `2026-12-20`), B (key `2026-11-05`)
 
-#### Scenario: Фільтри не змінюють ключ
-- **WHEN** фільтр `dates >= 2026-11-01`, сортування за зростанням за `dates`, запис A має значення `2026-10-01` (перше) і `2026-12-20`
-- **THEN** запис A входить до вибірки, а його ключ лишається `2026-10-01`
+#### Scenario: Filters do not change the key
+- **WHEN** the filter `dates >= 2026-11-01`, sorting in ascending order by `dates`, record A has the values `2026-10-01` (first) and `2026-12-20`
+- **THEN** record A is included in the selection, and its key remains `2026-10-01`
 
-#### Scenario: Запис без значень множинного поля
-- **WHEN** запис не має жодного значення множинного поля сортування у вказаній мові
-- **THEN** він розміщений після записів із ключем у будь-якому напрямку
+#### Scenario: Record without values of a multiple field
+- **WHEN** a record has no value at all of the multiple sort field in the specified language
+- **THEN** it is placed after the records with a key in any direction
 
-#### Scenario: Рівні ключі впорядковано за назвою
-- **WHEN** сортування за `views` за спаданням, записи з `title` «Beta» (id 1) і «Alpha» (id 2) мають однакове значення `views`
-- **THEN** «Alpha» йде перед «Beta», бо другорядний порядок за `title` за зростанням
+#### Scenario: Equal keys are ordered by title
+- **WHEN** sorting by `views` in descending order, records with `title` «Beta» (id 1) and «Alpha» (id 2) have the same value of `views`
+- **THEN** «Alpha» goes before «Beta», because of the secondary order by `title` in ascending order
 
-#### Scenario: Другорядний порядок не залежить від напрямку
-- **WHEN** сортування за `views` за зростанням і за спаданням, записи з рівним `views` мають `title` «Alpha» і «Beta»
-- **THEN** за обох напрямків «Alpha» йде перед «Beta»
+#### Scenario: Secondary order does not depend on the direction
+- **WHEN** sorting by `views` in ascending order and in descending order, records with an equal `views` have `title` «Alpha» and «Beta»
+- **THEN** in both directions «Alpha» goes before «Beta»
 
-#### Scenario: Запис без назви у вказаній мові
-- **WHEN** сортування за `views`, а запис із рівним ключем не має `title` у вказаній мові, хоч має в мові `default`
-- **THEN** він іде після записів із `title` у вказаній мові, далі за ідентифікатором; значення `title` мови `default` не підставляється
+#### Scenario: Record without a title in the specified language
+- **WHEN** sorting by `views`, and a record with an equal key has no `title` in the specified language, although it has one in the language `default`
+- **THEN** it goes after the records with `title` in the specified language, then by the identifier; the `title` of the language `default` is not substituted
 
-#### Scenario: Однакові ключ і назва
-- **WHEN** два записи мають однакові значення основного ключа й `title`
-- **THEN** їх порядок визначає ідентифікатор запису
+#### Scenario: Identical key and title
+- **WHEN** two records have identical values of the main key and of `title`
+- **THEN** their order is defined by the identifier of the record
 
-#### Scenario: Запис не дублюється
-- **WHEN** сортування за множинним полем, у записі п'ять значень
-- **THEN** запис з'являється у вибірці й у лічильнику сторінок один раз
+#### Scenario: Record is not duplicated
+- **WHEN** sorting by a multiple field, and the record has five values
+- **THEN** the record appears in the selection and in the page counter once
 
-#### Scenario: Сортування за полем будь-якого типу
-- **WHEN** сортування за полем типу `image` або `youtube`
-- **THEN** вибірка не відхиляється помилкою, а записи впорядковані за збереженим рядком першого значення
+#### Scenario: Sorting by a field of any type
+- **WHEN** sorting by a field of the type `image` or `youtube`
+- **THEN** the selection is not rejected with an error, and the records are ordered by the stored string of the first value
 
 ### Requirement: Фільтрація за значенням поля
-Система SHALL фільтрувати записи за полем, оператором і значенням у вказаній мові, а набір дозволених операторів SHALL визначатися типом поля: рівність для всіх типів; порівняння (більше/менше/діапазон) для числових, дати й дати-часу; входження підрядка для текстових; значення `true`/`false` для логічного; належність до переліку (`in`) для рядкових, текстових, числових, дати й дати-часу. Фільтр SHALL працювати однаково для множинного й немножинного поля: запис відповідає фільтру, якщо йому відповідає хоча б одне значення поля. Оператор `in` SHALL приймати непорожній масив значень, кожне з яких перевіряється правилами типу поля, і SHALL вважати запис відповідним, якщо будь-яке його значення дорівнює будь-якому з переданих. Кілька фільтрів SHALL поєднуватися через AND, і кожен фільтр SHALL перевірятися незалежно від інших, зокрема й для кількох фільтрів по одному полю.
+The system SHALL filter records by a field, an operator and a value in the specified language, and the set of permitted operators SHALL be defined by the type of the field: equality for all types; comparison (greater/less/range) for numeric, date and date-time fields; substring inclusion for text ones; the values `true`/`false` for boolean; membership in a list (`in`) for string, text, numeric, date and date-time ones. The filter SHALL work in the same way for a multiple and a non-multiple field: a record matches the filter if at least one value of the field matches it. The operator `in` SHALL accept a non-empty array of values, each of which is checked by the rules of the type of the field, and SHALL consider a record matching if any of its values equals any of the passed ones. Several filters SHALL be combined through AND, and each filter SHALL be checked independently of the others, including for several filters on one field.
 
-#### Scenario: Числовий діапазон
-- **WHEN** фільтр `price` між `10` і `20`
-- **THEN** повертаються лише записи, у яких `price` у цьому діапазоні включно
+#### Scenario: Numeric range
+- **WHEN** the filter `price` between `10` and `20`
+- **THEN** only records whose `price` is in this range inclusively are returned
 
-#### Scenario: Множинне поле
-- **WHEN** фільтр `tags` дорівнює `news`, а запис має значення `["a", "news"]`
-- **THEN** цей запис входить до результату
+#### Scenario: Multiple field
+- **WHEN** the filter `tags` equals `news`, and a record has the values `["a", "news"]`
+- **THEN** this record is included in the result
 
-#### Scenario: Належність до переліку
-- **WHEN** фільтр `city` з оператором `in` і значенням `["Kyiv", "Lviv"]`
-- **THEN** повертаються записи, у яких `city` дорівнює `Kyiv` або `Lviv`
+#### Scenario: Membership in a list
+- **WHEN** the filter `city` with the operator `in` and the value `["Kyiv", "Lviv"]`
+- **THEN** records whose `city` equals `Kyiv` or `Lviv` are returned
 
-#### Scenario: Належність до переліку для множинного поля
-- **WHEN** фільтр `tags` з оператором `in` і значенням `["news", "sale"]`, а запис має значення `["a", "sale"]`
-- **THEN** цей запис входить до результату
+#### Scenario: Membership in a list for a multiple field
+- **WHEN** the filter `tags` with the operator `in` and the value `["news", "sale"]`, and a record has the values `["a", "sale"]`
+- **THEN** this record is included in the result
 
-#### Scenario: Некоректне значення для `in`
-- **WHEN** оператор `in` з порожнім масивом або не масивом
-- **THEN** запит відхилено з помилкою валідації `filters.N.value`
+#### Scenario: Invalid value for `in`
+- **WHEN** the operator `in` with an empty array or not an array
+- **THEN** the request is rejected with a validation error `filters.N.value`
 
-#### Scenario: Кілька фільтрів по одному множинному полю
-- **WHEN** фільтри `dates >= 2026-11-10` і `dates <= 2026-11-15`, а запис має значення `2026-11-01` і `2026-12-20`
-- **THEN** запис входить до результату, бо кожен фільтр виконано окремо різними значеннями
+#### Scenario: Several filters on one multiple field
+- **WHEN** the filters `dates >= 2026-11-10` and `dates <= 2026-11-15`, and a record has the values `2026-11-01` and `2026-12-20`
+- **THEN** the record is included in the result, because each filter is executed separately by different values
 
-#### Scenario: Фільтр за мовою
-- **WHEN** фільтр `title` містить «Hello» з `lang = en`
-- **THEN** повертаються лише записи, чий англійський `title` містить «Hello», незалежно від значення `default`
+#### Scenario: Filter by language
+- **WHEN** the filter `title` contains «Hello» with `lang = en`
+- **THEN** only records whose English `title` contains «Hello» are returned, regardless of the value of `default`
 
-#### Scenario: Недопустимий оператор
-- **WHEN** до логічного поля застосовано оператор «містить» або `in`
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Unsupported operator
+- **WHEN** the operator «contains» or `in` is applied to a boolean field
+- **THEN** the request is rejected with a validation error
 
-#### Scenario: Невідоме поле
-- **WHEN** фільтр посилається на ключ, якого немає в типі контенту
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Unknown field
+- **WHEN** the filter refers to a key that is not in the content type
+- **THEN** the request is rejected with a validation error

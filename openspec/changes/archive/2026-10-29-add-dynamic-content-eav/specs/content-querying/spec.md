@@ -2,103 +2,103 @@
 
 ## Purpose
 
-Описує вибірку вузлів контенту типу контенту з налаштовуваними видимими полями, пошуком, фільтрами та сортуванням за динамічними полями з урахуванням їхнього типу й мови.
+Describes the selection of content nodes of a content type with configurable visible fields, search, filters and sorting by dynamic fields, taking into account their type and language.
 
 ## ADDED Requirements
 
-### Requirement: Вибірка вузлів із видимими полями
-Система SHALL повертати сторінку вузлів заданого типу контенту із значеннями лише запитаних видимих полів (за замовчуванням — із налаштувань списку в `settings` типу) у вказаній мові (за замовчуванням `default`; інші мови допустимі за тих самих умов, що й для читання значень) та з даними пагінації.
+### Requirement: Selection of nodes with visible fields
+The system SHALL return a page of nodes of the given content type with the values of only the requested visible fields (by default — from the list settings in the `settings` of the type) in the specified language (by default `default`; other languages are allowed under the same conditions as for reading values) and with the pagination data.
 
-#### Scenario: Видимі поля
-- **WHEN** запитано список вузлів з видимими полями `title` і `price`
-- **THEN** кожен вузол містить значення лише цих полів
+#### Scenario: Visible fields
+- **WHEN** a list of nodes with the visible fields `title` and `price` is requested
+- **THEN** each node contains values of only these fields
 
-#### Scenario: Налаштування за замовчуванням
-- **WHEN** видимі поля не вказано, а в `settings` типу задано налаштування списку
-- **THEN** використовуються видимі поля й сортування з цих налаштувань
+#### Scenario: Default settings
+- **WHEN** no visible fields are specified, and list settings are set in the `settings` of the type
+- **THEN** the visible fields and the sorting from these settings are used
 
-#### Scenario: Пагінація
-- **WHEN** запитано другу сторінку з розміром 10
-- **THEN** повертаються вузли 11–20 у заданому порядку та загальна кількість
+#### Scenario: Pagination
+- **WHEN** the second page with the size 10 is requested
+- **THEN** nodes 11–20 are returned in the given order, together with the total count
 
-#### Scenario: Недопустима мова
-- **WHEN** запитано список з `lang = en`, а багатомовність вимкнена або мови `en` немає в переліку
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Unsupported language
+- **WHEN** a list with `lang = en` is requested, and multilingualism is disabled or the language `en` is not in the list
+- **THEN** the request is rejected with a validation error
 
-#### Scenario: Мова вибірки
-- **WHEN** запитано список з `lang = en`
-- **THEN** видимі значення беруться з мови `en`; вузли без цього перекладу повертаються з `null` у відповідних полях
+#### Scenario: Selection language
+- **WHEN** a list with `lang = en` is requested
+- **THEN** the visible values are taken from the language `en`; nodes without this translation are returned with `null` in the corresponding fields
 
-### Requirement: Фільтрація за значенням поля
-Система SHALL фільтрувати вузли за полем, оператором і значенням у вказаній мові, а набір дозволених операторів SHALL визначатися типом поля: рівність для всіх типів; порівняння (більше/менше/діапазон) для числових, дати й дати-часу; входження підрядка для текстових; значення `true`/`false` для логічного. Для множинного поля вузол SHALL відповідати фільтру, якщо йому відповідає хоча б одне значення. Кілька фільтрів SHALL поєднуватися через AND.
+### Requirement: Filtering by field value
+The system SHALL filter nodes by a field, an operator and a value in the specified language, and the set of allowed operators SHALL be determined by the field type: equality for all types; comparison (greater/less/range) for numeric, date and date-time; substring containment for text; the values `true`/`false` for boolean. For a multiple field a node SHALL match the filter if at least one of its values matches. Several filters SHALL be combined with AND.
 
-#### Scenario: Числовий діапазон
-- **WHEN** фільтр `price` між `10` і `20`
-- **THEN** повертаються лише вузли, у яких `price` у цьому діапазоні включно
+#### Scenario: Numeric range
+- **WHEN** the filter `price` is between `10` and `20`
+- **THEN** only the nodes whose `price` is in this range inclusive are returned
 
-#### Scenario: Множинне поле
-- **WHEN** фільтр `tags` дорівнює `news`, а вузол має значення `["a", "news"]`
-- **THEN** цей вузол входить до результату
+#### Scenario: Multiple field
+- **WHEN** the filter `tags` equals `news`, and a node has the values `["a", "news"]`
+- **THEN** this node is included in the result
 
-#### Scenario: Фільтр за мовою
-- **WHEN** фільтр `title` містить «Hello» з `lang = en`
-- **THEN** повертаються лише вузли, чий англійський `title` містить «Hello», незалежно від значення `default`
+#### Scenario: Filter by language
+- **WHEN** the filter `title` contains "Hello" with `lang = en`
+- **THEN** only the nodes whose English `title` contains "Hello" are returned, regardless of the `default` value
 
-#### Scenario: Недопустимий оператор
-- **WHEN** до логічного поля застосовано оператор «містить»
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Unsupported operator
+- **WHEN** the operator "contains" is applied to a boolean field
+- **THEN** the request is rejected with a validation error
 
-#### Scenario: Невідоме поле
-- **WHEN** фільтр посилається на ключ, якого немає в типі контенту
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Unknown field
+- **WHEN** a filter refers to a key that does not exist in the content type
+- **THEN** the request is rejected with a validation error
 
-### Requirement: Пошук
-Система SHALL підтримувати текстовий пошук за переліком полів (із запиту або з налаштувань списку) у вказаній мові, повертаючи вузли, у яких хоча б одне з цих полів містить рядок пошуку; пошук SHALL допускати лише текстові поля.
+### Requirement: Search
+The system SHALL support text search over a list of fields (from the request or from the list settings) in the specified language, returning nodes in which at least one of these fields contains the search string; the search SHALL allow only text fields.
 
-#### Scenario: Пошук за кількома полями
-- **WHEN** пошук `lamp` за полями `title` і `description`
-- **THEN** повертаються вузли, де `lamp` міститься в `title` або в `description`
+#### Scenario: Search over several fields
+- **WHEN** the search `lamp` is applied over the fields `title` and `description`
+- **THEN** the nodes where `lamp` is contained in `title` or in `description` are returned
 
-#### Scenario: Нетекстове поле в пошуку
-- **WHEN** серед полів пошуку є ціле число
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Non-text field in the search
+- **WHEN** an integer field is among the search fields
+- **THEN** the request is rejected with a validation error
 
-### Requirement: Сортування за типом поля
-Система SHALL сортувати вузли за значенням поля у вказаній мові у напрямку зростання або спадання згідно з типом значення (числа — числово, дати — хронологічно, текст — лексикографічно, логічне — false перед true), SHALL розміщувати вузли без значення в кінці незалежно від напрямку, і SHALL застосовувати детермінований другорядний порядок за ідентифікатором вузла. Для множинного поля сортування за ним заборонене.
+### Requirement: Sorting by field type
+The system SHALL sort nodes by the value of a field in the specified language in ascending or descending direction according to the value type (numbers — numerically, dates — chronologically, text — lexicographically, boolean — false before true), SHALL place nodes without a value at the end regardless of the direction, and SHALL apply a deterministic secondary order by the node identifier. For a multiple field, sorting by it is forbidden.
 
-#### Scenario: Числове сортування
-- **WHEN** сортування за `views` за спаданням, значення `9`, `10`, `100`
-- **THEN** порядок `100`, `10`, `9`
+#### Scenario: Numeric sorting
+- **WHEN** sorting by `views` in descending order, with the values `9`, `10`, `100`
+- **THEN** the order is `100`, `10`, `9`
 
-#### Scenario: Вузли без значення
-- **WHEN** частина вузлів не має значення в полі сортування (у вказаній мові)
-- **THEN** вони розміщені після вузлів зі значенням у будь-якому напрямку
+#### Scenario: Nodes without a value
+- **WHEN** some nodes have no value in the sorting field (in the specified language)
+- **THEN** they are placed after the nodes with a value in any direction
 
-#### Scenario: Сортування за множинним полем
-- **WHEN** запитано сортування за множинним полем
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Sorting by a multiple field
+- **WHEN** sorting by a multiple field is requested
+- **THEN** the request is rejected with a validation error
 
-### Requirement: Пошук вузла за slug
-Система SHALL знаходити вузол за його slug незалежно від типу й виду та повертати його з типом і видом, або повідомляти про відсутність.
+### Requirement: Finding a node by slug
+The system SHALL find a node by its slug regardless of its type and kind and return it with its type and kind, or report its absence.
 
-#### Scenario: Знайдений вузол
-- **WHEN** запитано вузол зі slug `pro-nas`
-- **THEN** повертається цей вузол разом із типом контенту та його видом
+#### Scenario: Found node
+- **WHEN** a node with the slug `pro-nas` is requested
+- **THEN** this node is returned together with its content type and its kind
 
-#### Scenario: Відсутній вузол
-- **WHEN** запитано slug, якого немає
-- **THEN** повідомляється, що вузол не знайдено
+#### Scenario: Missing node
+- **WHEN** a slug that does not exist is requested
+- **THEN** it is reported that the node is not found
 
-### Requirement: Перелік типів за видом
-Система SHALL дозволяти отримати типи контенту, відфільтровані за видом `kind` (і за батьківським типом), щоб окремо працювати зі звичайним контентом, сторінками та блоками.
+### Requirement: List of types by kind
+The system SHALL allow obtaining the content types filtered by kind `kind` (and by parent type), in order to work separately with ordinary content, pages and blocks.
 
-#### Scenario: Фільтр типів за видом
-- **WHEN** запитано типи з видом `page`
-- **THEN** повертаються лише типи цього виду
+#### Scenario: Filter of types by kind
+- **WHEN** types with the kind `page` are requested
+- **THEN** only the types of this kind are returned
 
-### Requirement: Ізоляція за типом контенту
-Вибірка SHALL повертати лише вузли вказаного типу контенту й SHALL допускати лише поля цього типу.
+### Requirement: Isolation by content type
+The selection SHALL return only the nodes of the given content type and SHALL allow only the fields of this type.
 
-#### Scenario: Поле іншого типу
-- **WHEN** у запиті до типу `article` вказано ключ поля, що існує лише в типі `product`
-- **THEN** запит відхилено з помилкою валідації
+#### Scenario: Field of another type
+- **WHEN** a request to the type `article` specifies a field key that exists only in the type `product`
+- **THEN** the request is rejected with a validation error

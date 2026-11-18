@@ -2,28 +2,28 @@
 
 ## Context
 
-`TableCell` має `whitespace-nowrap`, тож комірка завжди така широка, як її найдовший вміст; `Column` (див. [docs/admin-data-table.md](../../../docs/admin-data-table.md)) не має засобів обмежити ширину. Опис під назвою виводить `cell` колонки `name` у `Pages/Admin/ContentTypes/Index.tsx` (вводиться змінами `add-content-type-form`, зараз з `line-clamp-2`). Мотивацію див. у proposal.md.
+`TableCell` has `whitespace-nowrap`, so a cell is always as wide as its longest content; `Column` (see [docs/admin-data-table.md](../../../docs/admin-data-table.md)) has no means to limit the width. The description under the name is output by the `cell` of the `name` column in `Pages/Admin/ContentTypes/Index.tsx` (introduced by the changes `add-content-type-form`, currently with `line-clamp-2`). The motivation is in proposal.md.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Загальна властивість колонки для обмеження ширини з обрізанням у один рядок.
-- Застосувати її до колонки назви типів контенту.
+- A general column property for limiting the width with truncation to one line.
+- Apply it to the name column of content types.
 
 **Non-Goals:**
-- Користувацька зміна ширини, мінімальна й фіксована ширина (`minWidth`), перенесення тексту, зміна серверного контракту.
+- User-driven resizing of columns, a minimum and fixed width (`minWidth`), text wrapping, changes to the server contract.
 
 ## Decisions
 
-1. **Назва й тип властивості: `width?: string`** у `Column` — CSS-довжина (`'24rem'`, `'40ch'`). Назва проста, а семантика — верхня межа: фактична ширина залежить від вмісту, короткий текст колонку не розтягує. Це зафіксовано в JSDoc і docs. Мінімальної/фіксованої ширини немає (Non-Goal).
-2. **Обмеження — на `th` і на обгортці вмісту.** Заголовок колонки (`TableHead` у `DataTable.tsx`) отримує `style={{ maxWidth: width }}`. `max-width` на комірках таблиці з автоматичним розкладом не гарантований, тому саме обрізання робить обгортка: `DataTableRow` для колонки з `width` рендерить `<div className="truncate" style={{ maxWidth: width }}>` усередині `TableCell`. Така обгортка не розтягується для короткого тексту, а для довгого дає `overflow: hidden` + трикрапку. Без `width` розмітка не змінюється.
-3. **Власний `cell` обрізається сам.** Обгортка з `truncate` діє на один рядок тексту; якщо `cell` повертає кілька блоків (назва + опис), обрізання кожного рядка робить сам `cell` класом `truncate`, а обгортка лише дає межу ширини. Тому колонка `name` задає `width` і в `cell` ставить `truncate` на назву та опис; `title` з повним описом лишається.
-4. **Текст заголовка не обрізається.** `th` отримує лише `max-width`, а сам текст заголовка не скорочується; колонка не стає вужчою за свій заголовок.
-5. **Кількість рядків опису.** `line-clamp-2` замінюється `truncate` (один рядок) за вимогою обмежити висоту рядків таблиці; це змінює лише клас у `Index.tsx`.
+1. **Name and type of the property: `width?: string`** in `Column` — a CSS length (`'24rem'`, `'40ch'`). The name is simple, and the semantics is an upper bound: the actual width depends on the content, a short text does not stretch the column. This is recorded in the JSDoc and the docs. There is no minimum/fixed width (a Non-Goal).
+2. **The limit — on the `th` and on the content wrapper.** The column header (`TableHead` in `DataTable.tsx`) gets `style={{ maxWidth: width }}`. `max-width` on table cells with automatic layout is not guaranteed, so the truncation itself is done by the wrapper: `DataTableRow` for a column with `width` renders `<div className="truncate" style={{ maxWidth: width }}>` inside `TableCell`. Such a wrapper does not stretch for short text, and for long text gives `overflow: hidden` + an ellipsis. Without `width` the markup does not change.
+3. **A custom `cell` truncates itself.** The wrapper with `truncate` acts on one line of text; if `cell` returns several blocks (name + description), the truncation of each line is done by `cell` itself with the class `truncate`, and the wrapper only provides the width limit. Therefore the `name` column sets `width` and puts `truncate` on the name and the description in `cell`; `title` with the full description remains.
+4. **The header text is not truncated.** `th` gets only `max-width`, and the header text itself is not shortened; the column does not become narrower than its header.
+5. **The number of lines of the description.** `line-clamp-2` is replaced by `truncate` (one line) to meet the requirement to limit the height of the table rows; this changes only the class in `Index.tsx`.
 
 ## Risks / Trade-offs
 
-- [Вузька межа ховає корисний текст] → повний опис у `title`, значення межі — на розсуд сторінки.
-- [`max-width` на `th` у таблиці з автоматичним розкладом може не враховуватися браузером] → межу гарантує обгортка комірок із `truncate`; `max-width` на `th` додатково фіксується в e2e, і якщо в Chromium він не діє, пропонується `table-layout: fixed` окремим рішенням.
-- [Колонка не вужча за заголовок] → прийнятно, заголовки короткі.
-- [Накладання на незавершену `add-content-type-form`] → застосовувати після неї; конфлікту в специфікаціях немає, бо вимоги лише додаються.
+- [A narrow limit hides useful text] → the full description is in `title`; the value of the limit is up to the page.
+- [`max-width` on `th` in a table with automatic layout may not be honoured by the browser] → the limit is guaranteed by the wrapper of cells with `truncate`; `max-width` on `th` is additionally checked in e2e, and if it does not work in Chromium, `table-layout: fixed` is proposed as a separate decision.
+- [A column is not narrower than its header] → acceptable, the headers are short.
+- [Overlap with the unfinished `add-content-type-form`] → apply after it; there is no conflict in the specifications, because the requirements are only added.

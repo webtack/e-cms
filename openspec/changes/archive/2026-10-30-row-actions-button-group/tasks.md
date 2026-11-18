@@ -1,21 +1,21 @@
 # Tasks
 
-## 1. Примітив ButtonGroup
+## 1. The ButtonGroup primitive
 
-- [x] 1.1 Додати `resources/js/Components/ui/button-group.tsx` у стилі наявних shadcn-компонентів, з JSDoc англійською та `@example`. Перевірка: `npm run build` на хості без помилок типів.
+- [x] 1.1 Add `resources/js/Components/ui/button-group.tsx` in the style of the existing shadcn components, with an English JSDoc and `@example`. Check: `npm run build` on the host without type errors.
 
-## 2. Типи контенту
+## 2. Content types
 
-- [x] 2.1 У `ContentTypeRowActions.tsx` замінити одиночний тригер на `ButtonGroup`: кнопка «Налаштування» (`Link` на `/admin/content-types/{key}/edit`) + тригер «⋮» з незмінним меню; оновити JSDoc. Перевірка: у браузері на `http://localhost:8080/admin/content-types` видно групу, меню містить «Редагувати», «Поля», «Видалити».
-- [x] 2.2 Оновити `e2e/admin-content-types.spec.js`: сценарій переходу по основній кнопці «Налаштування»; наявні сценарії з «Actions» мають лишитись зеленими. Перевірка: `npm run test:e2e -- admin-content-types`.
-- [x] 2.3 Оновити `docs/admin-content-types.md` (опис дій рядка й компонента, українською). Перевірка: текст відповідає новій поведінці, посилання у `docs/README.md` валідні.
+- [x] 2.1 In `ContentTypeRowActions.tsx` replace the single trigger with a `ButtonGroup`: the button «Налаштування» (a `Link` to `/admin/content-types/{key}/edit`) + the trigger «⋮» with the unchanged menu; update the JSDoc. Check: in the browser on `http://localhost:8080/admin/content-types` the group is visible, the menu contains «Редагувати», «Поля», «Видалити».
+- [x] 2.2 Update `e2e/admin-content-types.spec.js`: a scenario of the transition through the main button «Налаштування»; the existing scenarios with «Actions» must remain green. Check: `npm run test:e2e -- admin-content-types`.
+- [x] 2.3 Update `docs/admin-content-types.md` (the description of the row actions and of the component, in Ukrainian). Check: the text matches the new behaviour, the links in `docs/README.md` are valid.
 
-## 3. Поля контенту
+## 3. Content fields
 
-- [x] 3.1 У `ContentFieldRowActions.tsx` зробити те саме: кнопка «Редагувати» (`Link` на `{base}/edit`) + тригер «⋮» з незмінним меню; кнопка активна й для системного поля; оновити JSDoc. Перевірка: на сторінці полів типу видно групу, для `title` «Видалити» в меню неактивний, а кнопка «Редагувати» активна.
-- [x] 3.2 Оновити `e2e/admin-content-fields.spec.js`: перехід по основній кнопці, у тому числі для `title`. Перевірка: `npm run test:e2e -- admin-content-fields`.
-- [x] 3.3 Оновити `docs/admin-content-fields.md` (розділ «Меню рядка») і згадку про меню рядка в `docs/admin-data-table.md`. Перевірка: тексти відповідають поведінці, посилання валідні.
+- [x] 3.1 In `ContentFieldRowActions.tsx` do the same: the button «Редагувати» (a `Link` to `{base}/edit`) + the trigger «⋮» with the unchanged menu; the button is active also for a system field; update the JSDoc. Check: on the page of fields of a type the group is visible, for `title` «Видалити» in the menu is inactive, and the button «Редагувати» is active.
+- [x] 3.2 Update `e2e/admin-content-fields.spec.js`: the transition through the main button, including for `title`. Check: `npm run test:e2e -- admin-content-fields`.
+- [x] 3.3 Update `docs/admin-content-fields.md` (the section «Меню рядка») and the mention of the row menu in `docs/admin-data-table.md`. Check: the texts match the behaviour, the links are valid.
 
-## 4. Інтеграція
+## 4. Integration
 
-- [x] 4.1 Повний прогін `npm run test:e2e` та `docker compose exec app vendor/bin/pint --dirty --format agent`. Перевірка: усе зелене; якщо e2e падають через locale `uk`, діяти за правилом з пам'яті.
+- [x] 4.1 A full run of `npm run test:e2e` and `docker compose exec app vendor/bin/pint --dirty --format agent`. Check: everything is green; if the e2e fail because of the locale `uk`, act according to the rule from the memory.

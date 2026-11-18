@@ -3,28 +3,28 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню розділу типу сторінки
-Сторінки редагування типу сторінки, вкладок «Відображення» і «SEO», списку полів, створення й редагування поля, а також записів типу SHALL мати горизонтальне меню розділу з пунктами «Налаштування» (`/admin/page-types/{key}/edit`), «Відображення» (`/admin/page-types/{key}/display`), «SEO» (`/admin/page-types/{key}/seo`), «Поля» (`/admin/page-types/{key}/fields`) і «Записи» (`/admin/page-types/{key}/nodes`) та посилання назад до списку типів сторінок. Активний пункт SHALL бути підсвічений; на сторінках створення й редагування поля активним є «Поля», на сторінках записів — «Записи», на вкладці «Відображення» — «Відображення», на вкладці «SEO» — «SEO». На сторінці створення типу меню немає. Вкладка «Відображення» типу сторінки містить лише блок «Публічне відображення» (вибір полів сторінки) і зберігається власною кнопкою «Зберегти». Вкладка «SEO» типу сторінки працює так само, як у типу контенту (значення `meta_title`, `meta_description`, `meta_image` самого типу й блок «Мета-дані», див. `admin-content-types`), на адресах `/admin/page-types/{key}/seo`, `PUT /admin/page-types/{key}/values`; значення й блок зберігаються одним запитом єдиною кнопкою.
+The edit pages of a page type, the tabs «Відображення» ("Display") and «SEO», the list of fields, the creation and editing of a field, and the records of the type SHALL have a horizontal section menu with the items «Налаштування» ("Settings", `/admin/page-types/{key}/edit`), «Відображення» (`/admin/page-types/{key}/display`), «SEO» (`/admin/page-types/{key}/seo`), «Поля» ("Fields", `/admin/page-types/{key}/fields`) and «Записи» ("Records", `/admin/page-types/{key}/nodes`), and a link back to the list of page types. The active item SHALL be highlighted; on the pages of creating and editing a field the active item is «Поля», on the pages of records — «Записи», on the tab «Відображення» — «Відображення», on the tab «SEO» — «SEO». On the page of creating a type there is no menu. The tab «Відображення» of a page type contains only the block «Публічне відображення» (the choice of the fields of the page) and is saved by its own button «Зберегти». The tab «SEO» of a page type works the same way as for a content type (the values `meta_title`, `meta_description`, `meta_image` of the type itself and the block «Мета-дані», see `admin-content-types`), at the addresses `/admin/page-types/{key}/seo`, `PUT /admin/page-types/{key}/values`; the values and the block are saved in one request by the single button.
 
-#### Scenario: Перемикання розділів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Поля»
-- **THEN** відкривається список полів типу, а пункт «Поля» активний
+#### Scenario: Switching the sections
+- **WHEN** the user on the edit page of a page type chooses «Поля»
+- **THEN** the list of fields of the type opens, and the item «Поля» is active
 
-#### Scenario: Перехід до записів
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Записи»
-- **THEN** відкривається `/admin/page-types/{key}/nodes`, а пункт «Записи» активний
+#### Scenario: Going to the records
+- **WHEN** the user on the edit page of a page type chooses «Записи»
+- **THEN** `/admin/page-types/{key}/nodes` opens, and the item «Записи» is active
 
-#### Scenario: Перехід до відображення
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «Відображення»
-- **THEN** відкривається `/admin/page-types/{key}/display`, пункт «Відображення» активний, а блок «Публічне відображення» не містить полів картки, сортування й кількості
+#### Scenario: Going to the display tab
+- **WHEN** the user on the edit page of a page type chooses «Відображення»
+- **THEN** `/admin/page-types/{key}/display` opens, the item «Відображення» is active, and the block «Публічне відображення» contains no fields of the card, sorting or the number
 
-#### Scenario: Перехід до SEO
-- **WHEN** користувач на сторінці редагування типу сторінки обирає «SEO»
-- **THEN** відкривається `/admin/page-types/{key}/seo`, пункт «SEO» активний, видно форму значень `meta_*` типу й блок «Мета-дані»
+#### Scenario: Going to SEO
+- **WHEN** the user on the edit page of a page type chooses «SEO»
+- **THEN** `/admin/page-types/{key}/seo` opens, the item «SEO» is active, and the form of the values `meta_*` of the type and the block «Мета-дані» are visible
 
-#### Scenario: Збереження SEO типу сторінки
-- **WHEN** користувач вводить `meta_description` на вкладці «SEO» типу сторінки й зберігає
-- **THEN** значення збережено для типу, користувач лишається на вкладці, значення `meta_*` записів цього типу не змінено
+#### Scenario: Saving the SEO of a page type
+- **WHEN** the user enters `meta_description` on the tab «SEO» of a page type and saves
+- **THEN** the value is saved for the type, the user stays on the tab, and the values `meta_*` of the records of this type are not changed
 
-#### Scenario: Посилання назад
-- **WHEN** користувач натискає посилання назад на сторінці полів типу сторінки
-- **THEN** відкривається `/admin/page-types`
+#### Scenario: Link back
+- **WHEN** the user presses the link back on the page of the fields of a page type
+- **THEN** `/admin/page-types` opens

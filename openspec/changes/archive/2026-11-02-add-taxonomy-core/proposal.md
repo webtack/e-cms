@@ -2,32 +2,32 @@
 
 ## Why
 
-Контент потрібно категоризувати: рубрики, теги, довідники, спільні для кількох типів контенту. Зараз у моделі є лише скалярні поля, файли й `youtube`; поля-посилання на інші сутності немає, тож єдиний спосіб категоризації — вільний текст, який неможливо перекладати, впорядковувати в дерево і фільтрувати за ієрархією.
+Content needs to be categorized: headings, tags, reference books shared by several content types. Right now the model has only scalar fields, files and `youtube`; there is no field that references other entities, so the only way of categorization is free text, which cannot be translated, arranged into a tree, or filtered by hierarchy.
 
 ## What Changes
 
-- Окремий домен таксономії, не змішаний із типами контенту: словники (`taxonomy_vocabularies`) і терміни (`taxonomy_terms`) з деревом (один батько), глибиною дерева в `settings` словника та вагою для порядку братніх термінів. Терміни мають незмінний `uuid` (UUID v7, як у записів контенту), словник — незмінний унікальний `key`; **зв'язки між таблицями таксономії ідуть по цих ідентифікаторах** (`vocabulary_key`, `parent_uuid`, `term_uuid`), а значення поля `term` — по `uuid` терміна; числовий `id` лишається лише первинним ключем (потрібен, зокрема, для `media_relations.owner_id`).
-- Зображення терміна: одне на термін (колонка `image`, значення `{uuid}.{розширення}` файлу профілю `image`), з обліком використання в медіатеці (`media_relations`, власник `taxonomy_term`).
-- Переклади термінів (назва, опис) окремою таблицею `taxonomy_term_translations` за моделлю мов контенту: `default` плюс увімкнені мови, без fallback. Набір атрибутів терміна фіксований (системний): власних полів на термінах немає.
-- Нетривіальні правила цілісності: унікальний незмінний `key` словника, унікальний `slug` терміна в межах словника, заборона циклів і перевищення `max_depth`, заборона видалення терміна з дітьми або з використаннями, заборона видалення словника з термінами або з полями, що на нього посилаються.
-- Новий тип поля `term`: значення — `uuid` терміна, зберігається в наявній `content_values_string` (окремої таблиці значень і міграції немає, як у `image`/`file`); словник задається в `settings.vocabulary` поля (ключ словника). Поле належить типу контенту, значення — записам; поле може бути множинним.
-- Вибірка записів за полем `term`: оператори `eq` та `in` завжди охоплюють обраний термін **і всіх його нащадків** (обхід дерева в PHP, далі `whereIn` по `uuid`).
-- Тип `term` поки що не пропонується у формі створення поля в адмінці (її інтерфейс і введення значень у формі запису — окрема зміна `add-taxonomy-admin`).
+- A separate domain of the taxonomy, not mixed with the content types: vocabularies (`taxonomy_vocabularies`) and terms (`taxonomy_terms`) with a tree (one parent), the depth of the tree in the `settings` of the vocabulary and the weight for the order of the sibling terms. The terms have an immutable `uuid` (UUID v7, as in the records of content), the vocabulary — an immutable unique `key`; **the relations between the tables of the taxonomy go by these identifiers** (`vocabulary_key`, `parent_uuid`, `term_uuid`), and the value of the field `term` goes by the `uuid` of the term; the numeric `id` remains only the primary key (needed, in particular, for `media_relations.owner_id`).
+- The image of a term: one per term (the column `image`, the value `{uuid}.{extension}` of a file of the profile `image`), with accounting of usage in the media library (`media_relations`, the owner `taxonomy_term`).
+- The translations of terms (the name, the description) in a separate table `taxonomy_term_translations` modeled on the languages of the content: `default` plus the enabled languages, without fallback. The set of attributes of a term is fixed (system): there are no custom fields on terms.
+- Non-trivial rules of integrity: the unique immutable `key` of a vocabulary, the unique `slug` of a term within the vocabulary, the prohibition of cycles and of exceeding `max_depth`, the prohibition of deleting a term with children or with usages, the prohibition of deleting a vocabulary with terms or with the fields that reference it.
+- A new type of field `term`: the value is the `uuid` of a term, stored in the existing `content_values_string` (no separate table of values and no migration, as for `image`/`file`); the vocabulary is set in `settings.vocabulary` of the field (the key of the vocabulary). The field belongs to the type of content, the values — to the records; the field can be multiple.
+- The selection of records by the field `term`: the operators `eq` and `in` always cover the chosen term **and all its descendants** (a walk of the tree in PHP, then `whereIn` by `uuid`).
+- The type `term` is not offered yet in the form of creating a field in the admin (its interface and the input of values in the form of a record — a separate change `add-taxonomy-admin`).
 
-Не входить у зміну: адмін-розділ «Таксономія», вибір термінів у формі запису, публічні сторінки/маршрути категорій, імпорт-експорт термінів між середовищами.
+Not included in this change: the admin section «Таксономія», the choice of terms in the form of a record, the public pages/routes of categories, the import-export of terms between environments.
 
 ## Capabilities
 
 ### New Capabilities
-- `taxonomy`: словники й терміни, дерево з одним батьком і обмеженням глибини, переклади термінів, правила унікальності та видалення, сервіс дерева (нащадки терміна).
+- `taxonomy`: vocabularies and terms, the tree with one parent and the restriction of depth, the translations of terms, the rules of uniqueness and deletion, the service of the tree (the descendants of a term).
 
 ### Modified Capabilities
-- `content-values`: новий тип поля `term` (значення в `content_values_string`, правила валідації за словником, читання `uuid` терміна), перевірка `settings.vocabulary` при збереженні поля.
-- `content-querying`: оператори `eq`/`in` для поля `term` з розгортанням нащадків.
+- `content-values`: the new type of field `term` (the value in `content_values_string`, the validation rules by the vocabulary, the reading of the `uuid` of the term), the check of `settings.vocabulary` on saving the field.
+- `content-querying`: the operators `eq`/`in` for the field `term` with the expansion of the descendants.
 
 ## Impact
 
-- Код: нова міграція (3 таблиці таксономії; міграції таблиці значень немає), моделі `Vocabulary`, `Term` (+ переклади), клас типу `App\Content\FieldTypes\TermType`, сервіси дерева й запису, власник медіа `App\Files\Owners\TermOwner` (рядок у `config/files.php`), невеликі точки розширення в `ContentNodeQuery` (розгортання значень фільтра), `ContentField` (перевірка `settings` типу) і `ContentValueWriter` (блокування посилань у транзакції запису), рядок у `config/content.php`; приховування `term` з `typeOptions` у `ContentFieldController` до появи інтерфейсу.
-- Документація (`docs/`): новий `docs/taxonomy.md`; оновлення `docs/content-values.md` (реєстр типів і схема), `docs/content-querying.md` (оператори за типами), `docs/content-model.md` (посилання на таксономію), `docs/README.md` (індекс).
-- Специфікації: нова `taxonomy`, дельти `content-values` і `content-querying`.
-- Тести: PHP Feature/Unit для таксономії, типу `term` і вибірки; e2e не потрібні (зміна без інтерфейсу).
+- Code: a new migration (3 tables of the taxonomy; there is no migration of the table of values), the models `Vocabulary`, `Term` (+ translations), the class of the type `App\Content\FieldTypes\TermType`, the services of the tree and of the writing, the media owner `App\Files\Owners\TermOwner` (a line in `config/files.php`), small extension points in `ContentNodeQuery` (the expansion of the values of the filter), `ContentField` (the check of the `settings` of the type) and `ContentValueWriter` (locking of the references in the transaction of the writing), a line in `config/content.php`; hiding of `term` from `typeOptions` in `ContentFieldController` until the interface appears.
+- Documentation (`docs/`): a new `docs/taxonomy.md`; updates of `docs/content-values.md` (the registry of types and the schema), `docs/content-querying.md` (the operators by types), `docs/content-model.md` (a reference to the taxonomy), `docs/README.md` (the index).
+- Specifications: the new `taxonomy`, the deltas of `content-values` and `content-querying`.
+- Tests: PHP Feature/Unit for the taxonomy, the type `term` and the selection; e2e are not needed (the change without an interface).

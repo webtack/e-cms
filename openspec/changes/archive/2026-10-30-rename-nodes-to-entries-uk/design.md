@@ -2,38 +2,38 @@
 
 ## Context
 
-- Український текст інтерфейсу живе в `lang/uk.json`; у `resources/js` і PHP стоять англійські ключі (`"Nodes"`, `"Create node"` …), тому код не містить українського «вузол» (перевірено пошуком по `resources`, `app`, `tests`, `database`, `routes`).
-- Слово «вузол» (усі відмінки) є ще в: `e2e/admin-content-nodes.spec.js` (рядки 386, 392, 396), `e2e/admin-content-types.spec.js` (360), 10 файлах `docs/` і 7 основних специфікаціях (`admin-block-types`, `admin-content-nodes`, `admin-content-types`, `admin-page-types`, `content-model`, `content-querying`, `content-values`).
-- Підписи інтерфейсу в специфікаціях, у лапках «…», є лише в трьох вимогах: «Сторінка списку вузлів» (`admin-content-nodes`), «Меню дій рядка» та «Горизонтальне меню розділу типу» (`admin-content-types`). Лише вони змінюють спостережувану поведінку і йдуть дельтами.
-- «Вузол» і «запис» чоловічого роду, закінчення збігаються, крім родового відмінка однини («вузла» → «запису»).
-- Слово «запис» уже є в `docs/` і специфікаціях: ≈85 входжень, переважно дієслівні форми («записується», «записати»), а також іменник у значенні «рядок БД» («Тип контенту визначається записом», «Поле визначається записом»).
+- The Ukrainian interface text lives in `lang/uk.json`; `resources/js` and PHP contain English keys (`"Nodes"`, `"Create node"` …), so the code does not contain the Ukrainian «вузол» (checked by searching `resources`, `app`, `tests`, `database`, `routes`).
+- The word «вузол» (all cases) is also in: `e2e/admin-content-nodes.spec.js` (lines 386, 392, 396), `e2e/admin-content-types.spec.js` (360), 10 files in `docs/` and 7 main specifications (`admin-block-types`, `admin-content-nodes`, `admin-content-types`, `admin-page-types`, `content-model`, `content-querying`, `content-values`).
+- Interface labels in the specifications, in quotes «…», appear only in three requirements: «Сторінка списку вузлів» (`admin-content-nodes`), «Меню дій рядка» and «Горизонтальне меню розділу типу» (`admin-content-types`). Only they change the observable behaviour and go through deltas.
+- «Вузол» and «запис» are masculine, the endings coincide, except for the genitive singular («вузла» → «запису»).
+- The word «запис» is already in `docs/` and the specifications: ≈85 occurrences, mostly verb forms («записується», «записати»), and also the noun in the sense of "a DB row" («Тип контенту визначається записом», «Поле визначається записом»).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- В українському тексті (UI, e2e-очікування, docs, специфікації) скрізь «запис» замість «вузол».
-- Жодних змін у коді, маршрутах, ключах перекладу, БД і англійській локалі.
-- e2e-спеки областей, що зачіпає переклад, лишаються зеленими.
+- In the Ukrainian text (UI, e2e expectations, docs, specifications) everywhere «запис» instead of «вузол».
+- No changes in the code, routes, translation keys, DB and the English locale.
+- The e2e specs of the areas touched by the translation remain green.
 
 **Non-Goals:**
-- Перейменування `ContentNode`, `node`, `/nodes`, імен файлів, спеків `admin-content-nodes`, `docs/admin-content-nodes.md`.
-- Редагування архівних змін у `openspec/changes/archive/`.
-- Зміна англійських підписів (англійською лишається «Nodes»).
+- Renaming `ContentNode`, `node`, `/nodes`, file names, the specs `admin-content-nodes`, `docs/admin-content-nodes.md`.
+- Editing the archived changes in `openspec/changes/archive/`.
+- Changing the English labels («Nodes» remains in English).
 
 ## Decisions
 
-1. **Слово «Записи»** (обрано власником за варіантами «Матеріали», «Документи», «Сутності» тощо): злічуване, нейтральне, не збігається з «елемент» (повторювані поля) і «Контент».
-2. **Дельти лише для вимог із підписами інтерфейсу.** Решта згадок у специфікаціях — термін у прозі, поведінка не змінюється. Дельти: `admin-content-nodes` (RENAMED + MODIFIED «Сторінка списку записів») і `admin-content-types` (MODIFIED двох вимог). Заголовок вимоги перейменовується через `RENAMED`, а не прямою правкою, щоб дельта знайшла вимогу під час синхронізації.
-3. **Редакційна правка решти основних специфікацій під час apply**, прямо в `openspec/specs/*/spec.md`: контекстна заміна терміна в прозі, у заголовках вимог (крім «Сторінка списку вузлів», яку перейменовує дельта) і в сценаріях. Вимоги, що мають дельту, не чіпаються вручну, їх оновить синхронізація під час архівації. Альтернатива (MODIFIED на кожну з ≈40 вимог) відкинута: сотні рядків повторюваного тексту без зміни поведінки.
-4. **Заміна контекстна, не автоматична.** Правило: форми слова «вузол» замінюються на відповідні форми «запис» із перевіркою відмінка й узгодження прикметників/числівників; технічні ідентифікатори (`ContentNode`, `content_node_id`, `/nodes`, `nodes_count`, `node` у коді) не змінюються.
-5. **Колізія зі значенням «рядок БД».** Там, де після заміни виникає двозначність (напр. «запис запису»), старий іменник «запис» у значенні рядка БД переформульовується («рядок у БД», «дані»), а дієслівні форми не чіпаються. Вирішується по кожному входженню під час правки відповідного файлу.
-6. **Верифікація.** Пошук `вузл|Вузл|вузо|Вузе` поза `openspec/changes/archive/` має повертати порожній результат; e2e лише `admin-content-nodes` і `admin-content-types` (область «Область → спек» у `docs/e2e-testing.md`; зміна не чіпає спільний компонент, лише `lang/uk.json`, який читають усі сторінки, але змінюються тільки рядки вузла).
+1. **The word «Записи»** (chosen by the owner among the variants «Матеріали», «Документи», «Сутності» etc.): countable, neutral, does not coincide with «елемент» (repeated fields) and «Контент».
+2. **Deltas only for requirements with interface labels.** Other mentions in the specifications are a term in prose; the behaviour does not change. Deltas: `admin-content-nodes` (RENAMED + MODIFIED «Сторінка списку записів») and `admin-content-types` (MODIFIED of two requirements). The requirement heading is renamed through `RENAMED`, not by a direct edit, so that the delta finds the requirement during synchronization.
+3. **An editorial edit of the rest of the main specifications during apply**, directly in `openspec/specs/*/spec.md`: a contextual replacement of the term in prose, in requirement headings (except «Сторінка списку вузлів», which the delta renames) and in scenarios. Requirements that have a delta are not edited manually; synchronization will update them during archiving. The alternative (MODIFIED for each of the ≈40 requirements) is rejected: hundreds of lines of repeated text without a change of behaviour.
+4. **The replacement is contextual, not automatic.** Rule: the forms of the word «вузол» are replaced with the corresponding forms of «запис», with a check of the case and of the agreement of adjectives/numerals; technical identifiers (`ContentNode`, `content_node_id`, `/nodes`, `nodes_count`, `node` in code) are not changed.
+5. **A collision with the meaning "DB row".** Where the replacement creates an ambiguity (e.g. «запис запису»), the old noun «запис» in the sense of a DB row is reworded («рядок у БД», «дані»), while verb forms are not touched. It is decided for each occurrence while editing the corresponding file.
+6. **Verification.** A search for `вузл|Вузл|вузо|Вузе` outside `openspec/changes/archive/` must return an empty result; e2e only `admin-content-nodes` and `admin-content-types` (the area "Area → spec" in `docs/e2e-testing.md`; the change does not touch a shared component, only `lang/uk.json`, which all pages read, but only the node rows change).
 
 ## Risks / Trade-offs
 
-- **Двозначність «запис»** (див. п. 5): ризик пропустити іменникове «запис» у значенні БД. Пом'якшення: перегляд кожного входження `[Зз]апис` у змінюваних файлах.
-- **Пропущена форма слова** (напр. «вузлоподібний», «вузлові»): пошук `вузл|вузо|вузе` у кінці має це виявити.
-- **Назви сценаріїв у дельтах.** Валідатор вимагає збігу назв сценаріїв зі старими, тому три назви («Вузли лише цього типу», «Вузли», «Меню на сторінках вузлів») лишаються старими в дельтах і перейменовуються вручну в основних специфікаціях після синхронізації (завдання 3.3).
-- **Невідповідність дельти й основної специфікації**: якщо вручну відредагувати вимогу з дельтою, синхронізація може не знайти її за старою назвою. Пом'якшення: не чіпати вимоги з дельтами вручну (п. 3).
-- **Залежність e2e від мови користувача**: якщо e2e падають через `locale = uk`, дозволено скинути locale на `en` без питань (див. пам'ять проєкту).
-- Документація, яку описує зміна: `docs/README.md`, `docs/admin-content-nodes.md`, `docs/admin-content-types.md`, `docs/admin-block-types.md`, `docs/admin-page-types.md`, `docs/admin-data-table.md`, `docs/content-model.md`, `docs/content-querying.md`, `docs/content-values.md`, `docs/e2e-testing.md`.
+- **Ambiguity of «запис»** (see item 5): a risk of missing the noun «запис» in the DB sense. Mitigation: review each occurrence of `[Зз]апис` in the changed files.
+- **A missed word form** (e.g. «вузлоподібний», «вузлові»): a final search `вузл|вузо|вузе` should reveal it.
+- **Scenario names in deltas.** The validator requires the scenario names to match the old ones, so three names («Вузли лише цього типу», «Вузли», «Меню на сторінках вузлів») stay old in the deltas and are renamed manually in the main specifications after synchronization (task 3.3).
+- **Mismatch of the delta and the main specification**: if a requirement with a delta is edited manually, synchronization may not find it by the old name. Mitigation: do not edit requirements with deltas manually (item 3).
+- **The e2e dependence on the user's language**: if the e2e fail because of `locale = uk`, resetting the locale to `en` without asking is allowed (see the project memory).
+- Documentation described by the change: `docs/README.md`, `docs/admin-content-nodes.md`, `docs/admin-content-types.md`, `docs/admin-block-types.md`, `docs/admin-page-types.md`, `docs/admin-data-table.md`, `docs/content-model.md`, `docs/content-querying.md`, `docs/content-values.md`, `docs/e2e-testing.md`.

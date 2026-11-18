@@ -2,34 +2,34 @@
 
 ## Context
 
-Усі спеки входять під одним seeded-користувачем. `SetLocale` (`app/Http/Middleware/SetLocale.php`) визначає мову в порядку: `users.locale` → cookie `locale` → `Accept-Language` → `config('app.locale')`. Тому «залишена» `uk` у `users.locale` перебиває англійський `Accept-Language` Playwright. Спеки, що перемикають мову, повертають `English` в `afterEach`/`finally`, але це не спрацьовує, коли процес Playwright зупинено (Ctrl-C, збій Chromium, обрив) — стан лишається в БД до наступного запуску. Деталі сценаріїв: `docs/e2e-testing.md`. Спеки вже викликають `docker compose exec -T app php artisan tinker` (`admin-content-types.spec.js`, `admin-content-fields.spec.js`), тож зв'язок хоста з контейнером для e2e уже припустимий.
+All specs run under one seeded user. `SetLocale` (`app/Http/Middleware/SetLocale.php`) determines the language in this order: `users.locale` → cookie `locale` → `Accept-Language` → `config('app.locale')`. So a `uk` left in `users.locale` overrides Playwright's English `Accept-Language`. Specs that switch the language return `English` in `afterEach`/`finally`, but this does not run when the Playwright process is stopped (Ctrl-C, a Chromium crash, a dropped connection) — the state stays in the DB until the next run. Details of the scenarios: `docs/e2e-testing.md`. The specs already call `docker compose exec -T app php artisan tinker` (`admin-content-types.spec.js`, `admin-content-fields.spec.js`), so the host-to-container connection is already acceptable for e2e.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Кожен запуск `npm run test:e2e` стартує з `locale = 'en'` у адміністратора без ручних кроків.
-- Працює і після аварійно перерваного запуску.
+- Every run of `npm run test:e2e` starts with `locale = 'en'` for the administrator without manual steps.
+- It also works after an interrupted run.
 
 **Non-Goals:**
-- Окремий e2e-користувач, окрема БД чи зміна `SetLocale`.
-- Прибирання наявних `afterEach`/`finally` (вони потрібні для ізоляції всередині запуску).
-- Скидання мови після завершення запуску (див. нижче).
+- A separate e2e user, a separate DB or a change of `SetLocale`.
+- Removing the existing `afterEach`/`finally` (they are needed for isolation within a run).
+- Resetting the language after the run finishes (see below).
 
 ## Decisions
 
-- **Playwright `globalSetup` (`e2e/global-setup.js`), підключений у `playwright.config.js`.** Він виконується один раз перед усіма тестами й при кожному запуску, тож самовідновлює стан незалежно від того, як завершився попередній. Скидання виконується через `execFileSync('docker', ['compose','exec','-T','app','php','artisan','tinker','--execute=…'])` — той самий механізм, що й у наявних спеках.
-- **Скидаємо лише користувача з `ADMIN_EMAIL`** (за замовчуванням `admin@example.com`, як у спеках), а не всіх: це вужче й достатньо, бо лише він використовується в тестах. Email передається в PHP як JSON-літерал, щоб не ламати лапки.
-- **Скидання на `'en'`, а не `null`:** детермінований результат, що збігається з тим, до чого повертають спеки та що описано в документації.
-- **Помилка скидання зупиняє запуск** з повідомленням (контейнери не запущені / команда впала) — інакше з'явилися б десятки хибних падінь.
+- **Playwright `globalSetup` (`e2e/global-setup.js`), connected in `playwright.config.js`.** It runs once before all tests and on every run, so it restores the state itself regardless of how the previous run ended. The reset is performed through `execFileSync('docker', ['compose','exec','-T','app','php','artisan','tinker','--execute=…'])` — the same mechanism as in the existing specs.
+- **We reset only the user with `ADMIN_EMAIL`** (by default `admin@example.com`, as in the specs), not all users: this is narrower and sufficient, because only that user is used in the tests. The email is passed to PHP as a JSON literal so as not to break the quotes.
+- **Reset to `'en'`, not `null`:** a deterministic result that matches what the specs return to and what is described in the documentation.
+- **An error of the reset stops the run** with a message (the containers are not running / the command failed) — otherwise there would be dozens of false failures.
 
-Розглянуті альтернативи:
-- **`globalTeardown`** — не виконується при Ctrl-C/аварії, тобто не вирішує саме той випадок, що ламається; зайвий поруч із setup.
-- **Окремий e2e-користувач/`storageState` на спек** — ізолює повністю, але потребує сидування, змін у всіх спеках і стратегії входу; надмірно для цієї проблеми.
-- **`beforeAll` у кожному спеку** — дублювання й легко забути в новому спеку; глобальний setup покриває все централізовано.
-- **Примусова мова в запитах (cookie/заголовок)** — не допоможе: `users.locale` має вищий пріоритет за обидва.
+Alternatives considered:
+- **`globalTeardown`** — it does not run on Ctrl-C/a crash, so it does not solve the exact case that breaks; redundant next to the setup.
+- **A separate e2e user / `storageState` per spec** — isolates completely, but requires seeding, changes in all specs and a login strategy; excessive for this problem.
+- **`beforeAll` in each spec** — duplication, and easy to forget in a new spec; the global setup covers everything centrally.
+- **Forcing the language in requests (cookie/header)** — does not help: `users.locale` has a higher priority than both.
 
 ## Risks / Trade-offs
 
-- [Додаткова ~1–2 с на запуск через `docker compose exec`] → прийнятно, виконується один раз.
-- [Скидання торкається реальної локальної БД] → обмежено одним користувачем і однією колонкою; e2e і так працюють проти dev-БД.
-- [Збій посеред запуску між спеками все ще можливий] → `afterEach`/`finally` лишаються; `workers: 1` зберігає порядок.
+- [An extra ~1–2 s per run through `docker compose exec`] → acceptable, it runs once.
+- [The reset touches the real local DB] → limited to one user and one column; e2e already run against the dev DB.
+- [A failure in the middle of a run between specs is still possible] → `afterEach`/`finally` remain; `workers: 1` keeps the order.

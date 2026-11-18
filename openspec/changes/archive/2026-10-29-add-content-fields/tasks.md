@@ -1,41 +1,41 @@
 # Tasks
 
-## 1. Бекенд: маршрути, контролер, валідація
+## 1. Backend: routes, controller, validation
 
-- [x] 1.1 Додати в `routes/web.php` маршрути `admin.content-types.fields.{index,create,store,edit,update,destroy}` під `content-types/{contentType}` і `PUT …/fields/order` (оголосити перед `{field}`) і `Route::bind('field', …)` (пара тип + ключ, 404 для чужого/відсутнього ключа); перевірити `docker compose exec app php artisan route:list --path=fields`
-- [x] 1.2 Створити `StoreContentFieldRequest` (з публічним статичним `sharedRules()`), `UpdateContentFieldRequest` (без `key`, `is_system` не приймається) і `ReorderContentFieldsRequest` (`order`: масив унікальних рядків; у `after`-хуку множина ключів дорівнює множині ключів полів типу) з PHPDoc англійською та `@example`; спільні правила: `name`, `type` (`Rule::in` ключів реєстру), три `boolean`, `weight` (`integer`, 0–65535)
-- [x] 1.3 Створити `App\Http\Controllers\Admin\ContentFieldController`: `index` (рядки зі `has_values`, згруповані запити по таблицях значень), `create` (`typeOptions`, `defaultWeight`), `store`, `edit`, `update`, `destroy` (системне поле або поле з `has_values` → `back()` з `error`; інакше видалення й `success`), `reorder` (у транзакції `weight = індекс`, редірект назад); англійський PHPDoc з `@example` на класі й нетривіальних методах
-- [x] 1.4 Додати переклади серверних повідомлень («Field created.», «Field updated.», «Field deleted.», «A system field cannot be deleted.», «Cannot delete a field that has values.», «Field order updated.») у `lang/uk.json` та `lang/en.json`
-- [x] 1.5 Pest-тести в `tests/Feature/Admin/ContentField{Index,Create,Edit,Destroy}Test.php`: гість/неверифікований; список віддає поля за `weight`; 404 для `page`/`block` і чужого ключа поля; створення (успіх, дублікат ключа, формат ключа, незареєстрований тип, вага поза діапазоном, `is_system` ігнорується); редагування (зміна назви/ваги, ключ ігнорується, тип поля зі значеннями відхилено, тип без значень змінено, заборонені зміни `title`); видалення (звичайне; поле зі значеннями відхилено й значення лишаються; `title` відхилено); порядок (ваги стають 0…n-1, неповний набір / повтор / чужий ключ відхилено, 404 для `page`); `docker compose exec app php artisan test --filter=ContentField` проходить
-- [x] 1.6 Створити `docs/admin-content-fields.md` (маршрути, відповідь `index`, правила валідації, обмеження системного поля й полів зі значеннями) українською з перехресними посиланнями на [docs/content-model.md](../../../docs/content-model.md) і [docs/content-values.md](../../../docs/content-values.md); додати рядок у `docs/README.md`; `docker compose exec app vendor/bin/pint --dirty --format agent` без зауважень
+- [x] 1.1 Add to `routes/web.php` the routes `admin.content-types.fields.{index,create,store,edit,update,destroy}` under `content-types/{contentType}` and `PUT …/fields/order` (declared before `{field}`) and `Route::bind('field', …)` (the pair type + key, 404 for a foreign/missing key); check `docker compose exec app php artisan route:list --path=fields`
+- [x] 1.2 Create `StoreContentFieldRequest` (with a public static `sharedRules()`), `UpdateContentFieldRequest` (without `key`, `is_system` is not accepted) and `ReorderContentFieldsRequest` (`order`: an array of unique strings; in the `after` hook the set of keys equals the set of keys of the type's fields) with PHPDoc in English and `@example`; shared rules: `name`, `type` (`Rule::in` of the registry keys), three `boolean`, `weight` (`integer`, 0–65535)
+- [x] 1.3 Create `App\Http\Controllers\Admin\ContentFieldController`: `index` (rows with `has_values`, grouped queries per value table), `create` (`typeOptions`, `defaultWeight`), `store`, `edit`, `update`, `destroy` (a system field or a field with `has_values` → `back()` with `error`; otherwise deletion and `success`), `reorder` (in a transaction `weight = index`, redirect back); English PHPDoc with `@example` on the class and on non-trivial methods
+- [x] 1.4 Add the server messages ("Field created.", "Field updated.", "Field deleted.", "A system field cannot be deleted.", "Cannot delete a field that has values.", "Field order updated.") to `lang/uk.json` and `lang/en.json`
+- [x] 1.5 Pest tests in `tests/Feature/Admin/ContentField{Index,Create,Edit,Destroy}Test.php`: guest/unverified; the list gives fields by `weight`; 404 for `page`/`block` and a foreign field key; creation (success, duplicate key, key format, unregistered type, weight out of range, `is_system` ignored); editing (changing name/weight, key ignored, the type of a field with values rejected, the type without values changed, forbidden changes of `title`); deletion (ordinary; a field with values rejected and the values remain; `title` rejected); order (weights become 0…n-1, an incomplete set / a repeat / a foreign key rejected, 404 for `page`); `docker compose exec app php artisan test --filter=ContentField` passes
+- [x] 1.6 Create `docs/admin-content-fields.md` (routes, the `index` response, validation rules, the limits of the system field and of fields with values) in Ukrainian with cross-references to [docs/content-model.md](../../../docs/content-model.md) and [docs/content-values.md](../../../docs/content-values.md); add a line to `docs/README.md`; `docker compose exec app vendor/bin/pint --dirty --format agent` without remarks
 
-## 2. Фронтенд: список полів
+## 2. Frontend: the list of fields
 
-- [x] 2.1 Створити `resources/js/Pages/Admin/ContentFields/Index.tsx`: заголовок із назвою типу, посилання назад до типів, `DataTable mode="client"` (без `filterable`) з колонками з design.md (п. 4), кнопка «Створити» → `/fields/create`; JSDoc англійською
-- [x] 2.2 Створити `Components/Admin/ContentFields/ContentFieldRowActions.tsx` (меню «Редагувати»/«Видалити»; діалог видалення, що для `has_values` показує причину без кнопки підтвердження; «Видалити» неактивний для системного поля) за зразком `ContentTypeRowActions`; JSDoc з `@example`
-- [x] 2.3 Активувати пункт «Поля» в `ContentTypeRowActions.tsx` (`Link` на `/admin/content-types/{key}/fields`), оновити його JSDoc
-- [x] 2.4 Додати шаблони заголовків і крихт для `…/fields`, `…/fields/create`, `…/fields/*/edit` у `navigation.ts` (і оновити його JSDoc/`@example`); додати переклади UI в `lang/uk.json` і `lang/en.json`
-- [x] 2.5 Оновити `docs/admin-content-fields.md` (сторінка списку, колонки, меню) і `docs/admin-content-types.md` (пункт «Поля» активний) з перехресними посиланнями; `npm run build` без помилок
+- [x] 2.1 Create `resources/js/Pages/Admin/ContentFields/Index.tsx`: the title with the type name, a link back to the types, `DataTable mode="client"` (without `filterable`) with the columns from design.md (item 4), a "Create" button → `/fields/create`; JSDoc in English
+- [x] 2.2 Create `Components/Admin/ContentFields/ContentFieldRowActions.tsx` (the "Edit"/"Delete" menu; the delete dialog, which for `has_values` shows the reason without a confirm button; "Delete" is inactive for a system field) modelled on `ContentTypeRowActions`; JSDoc with `@example`
+- [x] 2.3 Activate the "Fields" item in `ContentTypeRowActions.tsx` (a `Link` to `/admin/content-types/{key}/fields`), update its JSDoc
+- [x] 2.4 Add the title and breadcrumb templates for `…/fields`, `…/fields/create`, `…/fields/*/edit` in `navigation.ts` (and update its JSDoc/`@example`); add the UI translations to `lang/uk.json` and `lang/en.json`
+- [x] 2.5 Update `docs/admin-content-fields.md` (the list page, columns, menu) and `docs/admin-content-types.md` (the "Fields" item is active) with cross-references; `npm run build` without errors
 
-## 3. Перетягування рядків (`reorder` у DataTable)
+## 3. Dragging rows (`reorder` in DataTable)
 
-- [x] 3.1 Додати залежності `@dnd-kit/core` і `@dnd-kit/sortable` на хості (`npm install`), перевірити `npm run build`
-- [x] 3.2 Додати в `DataTable` (типи `ClientProps` у `types.ts`/`DataTable.tsx`) необов'язковий проп `reorder` з `onReorder(orderedIds)`; з ним тіло таблиці обгорнуто в `DndContext`/`SortableContext` (миша й клавіатура), `DataTableRow` стає sortable і виводить ручку через `rowHandle`; ручки неактивні з підказкою, коли діє пошук/сортування або `meta.total > perPage`; без пропа розмітка не змінюється. JSDoc англійською з `@example`
-- [x] 3.3 Підключити `reorder` у демо-таблицю клієнтського режиму (`DataTableDemo`) для перевірки; додати e2e-перевірки в `e2e/admin-data-table.spec.js` (перетягування, клавіатура, неактивні ручки при пошуку/сортуванні, відсутність ручок без пропа)
-- [x] 3.4 Оновити `docs/admin-data-table.md` (проп `reorder`, слот `rowHandle`, умови активності, доступність) і перевірити посилання
+- [x] 3.1 Add the dependencies `@dnd-kit/core` and `@dnd-kit/sortable` on the host (`npm install`), check `npm run build`
+- [x] 3.2 Add the optional prop `reorder` with `onReorder(orderedIds)` to `DataTable` (the types `ClientProps` in `types.ts`/`DataTable.tsx`); with it the table body is wrapped in `DndContext`/`SortableContext` (mouse and keyboard), `DataTableRow` becomes sortable and renders the handle through `rowHandle`; the handles are inactive with a hint when a search/sorting is active or `meta.total > perPage`; without the prop the markup does not change. JSDoc in English with `@example`
+- [x] 3.3 Connect `reorder` to the client demo table (`DataTableDemo`) for verification; add e2e checks to `e2e/admin-data-table.spec.js` (dragging, the keyboard, inactive handles on search/sorting, no handles without the prop)
+- [x] 3.4 Update `docs/admin-data-table.md` (the `reorder` prop, the `rowHandle` slot, the activity conditions, accessibility) and check the links
 
-## 4. Фронтенд: форми створення й редагування
+## 4. Frontend: create and edit forms
 
-- [x] 4.1 Додати shadcn `Checkbox` у `Components/ui`, якщо його ще немає
-- [x] 4.2 Створити `Components/Admin/ContentFields/ContentFieldForm.tsx` (режими `create`/`edit`, блокування ключа, типу для системного поля/поля зі значеннями, «множинне»/«обов'язкове» для системного) і сторінки `Create.tsx`, `Edit.tsx` (біля ваги підказка про перетягування); JSDoc з `@example`
-- [x] 4.3 Оновити `docs/admin-content-fields.md` (форма, блокування полів) і `docs/content-model.md` (посилання на адмін-сторінку полів); перевірити валідність посилань у `docs/README.md`
+- [x] 4.1 Add the shadcn `Checkbox` to `Components/ui`, if it is not there yet
+- [x] 4.2 Create `Components/Admin/ContentFields/ContentFieldForm.tsx` (modes `create`/`edit`, blocking the key, the type for a system field/field with values, "multiple"/"required" for a system field) and the pages `Create.tsx`, `Edit.tsx` (a hint about dragging next to the weight); JSDoc with `@example`
+- [x] 4.3 Update `docs/admin-content-fields.md` (the form, blocked fields) and `docs/content-model.md` (a link to the admin page of fields); check the validity of the links in `docs/README.md`
 
-## 5. Порядок полів на сторінці
+## 5. Field order on the page
 
-- [x] 5.1 У `Pages/Admin/ContentFields/Index.tsx` підключити `reorder`: локальна копія `fields`, оптимістичне оновлення, `router.put('/admin/content-types/{key}/fields/order', { order }, { preserveScroll: true, only: ['fields'] })`, відкіт і тост при `errors.order`
-- [x] 5.2 Оновити `docs/admin-content-fields.md` (порядок: умови, ваги 0…n-1, відкіт при помилці)
+- [x] 5.1 In `Pages/Admin/ContentFields/Index.tsx` connect `reorder`: a local copy of `fields`, an optimistic update, `router.put('/admin/content-types/{key}/fields/order', { order }, { preserveScroll: true, only: ['fields'] })`, a rollback and a toast on `errors.order`
+- [x] 5.2 Update `docs/admin-content-fields.md` (the order: conditions, weights 0…n-1, rollback on error)
 
-## 6. Перевірка в браузері
+## 6. Browser check
 
-- [x] 6.1 Додати `e2e/admin-content-fields.spec.js` (підготовка даних через tinker, як в `admin-content-types.spec.js`): відкриття з меню типу, відсутність кнопки фільтрів, клієнтський пошук, створення, редагування, видалення з діалогом, поле зі значеннями (діалог без підтвердження), `title` без видалення, перетягування зі збереженням після перезавантаження; `npm run test:e2e -- admin-content-fields` проходить
-- [x] 6.2 Прогнати наявні тести (`docker compose exec app php artisan test`, `npm run test:e2e`) і Pint; оновити `docs/e2e-testing.md`, якщо з'явилися нові обмеження
+- [x] 6.1 Add `e2e/admin-content-fields.spec.js` (data preparation via tinker, as in `admin-content-types.spec.js`): opening from the type's menu, the absence of the filter button, client search, creation, editing, deletion with the dialog, a field with values (the dialog without confirmation), `title` without deletion, dragging with persistence after a reload; `npm run test:e2e -- admin-content-fields` passes
+- [x] 6.2 Run the existing tests (`docker compose exec app php artisan test`, `npm run test:e2e`) and Pint; update `docs/e2e-testing.md` if new limits appeared

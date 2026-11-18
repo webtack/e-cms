@@ -2,34 +2,34 @@
 
 ## Why
 
-Ресурси теми зараз є лише додатковими входами збірки адмінки: `vite.config.js` збирає разом адмінку (React) і `themes/*/assets/{css,js}/*`, а результат лягає в спільні `public/build` і `manifest.json`. Тому над темою не можна працювати окремо: кожна правка тягне `tsc` і збірку адмінки, збірка адмінки стирає файли тем, dev-сервер теми конфліктує з dev-сервером адмінки через один `public/hot`. Крім того, немає SCSS (пакета `sass` у проєкті немає), немає JS теми і немає розділення на власний код і код бібліотек: кожен файл у `assets/css` чи `assets/js` стає окремим входом, тож partial неможливо відрізнити від бандла.
+The resources of the theme are now only additional entries of the build of the admin: `vite.config.js` builds together the admin (React) and `themes/*/assets/{css,js}/*`, and the result lands in the shared `public/build` and `manifest.json`. Therefore one cannot work on the theme separately: every edit drags in `tsc` and the build of the admin, the build of the admin erases the files of the themes, and the dev server of the theme conflicts with the dev server of the admin through one `public/hot`. In addition, there is no SCSS (the package `sass` is not in the project), there is no JS of the theme, and there is no separation into one's own code and the code of libraries: every file in `assets/css` or `assets/js` becomes a separate entry, so a partial cannot be told apart from a bundle.
 
 ## What Changes
 
-- Тема збирається окремо від адмінки: нові команди `npm run theme:dev -- <name>` (dev-сервер з HMR) і `npm run theme:build [-- <name>]` (збирає одну тему або, без імені, усі) з окремим конфігом `vite.theme.config.js`, без `tsc` і без адмінки.
-- Результат збірки теми лягає в `public/themes/<name>/` зі своїм `manifest.json`; dev-сервер теми має власний hot-файл і власний порт. Збірка адмінки (`npm run build`) і збірка теми не стирають файли одна одної.
-- Входи теми задаються конвенцією, а не glob по всіх файлах: `assets/app.{css,scss,js}` (власний код теми) і `assets/vendor.{css,scss,js}` (бібліотеки). Решта файлів в `assets/` — partials, вони імпортуються, але окремими входами не стають.
-- Підтримується SCSS (додається залежність `sass`). Бібліотеки підключаються імпортом із `node_modules` або за шляхом усередині теми (`assets/lib/...`). Глобальні змінні, потрібні плагінам, виставляє сам `vendor.js`.
-- Шаблон `html` підключає `vendor` перед `app` з manifest теми (`@vite($assets, 'themes/<name>')`); `ThemeManager::assets()` читає manifest теми, а не `public/build/manifest.json`; у dev-режимі використовується hot-файл теми.
-- `vite.config.js` (адмінка) перестає знати про теми: `themeEntries()` прибирається.
-- **BREAKING**: розташування входів теми змінюється. `themes/default/assets/css/app.css` переїжджає в `themes/default/assets/app.css`, а ключ manifest стає `themes/default/assets/app.css`. Файли з `assets/css/*` і `assets/js/*`, що не названі `app`/`vendor`, більше не є входами. Після оновлення потрібна `npm run theme:build`.
-- Тема `default` лишається на Tailwind у звичайному `app.css`, без SCSS: Tailwind 4 не призначений для роботи з препроцесорами (Sass, Less, Stylus), тому Tailwind-вхід лишається чистим CSS.
+- The theme is built separately from the admin: new commands `npm run theme:dev -- <name>` (the dev server with HMR) and `npm run theme:build [-- <name>]` (builds one theme or, without a name, all of them) with a separate config `vite.theme.config.js`, without `tsc` and without the admin.
+- The output of the build of the theme lands in `public/themes/<name>/` with its own `manifest.json`; the dev server of the theme has its own hot file and its own port. The build of the admin (`npm run build`) and the build of the theme do not erase each other's files.
+- The entries of the theme are set by the convention, not by a glob over all files: `assets/app.{css,scss,js}` (the own code of the theme) and `assets/vendor.{css,scss,js}` (libraries). The rest of the files in `assets/` are partials: they are imported, but do not become separate entries.
+- SCSS is supported (the dependency `sass` is added). The libraries are connected by an import from `node_modules` or by a path inside the theme (`assets/lib/...`). The global variables needed by the plugins are set by `vendor.js` itself.
+- The template `html` connects `vendor` before `app` from the manifest of the theme (`@vite($assets, 'themes/<name>')`); `ThemeManager::assets()` reads the manifest of the theme, and not `public/build/manifest.json`; in the dev mode the hot file of the theme is used.
+- `vite.config.js` (the admin) no longer knows about the themes: `themeEntries()` is removed.
+- **BREAKING**: the location of the entries of the theme changes. `themes/default/assets/css/app.css` moves to `themes/default/assets/app.css`, and the key of the manifest becomes `themes/default/assets/app.css`. The files from `assets/css/*` and `assets/js/*` that are not named `app`/`vendor` are no longer entries. After the update `npm run theme:build` is needed.
+- The theme `default` stays on Tailwind in the ordinary `app.css`, without SCSS: Tailwind 4 is not designed for working with preprocessors (Sass, Less, Stylus), so the Tailwind entry stays plain CSS.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `site-themes`: вимога «Ресурси теми» змінюється (окрема збірка, `outDir` і manifest теми, входи `app`/`vendor`, підключення з manifest теми); додаються вимоги до конвенції входів, до SCSS і бібліотек та до незалежності збірок теми й адмінки.
-- `default-theme-styling`: стилі теми `default` підключаються з `assets/app.css`, а не `assets/css/app.css`; Tailwind-вхід лишається звичайним CSS.
+- `site-themes`: the requirement «Ресурси теми» ("Resources of the theme") changes (a separate build, the `outDir` and manifest of the theme, the entries `app`/`vendor`, the connection from the manifest of the theme); requirements are added for the convention of entries, for SCSS and libraries, and for the independence of the builds of the theme and of the admin.
+- `default-theme-styling`: the styles of the theme `default` are connected from `assets/app.css`, and not `assets/css/app.css`; the Tailwind entry stays an ordinary CSS.
 
 ## Impact
 
-- Код: `vite.config.js` (прибирається `themeEntries()`), новий `vite.theme.config.js`, `package.json` (скрипти `theme:dev`, `theme:build`, залежність `sass`), `app/Theme/ThemeManager.php` (`assets()`, hot-файл і каталог збірки теми), `themes/default/views/html.blade.php` (`@vite` з каталогом збірки теми), `themes/default/assets/css/app.css` → `themes/default/assets/app.css` (шляхи `@source` коригуються), `.gitignore` (`/public/themes`).
-- Тести: `tests/Feature/Theme/ThemeManagerTest.php` і `DefaultThemeStylingTest.php` (шлях manifest і ключ), перевірка входів і порядку `vendor` → `app`.
-- Збірка: окремі `public/themes/<name>/`; `public/build` лишається лише адмінкою.
-- Документація: `docs/site-themes.md` (розділ «Ресурси теми (Vite)»: структура `assets/`, команди, vendor/app, SCSS, бібліотеки, Tailwind і Sass), `docs/e2e-testing.md` (передумова: окрім `npm run build` потрібна `npm run theme:build`), `docs/README.md` (опис рядка про теми, якщо змінюється).
-- E2E: `e2e/public-site.spec.js` і `e2e/smoke.spec.js` запускаються, бо публічна сторінка змінює підключення стилів.
+- Code: `vite.config.js` (`themeEntries()` is removed), a new `vite.theme.config.js`, `package.json` (the scripts `theme:dev`, `theme:build`, the dependency `sass`), `app/Theme/ThemeManager.php` (`assets()`, the hot file and the build directory of the theme), `themes/default/views/html.blade.php` (`@vite` with the build directory of the theme), `themes/default/assets/css/app.css` → `themes/default/assets/app.css` (the paths `@source` are corrected), `.gitignore` (`/public/themes`).
+- Tests: `tests/Feature/Theme/ThemeManagerTest.php` and `DefaultThemeStylingTest.php` (the path of the manifest and the key), a check of the entries and of the order `vendor` → `app`.
+- The build: separate `public/themes/<name>/`; `public/build` remains only the admin.
+- Documentation: `docs/site-themes.md` (the section «Ресурси теми (Vite)»: the structure of `assets/`, the commands, vendor/app, SCSS, libraries, Tailwind and Sass), `docs/e2e-testing.md` (the prerequisite: besides `npm run build` the `npm run theme:build` is needed), `docs/README.md` (the description of the line about the themes, if it changes).
+- E2E: `e2e/public-site.spec.js` and `e2e/smoke.spec.js` are run, because the public page changes the connection of the styles.

@@ -2,17 +2,17 @@
 
 ## Context
 
-`NodeFieldInput` будує `selected: UploadedFile` зі словника `files` (початкові файли сторінки + завантажені в формі), а `FileUpload` малює з нього назву й розмір. Назву й опис, які користувач застосував кнопкою «Готово», зберігає `fileMeta.values[uuid]` (стан `useForm.file_meta`), тож блок не бачить змін. Опис у `files` є (`NodeFileInfo` із `fileInfo()`), але `FileUpload` його не виводить.
+`NodeFieldInput` builds `selected: UploadedFile` from the dictionary `files` (the initial files of the page plus the ones uploaded in the form), and `FileUpload` draws the name and the size from it. The name and the description that the user applied with the button «Готово» are stored in `fileMeta.values[uuid]` (the state of `useForm.file_meta`), so the block does not see the changes. The description is in `files` (`NodeFileInfo` from `fileInfo()`), but `FileUpload` does not output it.
 
 ## Decisions
 
-1. **Джерело правди для блоку — `fileMeta.values[uuid]`.** `NodeFieldInput` бере назву й опис звідти, коли `fileMeta` передано і запис є; інакше (немає `fileMeta`) — `info.name` і без опису. Так блок збігається з тим, що піде в запиті, і не потребує дублювання стану.
-2. **`FileUpload` отримує `description?: string`** (лише одиночний режим), який малюється `<p>` між назвою й розміром; порожній/відсутній — нічого. Альтернатива — класти опис у `details`: відхилено, бо `details` малюється під усім рядком (після кнопок), а вимога — над розміром у стовпці назви.
-3. **Довгий опис** обрізається `line-clamp-2`, повний текст видно у вікні. Значення не змінюється.
-4. **Лічильник у рядку з підписом.** `Label` — `display: flex`, тож `span` з лічильником усередині `legend` падає під нього. Робимо `legend` множинного поля `flex items-center` (лічильник лишається дитиною `legend`, `ml-2` → `gap`), без зміни `data-testid` і тексту «n / max». Спільний `Label` не чіпаємо.
-5. **Без змін бекенду, контракту `file_meta` і модального вікна.**
+1. **The source of truth for the block is `fileMeta.values[uuid]`.** `NodeFieldInput` takes the name and the description from there when `fileMeta` is passed and the record exists; otherwise (no `fileMeta`) — `info.name` and no description. This way the block matches what will go in the request, and it does not need a duplication of the state.
+2. **`FileUpload` receives `description?: string`** (only in the single mode), which is drawn as a `<p>` between the name and the size; empty/absent — nothing. The alternative — put the description into `details`: rejected, because `details` is drawn under the whole row (after the buttons), while the requirement is above the size in the column of the name.
+3. **A long description** is cut by `line-clamp-2`, the full text is visible in the window. The value does not change.
+4. **The counter in the row with the label.** `Label` is `display: flex`, so a `span` with the counter inside `legend` falls under it. We make the `legend` of the multiple field `flex items-center` (the counter stays a child of `legend`, `ml-2` → `gap`), without changing `data-testid` and the text "n / max". The shared `Label` is not touched.
+5. **No changes in the backend, in the `file_meta` contract or in the modal window.**
 
 ## Risks / Trade-offs
 
-- Якщо `fileMeta.values` ще не містить uuid (теоретично для щойно завантаженого файлу до `setData`), використовується запасний варіант із `files`; `rememberFile` додає метадані одночасно із завантаженням, тож розбіжності в UI немає.
-- Зміна назви в блоці тепер без збереження може відрізнятися від таблиці записів до «Зберегти» — це очікувано (чернетка форми).
+- If `fileMeta.values` does not yet contain the uuid (theoretically for a just uploaded file before `setData`), the fallback from `files` is used; `rememberFile` adds the metadata at the same time as the upload, so there is no discrepancy in the UI.
+- A change of the name in the block, now without saving, may differ from the table of records until «Зберегти» — this is expected (the draft of the form).

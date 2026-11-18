@@ -2,29 +2,29 @@
 
 ## Why
 
-Сайдбар адмінки — плоский статичний список: пункти керування структурою (типи, таксономія, меню), доступу (користувачі, ролі) і сайту змішані з робочими, а записи типу відкриваються лише через таблицю типів → «Записи». Редактору потрібен швидкий вхід у типи, з якими він працює щодня, а адміністратору — спосіб зібрати для всіх меню з потрібних типів і груп та прибрати службові пункти з головного рівня.
+The sidebar of the admin is a flat static list: the items of managing the structure (types, taxonomy, menus), access (users, roles) and the site are mixed with the working ones, and the records of a type are opened only through the table of types → «Записи» ("Records"). An editor needs a quick entrance to the types he works with every day, and the administrator needs a way to assemble for everybody a menu from the needed types and groups and to remove the service items from the main level.
 
 ## What Changes
 
-- Пункти керування (Content Types, Page Types, Block Types, Taxonomy, Menus, Users, Roles, Site) переїжджають з розкривного/плоского списку в корінь sidebar у дві підписані секції: **«Структура»** (типи ×3, Taxonomy, Menus) і **«Доступ»** (Users, Roles, Site). Кожен пункт зберігає власну умову видимості; секція без видимих пунктів ховається. Групи Settings немає. Сторінка `/admin/settings` лишається і стає пунктом **Site** секції «Доступ».
-- Нове **особисте меню «Обране»**: зірочка в заголовку сторінки записів типу і в рядку списку типів додає/прибирає тип; список належить користувачу (окрема таблиця) і показується у sidebar над меню адміна.
-- Нове **меню адміна для всіх**: сторінка `/admin/settings/navigation` (право `settings`) для налаштування дерева з двох рівнів — кореневе посилання на тип або група (перекладна назва) з посиланнями на типи. Меню показується у sidebar усім користувачам окремим блоком із заголовком **«Navigation»** (як «Обране»). Вхід у налаштування — іконка-посилання внизу sidebar (футер) для користувачів із правом `settings`.
-- Пункти «Обране» й меню адміна ведуть на список записів типу. Іконку визначає вид типу (`content` — `Table2`, `page` — `FileStack`, `block` — `Blocks`), групи — `Folder`/`FolderOpen`.
-- **Доступи**: тип показується в «Обраному» й меню адміна, лише якщо рівень користувача на тип не `none`; збережені недоступні або видалені типи відфільтровуються під час читання (дані не стираються, при поверненні доступу пункт з'являється знову). Група без видимих типів ховається.
-- Пункт Pages (макет без функціоналу) **прибирається** з sidebar. Dashboard і Media Library лишаються на верхньому рівні. Відступи між групами sidebar зменшуються.
+- The management items (Content Types, Page Types, Block Types, Taxonomy, Menus, Users, Roles, Site) move from a collapsible/flat list into the root of the sidebar in two labelled sections: **«Структура»** («Structure») (the types ×3, Taxonomy, Menus) and **«Доступ»** («Access») (Users, Roles, Site). Each item keeps its own visibility condition; a section without visible items is hidden. There is no group Settings. The page `/admin/settings` remains and becomes the item **Site** of the section «Доступ».
+- A new personal menu **«Обране»** («Favourites»): a star in the heading of the page of records of a type and in the row of the list of types adds/removes the type; the list belongs to the user (a separate table) and is shown in the sidebar above the admin menu.
+- A new **admin menu for everyone**: the page `/admin/settings/navigation` (the right `settings`) to configure a tree of two levels — a root link to a type or a group (a translatable name) with links to types. The menu is shown in the sidebar to all users in a separate block with the heading **«Navigation»** (like «Обране»). The entrance to the settings is an icon-link at the bottom of the sidebar (the footer) for the users with the right `settings`.
+- The items «Обране» and the admin menu lead to the list of records of a type. The icon is defined by the kind of the type (`content` — `Table2`, `page` — `FileStack`, `block` — `Blocks`), the groups — `Folder`/`FolderOpen`.
+- **Access**: a type is shown in «Обране» and in the admin menu only if the user's level on the type is not `none`; the saved unavailable or deleted types are filtered out during reading (the data is not erased; when the access returns the item appears again). A group without visible types is hidden.
+- The item Pages (a mock-up without functionality) is **removed** from the sidebar. Dashboard and Media Library remain at the top level. The indents between the groups of the sidebar are reduced.
 
 ## Capabilities
 
 ### New Capabilities
-- `admin-favorites`: особисте меню «Обране» — таблиця обраних типів користувача, зірочка на сторінці записів, показ у sidebar, фільтрація за доступами.
-- `admin-navigation-menu`: меню адміна для всіх — дерево груп і посилань на типи (два рівні), сторінка налаштування, перекладні назви груп, показ у sidebar з урахуванням доступів.
+- `admin-favorites`: the personal menu «Обране» — the table of favourite types of the user, the star on the page of records, the display in the sidebar, the filtering by access.
+- `admin-navigation-menu`: the admin menu for everyone — a tree of groups and links to types (two levels), the settings page, translatable names of the groups, the display in the sidebar with the account of the access.
 
 ### Modified Capabilities
-- `admin-shell`: вимога «Бічна навігація» — нова структура (Dashboard, Обране, Navigation, Media Library, секції «Структура» і «Доступ» у корені, футер із посиланням на налаштування меню), без Pages і розкривного Settings; компактні відступи між групами.
+- `admin-shell`: the requirement «Бічна навігація» ("Sidebar navigation") — the new structure (Dashboard, Обране, Navigation, Media Library, the sections «Структура» and «Доступ» in the root, the footer with the link to the settings of the menu), without Pages and the collapsible Settings; compact indents between the groups.
 
 ## Impact
 
-- Backend: міграції `user_favorite_types` і `admin_menu_entries`; моделі й сервіс вибірки видимих пунктів (за `AccessResolver`); контролери обраного й налаштування меню; маршрути під `can:settings` для налаштування; спільний проп `navigation` у `HandleInertiaRequests`.
-- Frontend: `AppSidebar.tsx`, `navigation.ts` (секції «Структура»/«Доступ», без Pages, хлібні крихти), `SidebarFooter`, зірочка в `Pages/Admin/ContentNodes/Index.tsx` і в рядку `Pages/Admin/ContentTypes/Index.tsx` (контролери списків типів передають `favoriteKeys`), нова сторінка `Pages/Admin/Settings/Navigation.tsx`, типи в `resources/js/types/index.d.ts`, переклади в `lang/en.json` і `lang/uk.json`.
-- Тести: PHP-тести нових областей (обране, меню, фільтрація за доступами), e2e — `admin-shell` (повний прогін через зміну sidebar), новий спек для обраного й меню.
-- Документація (`docs/`): оновити `admin-shell.md` (розділ Sidebar), `access-control.md` (фільтрація за рівнями), `e2e-testing.md` (таблиці), `README.md` (індекс); створити `admin-favorites.md` і `admin-navigation-menu.md`.
+- Backend: the migrations `user_favorite_types` and `admin_menu_entries`; the models and the service of selecting the visible items (by `AccessResolver`); the controllers of the favourites and of the settings of the menu; the routes under `can:settings` for the settings; the shared prop `navigation` in `HandleInertiaRequests`.
+- Frontend: `AppSidebar.tsx`, `navigation.ts` (the sections «Структура»/«Доступ», without Pages, the breadcrumbs), `SidebarFooter`, the star in `Pages/Admin/ContentNodes/Index.tsx` and in the row of `Pages/Admin/ContentTypes/Index.tsx` (the controllers of the lists of types pass `favoriteKeys`), the new page `Pages/Admin/Settings/Navigation.tsx`, the types in `resources/js/types/index.d.ts`, the translations in `lang/en.json` and `lang/uk.json`.
+- Tests: PHP tests of the new areas (the favourites, the menu, the filtering by access), e2e — `admin-shell` (a full run because of the change of the sidebar), a new spec for the favourites and the menu.
+- Documentation (`docs/`): update `admin-shell.md` (the section Sidebar), `access-control.md` (the filtering by levels), `e2e-testing.md` (the tables), `README.md` (the index); create `admin-favorites.md` and `admin-navigation-menu.md`.

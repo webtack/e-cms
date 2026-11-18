@@ -3,72 +3,72 @@
 ## ADDED Requirements
 
 ### Requirement: Значення типу в спільних таблицях значень
-Система SHALL зберігати значення самого типу в тих самих таблицях значень, що й значення записів. Рядок значення SHALL мати власника: запис (посилання на запис і його `uuid`) або тип (без запису, а `content_type` дорівнює ключу цього типу). Власник типу SHALL мати значення лише для полів цього типу, які за вимогою «Власники значень поля» належать типу. Для типу діють ті самі мови, ваги, валідація, нормалізація та правила перекладності, що й для запису; значення типу в мові, яка не є базовою, не підставляється з базової при читанні.
+The system SHALL store the values of the type itself in the same value tables as the values of records. A value row SHALL have an owner: a record (a reference to the record and its `uuid`) or a type (no record, and `content_type` equals the key of this type). The owner of a type SHALL have values only for the fields of this type that, by the requirement «Owners of field values», belong to the type. For a type the same languages, weights, validation, normalization and translatability rules apply as for a record; a value of a type in a language that is not the base one is not substituted from the base one when read.
 
-#### Scenario: Запис значення типу
-- **WHEN** для типу `news` записується `section_title` «Новини» у мові `default`
-- **THEN** значення збережено без запису, а `content_type` дорівнює `news`
+#### Scenario: Writing a value of a type
+- **WHEN** `section_title` «Новини» in the language `default` is written for the type `news`
+- **THEN** the value is saved without a record, and `content_type` equals `news`
 
-#### Scenario: Переклад значення типу
-- **WHEN** для типу `news` записується `section_title` «News» у мові `en`
-- **THEN** є два незалежні значення (`default`, `en`), заміна одного не змінює іншого
+#### Scenario: Translation of a value of a type
+- **WHEN** `section_title` «News» in the language `en` is written for the type `news`
+- **THEN** there are two independent values (`default`, `en`), replacing one does not change the other
 
-#### Scenario: Читання значень типу
-- **WHEN** читаються значення типу `news` для мови `en`, а `section_description` англійською не заповнено
-- **THEN** `section_description` дорівнює `null`, базове значення не підставляється
+#### Scenario: Reading values of a type
+- **WHEN** the values of the type `news` are read for the language `en`, and `section_description` is not filled in English
+- **THEN** `section_description` equals `null`, the base value is not substituted
 
-#### Scenario: Власник не збігається зі значенням
-- **WHEN** прямо в БД вставляється рядок власника-запису без запису або власника-типу з записом
-- **THEN** збереження відхилено на рівні БД
+#### Scenario: Owner does not match the value
+- **WHEN** a row of a record owner without a record, or a type owner with a record, is inserted directly into the DB
+- **THEN** the saving is rejected at the DB level
 
-#### Scenario: Унікальність значення типу
-- **WHEN** для одного типу, поля, мови й ваги двічі записується значення типу
-- **THEN** друге збереження відхилено на рівні БД
+#### Scenario: Uniqueness of a value of a type
+- **WHEN** for one type, field, language and weight a value of the type is written twice
+- **THEN** the second saving is rejected at the DB level
 
-#### Scenario: Значення типу не потрапляє у вибірку записів
-- **WHEN** виконується вибірка, фільтрація, пошук або сортування записів типу `news`
-- **THEN** значення самого типу не впливає на жоден із результатів
+#### Scenario: Value of a type does not get into the selection of records
+- **WHEN** a selection, filtering, search or sorting of records of the type `news` is performed
+- **THEN** the values of the type itself do not affect any of the results
 
-#### Scenario: Заповненість поля
-- **WHEN** поле має лише значення типу, а в жодному записі значень немає
-- **THEN** поле вважається таким, що має значення (його не можна видалити), але не вважається заповненим у записах
+#### Scenario: Filled state of a field
+- **WHEN** a field has only values of the type, and no record has values
+- **THEN** the field is considered as having values (it cannot be deleted), but it is not considered filled in the records
 
 ## MODIFIED Requirements
 
 ### Requirement: Спільний контракт таблиць значень
-Кожна таблиця значень SHALL містити власника значення (запис: `content_node_id` і `content_node_uuid`; або тип без запису), ознаку власника (`entity`: `node` або `type`), зв'язок із полем парою `key` типу (`content_type`) і `key` поля (`field_key`), мову (`lang`), вагу значення (`weight`), типізоване значення та опціональний JSON для додаткових налаштувань; комбінація (власник, тип, ключ поля, мова, вага) SHALL бути унікальною для обох власників. Для власника-запису тип у значенні SHALL збігатися з типом його запису, а `content_node_uuid` — з `uuid` цього запису; для власника-типу запис і його `uuid` SHALL бути порожніми.
+Each value table SHALL contain the owner of the value (for a record: `content_node_id` and `content_node_uuid`; or a type without a record), the owner flag (`entity`: `node` or `type`), the link to the field by the pair `key` of the type (`content_type`) and the `key` of the field (`field_key`), the language (`lang`), the weight of the value (`weight`), the typed value and an optional JSON for additional settings; the combination (owner, type, field key, language, weight) SHALL be unique for both owners. For a record owner the type in the value SHALL match the type of its record, and `content_node_uuid` — the `uuid` of this record; for a type owner the record and its `uuid` SHALL be empty.
 
-#### Scenario: Унікальність ваги
-- **WHEN** для одного запису, поля й мови двічі записується значення з однаковою вагою
-- **THEN** друге збереження відхилено на рівні БД
+#### Scenario: Uniqueness of the weight
+- **WHEN** for one record, field and language a value with the same weight is written twice
+- **THEN** the second saving is rejected at the DB level
 
-#### Scenario: Значення поля іншого типу
-- **WHEN** до запису типу `article` записується значення поля типу `product` (прямо в БД)
-- **THEN** збереження відхилено на рівні БД, бо тип у значенні не збігається з типом запису
+#### Scenario: Value of a field of another type
+- **WHEN** a value of a field of the type `product` is written to a record of the type `article` (directly in the DB)
+- **THEN** the saving is rejected at the DB level, because the type in the value does not match the type of the record
 
-#### Scenario: Значення неіснуючого поля
-- **WHEN** записується значення з парою (`content_type`, `field_key`), якої немає серед полів
-- **THEN** збереження відхилено на рівні БД
+#### Scenario: Value of a non-existent field
+- **WHEN** a value with the pair (`content_type`, `field_key`) that is not among the fields is written
+- **THEN** the saving is rejected at the DB level
 
-#### Scenario: Uuid запису в значенні
-- **WHEN** записується значення запису
-- **THEN** `content_node_uuid` збігається з `uuid` запису і не змінюється окремо від нього
+#### Scenario: Uuid of a record in a value
+- **WHEN** a value of a record is written
+- **THEN** `content_node_uuid` matches the `uuid` of the record and is not changed separately from it
 
-#### Scenario: Ознака власника
-- **WHEN** записується значення запису або значення типу
-- **THEN** `entity` дорівнює `node` або `type` відповідно, а суперечлива комбінація з наявністю запису відхиляється
+#### Scenario: Owner flag
+- **WHEN** a value of a record or a value of a type is written
+- **THEN** `entity` equals `node` or `type` respectively, and a contradictory combination with the presence of a record is rejected
 
 ### Requirement: Читання значень записів
-Система SHALL повертати значення запису за ключами полів для вказаної мови (за замовчуванням `default`; інші мови допустимі, коли багатомовність увімкнена і мова є в переліку мов контенту, зокрема неактивна) і SHALL завантажувати значення набору записів без запиту на кожен запис (кількість запитів не залежить від кількості записів). Так само система SHALL повертати значення самого типу за ключами його полів для вказаної мови; значення типу не змішуються зі значеннями записів.
+The system SHALL return the values of a record by field keys for the specified language (by default `default`; other languages are allowed when multilingualism is enabled and the language is in the list of content languages, including an inactive one), and SHALL load the values of a set of records without a request for each record (the number of requests does not depend on the number of records). In the same way the system SHALL return the values of the type itself by the keys of its fields for the specified language; the values of a type are not mixed with the values of records.
 
-#### Scenario: Читання набору
-- **WHEN** читаються значення 50 записів
-- **THEN** кількість запитів до БД не перевищує сталої межі, що залежить лише від кількості використаних типів значень
+#### Scenario: Reading a set
+- **WHEN** the values of 50 records are read
+- **THEN** the number of DB requests does not exceed a constant bound that depends only on the number of the value types used
 
-#### Scenario: Читання значень типу
-- **WHEN** читаються значення типу `news` за ключами `section_title` і `meta_image`
-- **THEN** повертаються значення цих полів для вказаної мови, а відсутнє значення — `null`
+#### Scenario: Reading values of a type
+- **WHEN** the values of the type `news` are read by the keys `section_title` and `meta_image`
+- **THEN** the values of these fields for the specified language are returned, and a missing value is `null`
 
-#### Scenario: Невідомий ключ значення типу
-- **WHEN** читається значення типу за ключем, якого тип не має або який не належить власнику-типу
-- **THEN** читання відхилено з помилкою валідації
+#### Scenario: Unknown key of a value of a type
+- **WHEN** a value of a type is read by a key that the type does not have, or that does not belong to the owner-type
+- **THEN** the reading is rejected with a validation error

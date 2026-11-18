@@ -2,21 +2,21 @@
 
 ## ADDED Requirements
 
-### Requirement: Ліміт елементів множинного поля
-Запис значень множинного поля, що має максимальну кількість елементів більшу за 0, SHALL відхиляти список, у якому (після відкидання порожніх елементів) більше елементів, ніж дозволено; помилка SHALL адресуватися самому полю. Ліміт `0` SHALL означати відсутність обмеження. Ліміт SHALL перевірятися незалежно від форми (спільним механізмом запису), поле без ліміту й немножинні поля поведінки не змінюють.
+### Requirement: Item limit of a multiple field
+Writing the values of a multiple field that has a maximum number of items greater than 0 SHALL reject a list in which (after discarding the empty items) there are more items than allowed; the error SHALL be addressed to the field itself. The limit `0` SHALL mean no limit. The limit SHALL be checked regardless of the form (by the shared writing mechanism); a field without a limit and non-multiple fields do not change their behaviour.
 
-#### Scenario: У межах ліміту
-- **WHEN** поле з лімітом 3 отримує три значення
-- **THEN** значення збережено
+#### Scenario: Within the limit
+- **WHEN** a field with a limit of 3 receives three values
+- **THEN** the values are saved
 
-#### Scenario: Понад ліміт
-- **WHEN** поле з лімітом 3 отримує чотири значення
-- **THEN** запис відхилено помилкою поля, нічого не змінено
+#### Scenario: Above the limit
+- **WHEN** a field with a limit of 3 receives four values
+- **THEN** the record is rejected with an error of the field, nothing is changed
 
-#### Scenario: Без ліміту
-- **WHEN** поле з лімітом 0 отримує двадцять значень
-- **THEN** усі значення збережено
+#### Scenario: No limit
+- **WHEN** a field with a limit of 0 receives twenty values
+- **THEN** all values are saved
 
-#### Scenario: Порожні елементи не рахуються
-- **WHEN** поле з лімітом 2 отримує два значення й один порожній елемент
-- **THEN** значення збережено
+#### Scenario: Empty items are not counted
+- **WHEN** a field with a limit of 2 receives two values and one empty item
+- **THEN** the values are saved

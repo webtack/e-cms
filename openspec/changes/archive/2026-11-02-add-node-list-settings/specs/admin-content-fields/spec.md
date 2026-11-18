@@ -3,36 +3,36 @@
 ## MODIFIED Requirements
 
 ### Requirement: Збереження нового поля
-Надсилання форми створення SHALL створювати поле в цьому типі з наданими значеннями. Ключ SHALL мати формат ключів полів (малі латинські літери, цифри й `_`, починається з літери, до 64 символів), не збігатися із зарезервованим ключем (`uuid`, `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`, а також ключі системних полів метаданих і розділу: `meta_title`, `meta_description`, `meta_image`, `section_title`, `section_description`, `section_cover`) і бути унікальним у межах типу (той самий ключ в іншому типі допустимий); назва — до 255 символів; тип значення SHALL бути зареєстрованим; вага SHALL бути цілим числом від 0 до 65535. Зайві пробіли по краях назви й ключа обрізаються. Системною ознакою створене поле SHALL НЕ мати, навіть якщо запит її містить. Після успіху користувач SHALL потрапити на список полів типу з повідомленням про успіх, а нове поле SHALL бути в таблиці.
+Submitting the creation form SHALL create a field in this type with the provided values. The key SHALL have the format of field keys (lowercase Latin letters, digits and `_`, starting with a letter, up to 64 characters), SHALL NOT coincide with a reserved key (`uuid`, `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`, as well as the keys of the system fields of metadata and section: `meta_title`, `meta_description`, `meta_image`, `section_title`, `section_description`, `section_cover`) and SHALL be unique within the type (the same key in another type is allowed); the name — up to 255 characters; the value type SHALL be registered; the weight SHALL be an integer from 0 to 65535. Extra spaces at the edges of the name and the key are trimmed. The created field SHALL NOT have the system flag, even if the request contains it. After success the user SHALL land on the list of fields of the type with a success message, and the new field SHALL be in the table.
 
-#### Scenario: Успішне створення
-- **WHEN** користувач заповнює ключ `views`, назву «Перегляди», тип «integer» і зберігає
-- **THEN** поле створено, користувача повернено до списку полів із повідомленням про успіх, `views` є в таблиці
+#### Scenario: Successful creation
+- **WHEN** the user fills in the key `views`, the name «Перегляди», the type «integer» and saves
+- **THEN** the field is created, the user is returned to the list of fields with a success message, and `views` is in the table
 
-#### Scenario: Обов'язкові значення
-- **WHEN** користувач зберігає форму без ключа або назви
-- **THEN** поле не створено, біля відповідного поля показано помилку
+#### Scenario: Required values
+- **WHEN** the user saves the form without a key or a name
+- **THEN** the field is not created, an error is shown next to the corresponding field
 
-#### Scenario: Недопустимий ключ
-- **WHEN** користувач вводить ключ `My Field` або `1price`
-- **THEN** поле не створено, біля поля ключа показано помилку
+#### Scenario: Invalid key
+- **WHEN** the user enters the key `My Field` or `1price`
+- **THEN** the field is not created, an error is shown next to the key field
 
-#### Scenario: Зарезервований ключ
-- **WHEN** користувач вводить ключ `slug`, `uuid`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`, `meta_title` або `section_cover`
-- **THEN** поле не створено, біля поля ключа показано помилку, що ключ зарезервований
+#### Scenario: Reserved key
+- **WHEN** the user enters the key `slug`, `uuid`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`, `meta_title` or `section_cover`
+- **THEN** the field is not created, an error is shown next to the key field that the key is reserved
 
-#### Scenario: Дублікат ключа в типі
-- **WHEN** користувач вводить ключ, що вже є серед полів цього типу (зокрема `title`)
-- **THEN** поле не створено, біля поля ключа показано помилку
+#### Scenario: Duplicate key in the type
+- **WHEN** the user enters a key that is already among the fields of this type (in particular `title`)
+- **THEN** the field is not created, an error is shown next to the key field
 
-#### Scenario: Незареєстрований тип значення
-- **WHEN** запит містить тип значення, якого немає в реєстрі
-- **THEN** поле не створено, біля поля типу показано помилку
+#### Scenario: Unregistered value type
+- **WHEN** the request contains a value type that is not in the registry
+- **THEN** the field is not created, an error is shown next to the type field
 
-#### Scenario: Недопустима вага
-- **WHEN** користувач вводить вагу -1 або 70000
-- **THEN** поле не створено, біля поля ваги показано помилку
+#### Scenario: Invalid weight
+- **WHEN** the user enters the weight -1 or 70000
+- **THEN** the field is not created, an error is shown next to the weight field
 
-#### Scenario: Спроба створити системне поле
-- **WHEN** запит створення містить ознаку системного поля
-- **THEN** поле створено як несистемне
+#### Scenario: Attempt to create a system field
+- **WHEN** the creation request contains the sign of a system field
+- **THEN** the field is created as a non-system one

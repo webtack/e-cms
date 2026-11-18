@@ -8,95 +8,95 @@
 ## MODIFIED Requirements
 
 ### Requirement: Сторінка списку записів
-Адмінка SHALL мати сторінки списку записів `/admin/content-types/{key}/nodes`, `/admin/page-types/{key}/nodes` і `/admin/block-types/{key}/nodes`, доступні лише автентифікованим користувачам з підтвердженою поштою. Кожна показує записи типу з цим ключем у таблиці даних у серверному режимі: пошук, сортування, пагінацію й розмір сторінки виконує сервер, а стан таблиці зберігається в адресі. Розділ SHALL приймати лише типи свого виду (`content`, `page`, `block` відповідно). Таблиця SHALL НЕ мати фільтрів. Заголовок сторінки SHALL називати тип, а над таблицею SHALL бути горизонтальне меню розділу типу з поточним пунктом «Записи». Для ключа, якого немає серед типів виду розділу (зокрема ключа типу іншого виду), сторінка SHALL відповідати 404. Сторінка SHALL відкриватися й для типу без записів.
+The admin SHALL have the list pages of records `/admin/content-types/{key}/nodes`, `/admin/page-types/{key}/nodes` and `/admin/block-types/{key}/nodes`, available only to authenticated users with a confirmed email. Each shows the records of the type with this key in the data table in server mode: the search, sorting, pagination and page size are performed by the server, and the state of the table is stored in the address. The section SHALL accept only types of its own kind (`content`, `page`, `block` respectively). The table SHALL NOT have filters. The page title SHALL name the type, and above the table SHALL be the horizontal section menu of the type with the current item «Записи». For a key that is not among the types of the kind of the section (in particular, a key of a type of another kind), the page SHALL respond with 404. The page SHALL open also for a type without records.
 
-#### Scenario: Відкриття сторінки
-- **WHEN** автентифікований користувач відкриває `/admin/content-types/news/nodes`
-- **THEN** він бачить таблицю записів типу `news`, заголовок із назвою типу та меню розділу, де поточним є «Записи»; кнопки фільтрів у панелі таблиці немає
+#### Scenario: Opening the page
+- **WHEN** an authenticated user opens `/admin/content-types/news/nodes`
+- **THEN** they see the table of records of the type `news`, the title with the name of the type and the section menu where «Записи» is current; there is no filter button in the toolbar of the table
 
-#### Scenario: Записи сторінок і блоків
-- **WHEN** автентифікований користувач відкриває `/admin/page-types/home/nodes` для типу виду `page` або `/admin/block-types/hero/nodes` для типу виду `block`
-- **THEN** він бачить таблицю записів цього типу, заголовок із назвою типу та меню розділу, де поточним є «Записи»
+#### Scenario: Records of pages and blocks
+- **WHEN** an authenticated user opens `/admin/page-types/home/nodes` for a type of the kind `page` or `/admin/block-types/hero/nodes` for a type of the kind `block`
+- **THEN** they see the table of records of this type, the title with the name of the type and the section menu where «Записи» is current
 
-#### Scenario: Записи лише цього типу
-- **WHEN** існують записи типів `news` і `product`, а користувач відкриває список типу `news`
-- **THEN** у таблиці лише записи типу `news`
+#### Scenario: Only records of this type
+- **WHEN** records of the types `news` and `product` exist, and the user opens the list of the type `news`
+- **THEN** the table contains only the records of the type `news`
 
-#### Scenario: Порожній стан
-- **WHEN** тип не має записів
-- **THEN** сторінка відкривається зі стандартним повідомленням таблиці про відсутність даних, кнопка «Створити» видима
+#### Scenario: Empty state
+- **WHEN** the type has no records
+- **THEN** the page opens with the standard message of the table about the absence of data, and the button «Створити» is visible
 
-#### Scenario: Тип іншого виду
-- **WHEN** користувач відкриває `/admin/content-types/home/nodes` для ключа типу виду `page`, або `/admin/page-types/hero/nodes` для ключа типу виду `block`
-- **THEN** сервер відповідає 404
+#### Scenario: Type of another kind
+- **WHEN** the user opens `/admin/content-types/home/nodes` for the key of a type of the kind `page`, or `/admin/page-types/hero/nodes` for the key of a type of the kind `block`
+- **THEN** the server responds with 404
 
-#### Scenario: Гість
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/content-types/news/nodes` або `/admin/page-types/home/nodes`
-- **THEN** його перенаправлено на сторінку входу
+#### Scenario: Guest
+- **WHEN** an unauthenticated visitor opens `/admin/content-types/news/nodes` or `/admin/page-types/home/nodes`
+- **THEN** they are redirected to the login page
 
 ### Requirement: Розділи записів для кожного виду типів
-Маршрути записів (список, створення, збереження, редагування, оновлення, видалення) SHALL існувати в трьох розділах: `/admin/content-types/{key}/nodes…`, `/admin/page-types/{key}/nodes…` і `/admin/block-types/{key}/nodes…`; кожен SHALL обслуговувати лише типи свого виду, а запис SHALL адресуватися парою (ключ типу, `uuid`). Поведінка форми, збереження, редагування й видалення запису SHALL бути однаковою в усіх розділах, а перенаправлення після дії SHALL вести до списку записів того самого розділу. Хлібні крихти сторінок записів SHALL вести через пункт sidebar розділу: «Content Types», «Page Types» або «Block Types».
+The record routes (list, create, store, edit, update, delete) SHALL exist in three sections: `/admin/content-types/{key}/nodes…`, `/admin/page-types/{key}/nodes…` and `/admin/block-types/{key}/nodes…`; each SHALL serve only the types of its own kind, and a record SHALL be addressed by the pair (type key, `uuid`). The behaviour of the form, saving, editing and deleting a record SHALL be the same in all sections, and the redirect after an action SHALL lead to the list of records of the same section. The breadcrumbs of the record pages SHALL lead through the sidebar item of the section: «Content Types», «Page Types» or «Block Types».
 
-#### Scenario: Розділ сторінок
-- **WHEN** користувач відкриває `/admin/page-types/home/nodes/create` для типу виду `page`
-- **THEN** відкривається форма створення запису цього типу
+#### Scenario: Section of pages
+- **WHEN** the user opens `/admin/page-types/home/nodes/create` for a type of the kind `page`
+- **THEN** the creation form of a record of this type opens
 
-#### Scenario: Створення запису блоку
-- **WHEN** користувач зберігає форму створення в `/admin/block-types/hero/nodes` без slug
-- **THEN** запис створено зі згенерованим slug із префіксом `block-`, і користувача перенаправлено на `/admin/block-types/hero/nodes`
+#### Scenario: Creating a record of a block
+- **WHEN** the user saves the creation form at `/admin/block-types/hero/nodes` without a slug
+- **THEN** the record is created with a generated slug with the prefix `block-`, and the user is redirected to `/admin/block-types/hero/nodes`
 
-#### Scenario: Slug блоку без префікса поза формою
-- **WHEN** запит створення запису блоку містить явний slug без префікса `block-`
-- **THEN** запис не створюється, а помилка стоїть біля поля slug
+#### Scenario: Slug of a block without the prefix outside the form
+- **WHEN** the request to create a record of a block contains an explicit slug without the prefix `block-`
+- **THEN** the record is not created, and the error is placed next to the slug field
 
-#### Scenario: Запис чужого розділу
-- **WHEN** користувач відкриває `/admin/content-types/hero/nodes/{uuid}/edit` для запису типу `hero` виду `block`
-- **THEN** сервер відповідає 404
+#### Scenario: Record of a foreign section
+- **WHEN** the user opens `/admin/content-types/hero/nodes/{uuid}/edit` for a record of the type `hero` of the kind `block`
+- **THEN** the server responds with 404
 
-#### Scenario: Хлібні крихти
-- **WHEN** користувач відкриває форму створення запису в `/admin/page-types/home/nodes/create`
-- **THEN** хлібні крихти: «Admin» → «Page Types» (посилання) → «Create node»
+#### Scenario: Breadcrumbs
+- **WHEN** the user opens the creation form of a record at `/admin/page-types/home/nodes/create`
+- **THEN** the breadcrumbs: «Admin» → «Page Types» (link) → «Create node»
 
-#### Scenario: Хлібні крихти контенту
-- **WHEN** користувач відкриває форму створення запису в `/admin/content-types/news/nodes/create`
-- **THEN** хлібні крихти: «Admin» → «Content Types» (посилання) → «Create node»
+#### Scenario: Breadcrumbs of content
+- **WHEN** the user opens the creation form of a record at `/admin/content-types/news/nodes/create`
+- **THEN** the breadcrumbs: «Admin» → «Content Types» (link) → «Create node»
 
 ## ADDED Requirements
 
 ### Requirement: Посилання на запис у медіатеці для всіх видів
-Сторінка медіатеки SHALL показувати для файлу, пов'язаного із записом будь-якого виду (`content`, `page`, `block`), підпис запису та посилання на його форму редагування в розділі його виду.
+The media library page SHALL show, for a file linked to a record of any kind (`content`, `page`, `block`), the label of the record and a link to its edit form in the section of its kind.
 
-#### Scenario: Файл у записі сторінки
-- **WHEN** файл використано в записі типу `home` виду `page`
-- **THEN** медіатека показує посилання на `/admin/page-types/home/nodes/{uuid}/edit`
+#### Scenario: File in a page record
+- **WHEN** a file is used in a record of the type `home` of the kind `page`
+- **THEN** the media library shows a link to `/admin/page-types/home/nodes/{uuid}/edit`
 
-#### Scenario: Файл у записі контенту
-- **WHEN** файл використано в записі типу `news` виду `content`
-- **THEN** посилання веде на `/admin/content-types/news/nodes/{uuid}/edit`
+#### Scenario: File in a content record
+- **WHEN** a file is used in a record of the type `news` of the kind `content`
+- **THEN** the link leads to `/admin/content-types/news/nodes/{uuid}/edit`
 
 ### Requirement: Префікс slug у формі запису блоку
-Форма створення й редагування запису типу виду `block` SHALL показувати префікс `block-` як незмінну візуально відокремлену частину поля slug перед елементом введення; елемент введення SHALL приймати лише частину slug після префікса. Форма SHALL надсилати серверу завжди повний slug із префіксом: до введеного тексту додається `block-`, якщо він не починається з нього явно (явно введений або вставлений префікс не дублюється, а в полі показується решта після нього). Порожнє поле SHALL надсилатися порожнім, і сервер генерує slug із префіксом `block-`. У формі редагування запису поле SHALL показувати наявний slug без префікса. Підказка під полем SHALL пояснювати, що порожнє поле дає згенерований slug із префіксом `block-`. Для записів видів `content` і `page` поле slug SHALL лишатися без префікса.
+The create and edit form of a record of a type of the kind `block` SHALL show the prefix `block-` as an unchangeable, visually separated part of the slug field before the input element; the input element SHALL accept only the part of the slug after the prefix. The form SHALL always send the server the full slug with the prefix: `block-` is added to the entered text unless it already starts with it explicitly (an explicitly entered or pasted prefix is not doubled, and the field shows the rest after it). An empty field SHALL be sent empty, and the server generates a slug with the prefix `block-`. In the edit form of a record the field SHALL show the existing slug without the prefix. The hint under the field SHALL explain that an empty field gives a generated slug with the prefix `block-`. For records of the kinds `content` and `page` the slug field SHALL remain without a prefix.
 
-#### Scenario: Префікс видно
-- **WHEN** користувач відкриває форму створення запису блоку
-- **THEN** перед полем slug видно префікс `block-`, а саме поле порожнє
+#### Scenario: Prefix is visible
+- **WHEN** the user opens the creation form of a record of a block
+- **THEN** the prefix `block-` is visible before the slug field, and the field itself is empty
 
-#### Scenario: Введено лише решту
-- **WHEN** користувач вводить у поле `hero` і зберігає форму
-- **THEN** запис створено зі slug `block-hero`
+#### Scenario: Only the rest is entered
+- **WHEN** the user enters `hero` in the field and saves the form
+- **THEN** the record is created with the slug `block-hero`
 
-#### Scenario: Префікс уже введено явно
-- **WHEN** користувач вставляє в поле `block-hero` і зберігає форму
-- **THEN** у полі показано `hero`, а запис створено зі slug `block-hero` (префікс не подвоєно)
+#### Scenario: Prefix is already entered explicitly
+- **WHEN** the user pastes `block-hero` into the field and saves the form
+- **THEN** the field shows `hero`, and the record is created with the slug `block-hero` (the prefix is not doubled)
 
-#### Scenario: Порожнє поле
-- **WHEN** користувач лишає поле порожнім і зберігає форму
-- **THEN** запис створено зі згенерованим slug виду `block-xxxxxxxx`
+#### Scenario: Empty field
+- **WHEN** the user leaves the field empty and saves the form
+- **THEN** the record is created with a generated slug of the form `block-xxxxxxxx`
 
-#### Scenario: Редагування
-- **WHEN** користувач відкриває форму редагування запису зі slug `block-hero`
-- **THEN** префікс `block-` показано окремо, а в полі стоїть `hero`
+#### Scenario: Editing
+- **WHEN** the user opens the edit form of a record with the slug `block-hero`
+- **THEN** the prefix `block-` is shown separately, and the field contains `hero`
 
-#### Scenario: Інші види
-- **WHEN** користувач відкриває форму запису типу виду `content` або `page`
-- **THEN** поле slug не має префікса
+#### Scenario: Other kinds
+- **WHEN** the user opens the form of a record of a type of the kind `content` or `page`
+- **THEN** the slug field has no prefix

@@ -3,63 +3,63 @@
 ## ADDED Requirements
 
 ### Requirement: Сортування за службовими атрибутами запису
-Система SHALL підтримувати сортування записів типу за службовими атрибутами запису у напрямку зростання або спадання: датами `created_at`, `updated_at` і `unpublished_at`, а також `status` (похідний стан) і `is_active`. Записи без значення (зокрема без `unpublished_at`) SHALL йти в кінці незалежно від напрямку. За рівних значень `created_at`, `updated_at` і `unpublished_at` порядок SHALL визначати ідентифікатор запису в напрямку основного сортування; другорядний порядок за `title` до цих сортувань SHALL НЕ застосовуватися. Сортування за `status` і `is_active` SHALL, як і за `published_at`, застосовувати за рівних значень другорядний порядок за `title`, далі за ідентифікатором. Стан для сортування SHALL упорядковуватися так: «Опубліковано», «Заплановано», «Завершено», «Вимкнено» (за спаданням навпаки), `is_active` — `false` перед `true`. Те саме SHALL діяти для `sort.field` в `settings.list`.
+The system SHALL support sorting the records of a type by the service attributes of the record in ascending or descending direction: the dates `created_at`, `updated_at` and `unpublished_at`, and also `status` (the derived state) and `is_active`. Records without a value (in particular without `unpublished_at`) SHALL go last regardless of the direction. For equal values of `created_at`, `updated_at` and `unpublished_at` the order SHALL be determined by the identifier of the record in the direction of the main sorting; the secondary order by `title` SHALL NOT be applied to these sortings. Sorting by `status` and `is_active` SHALL, as for `published_at`, apply for equal values the secondary order by `title`, then by the identifier. The state for sorting SHALL be ordered as follows: «Опубліковано», «Заплановано», «Завершено», «Вимкнено» (in descending order the reverse), `is_active` — `false` before `true`. The same SHALL apply to `sort.field` in `settings.list`.
 
-#### Scenario: Від найновішого
-- **WHEN** сортування за `created_at` за спаданням, записи створено у порядку A, B, C
-- **THEN** порядок C, B, A
+#### Scenario: From the newest
+- **WHEN** sorting by `created_at` in descending order, and the records were created in the order A, B, C
+- **THEN** the order is C, B, A
 
-#### Scenario: Від найстарішого
-- **WHEN** сортування за `created_at` за зростанням
-- **THEN** порядок A, B, C
+#### Scenario: From the oldest
+- **WHEN** sorting by `created_at` in ascending order
+- **THEN** the order is A, B, C
 
-#### Scenario: Однакова дата створення
-- **WHEN** два записи мають однакове значення `created_at` і різні `title`
-- **THEN** їх порядок визначає ідентифікатор запису, а не `title`
+#### Scenario: Equal creation date
+- **WHEN** two records have the same value of `created_at` and different `title`
+- **THEN** their order is determined by the identifier of the record, not by `title`
 
-#### Scenario: Сортування за датою оновлення
-- **WHEN** сортування за `updated_at` за спаданням
-- **THEN** першим іде запис, оновлений останнім
+#### Scenario: Sorting by the update date
+- **WHEN** sorting by `updated_at` in descending order
+- **THEN** the record updated last goes first
 
-#### Scenario: Записи без дати зняття
-- **WHEN** сортування за `unpublished_at` за спаданням, частина записів її не має
-- **THEN** записи без дати зняття йдуть останніми
+#### Scenario: Records without an unpublishing date
+- **WHEN** sorting by `unpublished_at` in descending order, and some records do not have it
+- **THEN** the records without an unpublishing date go last
 
-#### Scenario: Сортування за станом
-- **WHEN** сортування за `status` за зростанням, є записи в усіх чотирьох станах
-- **THEN** порядок «Опубліковано», «Заплановано», «Завершено», «Вимкнено»; записи одного стану — за `title`
+#### Scenario: Sorting by state
+- **WHEN** sorting by `status` in ascending order, and there are records in all four states
+- **THEN** the order is «Опубліковано», «Заплановано», «Завершено», «Вимкнено»; records of one state — by `title`
 
-#### Scenario: Сортування за активністю
-- **WHEN** сортування за `is_active` за зростанням
-- **THEN** вимкнені записи йдуть перед активними
+#### Scenario: Sorting by activity
+- **WHEN** sorting by `is_active` in ascending order
+- **THEN** the disabled records go before the active ones
 
-#### Scenario: Некоректний напрямок
-- **WHEN** сортування за службовим атрибутом із напрямком, відмінним від `asc` і `desc`
-- **THEN** запит відхилено помилкою валідації
+#### Scenario: Incorrect direction
+- **WHEN** sorting by a service attribute with a direction other than `asc` and `desc`
+- **THEN** the request is rejected with a validation error
 
 ### Requirement: Налаштування списку типу
-Налаштування списку записів SHALL зберігатися в `settings.list` типу з ключами `visible` (ключі колонок у порядку показу), `search` (ключі текстових полів пошуку) і `sort` (`field` і `direction`). `visible` SHALL допускати ключ `title`, ключі полів типу, що мають значення в записів, і службові ключі `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; `search` — ключі полів типу; `sort.field` — ключ поля типу або службовий ключ, крім `slug`; `direction` — `asc` або `desc`. Збереження типу з посиланням на невідомий ключ або недопустимий напрямок SHALL відхилятися помилкою валідації. Ключ `title` у `visible` SHALL задавати позицію колонки `title`; колонка `title` лишається завжди присутньою, а без її ключа в `visible` стоїть першою. Вибірка записів без явного `fields`, `search` і `sort` SHALL братися з цих налаштувань.
+The settings of the list of records SHALL be stored in `settings.list` of the type with the keys `visible` (the keys of the columns in the order of display), `search` (the keys of the text search fields) and `sort` (`field` and `direction`). `visible` SHALL allow the key `title`, the keys of the fields of the type that have values in the records, and the service keys `slug`, `status`, `is_active`, `created_at`, `updated_at`, `published_at`, `unpublished_at`; `search` — the keys of the fields of the type; `sort.field` — the key of a field of the type or a service key, except `slug`; `direction` — `asc` or `desc`. Saving a type with a reference to an unknown key or an invalid direction SHALL be rejected with a validation error. The key `title` in `visible` SHALL set the position of the column `title`; the column `title` remains always present, and without its key in `visible` it stands first. A selection of records without explicit `fields`, `search` and `sort` SHALL be taken from these settings.
 
-#### Scenario: Службовий ключ у visible
-- **WHEN** тип зберігається з `settings.list.visible` = `["status", "is_active", "unpublished_at"]`
-- **THEN** збереження успішне
+#### Scenario: Service key in visible
+- **WHEN** a type is saved with `settings.list.visible` = `["status", "is_active", "unpublished_at"]`
+- **THEN** the saving succeeds
 
-#### Scenario: Ключ title у visible
-- **WHEN** тип зберігається з `settings.list.visible` = `["price", "title"]`
-- **THEN** збереження успішне
+#### Scenario: Key title in visible
+- **WHEN** a type is saved with `settings.list.visible` = `["price", "title"]`
+- **THEN** the saving succeeds
 
-#### Scenario: Невідомий ключ
-- **WHEN** тип зберігається з `settings.list.visible` = `["missing"]`, а поля `missing` у типу немає
-- **THEN** збереження відхилено помилкою валідації з указанням ключа
+#### Scenario: Unknown key
+- **WHEN** a type is saved with `settings.list.visible` = `["missing"]`, and the type has no field `missing`
+- **THEN** the saving is rejected with a validation error that names the key
 
-#### Scenario: Недопустимий ключ пошуку
-- **WHEN** тип зберігається з `settings.list.search` = `["status"]`
-- **THEN** збереження відхилено помилкою валідації
+#### Scenario: Invalid search key
+- **WHEN** a type is saved with `settings.list.search` = `["status"]`
+- **THEN** the saving is rejected with a validation error
 
-#### Scenario: Сортування за службовим полем
-- **WHEN** тип зберігається з `settings.list.sort` = `{field: "created_at", direction: "desc"}`
-- **THEN** збереження успішне, а вибірка без явного `sort` повертає записи від найновішого
+#### Scenario: Sorting by a service field
+- **WHEN** a type is saved with `settings.list.sort` = `{field: "created_at", direction: "desc"}`
+- **THEN** the saving succeeds, and the selection without an explicit `sort` returns the records from the newest
 
-#### Scenario: Недопустимий напрямок
-- **WHEN** тип зберігається з `settings.list.sort.direction` = `up`
-- **THEN** збереження відхилено помилкою валідації
+#### Scenario: Invalid direction
+- **WHEN** a type is saved with `settings.list.sort.direction` = `up`
+- **THEN** the saving is rejected with a validation error

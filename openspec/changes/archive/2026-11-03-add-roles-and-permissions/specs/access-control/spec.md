@@ -2,116 +2,116 @@
 
 ## Purpose
 
-Визначає модель доступу «за роллю»: роль користувача задає, які розділи адмінки він бачить і які записи може створювати, змінювати та видаляти. Спека описує набір прав, рівні доступу, перевірку на сервері та поведінку при відмові.
+Defines the model of access «by role»: the role of a user sets which sections of the admin he sees and which records he can create, change and delete. The spec describes the set of rights, the levels of access, the checking on the server and the behaviour on refusal.
 
 ## ADDED Requirements
 
 ### Requirement: Одна роль на користувача
-Кожен користувач SHALL мати рівно одну роль. Права користувача дорівнюють правам його ролі; поєднання кількох ролей не підтримується.
+Each user SHALL have exactly one role. The rights of a user equal the rights of his role; the combination of several roles is not supported.
 
-#### Scenario: Користувач без ролі
-- **WHEN** робиться спроба створити користувача без ролі
-- **THEN** створення відхиляється з помилкою валідації поля ролі
+#### Scenario: User without a role
+- **WHEN** an attempt is made to create a user without a role
+- **THEN** the creation is rejected with a validation error of the field of the role
 
 ### Requirement: Системні права
-Роль SHALL мати набір булевих системних прав: керування користувачами, ролями, меню, налаштуваннями сайту, таксономією та типами (створення й налаштування типів і їхніх полів). Право на розділ дає повний доступ до цього розділу (перегляд, створення, зміна, видалення), а відсутність права закриває розділ повністю.
+A role SHALL have a set of boolean system rights: management of users, roles, menus, site settings, taxonomy and types (creation and settings of types and their fields). The right to a section gives full access to this section (viewing, creation, change, deletion), and the absence of the right closes the section completely.
 
-#### Scenario: Роль без права на меню
-- **WHEN** користувач ролі без права на меню відкриває `/admin/menus`
-- **THEN** відповідь 403, а вміст розділу не повертається
+#### Scenario: Role without the right to menus
+- **WHEN** a user of a role without the right to menus opens `/admin/menus`
+- **THEN** the response is 403, and the content of the section is not returned
 
-#### Scenario: Роль із правом на таксономію
-- **WHEN** користувач ролі з правом на таксономію відкриває `/admin/taxonomy` і створює словник
-- **THEN** дії виконуються так само, як для адміністратора
+#### Scenario: Role with the right to taxonomy
+- **WHEN** a user of a role with the right to taxonomy opens `/admin/taxonomy` and creates a vocabulary
+- **THEN** the actions are performed in the same way as for the administrator
 
 ### Requirement: Рівні доступу до записів типу
-Для кожного типу контенту (усіх видів `content`, `page`, `block`) роль SHALL мати один із рівнів: `none`, `own` або `any`. `none` — доступу до записів типу немає. `own` — створення записів, перегляд списку всіх записів типу, зміна й видалення лише записів, автором яких є сам користувач. `any` — створення, зміна й видалення будь-яких записів типу.
+For each content type (all kinds `content`, `page`, `block`) a role SHALL have one of the levels: `none`, `own` or `any`. `none` — there is no access to the records of the type. `own` — creation of records, viewing of the list of all records of the type, change and deletion only of the records whose author is the user himself. `any` — creation, change and deletion of any records of the type.
 
-#### Scenario: Рівень own і власний запис
-- **WHEN** користувач із рівнем `own` на тип змінює запис, автором якого він є
-- **THEN** зміну збережено
+#### Scenario: Level own and own record
+- **WHEN** a user with the level `own` on a type changes a record whose author he is
+- **THEN** the change is saved
 
-#### Scenario: Рівень own і чужий запис
-- **WHEN** користувач із рівнем `own` намагається змінити або видалити запис іншого автора
-- **THEN** відповідь 403, запис не змінено
+#### Scenario: Level own and foreign record
+- **WHEN** a user with the level `own` tries to change or delete a record of another author
+- **THEN** the response is 403, the record is not changed
 
-#### Scenario: Рівень own і список
-- **WHEN** користувач із рівнем `own` відкриває список записів типу
-- **THEN** він бачить усі записи типу, зокрема чужі, але не бачить дій зміни та видалення для чужих
+#### Scenario: Level own and the list
+- **WHEN** a user with the level `own` opens the list of records of the type
+- **THEN** he sees all records of the type, including the foreign ones, but does not see the actions of change and deletion for the foreign ones
 
-#### Scenario: Рівень none
-- **WHEN** користувач із рівнем `none` на тип відкриває список, форму створення чи редагування записів цього типу
-- **THEN** відповідь 403
+#### Scenario: Level none
+- **WHEN** a user with the level `none` on a type opens the list, the form of creation or the form of editing of records of this type
+- **THEN** the response is 403
 
-#### Scenario: Рівень any
-- **WHEN** користувач із рівнем `any` змінює або видаляє запис іншого автора
-- **THEN** дію виконано
+#### Scenario: Level any
+- **WHEN** a user with the level `any` changes or deletes a record of another author
+- **THEN** the action is performed
 
 ### Requirement: Публікація керується правом на запис
-Поля публікації запису (`is_active`, `published_at`, `unpublished_at`) SHALL змінюватися тим самим правом, що й решта запису; окремого права публікації немає.
+The publication fields of a record (`is_active`, `published_at`, `unpublished_at`) SHALL be changed by the same right as the rest of the record; there is no separate right of publication.
 
-#### Scenario: Автор публікує власний запис
-- **WHEN** користувач із рівнем `own` змінює дату публікації свого запису
-- **THEN** зміну збережено
+#### Scenario: Author publishes his own record
+- **WHEN** a user with the level `own` changes the publication date of his own record
+- **THEN** the change is saved
 
 ### Requirement: Рівні доступу до медіатеки
-Медіатека SHALL мати ті самі рівні `none`, `own`, `any`, де власником файлу є користувач, що його завантажив. Файл без власника доступний лише на рівні `any`.
+The media library SHALL have the same levels `none`, `own`, `any`, where the owner of a file is the user who uploaded it. A file without an owner is available only at the level `any`.
 
-#### Scenario: Видалення чужого файлу при own
-- **WHEN** користувач із рівнем `own` на медіа видаляє файл іншого користувача
-- **THEN** відповідь 403, файл збережено
+#### Scenario: Deleting a foreign file at own
+- **WHEN** a user with the level `own` on the media deletes a file of another user
+- **THEN** the response is 403, the file is kept
 
-#### Scenario: Медіа з рівнем none
-- **WHEN** користувач із рівнем `none` на медіа відкриває `/admin/media`
-- **THEN** відповідь 403
+#### Scenario: Media with the level none
+- **WHEN** a user with the level `none` on the media opens `/admin/media`
+- **THEN** the response is 403
 
 ### Requirement: Нові типи за замовчуванням закриті
-Щойно створений тип контенту SHALL мати рівень `none` для всіх ролей, крім `admin`. Видалення типу прибирає з ролей його рівні.
+A newly created content type SHALL have the level `none` for all roles except `admin`. The deletion of a type removes its levels from the roles.
 
-#### Scenario: Новий тип
-- **WHEN** адміністратор створює тип контенту
-- **THEN** користувач будь-якої ролі, крім `admin`, не має доступу до записів цього типу, доки роль не оновлено
+#### Scenario: New type
+- **WHEN** the administrator creates a content type
+- **THEN** a user of any role except `admin` has no access to the records of this type until the role is updated
 
-#### Scenario: Видалення типу
-- **WHEN** тип видаляється
-- **THEN** збережені рівні ролей для цього типу не залишаються й не відновлюються для типу з тим самим ключем
+#### Scenario: Deleting a type
+- **WHEN** a type is deleted
+- **THEN** the saved levels of the roles for this type do not remain and are not restored for a type with the same key
 
 ### Requirement: Системна роль admin
-Система SHALL мати системну роль `admin` з усіма системними правами та рівнем `any` на всі типи й медіатеку, зокрема на типи, створені пізніше. Роль `admin` не можна змінити чи видалити.
+The system SHALL have the system role `admin` with all system rights and the level `any` on all types and on the media library, including the types created later. The role `admin` cannot be changed or deleted.
 
-#### Scenario: Адміністратор і новий тип
-- **WHEN** створено новий тип і користувач ролі `admin` відкриває його записи
-- **THEN** доступ є без додаткового налаштування
+#### Scenario: Administrator and a new type
+- **WHEN** a new type is created and a user of the role `admin` opens its records
+- **THEN** the access is available without an additional setting
 
-#### Scenario: Існуючі користувачі після запровадження ролей
-- **WHEN** застосовано міграцію запровадження ролей
-- **THEN** кожен наявний користувач має роль `admin`
+#### Scenario: Existing users after the introduction of roles
+- **WHEN** the migration of the introduction of roles is applied
+- **THEN** each existing user has the role `admin`
 
 ### Requirement: Перевірка на сервері
-Усі маршрути адмінки, крім дашборда, профілю користувача та допоміжних пошукових ендпойнтів `lookup/*`, SHALL перевіряти права на сервері незалежно від того, які пункти показує інтерфейс. Недоступна дія відповідає 403.
+All routes of the admin, except the dashboard, the user profile and the auxiliary search endpoints `lookup/*`, SHALL check the rights on the server regardless of which items the interface shows. An unavailable action responds with 403.
 
-#### Scenario: Пряме звернення за адресою
-- **WHEN** користувач без права відправляє запит на недоступний маршрут, минаючи інтерфейс
-- **THEN** відповідь 403, дію не виконано
+#### Scenario: Direct access by address
+- **WHEN** a user without a right sends a request to an unavailable route, bypassing the interface
+- **THEN** the response is 403, the action is not performed
 
-#### Scenario: Дашборд і профіль
-- **WHEN** активний користувач будь-якої ролі відкриває дашборд чи профіль
-- **THEN** сторінки доступні
+#### Scenario: Dashboard and profile
+- **WHEN** an active user of any role opens the dashboard or the profile
+- **THEN** the pages are available
 
 ### Requirement: Допоміжні ендпойнти
-Пошукові ендпойнти `lookup/content-types` і `lookup/nodes` SHALL бути доступні кожному активному користувачу, що ввійшов. Завантаження файлів і запит даних відео YouTube SHALL бути доступні лише користувачу, що має рівень `own` або `any` хоча б на одному типі контенту чи на медіа.
+The search endpoints `lookup/content-types` and `lookup/nodes` SHALL be available to every active user who has logged in. The upload of files and the request of the data of YouTube videos SHALL be available only to a user who has the level `own` or `any` on at least one content type or on the media.
 
-#### Scenario: Пошук посилань
-- **WHEN** користувач із рівнем `none` на тип викликає `lookup/nodes` для цього типу
-- **THEN** отримує результати пошуку
+#### Scenario: Search of references
+- **WHEN** a user with the level `none` on a type calls `lookup/nodes` for this type
+- **THEN** he receives the results of the search
 
-#### Scenario: Завантаження файлу без прав на запис
-- **WHEN** користувач без жодного рівня `own` чи `any` на типи й медіа завантажує файл
-- **THEN** відповідь 403
+#### Scenario: Upload of a file without the rights to write
+- **WHEN** a user without any level `own` or `any` on the types and the media uploads a file
+- **THEN** the response is 403
 
 ### Requirement: Права на клієнті
-Інтерфейс SHALL отримувати від сервера перелік прав поточного користувача й використовувати його лише для показу чи приховування елементів; остаточне рішення завжди ухвалює сервер.
+The interface SHALL receive from the server the list of rights of the current user and use it only to show or hide the elements; the final decision is always made by the server.
 
-#### Scenario: Кнопка недоступної дії
-- **WHEN** користувач із рівнем `own` дивиться на чужий запис у списку
-- **THEN** кнопки зміни й видалення цього запису не показано
+#### Scenario: Button of an unavailable action
+- **WHEN** a user with the level `own` looks at a foreign record in the list
+- **THEN** the buttons of change and deletion of this record are not shown

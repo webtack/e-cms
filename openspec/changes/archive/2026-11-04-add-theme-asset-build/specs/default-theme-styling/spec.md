@@ -3,12 +3,12 @@
 ## MODIFIED Requirements
 
 ### Requirement: Стилі теми за замовчуванням підключаються через збірку ресурсів
-Тема `default` SHALL мати таблицю стилів у `assets/app.css`, яка підключається шаблоном `html` через збірку ресурсів теми. Таблиця стилів `default` SHALL лишатися звичайним CSS (без препроцесора), бо її збирає Tailwind. Сторінки публічного сайту з темою `default` SHALL віддавати з цією таблицею стилів, а сторінка адмінки SHALL НЕ отримувати стилі публічної теми.
+The theme `default` SHALL have a stylesheet in `assets/app.css`, which is connected by the template `html` through the build of the resources of the theme. The stylesheet of `default` SHALL remain ordinary CSS (without a preprocessor), because it is built by Tailwind. The pages of the public site with the theme `default` SHALL be served with this stylesheet, while the page of the admin SHALL NOT receive the styles of the public theme.
 
-#### Scenario: Публічна сторінка має стилі теми
-- **WHEN** гість відкриває головну сторінку при `APP_THEME=default` і зібраними ресурсами теми
-- **THEN** у `<head>` підключено зібрану таблицю стилів `app` теми `default`, і шапка, основна зона та футер мають власні відступи й шрифт, а не браузерні значення за замовчуванням
+#### Scenario: The public page has the styles of the theme
+- **WHEN** a guest opens the home page with `APP_THEME=default` and the built resources of the theme
+- **THEN** the built stylesheet `app` of the theme `default` is connected in `<head>`, and the header, the main zone and the footer have their own indents and font, not the browser default values
 
-#### Scenario: Адмінка не змінює вигляду
-- **WHEN** адміністратор відкриває будь-яку сторінку `/admin`
-- **THEN** стилі теми за замовчуванням не застосовуються, і вигляд адмінки такий самий, як до цієї зміни
+#### Scenario: The admin does not change its look
+- **WHEN** the administrator opens any page of `/admin`
+- **THEN** the styles of the default theme are not applied, and the look of the admin is the same as before this change

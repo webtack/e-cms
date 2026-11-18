@@ -1,16 +1,16 @@
 # Tasks
 
-## 1. Посилання на сайт у шапці
+## 1. Link to the site in the header
 
-- [x] 1.1 Додати в `AdminHeader` кнопку-іконку `ExternalLink` (`<a href="/" target="_blank" rel="noopener noreferrer">`, `aria-label` і `title` «Open site») перед `LocaleSwitcher`; JSDoc англійською; додати ключ «Open site» в український переклад
-- [x] 1.2 Додати в `e2e/admin-shell.spec.js` перевірку: кнопка є, `href="/"`, `target="_blank"`; запустити `npm run test:e2e -- e2e/admin-shell.spec.js`
-- [x] 1.3 Оновити `docs/admin-shell.md` (шапка: посилання на сайт)
+- [x] 1.1 Add to `AdminHeader` the icon button `ExternalLink` (`<a href="/" target="_blank" rel="noopener noreferrer">`, `aria-label` and `title` «Open site») before `LocaleSwitcher`; JSDoc in English; add the key «Open site» to the Ukrainian translation.
+- [x] 1.2 Add to `e2e/admin-shell.spec.js` a check: the button is there, `href="/"`, `target="_blank"`; run `npm run test:e2e -- e2e/admin-shell.spec.js`.
+- [x] 1.3 Update `docs/admin-shell.md` (the header: the link to the site).
 
-## 2. Кнопка «Перегляд» у формі запису
+## 2. Button «Перегляд» ("Preview") in the form of a record
 
-- [x] 2.1 У `ContentNodeController::edit` додати проп `publicUrl` (`/{slug}` для `page`, `/{type.slug}/{slug}` для `content`, `null` для `block`) з коментарем англійською
-- [x] 2.2 Додати Feature-тести пропа для page, content і block; запустити `docker compose exec app php artisan test --compact --filter=ContentNode`
-- [x] 2.3 Передати `publicUrl` з `Edit.tsx` у `ContentNodeForm` і показати в `FormActionBar` кнопку «Перегляд» (`target="_blank"`, `rel="noopener noreferrer"`) лише в режимі `edit` і коли `publicUrl` не `null`; JSDoc англійською; переклад «Preview» → «Перегляд»
-- [x] 2.4 Додати в `e2e/admin-content-nodes.spec.js` сценарії: кнопка є в редагуванні запису з правильним `href`/`target`, немає у формі створення й для блоку; запустити `npm run test:e2e -- e2e/admin-content-nodes.spec.js`
-- [x] 2.5 Оновити `docs/admin-content-nodes.md` (кнопка «Перегляд», правила адреси, 404 для невидимих) і, за потреби, `docs/e2e-testing.md`
-- [x] 2.6 Запустити `docker compose exec app vendor/bin/pint --dirty --format agent`
+- [x] 2.1 In `ContentNodeController::edit` add the prop `publicUrl` (`/{slug}` for `page`, `/{type.slug}/{slug}` for `content`, `null` for `block`) with a comment in English.
+- [x] 2.2 Add Feature tests of the prop for page, content and block; run `docker compose exec app php artisan test --compact --filter=ContentNode`.
+- [x] 2.3 Pass `publicUrl` from `Edit.tsx` to `ContentNodeForm` and show in `FormActionBar` the button «Перегляд» ("Preview") (`target="_blank"`, `rel="noopener noreferrer"`) only in the mode `edit` and when `publicUrl` is not `null`; JSDoc in English; the translation «Preview» → «Перегляд».
+- [x] 2.4 Add to `e2e/admin-content-nodes.spec.js` the scenarios: the button is in the editing of a record with the correct `href`/`target`, it is absent in the form of creating and for a block; run `npm run test:e2e -- e2e/admin-content-nodes.spec.js`.
+- [x] 2.5 Update `docs/admin-content-nodes.md` (the button «Перегляд» ("Preview"), the rules of the address, 404 for invisible ones) and, if needed, `docs/e2e-testing.md`.
+- [x] 2.6 Run `docker compose exec app vendor/bin/pint --dirty --format agent`.

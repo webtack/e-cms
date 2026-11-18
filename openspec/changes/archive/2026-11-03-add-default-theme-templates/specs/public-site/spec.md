@@ -3,46 +3,46 @@
 ## ADDED Requirements
 
 ### Requirement: Поля на сторінці й у деталях запису
-Сторінка (`kind = page`) і деталі запису `content` SHALL виводити після заголовка поля, перелічені в публічних налаштуваннях типу (`page_fields`), у порядку налаштування. Якщо налаштування немає, SHALL виводитися всі додані поля типу. Службові значення (`title`, `meta_*`, `section_*`) SHALL НЕ виводитися як звичайні поля, але `meta_title`, `meta_description` і `meta_image` SHALL потрапляти до `<head>` документа, коли задані. Поля SHALL виводитися шаблонами полів теми.
+The page (`kind = page`) and the details of a record `content` SHALL output after the heading the fields listed in the public settings of the type (`page_fields`), in the order of the setting. If there is no setting, all added fields of the type SHALL be output. The service values (`title`, `meta_*`, `section_*`) SHALL NOT be output as ordinary fields, but `meta_title`, `meta_description` and `meta_image` SHALL get into the `<head>` of the document, when they are set. The fields SHALL be output by the templates of the fields of the theme.
 
-#### Scenario: Налаштовані поля сторінки
-- **WHEN** тип сторінки має `page_fields = ['body']`, а запис — поля `body` і `note`
-- **THEN** у HTML є значення `body`, а `note` немає
+#### Scenario: Configured fields of a page
+- **WHEN** the page type has `page_fields = ['body']`, and the record has the fields `body` and `note`
+- **THEN** the HTML has the value of `body`, and there is no `note`
 
-#### Scenario: Без налаштування — усі додані поля
-- **WHEN** тип не має `page_fields`
-- **THEN** сторінка виводить усі додані поля, що мають значення
+#### Scenario: Without a setting — all added fields
+- **WHEN** the type has no `page_fields`
+- **THEN** the page outputs all added fields that have values
 
-#### Scenario: Мета-дані документа
-- **WHEN** запис має `meta_title` і `meta_description`
-- **THEN** `<title>` містить `meta_title`, а `<head>` — мета-опис
+#### Scenario: Metadata of the document
+- **WHEN** the record has `meta_title` and `meta_description`
+- **THEN** `<title>` contains `meta_title`, and `<head>` — the meta description
 
 ### Requirement: Картки записів у списку
-Список записів типу `content` SHALL виводити кожен запис карткою (preview) зі списку кандидатів `{t}/preview--{id}`, `{t}/preview`, `content/preview`, де `{id}` — числовий `id` запису. Картка SHALL показувати `title` як посилання на запис і поля з `list_fields`. Список SHALL використовувати сортування, кількість записів на сторінці й пагінатор із публічних налаштувань типу; без налаштувань — найновіші першими. Лише видимі записи SHALL потрапляти до списку.
+The list of records of the type `content` SHALL output each record as a card (preview) from the list of candidates `{t}/preview--{id}`, `{t}/preview`, `content/preview`, where `{id}` is the numeric `id` of the record. The card SHALL show `title` as a link to the record and the fields from `list_fields`. The list SHALL use the sorting, the number of records per page and the paginator from the public settings of the type; without the settings — the newest first. Only visible records SHALL get into the list.
 
-#### Scenario: Поля картки
-- **WHEN** тип має `list_fields = ['title', 'price']`
-- **THEN** картка кожного запису показує заголовок-посилання й ціну
+#### Scenario: Fields of the card
+- **WHEN** the type has `list_fields = ['title', 'price']`
+- **THEN** the card of each record shows the heading-link and the price
 
-#### Scenario: Перевизначена картка запису
-- **WHEN** тема має `news/preview--7`
-- **THEN** запис з `id = 7` типу `news` виводиться цим шаблоном, інші — `news/preview` чи `content/preview`
+#### Scenario: Overridden card of a record
+- **WHEN** the theme has `news/preview--7`
+- **THEN** the record with `id = 7` of the type `news` is output by this template, the others — by `news/preview` or `content/preview`
 
-#### Scenario: Пагінатор вимкнено
+#### Scenario: Paginator disabled
 - **WHEN** `pagination = false`
-- **THEN** список не містить посилань на сторінки
+- **THEN** the list contains no links to pages
 
-#### Scenario: Сортування
-- **WHEN** тип має `sort = {field: 'title', direction: 'asc'}`
-- **THEN** записи йдуть за заголовком за зростанням
+#### Scenario: Sorting
+- **WHEN** the type has `sort = {field: 'title', direction: 'asc'}`
+- **THEN** the records go by the heading in ascending order
 
 ### Requirement: Меню в шапці сайту
-Шапка сайту (`layout`) SHALL виводити меню `main`, якщо воно існує, на кожній публічній сторінці, включно з 404. Якщо меню `main` немає, шапка SHALL виводитися без меню.
+The header of the site (`layout`) SHALL output the menu `main`, if it exists, on every public page, including 404. If the menu `main` does not exist, the header SHALL be output without the menu.
 
-#### Scenario: Є меню main
-- **WHEN** існує меню `main` з видимими пунктами
-- **THEN** кожна публічна сторінка містить ці пункти в шапці
+#### Scenario: The menu main exists
+- **WHEN** the menu `main` with visible items exists
+- **THEN** every public page contains these items in the header
 
-#### Scenario: Меню main відсутнє
-- **WHEN** меню `main` не створено
-- **THEN** сторінки відображаються без помилки й без меню
+#### Scenario: The menu main is absent
+- **WHEN** the menu `main` has not been created
+- **THEN** the pages are displayed without an error and without a menu

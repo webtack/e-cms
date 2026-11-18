@@ -2,46 +2,46 @@
 
 ## Purpose
 
-Дає адміністратору змогу входити в систему та виходити з неї, а також гарантує, що розділ `/admin` доступний лише автентифікованим користувачам з підтвердженою електронною поштою.
+Lets the administrator log in and out, and guarantees that the `/admin` section is available only to authenticated users with a confirmed email address.
 
 ## ADDED Requirements
 
-### Requirement: Вхід за email і паролем
-Система SHALL надавати сторінку входу за адресою `/login`, яка автентифікує користувача за email і паролем та після успіху перенаправляє його на `/admin/dashboard` (або на запитану раніше адресу).
+### Requirement: Login with email and password
+The system SHALL provide a login page at `/login` that authenticates the user by email and password and, after success, redirects them to `/admin/dashboard` (or to the address requested earlier).
 
-#### Scenario: Успішний вхід
-- **WHEN** гість подає на `/login` правильні email і пароль підтвердженого користувача
-- **THEN** сесію створено, і користувача перенаправлено на `/admin/dashboard`
+#### Scenario: Successful login
+- **WHEN** a guest submits the correct email and password of a confirmed user to `/login`
+- **THEN** a session is created, and the user is redirected to `/admin/dashboard`
 
-#### Scenario: Неправильні облікові дані
-- **WHEN** гість подає неправильний пароль
-- **THEN** він залишається на сторінці входу і бачить повідомлення про помилку біля поля, а сесію не створено
+#### Scenario: Wrong credentials
+- **WHEN** a guest submits a wrong password
+- **THEN** they stay on the login page and see an error message next to the field, and no session is created
 
-#### Scenario: Автентифікований користувач на сторінці входу
-- **WHEN** уже автентифікований користувач відкриває `/login`
-- **THEN** його перенаправлено на `/admin/dashboard`
+#### Scenario: Authenticated user on the login page
+- **WHEN** an already authenticated user opens `/login`
+- **THEN** they are redirected to `/admin/dashboard`
 
-### Requirement: Вихід із системи
-Система SHALL дозволяти автентифікованому користувачеві завершити сесію POST-запитом на `/logout` і SHALL після цього перенаправляти на сторінку входу.
+### Requirement: Logout
+The system SHALL let an authenticated user end the session with a POST request to `/logout` and SHALL then redirect to the login page.
 
-#### Scenario: Вихід
-- **WHEN** автентифікований користувач виконує дію виходу з меню користувача
-- **THEN** сесію знищено, а наступна спроба відкрити `/admin/dashboard` перенаправляє на `/login`
+#### Scenario: Logout
+- **WHEN** an authenticated user runs the logout action from the user menu
+- **THEN** the session is destroyed, and the next attempt to open `/admin/dashboard` redirects to `/login`
 
-### Requirement: Захист розділу адмінки
-Усі маршрути під префіксом `/admin` SHALL бути доступні лише автентифікованим користувачам з підтвердженим email.
+### Requirement: Protection of the admin section
+All routes under the `/admin` prefix SHALL be available only to authenticated users with a confirmed email.
 
-#### Scenario: Гість відкриває адмінку
-- **WHEN** неавтентифікований відвідувач відкриває `/admin/dashboard`
-- **THEN** його перенаправлено на `/login`, а вміст адмінки не повертається
+#### Scenario: Guest opens the admin
+- **WHEN** an unauthenticated visitor opens `/admin/dashboard`
+- **THEN** they are redirected to `/login`, and the admin content is not returned
 
-#### Scenario: Непідтверджений email
-- **WHEN** автентифікований користувач без підтвердженого email відкриває `/admin/dashboard`
-- **THEN** доступ відхилено, вміст адмінки не повертається
+#### Scenario: Unconfirmed email
+- **WHEN** an authenticated user without a confirmed email opens `/admin/dashboard`
+- **THEN** access is denied, and the admin content is not returned
 
-### Requirement: Початковий адміністратор
-Після виконання сідерів система SHALL містити принаймні одного користувача з підтвердженим email, під яким можна увійти в адмінку.
+### Requirement: Initial administrator
+After the seeders run, the system SHALL contain at least one user with a confirmed email, with which one can log in to the admin.
 
-#### Scenario: Вхід під початковим користувачем
-- **WHEN** виконано міграції та сідери, і розробник входить з обліковими даними початкового користувача
-- **THEN** вхід успішний і відкривається `/admin/dashboard`
+#### Scenario: Login as the initial user
+- **WHEN** the migrations and seeders have been run, and the developer logs in with the credentials of the initial user
+- **THEN** the login succeeds, and `/admin/dashboard` opens

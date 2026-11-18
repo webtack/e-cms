@@ -1,20 +1,20 @@
 ## MODIFIED Requirements
 
 ### Requirement: Меню дій рядка поля
-Кожен рядок таблиці полів SHALL мати групу кнопок: основну кнопку «Редагувати» і поруч кнопку меню «⋮». «Редагувати» SHALL відкривати форму редагування цього поля. Меню «⋮» SHALL мати пункти «Редагувати» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено). Для системного поля пункт «Видалити» SHALL бути неактивним; для поля, що має значення, він лишається активним, але діалог не дає підтвердити видалення (див. «Видалення поля»). Основна кнопка «Редагувати» SHALL бути активною для будь-якого поля, зокрема системного.
+Each row of the fields table SHALL have a group of buttons: the main button «Редагувати» and next to it the menu button «⋮». «Редагувати» SHALL open the edit form of this field. The menu «⋮» SHALL have the items «Редагувати» and «Видалити» (in this order; «Видалити» is visually highlighted as a destructive action and separated). For a system field the item «Видалити» SHALL be inactive; for a field that has values it stays active, but the dialog does not allow confirming the deletion (see "Deleting a field"). The main button «Редагувати» SHALL be active for any field, including a system one.
 
-#### Scenario: Склад групи
-- **WHEN** користувач бачить рядок звичайного поля
-- **THEN** у ньому видно активну кнопку «Редагувати» та поруч кнопку меню «⋮» з доступною назвою
+#### Scenario: Composition of the group
+- **WHEN** the user sees the row of a regular field
+- **THEN** the active button «Редагувати» is visible in it, and next to it the menu button «⋮» with an accessible name
 
-#### Scenario: Редагувати з основної кнопки
-- **WHEN** користувач натискає «Редагувати» у рядку поля `summary` типу `news`
-- **THEN** відкривається `/admin/content-types/news/fields/summary/edit`
+#### Scenario: Edit from the main button
+- **WHEN** the user presses «Редагувати» in the row of the field `summary` of the type `news`
+- **THEN** `/admin/content-types/news/fields/summary/edit` opens
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку звичайного поля
-- **THEN** він бачить активні пункти «Редагувати» й «Видалити»
+#### Scenario: Composition of the menu
+- **WHEN** the user opens the menu «⋮» in the row of a regular field
+- **THEN** they see the active items «Редагувати» and «Видалити»
 
-#### Scenario: Системне поле
-- **WHEN** користувач бачить рядок поля `title` і відкриває його меню «⋮»
-- **THEN** кнопка «Редагувати» активна, у меню пункт «Видалити» неактивний, а «Редагувати» активний
+#### Scenario: System field
+- **WHEN** the user sees the row of the field `title` and opens its menu «⋮»
+- **THEN** the button «Редагувати» is active, in the menu the item «Видалити» is inactive, and «Редагувати» is active

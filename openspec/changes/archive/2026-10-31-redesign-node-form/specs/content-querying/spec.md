@@ -1,24 +1,24 @@
 ## ADDED Requirements
 
 ### Requirement: Видимість записів для публічної вибірки
-Вибірка SHALL мати режим «лише видимі», у якому вона повертає тільки записи з `is_active = true` і `published_at` не пізніше за поточний момент (включно). Режим SHALL застосовуватися до списку, лічильника загальної кількості й пошуку за slug (для публічного споживача), SHALL поєднуватися з фільтрами, пошуком і сортуванням та SHALL бути вимкненим за замовчуванням, щоб адмінка бачила всі записи. Вимкнений запис SHALL бути невидимим незалежно від `published_at`; запис із `published_at` у майбутньому SHALL бути невидимим до настання цього моменту.
+The selection SHALL have a mode «only visible», in which it returns only the records with `is_active = true` and `published_at` not later than the current moment (inclusive). The mode SHALL apply to the list, to the counter of the total number, and to the search by slug (for the public consumer), SHALL combine with filters, search and sorting, and SHALL be disabled by default, so that the admin sees all records. A disabled record SHALL be invisible regardless of `published_at`; a record with `published_at` in the future SHALL be invisible until this moment arrives.
 
-#### Scenario: Опублікований запис
-- **WHEN** запит у режимі «лише видимі» і запис має `is_active = true` та `published_at` у минулому
-- **THEN** запис входить до результату
+#### Scenario: Published record
+- **WHEN** a request in the mode «only visible» and the record has `is_active = true` and `published_at` in the past
+- **THEN** the record is included in the result
 
-#### Scenario: Відкладена публікація
-- **WHEN** запит у режимі «лише видимі» і запис має `published_at` у майбутньому
-- **THEN** запис не входить до результату й не враховується в загальній кількості
+#### Scenario: Deferred publication
+- **WHEN** a request in the mode «only visible» and the record has `published_at` in the future
+- **THEN** the record is not included in the result and is not counted in the total number
 
-#### Scenario: Вимкнений запис
-- **WHEN** запит у режимі «лише видимі» і запис має `is_active = false` та `published_at` у минулому
-- **THEN** запис не входить до результату
+#### Scenario: Disabled record
+- **WHEN** a request in the mode «only visible» and the record has `is_active = false` and `published_at` in the past
+- **THEN** the record is not included in the result
 
-#### Scenario: Адмінка бачить усе
-- **WHEN** вибірка виконується без режиму «лише видимі»
-- **THEN** повертаються записи в будь-якому стані
+#### Scenario: The admin sees everything
+- **WHEN** the selection is executed without the mode «only visible»
+- **THEN** records in any state are returned
 
-#### Scenario: Пошук за slug
-- **WHEN** публічний споживач шукає за slug вимкнений чи ще не опублікований запис
-- **THEN** повідомляється, що запис не знайдено
+#### Scenario: Search by slug
+- **WHEN** a public consumer searches by slug for a disabled or not yet published record
+- **THEN** it is reported that the record was not found

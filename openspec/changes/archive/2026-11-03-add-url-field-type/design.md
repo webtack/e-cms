@@ -2,31 +2,31 @@
 
 ## Context
 
-Складені значення вже є: `ComposedValue` (`split` / `compose`) пише скаляр у `value`, а решту в JSON `options` того ж рядка (`YoutubeType` — перше використання). Тип `url` використовує цей механізм без змін: `table()` повертає `content_values_string`, `options` = `{"title": "…"}` або `NULL`. Опис компонентів: `docs/content-values.md` (складені значення), `docs/admin-content-nodes.md` (віджети полів), `docs/admin-content-fields.md` (типи й `settings`).
+The composite values already exist: `ComposedValue` (`split` / `compose`) writes the scalar into `value`, and the rest into the JSON `options` of the same row (`YoutubeType` — the first use). The type `url` uses this mechanism without changes: `table()` returns `content_values_string`, `options` = `{"title": "…"}` or `NULL`. Description of the components: `docs/content-values.md` (composite values), `docs/admin-content-nodes.md` (the widgets of the fields), `docs/admin-content-fields.md` (the types and `settings`).
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Один клас `UrlType` + рядок у реєстрі; жодних міграцій.
-- Безпечне посилання: лише `http(s)` та відносні форми.
-- Простий віджет із двох `Input` в один рядок.
+- One class `UrlType` + a row in the registry; no migrations.
+- A safe link: only `http(s)` and the relative forms.
+- A simple widget from two `Input`s in one row.
 
 **Non-Goals:**
-- Перевірка доступності посилання, отримання title зі сторінки.
-- Налаштування типу (дозволені схеми, лише внутрішні), `target`/`rel`.
-- Публічний вивід посилання (його показує фронтенд сайту).
+- Checking the availability of the link, getting the title from the page.
+- The settings of the type (the allowed schemes, only internal ones), `target`/`rel`.
+- The public output of the link (it is shown by the frontend of the site).
 
 ## Decisions
 
-- **Розбір посилання** — публічний статичний `UrlType::isValid(string): bool` (за зразком `YoutubeType::parse`). Правило: після `trim` рядок не порожній, без пробільних/керівних символів (`/[\s\x00-\x1F\x7F]/`), і або (а) починається з `/` (але не `//`), `./`, `../`, `#`, `?`; або (б) `parse_url` дає схему `http`/`https` та непорожній `host`; або (в) починається з `mailto:` чи `tel:` і має непорожню частину після двокрапки. Альтернатива — `FILTER_VALIDATE_URL`/Laravel `url`: відхиляє відносні й дає несподівані винятки; відкинуто. Бекслеш (`/\evil.com` браузери читають як `//evil.com`) відхиляється разом із `//`.
-- **Складене значення**: `split` → `[trim(url), title !== '' ? ['title' => title] : null]`; `compose` → `['url' => scalar, 'title' => options['title'] ?? null]`; `isBlank` — за `url`, як у `YoutubeType`. Вхід може бути й голим рядком (як у `youtube`).
-- **Фільтри**: `eq`, `in`, `contains` (як `string`), пошук `searchable()` — `false` (значення складене, пошук списку шукає за текстовими полями; узгодити з реалізацією `searchable` у `StringType`).
-- **Форма**: стан — об'єкт `{url, title}` (`UrlValue`, `emptyUrl()` у `types.ts`), за аналогією з `YoutubeValue`; `NodeFieldItem` розширюється; `ContentNodeForm.initialValue` і `NodeFieldList` (множинне поле, звичайна кнопка «Додати елемент») обробляють `url`. Віджет — два `Input` у `grid grid-cols-2` (на вузькому екрані в стовпчик).
-- **Таблиця**: `ContentNodeController::text()` — `url` віддається клієнту об'єктом `{url, title}` (як `image` / `file`), а `NodeCell` на сторінці списку малює `<a target="_blank" rel="noopener noreferrer">` з текстом `title` або `url`. Тип колонки для таблиці — `text`. Відносне посилання в новій вкладці розв'язується відносно адмінки (той самий хост), тому веде на сторінку сайту за тим самим шляхом.
-- **Сортування немає**: `NodeListSettings` (`sortable`) додає `url` до виключень разом із `youtube` і `term`; значення складене й сортувати за ним не потрібно.
+- **Parsing of a link** — a public static `UrlType::isValid(string): bool` (by the pattern of `YoutubeType::parse`). The rule: after `trim` the string is not empty, without whitespace/control characters (`/[\s\x00-\x1F\x7F]/`), and either (a) starts with `/` (but not `//`), `./`, `../`, `#`, `?`; or (b) `parse_url` gives the scheme `http`/`https` and a non-empty `host`; or (c) starts with `mailto:` or `tel:` and has a non-empty part after the colon. Alternative — `FILTER_VALIDATE_URL`/Laravel `url`: it rejects the relative ones and gives unexpected exceptions; discarded. The backslash (`/\evil.com`, which browsers read as `//evil.com`) is rejected together with `//`.
+- **Composite value**: `split` → `[trim(url), title !== '' ? ['title' => title] : null]`; `compose` → `['url' => scalar, 'title' => options['title'] ?? null]`; `isBlank` — by `url`, as in `YoutubeType`. The input may also be a bare string (as in `youtube`).
+- **Filters**: `eq`, `in`, `contains` (as `string`), the search `searchable()` — `false` (the value is composite, the search of the list looks by text fields; to be aligned with the implementation of `searchable` in `StringType`).
+- **Form**: the state is an object `{url, title}` (`UrlValue`, `emptyUrl()` in `types.ts`), by analogy with `YoutubeValue`; `NodeFieldItem` is extended; `ContentNodeForm.initialValue` and `NodeFieldList` (a multiple field, the usual button «Додати елемент» — "Add element") handle `url`. The widget — two `Input`s in `grid grid-cols-2` (in a column on a narrow screen).
+- **Table**: `ContentNodeController::text()` — `url` is given to the client as an object `{url, title}` (as `image` / `file`), and `NodeCell` on the page of the list draws `<a target="_blank" rel="noopener noreferrer">` with the text `title` or `url`. The column type for the table is `text`. A relative link in a new tab is resolved relative to the admin (the same host), so it leads to the page of the site by the same path.
+- **No sorting**: `NodeListSettings` (`sortable`) adds `url` to the exclusions together with `youtube` and `term`; the value is composite and there is no need to sort by it.
 
 ## Risks / Trade-offs
 
-- [Переклади складених значень не перевірені для `url`] → у тестах перевірити запис/читання перекладного й множинного поля; поведінка за загальними правилами (на відміну від `youtube`, заборони перекладів немає).
-- [Відносне посилання розв'язується відносно сторінки, де його покажуть] → зберігаємо як введено; відповідальність фронтенду сайту.
-- [Нова гілка в `NodeFieldInput` / `initialValue` / `NodeFieldList` розростає код `youtube`-спецкейсів] → тримати `url` окремим невеликим компонентом `UrlField.tsx`.
+- [The translations of the composite values are not verified for `url`] → in the tests check writing/reading of a translatable and a multiple field; the behaviour follows the general rules (unlike `youtube`, there is no prohibition of translations).
+- [A relative link is resolved relative to the page where it is shown] → we store it as entered; the responsibility lies with the frontend of the site.
+- [A new branch in `NodeFieldInput` / `initialValue` / `NodeFieldList` grows the code of the `youtube` special cases] → keep `url` as a separate small component `UrlField.tsx`.

@@ -1,31 +1,31 @@
 ## ADDED Requirements
 
 ### Requirement: Секція «Публічне відображення» у формі типу
-Сторінка налаштувань типу SHALL містити секцію «Публічне відображення» для всіх видів. Для `page` і `block` вона містить лише вибір полів сторінки; для `content` — також поля картки, сортування (поле + напрямок), кількість записів на сторінці й перемикач пагінатора. Для вибору пропонуються лише додані поля (`is_system = false`); `title`, мета-поля й службові атрибути не пропонуються, бо завжди доступні шаблону. Секція SHALL відображати збережений стан із значеннями за замовчуванням і зберігатись разом із формою, оновлюючи лише ключ `public` налаштувань.
+The settings page of a type SHALL contain the section «Публічне відображення» for all kinds. For `page` and `block` it contains only the choice of the fields of the page; for `content` — also the fields of the card, the sorting (field + direction), the number of records per page and the switch of the paginator. For the choice only the added fields (`is_system = false`) are offered; `title`, the meta fields and the service attributes are not offered, because they are always available to the template. The section SHALL show the saved state with the default values and SHALL be saved together with the form, updating only the key `public` of the settings.
 
-#### Scenario: Значення за замовчуванням
-- **WHEN** відкрито форму типу `content` без публічних налаштувань
-- **THEN** перемикач «Усі додані поля» для сторінки ввімкнений, картка без доданих полів, сортування «Дата публікації» за спаданням, кількість «0» (усі)
+#### Scenario: Default values
+- **WHEN** the form of a type `content` without public settings is opened
+- **THEN** the switch «Усі додані поля» for the page is enabled, the card has no added fields, the sorting is «Дата публікації» descending, the number is «0» (all)
 
-#### Scenario: Явний вибір полів сторінки
-- **WHEN** адміністратор вимикає «Усі додані поля», позначає `price` і зберігає
-- **THEN** після повторного відкриття позначено лише `price`, а нове поле типу не з'являється серед позначених
+#### Scenario: Explicit choice of the page fields
+- **WHEN** the administrator switches off «Усі додані поля», marks `price` and saves
+- **THEN** after reopening only `price` is marked, and a new field of the type does not appear among the marked ones
 
-#### Scenario: Повернення до «усіх»
-- **WHEN** адміністратор вмикає «Усі додані поля» і зберігає
-- **THEN** ключ `page_fields` не зберігається, нове поле автоматично входить до сторінки
+#### Scenario: Return to «all»
+- **WHEN** the administrator switches on «Усі додані поля» and saves
+- **THEN** the key `page_fields` is not stored, and a new field automatically enters the page
 
-#### Scenario: Інші ключі не затираються
-- **WHEN** форма зберігається із зміненими публічними налаштуваннями
-- **THEN** `settings.list` і інші ключі `settings` лишаються без змін
+#### Scenario: Other keys are not erased
+- **WHEN** the form is saved with changed public settings
+- **THEN** `settings.list` and the other keys of `settings` remain unchanged
 
 ### Requirement: Кількість записів і пагінатор у формі
-Поле кількості записів SHALL приймати ціле ≥ 0 (за замовчуванням `0` — усі); при `0` перемикач пагінатора SHALL бути вимкнений і не впливати на результат. Секція SHALL показувати помилки валідації біля відповідних полів.
+The field of the number of records SHALL accept an integer ≥ 0 (by default `0` — all); with `0` the switch of the paginator SHALL be disabled and not affect the result. The section SHALL show validation errors next to the corresponding fields.
 
-#### Scenario: Пагінатор при «усі»
-- **WHEN** у полі кількості записів стоїть `0`
-- **THEN** перемикач «Пагінатор» вимкнений
+#### Scenario: Paginator with «all»
+- **WHEN** the field of the number of records is `0`
+- **THEN** the switch «Пагінатор» is disabled
 
-#### Scenario: Некоректна кількість
-- **WHEN** введено від'ємне число або більше за дозволену межу й натиснуто «Зберегти»
-- **THEN** біля поля показано помилку, налаштування не зберігаються
+#### Scenario: Incorrect number
+- **WHEN** a negative number or a number above the allowed limit is entered and «Зберегти» is pressed
+- **THEN** an error is shown next to the field, the settings are not saved

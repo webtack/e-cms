@@ -1,28 +1,28 @@
 ## Why
 
-У таблиці типів контенту колонка «Назва» росте разом із найдовшим описом (комірки таблиці не переносять текст), і решта колонок виштовхується за межі екрана. Таблиця даних не має способу обмежити ширину колонки, тож потрібен загальний механізм, а не одноразове виправлення сторінки.
+In the table of content types the "Name" column grows together with the longest description (table cells do not wrap text), and the remaining columns are pushed off the screen. The data table has no way to limit the width of a column, so a general mechanism is needed, not a one-off fix of the page.
 
 ## What Changes
 
-- До опису колонки `Column` додається необов'язкова властивість `width` (CSS-довжина, наприклад `24rem`): вона записується як `max-width` заголовка колонки (`th`) і межа вмісту комірок тіла; довший текст комірок обрізається з трикрапкою (`truncate`) в один рядок. Без властивості колонки поводяться як раніше.
-- Колонка «Назва» таблиці типів контенту отримує `width`; і назва, і опис під нею (замість обрізання до двох рядків) обрізаються в один рядок, повний текст лишається в підказці `title`.
+- An optional property `width` (a CSS length, for example `24rem`) is added to the column description `Column`: it is written as `max-width` of the column header (`th`) and as the limit of the content of the body cells; longer cell text is truncated with an ellipsis (`truncate`) to one line. Without the property the columns behave as before.
+- The "Name" column of the content types table gets a `width`; both the name and the description under it (instead of truncation to two lines) are truncated to one line, and the full text remains in the `title` hint.
 
-Поза межами: зміна ширини колонок користувачем, мінімальна й фіксована ширина (`minWidth`), перенесення тексту, серверні колонки (`TableColumn`) — ширина стосується лише відображення.
+Out of scope: user-driven resizing of columns, minimum and fixed width (`minWidth`), text wrapping, server-side columns (`TableColumn`) — the width concerns only the display.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `admin-data-table`: нова вимога про обмеження ширини колонки через `width`.
-- `admin-content-types`: нова вимога про обмеження ширини колонки назви з обрізанням опису в один рядок.
+- `admin-data-table`: a new requirement on limiting the width of a column via `width`.
+- `admin-content-types`: a new requirement on limiting the width of the name column with truncation of the description to one line.
 
 ## Impact
 
-- Код: `Components/Admin/DataTable/types.ts` (`Column.width`), `DataTableRow.tsx` (обгортка вмісту з обрізанням), `DataTable.tsx` (`style.maxWidth` на `TableHead` колонки); `Pages/Admin/ContentTypes/Index.tsx` (`width` для `name`, `truncate` замість `line-clamp-2`).
-- Тести: e2e `admin-data-table` і `admin-content-types` (ширина колонки, відсутність горизонтального розширення).
-- Docs: `docs/admin-data-table.md` (розділ «Опис колонок»), `docs/admin-content-types.md` (колонка назви).
-- Залежність: зміна накладається на `add-content-type-form`, яка вводить опис під назвою в `Index.tsx`; застосовувати після неї (або після її архівації).
+- Code: `Components/Admin/DataTable/types.ts` (`Column.width`), `DataTableRow.tsx` (a content wrapper with truncation), `DataTable.tsx` (`style.maxWidth` on the column's `TableHead`); `Pages/Admin/ContentTypes/Index.tsx` (`width` for `name`, `truncate` instead of `line-clamp-2`).
+- Tests: e2e `admin-data-table` and `admin-content-types` (column width, no horizontal expansion).
+- Docs: `docs/admin-data-table.md` (the section "Column description"), `docs/admin-content-types.md` (the name column).
+- Dependency: the change overlaps with `add-content-type-form`, which introduces the description under the name in `Index.tsx`; apply it after that one (or after its archiving).

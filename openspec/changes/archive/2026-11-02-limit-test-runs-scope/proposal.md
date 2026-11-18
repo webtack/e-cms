@@ -2,29 +2,29 @@
 
 ## Why
 
-Правила розробки вже обмежують запуск e2e (лише спек змінної області), але для PHP-тестів такого правила немає: після кожної правки є спокуса запускати весь `php artisan test`, хоча зміна зачіпає малу частину коду. Це сповільнює роботу так само, як повний прогін e2e.
+The development rules already limit the e2e runs (only the spec of the changed area), but for PHP tests there is no such rule: after each edit there is a temptation to run the whole `php artisan test`, although the change touches a small part of the code. This slows the work down just as much as a full e2e run.
 
 ## What Changes
 
-- Нове правило в `CLAUDE.md`: PHP-тести (PHPUnit/Feature/Unit) не запускаються всі, якщо в цьому немає необхідності; запускаються лише тести змінної області (`--filter`, шлях до файла/каталогу). Правило для e2e (вибірковий запуск) лишається чинним і явно названо поряд.
-- Те саме правило додається в `openspec/config.yaml` (`rules.tasks`), щоб завдання майбутніх змін не містили повного прогону PHP-тестів без потреби.
-- У `docs/e2e-testing.md` з'являється розділ про вибірковий запуск PHP-тестів (коли достатньо вибіркового запуску, коли потрібен повний, формат звіту), поряд з існуючим розділом «Коли запускати e2e».
-- Дельта-специфікація `e2e-testing`: нова вимога про вибірковий запуск PHP-тестів у правилах розробки.
+- A new rule in `CLAUDE.md`: PHP tests (PHPUnit/Feature/Unit) are not run all together unless there is a need; only the tests of the changed area are run (`--filter`, a path to a file or a directory). The rule for e2e (a selective run) remains in force and is explicitly named next to it.
+- The same rule is added to `openspec/config.yaml` (`rules.tasks`), so that the tasks of future changes do not contain a full PHP test run without need.
+- In `docs/e2e-testing.md` a section appears about the selective run of PHP tests (when a selective run is enough, when a full one is needed, the report format), next to the existing section «Коли запускати e2e» ("When to run e2e").
+- Delta specification `e2e-testing`: a new requirement about the selective run of PHP tests in the development rules.
 
-Припущення (записано, бо код цього не визначає): повний прогін PHP-тестів виправданий лише для змін, що зачіпають усе застосування: міграції та схема БД, `tests/TestCase.php` і спільні тестові хелпери, `phpunit.xml`, залежності `composer.json`/`composer.lock`, глобальні middleware, провайдери, конфігурація, автентифікація. Про вибір тестів перед запуском не питати (як і для e2e).
+Assumption (recorded, because the code does not define it): a full run of PHP tests is justified only for changes that touch the whole application: migrations and the DB schema, `tests/TestCase.php` and shared test helpers, `phpunit.xml`, the dependencies `composer.json`/`composer.lock`, global middleware, providers, configuration, authentication. The choice of tests is not to be asked about before the run (as for e2e).
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `e2e-testing`: додається вимога про вибірковий запуск PHP-тестів у правилах розробки (існуюча вимога «Вибір e2e-спеків для змін спільного коду» не змінюється).
+- `e2e-testing`: a requirement about the selective run of PHP tests in the development rules is added (the existing requirement «Вибір e2e-спеків для змін спільного коду» — "Choice of e2e specs for changes of shared code" — does not change).
 
 ## Impact
 
-- Правила: `CLAUDE.md`, `openspec/config.yaml`.
-- Документація: оновлюється `docs/e2e-testing.md` (новий розділ про PHP-тести); `docs/README.md` не змінюється (нових файлів немає).
-- Код застосунку, тести та `playwright.config.js` не змінюються.
+- Rules: `CLAUDE.md`, `openspec/config.yaml`.
+- Documentation: `docs/e2e-testing.md` is updated (a new section about PHP tests); `docs/README.md` does not change (no new files).
+- The application code, the tests and `playwright.config.js` do not change.

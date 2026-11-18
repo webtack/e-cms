@@ -1,20 +1,20 @@
 ## ADDED Requirements
 
 ### Requirement: Налаштування полів-посилань
-Форма поля SHALL для типу `type_ref` показувати обов'язковий вибір виду типів (`content`, `page`, `block`), а для типу `node_ref` — обов'язковий вибір типу запису (пошук серед усіх типів із назвою та ключем). Після появи значень у полі вибір SHALL бути заблокований з поясненням. Помилки сервера SHALL показуватися біля відповідного вибору. Інших налаштувань ці типи НЕ SHALL мати.
+The form of the field SHALL show, for the type `type_ref`, a required choice of the kind of types (`content`, `page`, `block`), and for the type `node_ref` — a required choice of the type of records (a search among all types by the name and the key). After the values appear in the field, the choice SHALL be blocked with an explanation. The errors of the server SHALL be shown next to the corresponding choice. These types SHALL NOT have other settings.
 
-#### Scenario: Створення поля type_ref
-- **WHEN** адмін обирає тип `type_ref`, вид `block` і зберігає
-- **THEN** поле створено з `settings.kind = block`
+#### Scenario: Creating a field type_ref
+- **WHEN** the admin chooses the type `type_ref`, the kind `block` and saves
+- **THEN** the field is created with `settings.kind = block`
 
-#### Scenario: Створення поля node_ref
-- **WHEN** адмін обирає тип `node_ref`, тип запису `article` і зберігає
-- **THEN** поле створено з `settings.content_type = article`
+#### Scenario: Creating a field node_ref
+- **WHEN** the admin chooses the type `node_ref`, the type of records `article` and saves
+- **THEN** the field is created with `settings.content_type = article`
 
-#### Scenario: Обов'язковий вибір
-- **WHEN** адмін зберігає поле `type_ref` / `node_ref` без вибору
-- **THEN** показано помилку біля вибору
+#### Scenario: Required choice
+- **WHEN** the admin saves a field `type_ref` / `node_ref` without a choice
+- **THEN** an error is shown next to the choice
 
-#### Scenario: Поле зі значеннями
-- **WHEN** адмін відкриває поле, що вже має значення
-- **THEN** вибір виду / типу заблокований із поясненням
+#### Scenario: Field with values
+- **WHEN** the admin opens a field that already has values
+- **THEN** the choice of the kind / the type is blocked with an explanation

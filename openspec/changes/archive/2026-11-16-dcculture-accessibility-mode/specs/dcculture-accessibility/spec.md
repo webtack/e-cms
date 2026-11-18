@@ -2,12 +2,12 @@
 
 ## Purpose
 
-The accessibility ("version for visually impaired") panel of the public theme `dcculture`: a dropdown in the top bar that lets a visitor enlarge the text and switch to a grayscale, high-contrast or negative-contrast view, remembered in the visitor's browser.
+The accessibility ("version for visually impaired" — «Версія для слабозорих») panel of the public theme `dcculture`: a dropdown in the top bar that lets a visitor enlarge the text and switch to a grayscale, high-contrast or negative-contrast view, remembered in the visitor's browser.
 
 ## ADDED Requirements
 
 ### Requirement: Accessibility dropdown in the top bar
-The top bar of every public page SHALL show an accessibility button that opens a dropdown titled "Для людей з порушенням зору" (in the active interface language) with six items in this order: increase text size, decrease text size, grayscale, high contrast, negative contrast, reset. On screens 768 px wide and wider the button SHALL show the text "Версія для слабозорих" (in the active interface language) next to its icon; on narrower screens it SHALL show only the icon and keep the same accessible name. The button SHALL expose whether the dropdown is open to assistive technology. Activating an item SHALL NOT navigate or scroll the page and SHALL NOT close the dropdown, so several items can be used in a row. The dropdown SHALL close with Escape (returning focus to the button), with a click outside it and when focus leaves it. The dropdown SHALL stay inside the viewport on a 360 px wide screen. The text, labels and the title SHALL be available in Ukrainian and in English.
+The top bar of every public page SHALL show an accessibility button that opens a dropdown titled "Для людей з порушенням зору" ("For people with visual impairment") (in the active interface language) with six items in this order: increase text size, decrease text size, grayscale, high contrast, negative contrast, reset. On screens 768 px wide and wider the button SHALL show the text "Версія для слабозорих" ("Version for the visually impaired") next to its icon; on narrower screens it SHALL show only the icon and keep the same accessible name. The button SHALL expose whether the dropdown is open to assistive technology. Activating an item SHALL NOT navigate or scroll the page and SHALL NOT close the dropdown, so several items can be used in a row. The dropdown SHALL close with Escape (returning focus to the button), with a click outside it and when focus leaves it. The dropdown SHALL stay inside the viewport on a 360 px wide screen. The text, labels and the title SHALL be available in Ukrainian and in English.
 
 #### Scenario: Button text on a desktop
 - **WHEN** a visitor opens any public page on a 1440 px wide screen
@@ -22,7 +22,7 @@ The top bar of every public page SHALL show an accessibility button that opens a
 - **THEN** the dropdown with the six items is shown and the button reports that it is expanded
 
 #### Scenario: Several items in a row
-- **WHEN** a visitor activates "Збільшити розмір тексту" in the open dropdown
+- **WHEN** a visitor activates "Збільшити розмір тексту" ("Increase text size") in the open dropdown
 - **THEN** the text becomes larger, the page does not scroll or navigate, and the dropdown stays open
 
 #### Scenario: Closing with Escape
@@ -38,7 +38,7 @@ The top bar of every public page SHALL show an accessibility button that opens a
 - **THEN** no part of it is outside the viewport and no horizontal page scrolling appears
 
 ### Requirement: Text size steps
-The visitor SHALL be able to change the size of all text of the public page in four steps, 16 px, 18 px, 20 px and 22 px, where 16 px is the default. "Збільшити розмір тексту" SHALL move one step up and "Зменшити розмір тексту" one step down. At the smallest step the decrease item SHALL be disabled and at the largest step the increase item SHALL be disabled; a disabled item SHALL be marked as disabled for assistive technology and SHALL NOT change the size. Every font size of the theme SHALL scale with the step, so that all text, including the small text of the footer, cards and the menu, changes size proportionally; at the default step the page SHALL look as before this capability. The main navigation SHALL keep fitting its row (with the "Ще" item) after the size changes, with no horizontal page scrolling.
+The visitor SHALL be able to change the size of all text of the public page in four steps, 16 px, 18 px, 20 px and 22 px, where 16 px is the default. "Збільшити розмір тексту" ("Increase text size") SHALL move one step up and "Зменшити розмір тексту" ("Decrease text size") one step down. At the smallest step the decrease item SHALL be disabled and at the largest step the increase item SHALL be disabled; a disabled item SHALL be marked as disabled for assistive technology and SHALL NOT change the size. Every font size of the theme SHALL scale with the step, so that all text, including the small text of the footer, cards and the menu, changes size proportionally; at the default step the page SHALL look as before this capability. The main navigation SHALL keep fitting its row (with the "Ще" ("More") item) after the size changes, with no horizontal page scrolling.
 
 #### Scenario: Increase by one step
 - **WHEN** the text size is at the default step and the visitor activates "Збільшити розмір тексту"
@@ -65,7 +65,7 @@ The visitor SHALL be able to change the size of all text of the public page in f
 - **THEN** the page looks as it did before this capability
 
 ### Requirement: Colour modes
-The visitor SHALL be able to choose one of three colour modes: grayscale ("Відтінки сірого"), high contrast ("Високий контраст") and negative contrast ("Негативний контраст"). Only one mode SHALL be active at a time; choosing another replaces the active one, and the item of the active mode SHALL be disabled and marked as the current one. In every mode every image and every video poster of the page SHALL be shown in grayscale. Grayscale SHALL replace the brand colours with grays and keep the light page. High contrast SHALL show a dark page with light text and one blue accent colour. Negative contrast SHALL show a dark page with light text and one yellow accent colour. In the two contrast modes text and the background behind it SHALL have a contrast ratio of at least 7:1, and links, buttons, form fields and the focused element SHALL stay distinguishable. The decorative backgrounds of the theme (ornaments, patterns, the hero background) SHALL not bring colour into a mode and SHALL NOT make text hard to read. The mode SHALL apply to every public page of the theme.
+The visitor SHALL be able to choose one of three colour modes: grayscale ("Відтінки сірого" — "Shades of grey"), high contrast ("Високий контраст" — "High contrast") and negative contrast ("Негативний контраст" — "Negative contrast"). Only one mode SHALL be active at a time; choosing another replaces the active one, and the item of the active mode SHALL be disabled and marked as the current one. In every mode every image and every video poster of the page SHALL be shown in grayscale. Grayscale SHALL replace the brand colours with grays and keep the light page. High contrast SHALL show a dark page with light text and one blue accent colour. Negative contrast SHALL show a dark page with light text and one yellow accent colour. In the two contrast modes text and the background behind it SHALL have a contrast ratio of at least 7:1, and links, buttons, form fields and the focused element SHALL stay distinguishable. The decorative backgrounds of the theme (ornaments, patterns, the hero background) SHALL not bring colour into a mode and SHALL NOT make text hard to read. The mode SHALL apply to every public page of the theme.
 
 #### Scenario: Grayscale mode
 - **WHEN** the visitor activates "Відтінки сірого"
@@ -92,7 +92,7 @@ The visitor SHALL be able to choose one of three colour modes: grayscale ("Ві�
 - **THEN** both the larger text and the colour mode apply together
 
 ### Requirement: Reset
-The "Скинути" item SHALL remove the active colour mode and return the text size to the default step in one action, so the page looks as it does for a visitor who has never used the panel, and SHALL remove the stored choice. The dropdown SHALL stay open after it.
+The "Скинути" ("Reset") item SHALL remove the active colour mode and return the text size to the default step in one action, so the page looks as it does for a visitor who has never used the panel, and SHALL remove the stored choice. The dropdown SHALL stay open after it.
 
 #### Scenario: Reset restores the default view
 - **WHEN** the text size is 20 px, a colour mode is active and the visitor activates "Скинути"

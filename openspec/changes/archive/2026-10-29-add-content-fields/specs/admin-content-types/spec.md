@@ -2,17 +2,17 @@
 
 ## MODIFIED Requirements
 
-### Requirement: Меню дій рядка
-Кожен рядок SHALL мати меню «⋮» з пунктами «Редагувати», «Поля» і «Видалити» (у цьому порядку; «Видалити» візуально виділено як деструктивну дію й відокремлено від інших). «Редагувати» SHALL відкривати форму редагування цього типу, «Поля» — сторінку полів цього типу, «Видалити» — запускати видалення з підтвердженням.
+### Requirement: Row action menu
+Each row SHALL have a "⋮" menu with the items "Edit", "Fields" and "Delete" (in this order; "Delete" is visually highlighted as a destructive action and separated from the others). "Edit" SHALL open the edit form of this type, "Fields" — the fields page of this type, "Delete" — start the deletion with confirmation.
 
-#### Scenario: Склад меню
-- **WHEN** користувач відкриває меню «⋮» у рядку типу
-- **THEN** він бачить активні пункти «Редагувати», «Поля», «Видалити» з перекладеними підписами
+#### Scenario: Menu content
+- **WHEN** the user opens the "⋮" menu in a type row
+- **THEN** they see the active items "Edit", "Fields", "Delete" with translated labels
 
-#### Scenario: Редагувати
-- **WHEN** користувач обирає «Редагувати» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/edit`
+#### Scenario: Edit
+- **WHEN** the user chooses "Edit" in the row of the type with the key `news`
+- **THEN** `/admin/content-types/news/edit` opens
 
-#### Scenario: Пункти неактивні
-- **WHEN** користувач обирає «Поля» у рядку типу з ключем `news`
-- **THEN** відкривається `/admin/content-types/news/fields`
+#### Scenario: Items are inactive
+- **WHEN** the user chooses "Fields" in the row of the type with the key `news`
+- **THEN** `/admin/content-types/news/fields` opens

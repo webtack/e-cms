@@ -1,40 +1,40 @@
 ## Why
 
-Редактор `richtext` зараз не вміє вставляти зображення: редактор не має такої дії, а сервер викидає `img` під час санітизації. Щоб ілюструвати текст, користувач має вставляти зображення за сторонньою адресою, і такі картинки не потрапляють у медіатеку: їх не видно серед файлів, вони не мають лічильника використань і можуть зникнути разом з чужим сайтом. Поле `image` уже вміє завантажувати файл у сховище й вести зв'язки в `media_relations`; редактор має робити те саме.
+The `richtext` editor currently cannot insert images: the editor has no such action, and the server drops `img` during sanitization. To illustrate a text, the user has to insert an image from a third-party address, and such pictures do not get into the media library: they are not visible among the files, they have no usage counter, and they can disappear together with a foreign site. The field `image` already can upload a file to the storage and keep links in `media_relations`; the editor must do the same.
 
 ## What Changes
 
-- У панелі інструментів редактора `richtext` з'являється кнопка «Зображення»: вибір файлу, миттєве завантаження через `POST /admin/files` і вставка `<img>` у позицію курсора. Правила (тип, розмір) беруться з профілю `image`. Коли зображення в тексті виділене, та сама кнопка відкриває діалог параметрів замість вибору файлу; виділене зображення візуально підсвічується.
-- Завантаження за полем (`content_type` + `field_key`) приймає також поле типу `richtext`: профіль — `image`, налаштування поля файлових обмежень не мають.
-- Вставлене зображення можна налаштувати: ширина в пікселях (поле «Ширина», кнопка «Початковий розмір»), альтернативний текст `alt` і видимий підпис (`<figure><img><figcaption>`). Налаштування змінюються в діалозі, що відкривається подвійним кліком по зображенню (або кнопкою «Зображення» при виділеному зображенні).
-- У текст потрапляє відносна адреса без протоколу й домену: `/storage/{uuid}.{ext}` (а не `http://host/storage/...`).
-- Санітизатор HTML дозволяє `img` (атрибути `src`, `alt`) лише з адресою у цьому відносному вигляді, та `width` (ціле число пікселів у межах 1–4000); додатково дозволяються `figure` і `figcaption` для підпису; будь-яке інше зображення (зовнішнє, `data:`, з іншим шляхом) прибирається.
-- Значення `richtext` перевіряється: кожне зображення має посилатися на наявний файл профілю `image`.
-- Тип `richtext` починає відстежувати файли (`TracksFiles`): під час запису значення зв'язки власника (роль — ключ поля, мова — мова значення) синхронізуються з файлами, знайденими в `<img>`, у тій самій транзакції. Видалення зображення з тексту прибирає зв'язок, файл лишається в сховищі.
-- Підпис (текст `figcaption`) входить у видимий текст значення (пошук, `min`/`max`). Запис, що містить лише зображення (без тексту й фрейму), вважається непорожнім.
-- Зображення ніколи не виділяється саме (ні при відкритті форми, ні після оновлення значення): виділяє лише дія користувача (клік, вставка).
-- Виділене зображення вирівнюється наявними кнопками вирівнювання (ліворуч, по центру, праворуч); підпис завжди по центру саме під зображенням. Вирівнювання зберігається стандартним HTML без класів: `figure` має ширину зображення й вирівнюється полями (`<figure style="width: 500px; max-width: 100%; margin-left: auto; margin-right: auto; text-align: center"><img><figcaption>…</figcaption></figure>`; праворуч — лише `margin-left: auto`; ліворуч — без полів).
-- Вирівнювання зображення діє на саме зображення, а не лише на підпис (у редакторі `img` у `figure` вбудований, а не блоковий). Форма запису ноди ширша: `max-w-5xl` замість `max-w-2xl`.
-- Нове зображення вставляється з шириною 500 px за замовчуванням (`IMAGE_DEFAULT_WIDTH`); у діалозі її можна змінити, а «Початковий розмір» прибирає ширину (природний розмір). Уже вставлені зображення не змінюються.
-- Не входить: перетягування ручки зміни розміру, обтікання зображення, вибір файлу з медіатеки.
-- **BREAKING**: ні. Раніше збережені значення не змінюються; зовнішні `img`, що вже могли бути видалені санітизатором, не повертаються.
+- The toolbar of the `richtext` editor gets a button «Зображення»: choosing a file, an instant upload through `POST /admin/files`, and insertion of `<img>` at the cursor position. The rules (type, size) are taken from the profile `image`. When an image in the text is selected, the same button opens a dialog of the parameters instead of the file selection; the selected image is visually highlighted.
+- The upload by field (`content_type` + `field_key`) also accepts a field of the type `richtext`: the profile is `image`, the settings of the field have no file restrictions.
+- The inserted image can be configured: the width in pixels (the field «Ширина», the button «Початковий розмір»), the alternative text `alt`, and a visible caption (`<figure><img><figcaption>`). The settings are changed in a dialog that opens by a double click on the image (or by the button «Зображення» with the image selected).
+- The text gets a relative address without the protocol and the domain: `/storage/{uuid}.{ext}` (and not `http://host/storage/...`).
+- The HTML sanitizer allows `img` (the attributes `src`, `alt`) only with the address in this relative form, and `width` (an integer number of pixels within 1–4000); in addition `figure` and `figcaption` are allowed for the caption; any other image (external, `data:`, with another path) is removed.
+- The value of `richtext` is checked: each image must reference an existing file of the profile `image`.
+- The type `richtext` starts tracking files (`TracksFiles`): during a write the links of the owner (the role — the field key, the language — the language of the value) are synchronized with the files found in `<img>`, in the same transaction. Removing an image from the text removes its link, the file stays in the storage.
+- The caption (the text of `figcaption`) is included in the visible text of the value (search, `min`/`max`). A record that contains only an image (without text and without a frame) is considered non-empty.
+- An image is never selected by itself (neither when the form is opened, nor after the value is updated): only a user action (a click, insertion) selects it.
+- The selected image is aligned by the existing alignment buttons (left, centre, right); the caption is always centred right under the image. The alignment is stored in standard HTML without classes: `figure` has the width of the image and is aligned by margins (`<figure style="width: 500px; max-width: 100%; margin-left: auto; margin-right: auto; text-align: center"><img><figcaption>…</figcaption></figure>`; right — only `margin-left: auto`; left — no margins).
+- The alignment of the image applies to the image itself, not only to the caption (in the editor `img` inside `figure` is inline, not a block). The form of the record of a node is wider: `max-w-5xl` instead of `max-w-2xl`.
+- A newly inserted image is inserted with the width of 500 px by default (`IMAGE_DEFAULT_WIDTH`); in the dialog it can be changed, and «Початковий розмір» removes the width (the natural size). Images already inserted do not change.
+- Not included: dragging the resize handle, wrapping the image around text, choosing a file from the media library.
+- **BREAKING**: no. The previously saved values do not change; external `img` that might have already been removed by the sanitizer do not come back.
 
 ## Capabilities
 
 ### New Capabilities
 
-Немає.
+None.
 
 ### Modified Capabilities
 
-- `admin-content-nodes`: замість «Зображення й файли в редакторі недоступні» редактор `richtext` має кнопку вставки зображення із завантаженням у медіатеку.
-- `content-values`: `richtext` допускає `img` з відносною адресою сховища, перевіряє наявність файлів і непорожність за зображенням.
-- `file-storage`: завантаження за полем приймає поле `richtext` (профіль `image`).
-- `media-library`: синхронізація зв'язків охоплює і зображення, вставлені в `richtext`.
+- `admin-content-nodes`: instead of "Images and files in the editor are not available" the editor `richtext` has a button for inserting an image with an upload to the media library.
+- `content-values`: `richtext` allows `img` with a relative address of the storage, checks the existence of the files and the non-emptiness by an image.
+- `file-storage`: the upload by field accepts the field `richtext` (the profile `image`).
+- `media-library`: the synchronization of links covers the images inserted in `richtext` too.
 
 ## Impact
 
-- Backend: `app/Content/HtmlSanitizer.php` (+ нові атрибутні санітизатори `img`: адреса й ширина; дозвіл `figure`/`figcaption`), `app/Content/FieldTypes/RichTextType.php` (`TracksFiles`, правило перевірки файлів), `app/Http/Requests/Admin/StoreFileRequest.php`, `app/Http/Controllers/Admin/FileController.php`, `app/Files/UploadRules.php` (поле без файлових налаштувань).
-- Frontend: `resources/js/Components/Admin/ContentNodes/RichTextToolbar.tsx`, `ContentNodeForm.tsx` (ширина форми), `RichTextEditor.tsx`, `richTextExtensions.ts` (вузол зображення з `alt`, `width`, `caption`), нова панель параметрів зображення, `NodeFieldInput.tsx` (передача типу контенту й ключа поля), переклади `uk`.
-- Тести: Feature (санітизатор, тип, завантаження, зв'язки), e2e `admin-content-nodes.spec.js` (+ `admin-media.spec.js` для зв'язків).
-- Документація (укр.): оновити `docs/admin-content-nodes.md`, `docs/content-values.md`, `docs/file-storage.md`, `docs/media-library.md`, `docs/admin-content-fields.md` (якщо описує `richtext`), `docs/e2e-testing.md` (таблиці при зміні набору спеків); `docs/README.md` без нових файлів не змінюється.
+- Backend: `app/Content/HtmlSanitizer.php` (+ new attribute sanitizers of `img`: the address and the width; the allowance of `figure`/`figcaption`), `app/Content/FieldTypes/RichTextType.php` (`TracksFiles`, the rule of checking files), `app/Http/Requests/Admin/StoreFileRequest.php`, `app/Http/Controllers/Admin/FileController.php`, `app/Files/UploadRules.php` (a field without file settings).
+- Frontend: `resources/js/Components/Admin/ContentNodes/RichTextToolbar.tsx`, `ContentNodeForm.tsx` (the width of the form), `RichTextEditor.tsx`, `richTextExtensions.ts` (the image node with `alt`, `width`, `caption`), a new panel of the parameters of the image, `NodeFieldInput.tsx` (passing the type of content and the key of the field), translations `uk`.
+- Tests: Feature (the sanitizer, the type, the upload, the links), e2e `admin-content-nodes.spec.js` (+ `admin-media.spec.js` for the links).
+- Documentation (in Ukrainian): update `docs/admin-content-nodes.md`, `docs/content-values.md`, `docs/file-storage.md`, `docs/media-library.md`, `docs/admin-content-fields.md` (if it describes `richtext`), `docs/e2e-testing.md` (tables when the set of specs changes); `docs/README.md` without new files is not changed.

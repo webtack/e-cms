@@ -2,13 +2,13 @@
 
 ## ADDED Requirements
 
-### Requirement: Короткі позначення типів у налаштуваннях файлового поля
-Список дозволених типів файлів у налаштуваннях полів «зображення» і «файл» SHALL показувати кожен тип коротким позначенням розширення (наприклад, `pdf`, `docx`, `xlsx`) замість повного MIME-типу. Збережені налаштування поля SHALL і далі містити повні MIME-типи, а вже збережені поля SHALL відображатися з тими самими позначеними типами без зміни даних.
+### Requirement: Short labels of types in the settings of the file field
+The list of allowed file types in the settings of the fields "image" and "file" SHALL show each type by a short extension label (for example, `pdf`, `docx`, `xlsx`) instead of the full MIME type. The saved settings of the field SHALL still contain the full MIME types, and already saved fields SHALL be displayed with the same labelled types without changing the data.
 
-#### Scenario: Список типів
-- **WHEN** користувач відкриває форму поля типу `file`
-- **THEN** список дозволених типів показує `pdf`, `docx` і `xlsx`, без довгих MIME-рядків
+#### Scenario: List of types
+- **WHEN** the user opens the form of a field of the type `file`
+- **THEN** the list of allowed types shows `pdf`, `docx` and `xlsx`, without long MIME strings
 
-#### Scenario: Збереження вибору
-- **WHEN** користувач вибирає позначку `docx` і зберігає поле
-- **THEN** у налаштуваннях поля зберігається повний MIME-тип `docx`-документа, а після повторного відкриття форми позначка `docx` відмічена
+#### Scenario: Saving the choice
+- **WHEN** the user selects the mark `docx` and saves the field
+- **THEN** the full MIME type of the `docx` document is stored in the settings of the field, and after reopening the form the mark `docx` is checked

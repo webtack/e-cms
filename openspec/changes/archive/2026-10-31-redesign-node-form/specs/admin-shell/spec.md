@@ -1,39 +1,39 @@
 ## ADDED Requirements
 
 ### Requirement: Липка панель дій форм
-Кожна форма створення й редагування в адмінці (тип контенту, поле типу, запис) SHALL мати панель дій, що лишається прилипнутою до нижньої межі вікна при прокрутці, на всіх розмірах екрана. Панель SHALL містити кнопку «Зберегти» та посилання «Скасувати», що повертає до списку без змін; кнопки SHALL НЕ стояти в потоці форми. Панель SHALL мати непрозорий фон і верхню межу, враховувати безпечну нижню область пристрою й не перекривати останні поля форми (кінець форми можна прокрутити над панеллю). Між вмістом форми й панеллю SHALL бути невеликий відступ, щоб форма не прилипала до панелі. Під час відправлення кнопка «Зберегти» SHALL бути неактивною.
+Each create and edit form in the admin (a content type, a field of a type, a record) SHALL have an action bar that stays pinned to the bottom edge of the window when scrolling, on all screen sizes. The bar SHALL contain the button «Зберегти» and the link «Скасувати», which returns to the list without changes; the buttons SHALL NOT stand in the flow of the form. The bar SHALL have an opaque background and a top border, take into account the safe bottom area of the device, and not overlap the last fields of the form (the end of the form can be scrolled above the bar). Between the content of the form and the bar there SHALL be a small indent, so that the form does not stick to the bar. During submission the button «Зберегти» SHALL be disabled.
 
-#### Scenario: Довга форма
-- **WHEN** користувач відкриває форму з довгим вмістом і не прокручує її до кінця
-- **THEN** кнопки «Скасувати» й «Зберегти» видно внизу вікна
+#### Scenario: Long form
+- **WHEN** the user opens a form with long content and does not scroll it to the end
+- **THEN** the buttons «Скасувати» and «Зберегти» are visible at the bottom of the window
 
-#### Scenario: Скасування
-- **WHEN** користувач натискає «Скасувати» в панелі
-- **THEN** він повертається до списку без збережених змін
+#### Scenario: Cancellation
+- **WHEN** the user presses «Скасувати» in the bar
+- **THEN** they return to the list without saved changes
 
-#### Scenario: Збереження з панелі
-- **WHEN** користувач натискає «Зберегти» в панелі
-- **THEN** форму відправлено так само, як і раніше
+#### Scenario: Saving from the bar
+- **WHEN** the user presses «Зберегти» in the bar
+- **THEN** the form is submitted as before
 
-#### Scenario: Усі форми адмінки
-- **WHEN** користувач відкриває форму створення типу, поля чи запису
-- **THEN** у кожній є липка панель дій
+#### Scenario: All admin forms
+- **WHEN** the user opens the creation form of a type, of a field or of a record
+- **THEN** each has a sticky action bar
 
-#### Scenario: Кінець форми не перекрито
-- **WHEN** користувач прокручує форму до кінця
-- **THEN** останнє поле повністю видно над панеллю
+#### Scenario: The end of the form is not overlapped
+- **WHEN** the user scrolls the form to the end
+- **THEN** the last field is fully visible above the bar
 
-#### Scenario: Відступ від панелі
-- **WHEN** користувач прокручує форму до кінця
-- **THEN** між останнім елементом форми й панеллю дій є видимий проміжок
+#### Scenario: Indent from the bar
+- **WHEN** the user scrolls the form to the end
+- **THEN** there is a visible gap between the last element of the form and the action bar
 
 ### Requirement: Рамка форм типу й поля
-Вміст форм створення й редагування типу контенту та поля типу SHALL бути в контейнері із заокругленою рамкою (`rounded-md border`). Панель дій SHALL лишатися поза рамкою, на всю ширину.
+The content of the create and edit forms of a content type and of a field of a type SHALL be in a container with a rounded frame (`rounded-md border`). The action bar SHALL stay outside the frame, full width.
 
-#### Scenario: Форма типу в рамці
-- **WHEN** користувач відкриває форму створення чи редагування типу контенту
-- **THEN** поля форми оточені заокругленою рамкою, а панель дій — поза нею
+#### Scenario: Form of a type in a frame
+- **WHEN** the user opens the creation or edit form of a content type
+- **THEN** the fields of the form are surrounded by a rounded frame, and the action bar is outside it
 
-#### Scenario: Форма поля в рамці
-- **WHEN** користувач відкриває форму створення чи редагування поля типу
-- **THEN** поля форми оточені заокругленою рамкою, а панель дій — поза нею
+#### Scenario: Form of a field in a frame
+- **WHEN** the user opens the creation or edit form of a field of a type
+- **THEN** the fields of the form are surrounded by a rounded frame, and the action bar is outside it

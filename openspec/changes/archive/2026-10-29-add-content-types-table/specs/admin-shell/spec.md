@@ -1,20 +1,20 @@
 ## MODIFIED Requirements
 
-### Requirement: Бічна навігація
-Оболонка SHALL містити бічну панель з пунктами Dashboard, Content Types, Pages, Media Library і Settings та SHALL підсвічувати пункт, що відповідає поточній адресі. Назви пунктів SHALL відображатися мовою інтерфейсу поточного користувача. Пункт Content Types SHALL відкривати сторінку списку типів контенту.
+### Requirement: Sidebar navigation
+The shell SHALL contain a sidebar with the items Dashboard, Content Types, Pages, Media Library and Settings and SHALL highlight the item that matches the current address. The names of the items SHALL be displayed in the interface language of the current user. The Content Types item SHALL open the list page of content types.
 
-#### Scenario: Підсвітка активного пункту
-- **WHEN** користувач перебуває на `/admin/dashboard`
-- **THEN** пункт Dashboard позначено як активний, а решту пунктів — ні
+#### Scenario: Highlighting the active item
+- **WHEN** the user is on `/admin/dashboard`
+- **THEN** the Dashboard item is marked as active, and the other items are not
 
-#### Scenario: Робочий пункт Content Types
-- **WHEN** користувач переходить за пунктом Content Types
-- **THEN** відкривається `/admin/content-types`, пункт позначено як активний, а хлібні крихти показують його назву
+#### Scenario: Working Content Types item
+- **WHEN** the user navigates via the Content Types item
+- **THEN** `/admin/content-types` opens, the item is marked as active, and the breadcrumbs show its name
 
-#### Scenario: Макетні пункти
-- **WHEN** користувач бачить пункти Pages, Media Library і Settings
-- **THEN** вони відображаються як макет і не відкривають робочих функцій цього етапу
+#### Scenario: Layout items
+- **WHEN** the user sees the items Pages, Media Library and Settings
+- **THEN** they are displayed as a layout and do not open working features of this stage
 
-#### Scenario: Назви пунктів українською
-- **WHEN** користувач із мовою `uk` відкриває `/admin/dashboard`
-- **THEN** назви пунктів sidebar відображаються українськими перекладами, а підсвітка активного пункту не змінюється
+#### Scenario: Item names in Ukrainian
+- **WHEN** a user with language `uk` opens `/admin/dashboard`
+- **THEN** the sidebar item names are displayed with Ukrainian translations, and the highlighting of the active item does not change
