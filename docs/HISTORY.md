@@ -13,7 +13,7 @@ The package was developed change by change with [OpenSpec](https://github.com/Fi
 - To learn why something is the way it is, find the capability in `openspec/specs/`, then search the archive for the changes that touched it (`grep -rl "<capability>" openspec/changes/archive`).
 - The topic pages in [docs/](README.md) describe how the code works today; this history explains how it came to be. Some archived changes were made before the code became a package and mention the application's own paths and commands (`App\…`, `docker compose exec app`, browser tests); they are kept as written, and the early ones are written in Ukrainian.
 
-## Archived changes (135)
+## Archived changes (136)
 
 | Date | Change | Why |
 |------|--------|-----|
@@ -152,3 +152,4 @@ The package was developed change by change with [OpenSpec](https://github.com/Fi
 | 2026-11-17 | [translate-site-and-media](../openspec/changes/archive/2026-11-17-translate-site-and-media/proposal.md) | Two kinds of public data still have no way to be translated: the general site settings (name, description, address, schedule, contact labels) and the descriptions of files, which are the alternative text of every public image. |
 | 2026-11-17 | [translation-ui-foundation](../openspec/changes/archive/2026-11-17-translation-ui-foundation/proposal.md) | Translations of terms and menu items are edited today as extra name/description blocks for every language inside the main form. |
 | 2026-11-17 | [users-right-cannot-touch-admins](../openspec/changes/archive/2026-11-17-users-right-cannot-touch-admins/proposal.md) | The `users` system right is documented as a plain "manage users" right, but it is in fact a path to full administrator access. |
+| 2026-11-18 | [demo-app-consumes-package](../openspec/changes/archive/2026-11-18-demo-app-consumes-package/proposal.md) | Steps 1–6 build `webtack/e-cms` next to the demo, which still carries its own copy of the CMS in `app/`. |
