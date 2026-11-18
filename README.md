@@ -2,6 +2,8 @@
 
 `webtack/e-cms` is a multilingual content management system for Laravel. It adds an admin panel (Inertia, React, Tailwind), a flexible content model, a media library, menus, taxonomy, role-based access and a theme system for the public site, to an existing Laravel application. The admin ships compiled, so the host needs **no Node and no build** to use it.
 
+![](/docs/dashboard.jpg)
+
 ## Features
 
 - **Content model** — content types of three kinds (content, pages, blocks) with 15 field types, translations per field, node queries and a public search.
